@@ -1,0 +1,25 @@
+
+The negative sign in the resolve interpenetartion function in the
+ParticleContact class which is different from the book.
+
+The matrix classes and the use of explicit formulas instead of
+general formulas.
+
+Remove the union and keep only the struct components as member
+variables in the quaternion class.
+
+Make the inverse transform into one single operation instead of
+two when converting world to local coordinates.
+
+Get rid of preprocessor macros (except for header gaurds), use
+global variables or typedef instead.
+
+Include H in header guards.
+
+Fix the tetrahedron inertia tensor, which is wobbly now.
+
+Use the wrapper transform function to transform world and local
+coordinates instead of doing direct multiplication.
+
+Fix the issue where body->transformMatrix.transform(connectionPoint)
+doesn't work and the definition is not recognized in the source file.
