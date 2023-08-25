@@ -11,7 +11,7 @@ variables in the quaternion class.
 Make the inverse transform into one single operation instead of
 two when converting world to local coordinates.
 
-Get rid of preprocessor macros (except for header gaurds), use
+Get rid of preprocessor macros (except for header guards), use
 global variables or typedef instead.
 
 Include H in header guards.
@@ -23,3 +23,16 @@ coordinates instead of doing direct multiplication.
 
 Fix the issue where body->transformMatrix.transform(connectionPoint)
 doesn't work and the definition is not recognized in the source file.
+
+Add a comment explaining each header for the headers that don't
+have it.
+
+Remove all header and source files not relating to the engine (used
+for testing, like the geometric objects and their interface).
+
+Since we created a BVH tree class, we can perhaps use loops instead
+of recursion to insert and remove nodes, and then recalculate the
+bounding volumes of the ancestors without having each node hold
+a pointer to the parent, something that causes redundancies in the
+relationship between nodes and may cause errors if they parent/child
+status does not match.

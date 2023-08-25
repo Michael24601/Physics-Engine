@@ -81,7 +81,7 @@
     <ClCompile Include="rigidBody.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="BHVNode.cpp">
+    <ClCompile Include="BVHNode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="boundingSphere.cpp">
@@ -185,10 +185,13 @@
     <ClInclude Include="rigidBodySpringForce.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="BHVNode.h">
+    <ClInclude Include="BVHNode.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="boundingSphere.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="boundingVolumeHierarchy.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

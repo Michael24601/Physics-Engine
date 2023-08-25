@@ -1,5 +1,5 @@
 
-#include "BHVNode.h"
+#include "BVHNode.h"
 
 using namespace pe;
 
