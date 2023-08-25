@@ -84,6 +84,9 @@
     <ClCompile Include="BHVNode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="boundingSphere.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="particleDrag.h">
@@ -185,7 +188,7 @@
     <ClInclude Include="BHVNode.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="boudingSphere.h">
+    <ClInclude Include="boundingSphere.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

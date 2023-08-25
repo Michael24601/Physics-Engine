@@ -147,6 +147,7 @@
   <ItemGroup>
     <ClCompile Include="anchoredSpringForce.cpp" />
     <ClCompile Include="BHVNode.cpp" />
+    <ClCompile Include="boundingSphere.cpp" />
     <ClCompile Include="cone.h" />
     <ClCompile Include="particle.cpp" />
     <ClCompile Include="particleBungeeForce.cpp" />
@@ -172,7 +173,7 @@
   <ItemGroup>
     <ClInclude Include="accuracy.h" />
     <ClInclude Include="BHVNode.h" />
-    <ClInclude Include="boudingSphere.h" />
+    <ClInclude Include="boundingSphere.h" />
     <ClInclude Include="cylinder.h" />
     <ClInclude Include="geometricShape.h" />
     <ClInclude Include="matrix3x3.h" />
