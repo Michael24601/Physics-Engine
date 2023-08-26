@@ -22,6 +22,9 @@
 #include "rigidBodyGravity.h"
 #include "rigidBodySpringForce.h"
 
+#include "boundingVolumeHierarchy.h"
+#include "boundingSphere.h"
+
 using namespace pe;
 using namespace std;
 
@@ -99,7 +102,8 @@ sf::Vector2f threeToTwo(const Vector3D& vector) {
 }
 */
 
-
+// Body testing
+/*
 int main() {
     
     sf::RenderWindow window(sf::VideoMode(800, 800), "Test");
@@ -111,25 +115,6 @@ int main() {
 
     sf::Clock clock;
     real deltaT = 0;
-
-    /*
-    vector<GeometricShape*> shapes;
-    shapes.push_back(new RectangularPrism(130, 60, 80, 20, Vector3D(150, 650, 0), sf::Color::Green));
-    shapes.push_back(new TriangularPrism(70, 100, 120, 20, Vector3D(400,650, 0), sf::Color::Red));
-    shapes.push_back(new Pyramid(100, 120, 20, Vector3D(650, 650, 0), sf::Color::Blue));
-    shapes.push_back(new Tetrahedron(120, 10, Vector3D(150, 400, 0), sf::Color::Magenta));
-    shapes.push_back(new RectangularPrism(100, 100, 100, 20, Vector3D(400, 400, 0), sf::Color::Yellow));
-    shapes.push_back(new Pyramid(50, 170, 80, Vector3D(650, 400, 0), sf::Color(255, 120, 60)));
-    shapes.push_back(new Cone(60, 120, 15, Vector3D(150, 150, 0), sf::Color::White));
-    shapes.push_back(new Sphere(70, 80000, Vector3D(400, 150, 0), sf::Color::Cyan));
-    shapes.push_back(new Cylinder(60, 100, 20, Vector3D(650, 150, 0), sf::Color(120, 80, 200)));
-
-    for (int i = 0; i < shapes.size(); i++) {
-        shapes[i]->body.addTorque(Vector3D(100, -100, -100));
-        shapes[i]->body.calculateDerivedData();
-        shapes[i]->body.integrate(10);
-    }
-    */
 
     real side = 200;
     RectangularPrism c(side, side, side, 100, Vector3D(400, 400, 0), sf::Color::Yellow);
@@ -160,14 +145,6 @@ int main() {
             if (event.type == sf::Event::Closed)
                 window.close();
         }
-
-        /*
-        for (int i = 0; i < shapes.size(); i++) {
-            shapes[i]->body.calculateDerivedData();
-            shapes[i]->body.integrate(deltaT);
-            shapes[i]->recalculateVertices();
-        }
-        */
 
         c.body.calculateDerivedData();
         fixed.calculateDerivedData();
@@ -201,15 +178,6 @@ int main() {
 
         window.clear(sf::Color::Black);
 
-        /*
-        for (int i = 0; i < shapes.size(); i++) {
-            vector<sf::VertexArray> v = shapes[i]->drawLines();
-            for (int j = 0; j < v.size(); j++) {
-                window.draw(v[j]);
-            }
-        }
-        */
-
         vector<sf::VertexArray> v = c.drawLines();
         for (int j = 0; j < v.size(); j++) {
             window.draw(v[j]);
@@ -237,8 +205,9 @@ int main() {
 
     return 0;
 }
+*/
 
-
+// Particle testing
 /*
 int main()
 {
@@ -329,3 +298,29 @@ int main()
 
     return 0;
 }*/
+
+// Tree testing
+int main() {
+
+    BoundingVolumeHierarchy<BoundingSphere> tree;
+
+    tree.display();
+
+    RigidBody b;
+
+    Vector3D centre(1, 2, 3);
+
+    BoundingSphere s(centre, 100);
+
+    tree.insert(&b, s);
+
+    centre = Vector3D(50, -120, 7);
+
+    BoundingSphere s2(centre, 150);
+
+    tree.insert(&b, s2);
+
+    tree.display();
+
+    return 0;
+}

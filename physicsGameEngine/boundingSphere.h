@@ -26,7 +26,7 @@ namespace pe{
 
 	class BoundingSphere {
 
-	private:
+	public:
 
 		// centre coordinates and radius of the bounding volume's sphere
 		Vector3D centre;
@@ -51,6 +51,15 @@ namespace pe{
 
 		// Returns true if the calling object overlaps with 
 		bool overlaps(const BoundingSphere* sphere) const;
+
+		/*
+			Returns how much the bounding volume sphere would have to grow
+			in order to encompass a new bounding sphere given as a parameter.
+			Used in order to determine where to insert a new body in the
+			BVH tree. Note that the new growth is given in terms of area, not
+			volume, as that is what the insertion algorithm needs to check. 
+		*/
+		real getNewGrowth(const BoundingSphere& newSphere) const;
 	};
 }
 

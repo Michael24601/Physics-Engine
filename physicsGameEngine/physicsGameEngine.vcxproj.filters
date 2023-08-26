@@ -81,9 +81,6 @@
     <ClCompile Include="rigidBody.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="BVHNode.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="boundingSphere.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

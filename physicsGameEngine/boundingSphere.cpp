@@ -73,3 +73,22 @@ bool BoundingSphere::overlaps(const BoundingSphere* sphere) const {
 	return ((radius + sphere->radius) * (radius + sphere->radius)
 		> distanceSquared);
 }
+
+
+real BoundingSphere::getNewGrowth(const BoundingSphere& newSphere) const {
+    /*
+        To calculate the new growth, we can just create a new bounding
+        sphere encompassing the calling object sphere new bounding sphere.
+    */
+    BoundingSphere encompassingSphere(*this, newSphere);
+
+    /*
+        We then return the difference in size between the calling object
+        and this new sphere. Note that the difference is proportional
+        to area, not volume, as that is more valuable for the purpose of
+        determining the best place to insert a new body with a particular
+        bounding sphere.
+    */
+    return (encompassingSphere.radius * encompassingSphere.radius
+        - radius * radius);
+}

@@ -43,12 +43,18 @@
 	calls whichever node (or entire subtree for non-leaf nodes) we want
 	removed. So this class is little more than a wrapper for the root node
 	of the tree.
+	Note that because we always replace a leaf by a parent of the old
+	leaf and the new node, and because we always replace a parent by the
+	remaining node whenever we remove a node, the hierarchy is always a
+	full binary tree where each node has 0 or 2 children, but never 1.
 */
 
 #ifndef BOUNDING_VOLUME_HIERARCHY_H
 #define BOUNDING_VOLUME_HIERARCHY_H
 
 #include "BVHNode.h"
+#include <iostream>
+#include <iomanip>
 
 namespace pe {
 
@@ -58,13 +64,74 @@ namespace pe {
 	private:
 
 		// Represents the root of the tree
-		BVHNode* root;
+		BVHNode<BoundingVolumeClass>* root;
 
 	public:
 
+		BoundingVolumeHierarchy() : root {nullptr} {}
 
+		/*
+			Inserts a rigid body accompanied by its bounding volume into
+			the tree.
+		*/
+		void insert(RigidBody* rigidBody,
+			const BoundingVolumeClass& boundingVolume);
+
+		/*
+			Removes an entire subtree (could just be a leaf) from the tree by
+			calling its destructor, which handles all other changes like
+			recalculating the bounding volumes for the ancestors and making
+			the sibling the parent.
+		*/
+		void removeSubtree(BVHNode<BoundingVolumeClass>* node);
+
+		
+		// Remove later
+		void displayAux(std::ostream& out, BVHNode<BoundingVolumeClass>* ptr, int indent) {
+			if (ptr == NULL)
+				return;
+			displayAux(out, ptr->children[0], indent + 16);
+			Vector3D centre = ptr->boundingVolume.centre;
+			real radius = ptr->boundingVolume.radius;
+			std::cout << std::setw(indent) << " " << centre.x << " "
+				<< centre.y << " " << centre.z << " " << radius << " "
+				<< ptr->rigidBody << "\n";
+			displayAux(out, ptr->children[1], indent + 16);
+		}
+
+		// Remove later
+		void display() {
+			if (root != nullptr) {
+				displayAux(std::cout, root, 0);
+				std::cout << "================================\n";
+			}
+			else
+				std::cout << "Empty tree.\n";
+		}
 
 	};
+
+	// Function definitions (included in header because of the template)
+
+	template<class BoundingVolumeClass>
+	void BoundingVolumeHierarchy<BoundingVolumeClass>::insert(
+		RigidBody* rigidBody, const BoundingVolumeClass& boundingVolume) {
+		// If the tree is empty, create a root with the body in it, and no parent
+		if (root == nullptr) {
+			root = new BVHNode<BoundingVolumeClass>(rigidBody, boundingVolume, nullptr);
+		}
+		// Otherwise, call the insert function at the root
+		else {
+			root->insertInSubtree(rigidBody, boundingVolume);
+		}
+	}
+
+
+	template<class BoundingVolumeClass>
+	void BoundingVolumeHierarchy<BoundingVolumeClass>::removeSubtree(
+		BVHNode<BoundingVolumeClass>* node) {
+		node->~BVHNode();
+	}
 }
 
 #endif

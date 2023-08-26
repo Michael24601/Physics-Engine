@@ -1,6 +1,7 @@
 
 The negative sign in the resolve interpenetartion function in the
-ParticleContact class which is different from the book.
+ParticleContact class which is different from the book, make sure
+it works.
 
 The matrix classes and the use of explicit formulas instead of
 general formulas.
@@ -9,7 +10,7 @@ Remove the union and keep only the struct components as member
 variables in the quaternion class.
 
 Make the inverse transform into one single operation instead of
-two when converting world to local coordinates.
+two when converting world to local coordinates (DONE).
 
 Get rid of preprocessor macros (except for header guards), use
 global variables or typedef instead.
@@ -19,7 +20,7 @@ Include H in header guards.
 Fix the tetrahedron inertia tensor, which is wobbly now.
 
 Use the wrapper transform function to transform world and local
-coordinates instead of doing direct multiplication.
+coordinates instead of doing direct multiplication (DONE).
 
 Fix the issue where body->transformMatrix.transform(connectionPoint)
 doesn't work and the definition is not recognized in the source file.
@@ -36,3 +37,18 @@ bounding volumes of the ancestors without having each node hold
 a pointer to the parent, something that causes redundancies in the
 relationship between nodes and may cause errors if they parent/child
 status does not match.
+
+Turn the bounding volume from a template with overlaps() and
+getGrowth() functions to an interface and extended class, and dont
+forget to place the functions in an implementation file now that there
+is no template.
+
+Remove the display functions of the tree.
+
+Make bounding sphere datas private after testing.
+
+Later on, make sure the "Geometric objects" like cube extend both
+the rigid body and the geometric object classes.
+
+Make sure the remove of BVH tree and node classes works well,
+because it likely doesn't handle edge cases at all.
