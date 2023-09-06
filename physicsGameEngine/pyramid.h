@@ -2,7 +2,7 @@
 #ifndef PYRAMID
 #define PYRAMID
 
-#include "rigidBody.h"
+#include "rigidbody.h"
 #include <vector>
 #include "geometricShape.h"
 
@@ -31,12 +31,12 @@ namespace pe {
                 mass* (3 * height * height + side * side) / 12.0f,
                 0, 0, 0, mass* (3 * height * height + side * side) / 12.0f,
                 0, 0, 0, (mass* side* side) / 6.0f);
-            body.setInertiaTensor(inertiaTensor);
+            body->setInertiaTensor(inertiaTensor);
 
-            body.angularDamping = 1;
-            body.linearDamping = 1;
+            body->angularDamping = 1;
+            body->linearDamping = 1;
 
-            body.calculateDerivedData();
+            body->calculateDerivedData();
             recalculateVertices();
         }
 

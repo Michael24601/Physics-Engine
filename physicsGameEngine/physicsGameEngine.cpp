@@ -25,6 +25,8 @@
 #include "boundingVolumeHierarchy.h"
 #include "boundingSphere.h"
 
+#include "collisionDetector.h"
+
 using namespace pe;
 using namespace std;
 
@@ -99,111 +101,6 @@ sf::Vector2f threeToTwo(const Vector3D& vector) {
     Vector3D transformResult(result.x / result.w, result.y / result.w,
         result.z / result.w);
     return sf::Vector2f(transformResult.x, transformResult.y);
-}
-*/
-
-// Body testing
-/*
-int main() {
-    
-    sf::RenderWindow window(sf::VideoMode(800, 800), "Test");
-
-    // Just in order to flip y axis
-    sf::View view = window.getDefaultView();
-    view.setSize(800, -800);
-    window.setView(view);
-
-    sf::Clock clock;
-    real deltaT = 0;
-
-    real side = 200;
-    RectangularPrism c(side, side, side, 100, Vector3D(400, 400, 0), sf::Color::Yellow);
-    RigidBody fixed;
-    fixed.position = Vector3D(200, 700, 0);
-
-    RigidBody fixed2;
-    fixed2.position = Vector3D(600, 700, 0);
-
-    c.body.angularDamping = 0.98;
-    c.body.linearDamping= 0.98;
-    
-    RigidBodyGravity g(Vector3D(0, -10, 0));
-    Vector3D app(-side/2.0, side / 2.0, -side / 2.0);
-    Vector3D origin;
-    RigidBodySpringForce s(app, &fixed, origin, 3, 300);
-
-    Vector3D app2(side / 2.0, side / 2.0, -side / 2.0);
-    RigidBodySpringForce s2(app2, &fixed2, origin, 7, 300);
-
-    while (window.isOpen()) {
-
-        clock.restart();
-
-        sf::Event event;
-        while (window.pollEvent(event))
-        {
-            if (event.type == sf::Event::Closed)
-                window.close();
-        }
-
-        c.body.calculateDerivedData();
-        fixed.calculateDerivedData();
-        fixed2.calculateDerivedData();
-       
-        s.updateForce(&(c.body), deltaT);
-        s2.updateForce(&(c.body), deltaT);
-        g.updateForce(&(c.body), deltaT);
-
-        c.body.integrate(deltaT);
-
-        c.recalculateVertices();
-
-        Vector3D point = c.body.transformMatrix.transform(app);
-        sf::Vector2f p1(point.x, point.y);
-        sf::Vector2f p2(fixed.position.x, fixed.position.y);
-        sf::VertexArray a(sf::LineStrip, 2);
-
-        a[0].position = p1;
-        a[1].position = p2;
-        a[0].color = a[1].color = sf::Color::Green;
-
-        point = c.body.transformMatrix.transform(app2);
-        sf::Vector2f p3(point.x, point.y);
-        sf::Vector2f p4(fixed2.position.x, fixed2.position.y);
-        sf::VertexArray b(sf::LineStrip, 2);
-
-        b[0].position = p3;
-        b[1].position = p4;
-        b[0].color = b[1].color = sf::Color::Green;
-
-        window.clear(sf::Color::Black);
-
-        vector<sf::VertexArray> v = c.drawLines();
-        for (int j = 0; j < v.size(); j++) {
-            window.draw(v[j]);
-        }
-
-        sf::CircleShape shape;
-        shape.setFillColor(sf::Color::Red);
-        shape.setRadius(5);
-        shape.setPosition(fixed.position.x, fixed.position.y);
-        window.draw(shape);
-
-        sf::CircleShape shape2;
-        shape2.setFillColor(sf::Color::Red);
-        shape2.setRadius(5);
-        shape2.setPosition(fixed2.position.x, fixed2.position.y);
-        window.draw(shape2);
-
-        window.draw(a);
-        window.draw(b);
-
-        window.display();
-
-        deltaT = clock.getElapsedTime().asSeconds() * 10;
-    }
-
-    return 0;
 }
 */
 
@@ -300,6 +197,7 @@ int main()
 }*/
 
 // Tree testing
+/*
 int main() {
 
     BoundingVolumeHierarchy<BoundingSphere> tree;
@@ -314,6 +212,8 @@ int main() {
 
     tree.insert(&b, s);
 
+    tree.display();
+
     centre = Vector3D(50, -120, 7);
 
     BoundingSphere s2(centre, 150);
@@ -322,5 +222,287 @@ int main() {
 
     tree.display();
 
+    centre = Vector3D(762, 0, 123);
+
+    BoundingSphere s3(centre, 18);
+
+    tree.insert(&b, s3);
+
+    tree.display();
+
     return 0;
 }
+*/
+
+// Body testing
+/*
+int main() {
+
+    sf::RenderWindow window(sf::VideoMode(800, 800), "Test");
+
+    // Just in order to flip y axis
+    sf::View view = window.getDefaultView();
+    view.setSize(800, -800);
+    window.setView(view);
+
+    sf::Clock clock;
+    real deltaT = 0;
+
+    real side = 100;
+    real side2 = 60;
+    RectangularPrism c(side, side, side, 150, Vector3D(400, 200, 0), sf::Color::Yellow);
+    RectangularPrism c2(side2, side2, side2, 60, Vector3D(400, 100, 0), sf::Color::Red);
+
+    real height = 50;
+    real radius = 30;
+    Cone sp(radius, height, 100, Vector3D(400, 100, 0), sf::Color::Cyan);
+    RigidBody fixed;
+    fixed.position = Vector3D(400, 700, 0);
+
+
+    c.body->angularDamping = 0.80;
+    c.body->linearDamping= 0.95;
+
+    c2.body->angularDamping = 0.80;
+    c2.body->linearDamping = 0.95;
+
+    sp.body->angularDamping = 0.80;
+    sp.body->linearDamping = 0.95;
+
+    RigidBodyGravity g(Vector3D(0, -10, 0));
+    Vector3D app(-side/2.0, side / 2.0, -side / 2.0);
+    Vector3D origin;
+    RigidBodySpringForce s(app, &fixed, origin, 15, 100);
+
+    Vector3D app2(side / 2.0, -side / 2.0, side / 2.0);
+    Vector3D app3(-side2 / 2.0, side2 / 2.0, -side2 / 2.0);
+    RigidBodySpringForce s2(app3, c.body, app2, 10, 20);
+    RigidBodySpringForce s3(app2, c2.body, app3, 10, 20);
+
+    Vector3D app4(-side / 2.0, -side / 2.0, side / 2.0);
+    Vector3D app5 = sp.vertices[0];
+
+    RigidBodySpringForce s4(app5, c.body, app4, 10, 10);
+    RigidBodySpringForce s5(app4, sp.body, app5, 10, 10);
+
+    while (window.isOpen()) {
+
+        clock.restart();
+
+        sf::Event event;
+        while (window.pollEvent(event))
+        {
+            if (event.type == sf::Event::Closed)
+                window.close();
+            else if (sf::Mouse::isButtonPressed(sf::Mouse::Right)) {
+                RigidBodyGravity force(Vector3D(3000, 0, 0));
+                force.updateForce(c.body, deltaT);
+            }
+            else if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
+                RigidBodyGravity force(Vector3D(-3000, 0, 0));
+                force.updateForce(c.body, deltaT);
+            }
+        }
+
+        c.body->calculateDerivedData();
+        c2.body->calculateDerivedData();
+        sp.body->calculateDerivedData();
+        fixed.calculateDerivedData();
+
+        s.updateForce((c.body), deltaT);
+        s2.updateForce((c2.body), deltaT);
+        s3.updateForce((c.body), deltaT);
+        s4.updateForce((sp.body), deltaT);
+        s5.updateForce((c.body), deltaT);
+        g.updateForce((c2.body), deltaT);
+        g.updateForce((c.body), deltaT);
+        g.updateForce((sp.body), deltaT);
+
+        c.body->integrate(deltaT);
+        c.recalculateVertices();
+        c2.body->integrate(deltaT);
+        c2.recalculateVertices();
+        sp.body->integrate(deltaT);
+        sp.recalculateVertices();
+
+        Vector3D point = c.body->transformMatrix.transform(app);
+        sf::Vector2f p3(point.x, point.y);
+        sf::Vector2f p4(fixed.position.x, fixed.position.y);
+        sf::VertexArray a(sf::LineStrip, 2);
+
+        a[0].position = p3;
+        a[1].position = p4;
+        a[0].color = a[1].color = sf::Color::Green;
+
+        point = c2.body->transformMatrix.transform(app3);
+        sf::Vector2f p1(point.x, point.y);
+        point = c.body->transformMatrix.transform(app2);
+        sf::Vector2f p2(point.x, point.y);
+        sf::VertexArray b(sf::LineStrip, 2);
+
+        b[0].position = p1;
+        b[1].position = p2;
+        b[0].color = b[1].color = sf::Color::Green;
+
+        point = sp.body->transformMatrix.transform(app5);
+        sf::Vector2f p5(point.x, point.y);
+        point = c.body->transformMatrix.transform(app4);
+        sf::Vector2f p6(point.x, point.y);
+        sf::VertexArray d(sf::LineStrip, 2);
+
+        d[0].position = p5;
+        d[1].position = p6;
+        d[0].color = d[1].color = sf::Color::Green;
+
+        window.clear(sf::Color::Black);
+
+        vector<sf::VertexArray> v = c.drawLines();
+        for (int j = 0; j < v.size(); j++) {
+            window.draw(v[j]);
+        }
+
+        v = c2.drawLines();
+        for (int j = 0; j < v.size(); j++) {
+            window.draw(v[j]);
+        }
+
+        v = sp.drawLines();
+        for (int j = 0; j < v.size(); j++) {
+            window.draw(v[j]);
+        }
+
+        sf::CircleShape shape;
+        shape.setFillColor(sf::Color::Red);
+        shape.setOrigin(2, 2);
+        shape.setRadius(4);
+        shape.setPosition(fixed.position.x, fixed.position.y);
+        window.draw(shape);
+
+        window.draw(a);
+        window.draw(b);
+        window.draw(d);
+
+        window.display();
+
+        deltaT = clock.getElapsedTime().asSeconds() * 10;
+    }
+
+    return 0;
+}
+*/
+
+
+int main() {
+
+    sf::RenderWindow window(sf::VideoMode(800, 800), "Test");
+
+    // Just in order to flip y axis
+    sf::View view = window.getDefaultView();
+    view.setSize(800, -800);
+    window.setView(view);
+
+    sf::Clock clock;
+    real deltaT = 0;
+
+    real side = 100;
+    Vector3D prism(side, side, side);
+    RectangularPrism c(prism, 150, Vector3D(700, 600, 0), sf::Color::Yellow);
+
+    RigidBody fixed;
+    fixed.position = Vector3D(400, 700, 0);
+
+
+    c.body->angularDamping = 0.8;
+    c.body->linearDamping = 0.95;
+
+    RigidBodyGravity g(Vector3D(0, -10, 0));
+    Vector3D app(-side / 2.0, side / 2.0, -side / 2.0);
+    Vector3D origin;
+    RigidBodySpringForce s(app, &fixed, origin, 15, 200);
+
+    ContactData data{};
+    data.contacts = new Contact[100];
+    CollisionDetector detector;
+    Vector3D normal(1, 0, 0);
+    normal.normalize();
+    real offset = -200;
+    Plane p(normal, offset);
+
+    while (window.isOpen()) {
+
+        clock.restart();
+
+        sf::Event event;
+        while (window.pollEvent(event))
+        {
+            if (event.type == sf::Event::Closed)
+                window.close();
+            else if (sf::Mouse::isButtonPressed(sf::Mouse::Right)) {
+                RigidBodyGravity force(Vector3D(3000, 0, 0));
+                force.updateForce(c.body, deltaT);
+            }
+            else if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
+                RigidBodyGravity force(Vector3D(-3000, 0, 0));
+                force.updateForce(c.body, deltaT);
+            }
+        }
+
+        c.body->calculateDerivedData();
+        fixed.calculateDerivedData();
+
+        s.updateForce((c.body), deltaT);
+        g.updateForce((c.body), deltaT);
+
+        c.body->integrate(deltaT);
+        c.recalculateVertices();
+
+        
+        sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
+        // convert it to world coordinates
+        sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);
+
+        c.body->position = Vector3D(worldPos.x, worldPos.y, 0);
+        
+
+        // Checks for a collision
+        std::cout << detector.boxAndPlane(c, p, &data) << "\n";
+
+        Vector3D point = c.body->transformMatrix.transform(app);
+        sf::Vector2f p3(point.x, point.y);
+        sf::Vector2f p4(fixed.position.x, fixed.position.y);
+        sf::VertexArray a(sf::LineStrip, 2);
+
+        a[0].position = p3;
+        a[1].position = p4;
+        a[0].color = a[1].color = sf::Color::Green;
+
+        window.clear(sf::Color::Black);
+
+        vector<sf::VertexArray> v = c.drawLines();
+        for (int j = 0; j < v.size(); j++) {
+            window.draw(v[j]);
+        }
+
+        sf::CircleShape shape;
+        shape.setFillColor(sf::Color::Red);
+        shape.setOrigin(2, 2);
+        shape.setRadius(4);
+        shape.setPosition(fixed.position.x, fixed.position.y);
+        window.draw(shape);
+
+        sf::VertexArray line(sf::LineStrip, 2);
+        line[0].position = sf::Vector2f(-offset, 0);
+        line[1].position = sf::Vector2f(-offset, 800);
+        line[0].color = line[1].color = sf::Color::Cyan;
+
+        window.draw(a);
+        window.draw(line);
+
+        window.display();
+
+        deltaT = clock.getElapsedTime().asSeconds() * 10;
+    }
+
+    return 0;
+}
+

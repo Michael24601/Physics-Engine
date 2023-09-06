@@ -2,7 +2,7 @@
 #ifndef TRIANGULAR_PRISM
 #define TRIANGULAR_PRISM
 
-#include "rigidBody.h"
+#include "rigidbody.h"
 #include <SFML/Graphics.hpp>
 #include <vector>
 #include "geometricShape.h"
@@ -36,12 +36,12 @@ namespace pe {
                 0, 0, 0, mass* (3 * side1 * side1 + 3 * height * height) / 36.0f
                 + (mass * side2 * side2) / 6.0f,
                 0, 0, 0, mass* (height* height + side1 * side1) / 18.0f);
-            body.setInertiaTensor(inertiaTensor);
+            body->setInertiaTensor(inertiaTensor);
 
-            body.angularDamping = 1;
-            body.linearDamping = 1;
+            body->angularDamping = 1;
+            body->linearDamping = 1;
 
-            body.calculateDerivedData();
+            body->calculateDerivedData();
             recalculateVertices();
         }
 

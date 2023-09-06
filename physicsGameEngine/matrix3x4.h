@@ -328,6 +328,14 @@ namespace pe {
 				vector.z * data[10]
 			);
 		}
+
+		/*
+			Returns the first, second, third, or fourth column vector,
+			starting with i = 0.
+		*/
+		Vector3D getColumnVector(int i) const {
+			return Vector3D(data[i], data[i + 4], data[i + 8]);
+		}
 	};
 }
 

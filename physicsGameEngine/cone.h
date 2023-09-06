@@ -2,7 +2,7 @@
 #ifndef CONE
 #define CONE
 
-#include "rigidBody.h"
+#include "rigidbody.h"
 #include "geometricShape.h"
 #include <vector>
 
@@ -36,12 +36,12 @@ namespace pe {
             real izz = (3.0 / 20.0) * mass * (std::pow(height, 2)
                 + 4 * std::pow(radius, 2));
             Matrix3x3 inertiaTensor(ixx, 0, 0, 0, iyy, 0, 0, 0, izz);
-            body.setInertiaTensor(inertiaTensor);
+            body->setInertiaTensor(inertiaTensor);
 
-            body.angularDamping = 1;
-            body.linearDamping = 1;
+            body->angularDamping = 1;
+            body->linearDamping = 1;
 
-            body.calculateDerivedData();
+            body->calculateDerivedData();
             recalculateVertices();
         }
 

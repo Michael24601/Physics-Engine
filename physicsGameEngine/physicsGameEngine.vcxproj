@@ -147,6 +147,7 @@
   <ItemGroup>
     <ClCompile Include="anchoredSpringForce.cpp" />
     <ClCompile Include="boundingSphere.cpp" />
+    <ClCompile Include="collisionDetector.cpp" />
     <ClCompile Include="cone.h" />
     <ClCompile Include="particle.cpp" />
     <ClCompile Include="particleBungeeForce.cpp" />
@@ -174,6 +175,9 @@
     <ClInclude Include="BVHNode.h" />
     <ClInclude Include="boundingSphere.h" />
     <ClInclude Include="boundingVolumeHierarchy.h" />
+    <ClInclude Include="collisionDetector.h" />
+    <ClInclude Include="contact.h" />
+    <ClInclude Include="contactData.h" />
     <ClInclude Include="cylinder.h" />
     <ClInclude Include="geometricShape.h" />
     <ClInclude Include="matrix3x3.h" />
@@ -193,6 +197,7 @@
     <ClInclude Include="particleRod.h" />
     <ClInclude Include="particleSpringForce.h" />
     <ClInclude Include="particleWorld.h" />
+    <ClInclude Include="plane.h" />
     <ClInclude Include="rectangularPrism.h" />
     <ClInclude Include="pyramid.h" />
     <ClInclude Include="quaternion.h" />

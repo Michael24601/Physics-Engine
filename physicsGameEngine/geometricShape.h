@@ -1,3 +1,7 @@
+/*
+    In the book, this is called a primitive, and it does not include any
+    of the graphics.
+*/
 
 #ifndef GEOMETRIC_SHAPE
 #define GEOMETRIC_SHAPE
@@ -17,13 +21,37 @@ namespace pe {
         // Absolute coordinates of the vertices
         std::vector<sf::Vector2f> coordinates;
         sf::Color color;
+
+
         // Rigid body containing the physics
-        RigidBody body;
+        RigidBody* body;
+        
+        /*
+			Because the geometric centre may not be the same as the centre
+			of mass in all cases (especially in the case of complex shapes),
+			we need a 3 by 4 matrix to represent the offset in terms of a
+			rotation and translation.
+		*/
+        Matrix3x4 offset;
+
+        /*
+            The final transformation matrix, which combines the transform of
+            the bodie's transform to get the rotation and translation, and
+            the offset, to get the geometric centre in terms of the bodie's
+            centre. If there is no offset, the transform is the same as the
+            body's transform matrix.
+        */
+        Matrix3x4 transform;
+
+
+        // Default constructor which leaves the body as null
+        GeometricShape() {}
 
         GeometricShape(real mass, Vector3D position, sf::Color color) :
             color{ color } {
-            body.setMass(mass);
-            body.position = position;
+            body = new RigidBody();
+            body->setMass(mass);
+            body->position = position;
         }
 
         sf::VertexArray drawLine(sf::Vector2f c1, sf::Vector2f c2) {
@@ -45,10 +73,18 @@ namespace pe {
         void recalculateVertices() {
             for (int i = 0; i < vertices.size(); i++) {
                 Vector3D absolute =
-                    body.getPointInWorldCoordinates(vertices[i]);
+                    body->getPointInWorldCoordinates(vertices[i]);
                 // 800 - because the axis is flipped
                 coordinates[i] = sf::Vector2f(absolute.x, absolute.y);
             }
+        }
+
+        /*
+            Returns the first, second, third or fourth column in the body's
+            transform matrix, starting with i = 0.
+        */
+        Vector3D getAxis(unsigned int i) const {
+            return transform.getColumnVector(i);
         }
     };
 }

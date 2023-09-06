@@ -52,3 +52,18 @@ the rigid body and the geometric object classes.
 
 Make sure the remove of BVH tree and node classes works well,
 because it likely doesn't handle edge cases at all.
+
+Either use body or rigidBody as a variable name consistently.
+
+Instead of a collision detection and resolution algorithm for each
+new shape, we can implement the SAT (seperating axis theorem) for
+a general algorithm that works for all convex polyhedra.
+
+Initialize in each shape's contructor the transform variable.
+
+Fix the generation of contacts in the array, right now only the
+first value is being set. Maybe use a counter.
+
+Figure out what offset should be when we don't want to rotate,
+and add it by default in transform. Make sure its updated every
+frame.

@@ -2,7 +2,6 @@
 #ifndef SPHERE
 #define SPHERE
 
-#include "rigidBody.h"
 #include "geometricShape.h"
 #include <vector>
 
@@ -12,13 +11,19 @@ namespace pe {
 
     public:
 
-        real radius;
         // Number of points for each circle
         int pointNum = 100;
 
+        // Circle radius
+        real radius;
+
+        /*
+            Sets things like the inertia tensor and creates the graphics of
+            the sphere.
+        */
         Sphere(real radius, real mass, Vector3D position,
             sf::Color color) : GeometricShape(mass, position, color),
-            radius{ radius } {
+            radius(radius) {
 
             vertices.resize(3 * pointNum);
             coordinates.resize(3 * pointNum);
@@ -38,15 +43,24 @@ namespace pe {
             real iyy = (2.0f / 5.0f) * mass * radius / radius;
             real izz = (2.0f / 5.0f) * mass * radius / radius;
             Matrix3x3 inertiaTensor(ixx, 0, 0, 0, iyy, 0, 0, 0, izz);
-            body.setInertiaTensor(inertiaTensor);
+            body->setInertiaTensor(inertiaTensor);
 
-            body.angularDamping = 1;
-            body.linearDamping = 1;
+            body->angularDamping = 1;
+            body->linearDamping = 1;
 
-            body.calculateDerivedData();
+            body->calculateDerivedData();
             recalculateVertices();
+
+            /*
+                Because the offset is 0, the transform as a whole is the
+                same as the body's.
+            */
+            transform = body->transformMatrix;
         }
 
+        /*
+            Returns the lines used in drawing the object.
+        */
         virtual std::vector<sf::VertexArray> drawLines() {
             std::vector<sf::VertexArray> lines;
             lines.resize(3 * pointNum);

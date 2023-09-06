@@ -2,7 +2,7 @@
 #ifndef CYLINDER
 #define CYLINDER
 
-#include "rigidBody.h"
+#include "rigidbody.h"
 #include "geometricShape.h"
 #include <vector>
 
@@ -35,12 +35,12 @@ namespace pe {
             real iyy = (1.0f / 12.0f) * mass * (3 * radius * radius + height * height);
             real izz = (1.0f / 2.0f) * mass * radius * radius;
             Matrix3x3 inertiaTensor(ixx, 0, 0, 0, iyy, 0, 0, 0, izz);
-            body.setInertiaTensor(inertiaTensor);
+            body->setInertiaTensor(inertiaTensor);
 
-            body.angularDamping = 1;
-            body.linearDamping = 1;
+            body->angularDamping = 1;
+            body->linearDamping = 1;
 
-            body.calculateDerivedData();
+            body->calculateDerivedData();
             recalculateVertices();
         }
 

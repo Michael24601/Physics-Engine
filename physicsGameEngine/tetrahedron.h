@@ -2,7 +2,7 @@
 #ifndef TETRAHEDRON
 #define TETRAHEDRON
 
-#include "rigidBody.h"
+#include "rigidbody.h"
 #include <vector>
 #include "geometricShape.h"
 
@@ -38,12 +38,12 @@ namespace pe {
             double Ixx, Iyy, Izz = (1.0f / 60.0f) * mass * side * side;
             Matrix3x3 inertiaTensor(Ixx, 0, 0, 0, Iyy, 0, 0, 0, Izz);
             inertiaTensor *= (mass * side * side / 60.0f);
-            body.setInertiaTensor(inertiaTensor);
+            body->setInertiaTensor(inertiaTensor);
 
-            body.angularDamping = 1;
-            body.linearDamping = 1;
+            body->angularDamping = 1;
+            body->linearDamping = 1;
 
-            body.calculateDerivedData();
+            body->calculateDerivedData();
             recalculateVertices();
         }
 
