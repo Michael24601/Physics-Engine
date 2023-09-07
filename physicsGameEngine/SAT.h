@@ -54,7 +54,7 @@ namespace sat {
 			*/
 			for (int i = 0; i < C0.globalVertices.size(); ++i) {
 				pe::Vector3D P = *C0.faces[i].vertices[0];
-				pe::Vector3D N = C0.faces[i].normal; // outward pointing
+				pe::Vector3D N = C0.faces[i].normal(); // outward pointing
 				if (whichSide(C1, P, N) > 0) {
 					// C1 is entirely on the positive side of the line P + t * N.
 					return false;
@@ -67,7 +67,7 @@ namespace sat {
 			*/
 			for (int i = 0; i < C1.globalVertices.size(); ++i) {
 				pe::Vector3D P = *C1.faces[i].vertices[0];
-				pe::Vector3D N = C1.faces[i].normal; // outward pointing
+				pe::Vector3D N = C1.faces[i].normal(); // outward pointing
 				if (whichSide(C0, P, N) > 0) {
 					// C1 is entirely on the positive side of the line P + t * N.
 					return false;
@@ -113,20 +113,14 @@ namespace sat {
 	struct Face{
 		std::vector<pe::Vector3D*> vertices;
 
-		// Local normal in relative coordinates to the start
-		pe::Vector3D localNormal;
-
-		/*
-			Global normal, updated each frame using the transform matrix
-			and the localNormal.
-			The other strategy is to recalculate the normal each frame
-			from the newly updated vertices, but this may lead to
-			inconcistencies. This also elminates the need to place the
-			vertices all in the same direction in the face (clockwise or
-			counter clockwise) as the normal is calculated only once and
-			explicitely.
-		*/
-		pe::Vector3D normal;
+		pe::Vector3D normal() const {
+			// Calculate the local normal using cross product
+			pe::Vector3D AB = *vertices[1] - *vertices[0];
+			pe::Vector3D AC = *vertices[2] - *vertices[0];
+			pe::Vector3D normal = AB.vectorProduct(AC);
+			normal.normalize();
+			return normal;
+		}
 	};
 
 	struct Edge {
@@ -194,26 +188,6 @@ namespace sat {
 				globalVertices[i] =
 					body->transformMatrix.transform(localVertices[i]);
 			}
-			for (int i = 0; i < faces.size(); i++) {
-				faces[i].normal =
-					body->transformMatrix.transform(faces[i].localNormal);
-			}
-			/*
-				Otherwise, we need to use the new vertices:
-				for (int i = 0; i < faces.size(); i++) {
-					// Make sure the vertices are always in the same direction
-					pe::Vector3D A = *faces[i].vertices[0];
-					pe::Vector3D B = *faces[i].vertices[1];
-					pe::Vector3D C = *faces[i].vertices[2];
-
-					pe::Vector3D AB = B - A;
-					pe::Vector3D AC = C - A;
-
-					pe::Vector3D normal = AB.vectorProduct(AC);
-					normal.normalize();
-					faces[i].normal = normal;	
-				}	
-			*/
 		}
 
 		// Used to set teh edges and faces when the class is extended
