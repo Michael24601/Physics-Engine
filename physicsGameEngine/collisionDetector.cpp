@@ -109,16 +109,11 @@ unsigned int CollisionDetector::boxAndPlane(const RectangularPrism& box,
 			* box.vertices[i];
 
 		// Distance from the plane of one of the vertices
-		real vertexDistance = (box.body->position.scalarProduct(plane.normal)
+		real vertexDistance = (vertexPosition.scalarProduct(plane.normal)
 			+ plane.offset) / (plane.normal.magnitude()) ;
 
-		if (i == 0) {
-			std::cout << vertexDistance << " . ";
-		}
-
 		// Checks if the vertex is colliding with the plane
-		if (vertexDistance <= data->tolerance)
-		{
+		if (vertexDistance <= data->tolerance) {
 			/*
 				Creates a contact with the point at the halfway distance
 				between the planeand the vertex.
@@ -133,8 +128,5 @@ unsigned int CollisionDetector::boxAndPlane(const RectangularPrism& box,
 			contactCount++;
 		}
 	}
-
-	std::cout << "\n";
-
 	return contactCount;
 }

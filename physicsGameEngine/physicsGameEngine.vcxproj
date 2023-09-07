@@ -206,6 +206,7 @@
     <ClInclude Include="rigidBodyGravity.h" />
     <ClInclude Include="rigidBodySpringForce.h" />
     <ClInclude Include="rigidBodyWorld.h" />
+    <ClInclude Include="SAT.h" />
     <ClInclude Include="sphere.h" />
     <ClInclude Include="tetrahedron.h" />
     <ClInclude Include="triangularPrism.h" />

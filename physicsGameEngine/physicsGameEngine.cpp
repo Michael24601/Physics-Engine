@@ -406,11 +406,10 @@ int main() {
 
     real side = 100;
     Vector3D prism(side, side, side);
-    RectangularPrism c(prism, 150, Vector3D(700, 600, 0), sf::Color::Yellow);
+    RectangularPrism c(prism, 250, Vector3D(700, 600, 0), sf::Color::Yellow);
 
     RigidBody fixed;
     fixed.position = Vector3D(400, 700, 0);
-
 
     c.body->angularDamping = 0.8;
     c.body->linearDamping = 0.95;
@@ -455,14 +454,6 @@ int main() {
 
         c.body->integrate(deltaT);
         c.recalculateVertices();
-
-        
-        sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
-        // convert it to world coordinates
-        sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);
-
-        c.body->position = Vector3D(worldPos.x, worldPos.y, 0);
-        
 
         // Checks for a collision
         std::cout << detector.boxAndPlane(c, p, &data) << "\n";

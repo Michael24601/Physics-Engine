@@ -109,7 +109,7 @@ namespace pe {
 			of another.
 		*/
 		real scalarProduct(const Vector3D& vector) const {
-			return x * vector.x + y + vector.y + z * vector.z;
+			return x * vector.x + y * vector.y + z * vector.z;
 		}
 
 		/*
@@ -127,6 +127,11 @@ namespace pe {
 			x = y * vector.z - z * vector.y;
 			y = z * vector.x - x * vector.z;
 			z = x * vector.y - y * vector.x;
+		}
+
+		// Overriden operator !=
+		bool operator!=(const Vector3D& vector) const {
+			return !(x == vector.x && y == vector.y && z == vector.z);
 		}
 
 		// Returns each of the coordinates to 0

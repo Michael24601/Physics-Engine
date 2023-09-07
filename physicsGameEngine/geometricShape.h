@@ -84,7 +84,12 @@ namespace pe {
             transform matrix, starting with i = 0.
         */
         Vector3D getAxis(unsigned int i) const {
-            return transform.getColumnVector(i);
+            if (body) {
+                return body->transformMatrix.getColumnVector(i);
+            }
+            else {
+                return Vector3D();
+            }
         }
     };
 }

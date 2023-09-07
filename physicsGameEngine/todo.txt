@@ -67,3 +67,18 @@ first value is being set. Maybe use a counter.
 Figure out what offset should be when we don't want to rotate,
 and add it by default in transform. Make sure its updated every
 frame.
+
+Make sure that the change in the collision of a box and plane
+works.
+
+Should the normal in the face class be just a fucntion, which
+means the values are recalculated each time it's called, wasting
+time, or shouldi it be a variable updated each frame, saving time,
+but forcing us to update it? Solve this.
+
+Ensure whether SAT expects the normal to be calculated clockwise
+from the vertices, or if it doesn't matter.
+
+Is it better practice to recalculate the normal vector from the
+vertices each time? or transform the normal vector each frame using
+the transform of the body?
