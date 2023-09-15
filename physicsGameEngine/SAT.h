@@ -17,9 +17,9 @@ namespace sat {
 
 
 	// Assumes the face has at least 3 vertices
-	struct Face{
+	struct Face {
 		std::vector<pe::Vector3D*> vertices;
-		
+
 		/*
 			We can either return the normal in a function each time,
 			removing the need to update a variable each frame, but slowing
@@ -41,6 +41,23 @@ namespace sat {
 			pe::Vector3D normal = AB.vectorProduct(AC);
 			normal.normalize();
 			return normal;
+		}
+
+		/*
+			Function to calculate the centroid of the face.
+			Clculated each frame from the global coordinates of the vertices,
+			so there is no need to use a transform matrix to transform them.
+		*/
+		Vector3D centroid() const {
+			Vector3D sum(0, 0, 0);
+
+			// Calculate the sum of vertex positions
+			for (const Vector3D* vertex : vertices) {
+				sum += *vertex;
+			}
+
+			// Calculate the centroid as the average of vertex positions
+			return sum * (1.0f / static_cast<real>(vertices.size()));
 		}
 	};
 
@@ -69,17 +86,40 @@ namespace sat {
 		std::vector<Edge> edges;
 
 		// Constructor, only takes body at this stage
-		Primitive(pe::RigidBody* body, pe::real mass, 
+		Primitive(pe::RigidBody* body, pe::real mass,
 			const pe::Vector3D& position) : body{ body } {
 			body->setMass(mass);
 			body->position = position;
 		}
 
-		sf::VertexArray drawLine(pe::Vector3D* c1, pe::Vector3D* c2) const {
+		/*
+			Function that returns the normals of each face using the built in
+			face normal function, which means they don't need to be transformed
+			and are calculates each frame in this function.
+		*/
+		vector<pair<Vector3D, Vector3D>> calculateFaceNormals(real length) const {
+			vector<pair<Vector3D, Vector3D>> normals;
+
+			for (const auto& face : faces) {
+				// Calculate the average of the face vertices (center)
+				Vector3D center = face.centroid();
+
+				// Calculate the endpoint of the normal line
+				pe::Vector3D normal = face.normal();
+				pe::Vector3D endpoint = center + (normal * length);
+
+				normals.push_back(std::make_pair(center, endpoint));
+			}
+
+			return normals;
+		}
+
+		sf::VertexArray drawLine(pe::Vector3D* c1, pe::Vector3D* c2,
+			sf::Color color) const {
 			sf::VertexArray line(sf::LineStrip, 2);
 			line[0].position = sf::Vector2f(c1->x, c1->y);
 			line[1].position = sf::Vector2f(c2->x, c2->y);
-			line[0].color = line[1].color = sf::Color::White;
+			line[0].color = line[1].color = color;
 
 			return line;
 		}
@@ -87,11 +127,20 @@ namespace sat {
 		// Returns lines to draw, which are the edges
 		std::vector<sf::VertexArray> drawLines() const {
 			std::vector<sf::VertexArray> lines;
-			lines.resize(edges.size());
+
 			for (int i = 0; i < edges.size(); i++) {
-				lines[i] = drawLine(edges[i].vertices[0],
-					edges[i].vertices[1]);
+				lines.push_back(drawLine(edges[i].vertices[0],
+					edges[i].vertices[1], sf::Color::White));
 			}
+
+			// Also draws the normals
+			vector<pair<Vector3D, Vector3D>> normals
+				= calculateFaceNormals(40);
+			for (int i = 0; i < normals.size(); i++) {
+				lines.push_back(drawLine(&normals[i].first,
+					&normals[i].second, sf::Color::Red));
+			}
+
 			return lines;
 		}
 
@@ -100,7 +149,6 @@ namespace sat {
 			Since the faces and edges use pointers, they don't need
 			to be updated. The normal of the face is returned from
 			a function so it also need not be updated.
-			It also updates the normals. 
 		*/
 		void updateVertices() {
 			for (int i = 0; i < globalVertices.size(); i++) {
@@ -120,7 +168,7 @@ namespace sat {
 			calculated by the Face class.
 		*/
 		virtual void setFaces() = 0;
-		
+
 		// Uses SAT to check if the convex shapes are colliding
 		bool isColliding(const Primitive& primitive) {
 			return testIntersection(*this, primitive);
@@ -218,6 +266,132 @@ namespace sat {
 		}
 		return true;
 	}
+	
+	/*
+		Generates contacts between two primitives, be they face to face,
+		point to face, face to edge, or edge to edge. Must be called
+		after having made sure the two primitives are colliding,
+		since this function only works assuming they are. It will wrongly
+		generate contacts otherwise.
+	*/
+	bool generateContacts(const Primitive& C0, const Primitive& C1,
+		std::vector<Contact>& contacts) {
+
+		// Test faces of C0 for separation
+		for (int i = 0; i < C0.faces.size(); ++i) {
+			Vector3D P = *C0.faces[i].vertices[0];
+			Vector3D N = C0.faces[i].normal(); // outward pointing
+			if (whichSide(C1, P, N) > 0) {
+				// C1 is entirely on the positive side of the face.
+				continue;
+			}
+
+			// Calculate the contact point on the face of C0
+			// For simplicity, we'll assume the contact point is the centroid of the face
+			Vector3D contactPointOnC0 = C0.faces[i].centroid();
+
+			// Calculate the contact normal (opposite of the face normal)
+			Vector3D contactNormal = N * -1;
+
+			// Calculate penetration depth
+			real penetration = (contactPointOnC0 - P).scalarProduct(N);
+
+			// Create a contact
+			Contact contact;
+			contact.body[0] = C0.body;
+			contact.body[1] = C1.body;
+			contact.friction = 0;
+			contact.restitution = 1;
+			contact.contactPoint = contactPointOnC0;
+			contact.contactNormal = contactNormal;
+			contact.penetration = penetration;
+
+			// Add the contact to the list
+			contacts.push_back(contact);
+		}
+
+		// Test faces of C1 for separation (similar to the above loop)
+
+		// Test cross products of pairs of edge directions
+		for (int i0 = 0; i0 < C0.globalVertices.size(); ++i0) {
+			Vector3D D0 = *C0.edges[i0].vertices[1] - *C0.edges[i0].vertices[0];
+			Vector3D P = *C0.edges[i0].vertices[0];
+			for (int i1 = 0; i1 < C1.globalVertices.size(); ++i1) {
+				Vector3D D1 = *C1.edges[i1].vertices[1] - *C1.edges[i1].vertices[0];
+				Vector3D N = D0.vectorProduct(D1);
+				if (N != Vector3D(0, 0, 0)) {
+					int side0 = whichSide(C0, P, N);
+					if (side0 == 0) {
+						continue;
+					}
+					int side1 = whichSide(C1, P, N);
+					if (side1 == 0) {
+						continue;
+					}
+					if (side0 * side1 < 0) {
+						// Calculate contact point on edges
+						Vector3D pointOnEdge0 = P + D1 
+							* (D0.scalarProduct(D1) / D1.magnitudeSquared());
+						Vector3D pointOnEdge1 = P + D0 
+							* (D0.scalarProduct(D1) / D0.magnitudeSquared());
+
+						// Calculate penetration depth (distance between the two closest points)
+						Vector3D delta = pointOnEdge0 - pointOnEdge1;
+						real penetration = delta.magnitude();
+
+						// Normalize the delta vector to get the contact normal
+						Vector3D contactNormal = delta;
+						contactNormal.normalize();
+
+						// Create a contact
+						Contact contact;
+						contact.body[0] = C0.body;
+						contact.body[1] = C1.body;
+						contact.friction = 0;
+						contact.restitution = 1;
+						// Midpoint between the two closest points
+						contact.contactPoint = (pointOnEdge0 + pointOnEdge1) * (real)0.5; 
+						contact.contactNormal = contactNormal;
+						contact.penetration = penetration;
+
+						// Add the contact to the list
+						contacts.push_back(contact);
+					}
+				}
+			}
+		}
+
+		// Return true if there are contacts, false otherwise
+		return !contacts.empty();
+	}
+
+	void resolveContact(const Contact& contact) {
+
+		// Calculates the relative velocity of the bodies at the contact point
+		Vector3D relativeVelocity = (contact.body[1]->linearVelocity +
+			contact.body[1]->angularVelocity.vectorProduct(
+				contact.contactPoint - contact.body[1]->position)) -
+			(contact.body[0]->linearVelocity 
+				+ contact.body[0]->angularVelocity.vectorProduct(
+					contact.contactPoint - contact.body[0]->position));
+
+		// Calculates the relative velocity along the contact normal
+		real relativeVelocityAlongNormal = relativeVelocity.scalarProduct(
+			contact.contactNormal);
+
+		// Calculate the impulse (change in velocity)
+		real impulse = -(1 + contact.restitution) * relativeVelocityAlongNormal;
+
+		// Apply impulses to the bodies
+		Vector3D impulseForce = contact.contactNormal * impulse;
+
+		// Apply the impulse force to the first body
+		contact.body[0]->addForce(impulseForce, contact.contactPoint);
+
+		// Apply the negative of the impulse force to the second body
+		contact.body[1]->addForce(impulseForce * -1, contact.contactPoint);
+	}
+
 
 	class Cube : public Primitive {
 
@@ -241,9 +415,9 @@ namespace sat {
 			localVertices[6] = pe::Vector3D(side / 2, side / 2, side / 2);
 			localVertices[7] = pe::Vector3D(-side / 2, side / 2, side / 2);
 
-			pe::Matrix3x3 inertiaTensor((side * side + side * side),
-				0, 0, 0, (side * side + side * side),
-				0, 0, 0, (side * side + side * side));
+			pe::Matrix3x3 inertiaTensor((side* side + side * side),
+				0, 0, 0, (side* side + side * side),
+				0, 0, 0, (side* side + side * side));
 			inertiaTensor *= (mass / 12.0f);
 			body->setInertiaTensor(inertiaTensor);
 
@@ -336,11 +510,11 @@ namespace sat {
 			edges.resize(8);
 
 			// Define the edges of the pyramid
-			edges[0] = { &globalVertices[0], &globalVertices[1] };
-			edges[1] = { &globalVertices[1], &globalVertices[2] };
-			edges[2] = { &globalVertices[2], &globalVertices[3] };
-			edges[3] = { &globalVertices[3], &globalVertices[4] };
-			edges[4] = { &globalVertices[4], &globalVertices[1] };
+			edges[0] = { &globalVertices[1], &globalVertices[2] };
+			edges[1] = { &globalVertices[2], &globalVertices[3] };
+			edges[2] = { &globalVertices[3], &globalVertices[4] };
+			edges[3] = { &globalVertices[4], &globalVertices[1] };
+			edges[4] = { &globalVertices[0], &globalVertices[1] };
 			edges[5] = { &globalVertices[0], &globalVertices[2] };
 			edges[6] = { &globalVertices[0], &globalVertices[3] };
 			edges[7] = { &globalVertices[0], &globalVertices[4] };
@@ -351,18 +525,18 @@ namespace sat {
 			faces.resize(5); // Pyramid has 5 faces
 
 			// Base face
-			faces[0].vertices = { &globalVertices[1], &globalVertices[2],
-				&globalVertices[3], &globalVertices[4] };
+			faces[0].vertices = { &globalVertices[1], &globalVertices[4],
+				&globalVertices[3], &globalVertices[2] };
 
 			// Side faces
-			faces[1].vertices = { &globalVertices[0], &globalVertices[1],
-				&globalVertices[4] };
-			faces[2].vertices = { &globalVertices[0], &globalVertices[4],
-				&globalVertices[3] };
-			faces[3].vertices = { &globalVertices[0], &globalVertices[3],
-				&globalVertices[2] };
-			faces[4].vertices = { &globalVertices[0], &globalVertices[2],
+			faces[1].vertices = { &globalVertices[0], &globalVertices[4],
 				&globalVertices[1] };
+			faces[2].vertices = { &globalVertices[0], &globalVertices[1],
+				&globalVertices[2] };
+			faces[3].vertices = { &globalVertices[0], &globalVertices[2],
+				&globalVertices[3] };
+			faces[4].vertices = { &globalVertices[0], &globalVertices[3],
+				&globalVertices[4] };
 		}
 	};
 }

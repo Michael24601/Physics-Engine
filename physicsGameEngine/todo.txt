@@ -82,3 +82,11 @@ from the vertices, or if it doesn't matter.
 Is it better practice to recalculate the normal vector from the
 vertices each time? or transform the normal vector each frame using
 the transform of the body?
+
+Remove the specific collision detection / contact generation and use
+SAT and a general contact generation function.
+
+Make sure BHV is optimized and remains balanced after additions and
+removals.
+
+Place your code in folders so it's more organized.

@@ -542,20 +542,21 @@ int main() {
     real deltaT = 0;
 
     real side = 100;
-    sat::Cube c(new RigidBody(), side, 250, Vector3D(250, 200, 0));
+    sat::Cube c(new RigidBody(), side, 250, Vector3D(-200, 300, 0));
     Quaternion orientation(1, -1, 0, 1);
     orientation.normalize();
     c.body->orientation = orientation;
 
+    Vector3D g(0, -10, 0);
+    RigidBodyGravity gravity(g);
+
     real side2 = 150;
-    sat::Cube c2(new RigidBody(), side2, 250, Vector3D(-200, -100, 0));
+    sat::Pyramid c2(new RigidBody(), side2, 300, 250, Vector3D(-200, -100, 0));
     Quaternion orientation2(-1, 2, -1, -1);
     orientation2.normalize();
     c2.body->orientation = orientation2;
 
     real rotationSpeed = 0.05;
-
-    bool move = false;
 
     while (window.isOpen()) {
 
@@ -580,31 +581,30 @@ int main() {
                 cameraPosition.z = newZ;
                 viewMatrix = glm::lookAt(cameraPosition, cameraTarget, upVector);
             }
-            // Check for input to rotate the camera around the X-axis
-            else if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
-                move = !move;
-            }
         }
 
+        // Changes intertia tensor and tranformation matrix
         c.body->calculateDerivedData();
         c2.body->calculateDerivedData();
 
-        if (!move) {
-            sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
-            sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);
-            c.body->position = Vector3D(worldPos.x, worldPos.y, c.body->position.z);
-        }
- 
+        // Adds force
+        gravity.updateForce(c.body, deltaT);
 
+        // To move based on force
+        c.body->integrate(deltaT);
+        c2.body->integrate(deltaT);
+
+        // To tranform local vertices
         c.updateVertices();
         c2.updateVertices();
+
+        // For camera rotation
+        transformBody(c, viewMatrix);
+        transformBody(c2, viewMatrix);
 
         std::cout << c.isColliding(c2) << "\n";
 
         window.clear(sf::Color::Black);
-
-        transformBody(c, viewMatrix);
-        transformBody(c2, viewMatrix);
 
         vector<sf::VertexArray> v = c.drawLines();
         for (int j = 0; j < v.size(); j++) {

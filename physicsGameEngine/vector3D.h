@@ -105,15 +105,15 @@ namespace pe {
 
 		/*
 			Scalar or dot product. Used in calculating the angle between
-			two vectors, as well as the magnitude of one vector in the direction
-			of another.
+			two vectors, as well as the magnitude of one vector in the
+			direction of another.
 		*/
 		real scalarProduct(const Vector3D& vector) const {
 			return x * vector.x + y * vector.y + z * vector.z;
 		}
 
 		/*
-			Vector or cross-product (not commutative). Used to calculate the
+			Vector or cross product (not commutative). Used to calculate the
 			angle as well as the magnitude of one vector not in the direction
 			of another. Can also be used to construct a triplet of orthogonal
 			vectors.
