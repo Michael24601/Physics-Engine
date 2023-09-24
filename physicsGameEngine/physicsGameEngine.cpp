@@ -523,7 +523,7 @@ int main() {
 
 
     // Define camera properties
-    glm::vec3 cameraPosition = glm::vec3(0.0f, 0.0f, 400.0f); // Camera's position in world coordinates
+    glm::vec3 cameraPosition = glm::vec3(400.0f, 0.0f, 0.0f); // Camera's position in world coordinates
     glm::vec3 cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);   // Point the camera is looking at
     glm::vec3 upVector = glm::vec3(0.0f, 1.0f, 0.0f);        // Up vector
 
@@ -542,7 +542,7 @@ int main() {
     real deltaT = 0;
 
     real side = 100;
-    sat::Cube c(new RigidBody(), side, 250, Vector3D(-200, 300, 0));
+    sat::Cube c(new RigidBody(), side, 10, Vector3D(-200, 300, 0));
     Quaternion orientation(1, -1, 0, 1);
     orientation.normalize();
     c.body->orientation = orientation;
@@ -551,12 +551,12 @@ int main() {
     RigidBodyGravity gravity(g);
 
     real side2 = 150;
-    sat::Pyramid c2(new RigidBody(), side2, 300, 250, Vector3D(-200, -100, 0));
+    sat::Pyramid c2(new RigidBody(), side2, 300, 10, Vector3D(-200, -100, 0));
     Quaternion orientation2(-1, 2, -1, -1);
     orientation2.normalize();
     c2.body->orientation = orientation2;
 
-    real rotationSpeed = 0.05;
+    real rotationSpeed = 0.1;
 
     while (window.isOpen()) {
 
@@ -590,9 +590,19 @@ int main() {
         // Adds force
         gravity.updateForce(c.body, deltaT);
 
+        // Resolves collisions
+        if (c.isColliding(c2)) {
+            cout << "Contact!\n";
+            // vector<Contact> contacts;
+            //sat::generateContacts(c, c2, contacts);
+            // for (int i = 0; i < contacts.size(); i++) {
+               // sat::resolveContact(contacts[i]);
+            // }
+        }
+
         // To move based on force
         c.body->integrate(deltaT);
-        c2.body->integrate(deltaT);
+        // c2.body->integrate(deltaT);
 
         // To tranform local vertices
         c.updateVertices();
@@ -601,8 +611,6 @@ int main() {
         // For camera rotation
         transformBody(c, viewMatrix);
         transformBody(c2, viewMatrix);
-
-        std::cout << c.isColliding(c2) << "\n";
 
         window.clear(sf::Color::Black);
 
@@ -617,7 +625,7 @@ int main() {
 
         window.display();
 
-        deltaT = clock.getElapsedTime().asSeconds() * 10;
+        deltaT = clock.getElapsedTime().asSeconds() ;
     }
 
     return 0;

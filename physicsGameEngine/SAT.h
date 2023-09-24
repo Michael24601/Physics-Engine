@@ -300,8 +300,8 @@ namespace sat {
 			Contact contact;
 			contact.body[0] = C0.body;
 			contact.body[1] = C1.body;
-			contact.friction = 0;
-			contact.restitution = 1;
+			contact.friction = 1;
+			contact.restitution = 0.1;
 			contact.contactPoint = contactPointOnC0;
 			contact.contactNormal = contactNormal;
 			contact.penetration = penetration;
@@ -347,8 +347,8 @@ namespace sat {
 						Contact contact;
 						contact.body[0] = C0.body;
 						contact.body[1] = C1.body;
-						contact.friction = 0;
-						contact.restitution = 1;
+						contact.friction = 1;
+						contact.restitution = 0.1;
 						// Midpoint between the two closest points
 						contact.contactPoint = (pointOnEdge0 + pointOnEdge1) * (real)0.5; 
 						contact.contactNormal = contactNormal;
@@ -366,30 +366,49 @@ namespace sat {
 	}
 
 	void resolveContact(const Contact& contact) {
-
-		// Calculates the relative velocity of the bodies at the contact point
+		// Calculate relative velocity
 		Vector3D relativeVelocity = (contact.body[1]->linearVelocity +
 			contact.body[1]->angularVelocity.vectorProduct(
 				contact.contactPoint - contact.body[1]->position)) -
-			(contact.body[0]->linearVelocity 
-				+ contact.body[0]->angularVelocity.vectorProduct(
+			(contact.body[0]->linearVelocity +
+				contact.body[0]->angularVelocity.vectorProduct(
 					contact.contactPoint - contact.body[0]->position));
 
-		// Calculates the relative velocity along the contact normal
-		real relativeVelocityAlongNormal = relativeVelocity.scalarProduct(
-			contact.contactNormal);
+		// Calculate relative velocity along the contact normal
+		double relativeVelocityAlongNormal = relativeVelocity.scalarProduct(contact.contactNormal);
 
-		// Calculate the impulse (change in velocity)
-		real impulse = -(1 + contact.restitution) * relativeVelocityAlongNormal;
+		// If relative velocity is separating, no action is needed
+		if (relativeVelocityAlongNormal > 0) {
+			return;
+		}
+
+		// Calculate impulse
+		double impulse = -(1 + contact.restitution) * relativeVelocityAlongNormal;
+		impulse /= contact.body[0]->inverseMass + contact.body[1]->inverseMass;
+
+		impulse *= 0.05;
 
 		// Apply impulses to the bodies
 		Vector3D impulseForce = contact.contactNormal * impulse;
-
-		// Apply the impulse force to the first body
 		contact.body[0]->addForce(impulseForce, contact.contactPoint);
-
-		// Apply the negative of the impulse force to the second body
 		contact.body[1]->addForce(impulseForce * -1, contact.contactPoint);
+
+		// Calculate and apply friction impulses (if needed)
+		// Implement friction calculations here
+
+		// If objects are penetrating, move them apart along the contact normal
+		if (contact.penetration > 0) {
+			const double movePerMass = contact.penetration /
+				(contact.body[0]->inverseMass + contact.body[1]->inverseMass);
+
+			Vector3D move = contact.contactNormal * movePerMass;
+
+			// Move objects apart
+			contact.body[0]->position = (contact.body[0]->position +
+				move * contact.body[0]->inverseMass);
+			contact.body[1]->position = (contact.body[1]->position -
+				move * contact.body[1]->inverseMass);
+		}
 	}
 
 

@@ -90,3 +90,7 @@ Make sure BHV is optimized and remains balanced after additions and
 removals.
 
 Place your code in folders so it's more organized.
+
+Detail and resolve the tradeoff between recalcuting normals, bouding
+volume spheres each frame (accuracy) vs once, and then transforming
+them (speed).
