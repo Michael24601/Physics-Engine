@@ -149,6 +149,7 @@
     <ClCompile Include="boundingSphere.cpp" />
     <ClCompile Include="collisionDetector.cpp" />
     <ClCompile Include="cone.h" />
+    <ClCompile Include="contactGeneration.cpp" />
     <ClCompile Include="drawingUtil.cpp" />
     <ClCompile Include="particle.cpp" />
     <ClCompile Include="particleBungeeForce.cpp" />
