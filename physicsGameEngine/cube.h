@@ -46,18 +46,41 @@ namespace pe {
 		virtual void setEdges() override {
 			edges.resize(12);
 
-			edges[0] = { &globalVertices[0], &globalVertices[1] };
-			edges[1] = { &globalVertices[1], &globalVertices[2] };
-			edges[2] = { &globalVertices[2], &globalVertices[3] };
-			edges[3] = { &globalVertices[3], &globalVertices[0] };
-			edges[4] = { &globalVertices[4], &globalVertices[5] };
-			edges[5] = { &globalVertices[5], &globalVertices[6] };
-			edges[6] = { &globalVertices[6], &globalVertices[7] };
-			edges[7] = { &globalVertices[7], &globalVertices[4] };
-			edges[8] = { &globalVertices[0], &globalVertices[4] };
-			edges[9] = { &globalVertices[1], &globalVertices[5] };
-			edges[10] = { &globalVertices[2], &globalVertices[6] };
-			edges[11] = { &globalVertices[3], &globalVertices[7] };
+			edges[0].vertices[0] = &globalVertices[0];
+			edges[0].vertices[1] = &globalVertices[1];
+
+			edges[1].vertices[0] = &globalVertices[1];
+			edges[1].vertices[1] = &globalVertices[2];
+
+			edges[2].vertices[0] = &globalVertices[2];
+			edges[2].vertices[1] = &globalVertices[3];
+
+			edges[3].vertices[0] = &globalVertices[3];
+			edges[3].vertices[1] = &globalVertices[0];
+
+			edges[4].vertices[0] = &globalVertices[4];
+			edges[4].vertices[1] = &globalVertices[5];
+
+			edges[5].vertices[0] = &globalVertices[5];
+			edges[5].vertices[1] = &globalVertices[6];
+
+			edges[6].vertices[0] = &globalVertices[6];
+			edges[6].vertices[1] = &globalVertices[7];
+
+			edges[7].vertices[0] = &globalVertices[7];
+			edges[7].vertices[1] = &globalVertices[4];
+
+			edges[8].vertices[0] = &globalVertices[0];
+			edges[8].vertices[1] = &globalVertices[4];
+
+			edges[9].vertices[0] = &globalVertices[1];
+			edges[9].vertices[1] = &globalVertices[5];
+
+			edges[10].vertices[0] = &globalVertices[2];
+			edges[10].vertices[1] = &globalVertices[6];
+
+			edges[11].vertices[0] = &globalVertices[3];
+			edges[11].vertices[1] = &globalVertices[7];
 		}
 
 		virtual void setFaces() override {

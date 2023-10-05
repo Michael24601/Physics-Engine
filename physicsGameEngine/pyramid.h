@@ -46,14 +46,29 @@ namespace pe {
 			edges.resize(8);
 
 			// Define the edges of the pyramid
-			edges[0] = { &globalVertices[1], &globalVertices[2] };
-			edges[1] = { &globalVertices[2], &globalVertices[3] };
-			edges[2] = { &globalVertices[3], &globalVertices[4] };
-			edges[3] = { &globalVertices[4], &globalVertices[1] };
-			edges[4] = { &globalVertices[0], &globalVertices[1] };
-			edges[5] = { &globalVertices[0], &globalVertices[2] };
-			edges[6] = { &globalVertices[0], &globalVertices[3] };
-			edges[7] = { &globalVertices[0], &globalVertices[4] };
+			edges[0].vertices[0] = &globalVertices[1];
+			edges[0].vertices[1] = &globalVertices[2];
+
+			edges[1].vertices[0] = &globalVertices[2];
+			edges[1].vertices[1] = &globalVertices[3];
+
+			edges[2].vertices[0] = &globalVertices[3];
+			edges[2].vertices[1] = &globalVertices[4];
+
+			edges[3].vertices[0] = &globalVertices[4];
+			edges[3].vertices[1] = &globalVertices[1];
+
+			edges[4].vertices[0] = &globalVertices[0];
+			edges[4].vertices[1] = &globalVertices[1];
+
+			edges[5].vertices[0] = &globalVertices[0];
+			edges[5].vertices[1] = &globalVertices[2];
+
+			edges[6].vertices[0] = &globalVertices[0];
+			edges[6].vertices[1] = &globalVertices[3];
+
+			edges[7].vertices[0] = &globalVertices[0];
+			edges[7].vertices[1] = &globalVertices[4];
 		}
 
 		// All vertices are in clockwise order

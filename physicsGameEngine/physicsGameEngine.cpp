@@ -501,23 +501,11 @@ int main() {
 
 
 #include "SAT.h"
-#include <glm.hpp>
-#include <gtc/matrix_transform.hpp>
+#include "cube.h"
+#include "pyramid.h"
+#include "contactGeneration.h"
+#include "drawingUtil.h"
 
-using namespace sat;
-
-void transformBody(Primitive& p, glm::mat4 viewMatrix) {
-    for (int i = 0; i < p.globalVertices.size(); i++) {
-
-        glm::vec3 vertex(p.globalVertices[i].x,
-            p.globalVertices[i].y, p.globalVertices[i].z);
-
-        // Apply the view matrix transformation to each vertex
-        vertex = glm::vec3(viewMatrix * glm::vec4(vertex, 1.0f));
-
-        p.globalVertices[i] = Vector3D(vertex.x, vertex.y, vertex.z);
-    }
-}
 
 int main() {
 
@@ -542,21 +530,24 @@ int main() {
     real deltaT = 0;
 
     real side = 100;
-    sat::Cube c(new RigidBody(), side, 10, Vector3D(-200, 300, 0));
-    Quaternion orientation(1, -1, 0, 1);
+    Cube c(new RigidBody(), side, 10, Vector3D(-200, 300, 0));
+    Quaternion orientation(0, 1, -1, 1);
     orientation.normalize();
+    
     c.body->orientation = orientation;
 
     Vector3D g(0, -10, 0);
     RigidBodyGravity gravity(g);
 
     real side2 = 150;
-    sat::Pyramid c2(new RigidBody(), side2, 300, 10, Vector3D(-200, -100, 0));
+    Cube c2(new RigidBody(), side2, 10, Vector3D(-200, -100, 0));
     Quaternion orientation2(-1, 2, -1, -1);
     orientation2.normalize();
     c2.body->orientation = orientation2;
 
     real rotationSpeed = 0.1;
+    bool pause = false;
+    vector<std::pair<Vector3D, Vector3D>> normals;
 
     while (window.isOpen()) {
 
@@ -568,64 +559,83 @@ int main() {
             if (event.type == sf::Event::Closed)
                 window.close();
             else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
-                float newX = cos(rotationSpeed) * cameraPosition.x - sin(rotationSpeed) * cameraPosition.z;
-                float newZ = sin(rotationSpeed) * cameraPosition.x + cos(rotationSpeed) * cameraPosition.z;
+                float newX = cos(rotationSpeed) * cameraPosition.x 
+                    - sin(rotationSpeed) * cameraPosition.z;
+                float newZ = sin(rotationSpeed) * cameraPosition.x 
+                    + cos(rotationSpeed) * cameraPosition.z;
                 cameraPosition.x = newX;
                 cameraPosition.z = newZ;
                 viewMatrix = glm::lookAt(cameraPosition, cameraTarget, upVector);
             }
             else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
-                float newX = cos(-rotationSpeed) * cameraPosition.x - sin(-rotationSpeed) * cameraPosition.z;
-                float newZ = sin(-rotationSpeed) * cameraPosition.x + cos(-rotationSpeed) * cameraPosition.z;
+                float newX = cos(-rotationSpeed) * cameraPosition.x
+                    - sin(-rotationSpeed) * cameraPosition.z;
+                float newZ = sin(-rotationSpeed) * cameraPosition.x 
+                    + cos(-rotationSpeed) * cameraPosition.z;
                 cameraPosition.x = newX;
                 cameraPosition.z = newZ;
                 viewMatrix = glm::lookAt(cameraPosition, cameraTarget, upVector);
             }
+            else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
+                // Increase the pitch angle to rotate the camera upwards
+                cameraPosition.y += rotationSpeed * 50;
+                viewMatrix = glm::lookAt(cameraPosition, cameraTarget, upVector);
+            }
+            else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
+                // Decrease the pitch angle to rotate the camera downwards
+                cameraPosition.y -= rotationSpeed * 50;
+                viewMatrix = glm::lookAt(cameraPosition, cameraTarget, upVector);
+            }
         }
+        if (!pause) {
+            // Changes intertia tensor and tranformation matrix
+            c.body->calculateDerivedData();
+            c2.body->calculateDerivedData();
 
-        // Changes intertia tensor and tranformation matrix
-        c.body->calculateDerivedData();
-        c2.body->calculateDerivedData();
+            // Adds force
+            gravity.updateForce(c.body, deltaT);
 
-        // Adds force
-        gravity.updateForce(c.body, deltaT);
+            // Resolves collisions
+            if (c.isColliding(c2)) {
+                cout << "Contact!\n";
+                std::vector<Contact> contacts;
+                returnMaxContact(c, c2, contacts);
+                for (int i = 0; i < contacts.size(); i++) {
+                    contacts[i].contactNormal.display();
+                    normals = contacts[i].drawNormals(100);
+                    contacts[i].contactPoint.display();
+                }
+                pause = true;
+            }
 
-        // Resolves collisions
-        if (c.isColliding(c2)) {
-            cout << "Contact!\n";
-            // vector<Contact> contacts;
-            //sat::generateContacts(c, c2, contacts);
-            // for (int i = 0; i < contacts.size(); i++) {
-               // sat::resolveContact(contacts[i]);
-            // }
+            // To move based on force
+            c.body->integrate(deltaT);
+            // c2.body->integrate(deltaT);
         }
-
-        // To move based on force
-        c.body->integrate(deltaT);
-        // c2.body->integrate(deltaT);
 
         // To tranform local vertices
         c.updateVertices();
         c2.updateVertices();
 
-        // For camera rotation
-        transformBody(c, viewMatrix);
-        transformBody(c2, viewMatrix);
+        // For camera rotation       
 
         window.clear(sf::Color::Black);
 
-        vector<sf::VertexArray> v = c.drawLines();
-        for (int j = 0; j < v.size(); j++) {
-            window.draw(v[j]);
-        }
-        v = c2.drawLines();
-        for (int j = 0; j < v.size(); j++) {
-            window.draw(v[j]);
-        }
+        std:vector<sf::VertexArray> vertexArray;
+        vertexArray = transformLinesToVertexArray(c.drawLines(), viewMatrix, sf::Color::White);
+        drawVectorOfVertexArray(vertexArray, window);
+        vertexArray = transformLinesToVertexArray(c.calculateFaceNormals(50), viewMatrix, sf::Color::Red);
+        drawVectorOfVertexArray(vertexArray, window);
+        vertexArray = transformLinesToVertexArray(c2.drawLines(), viewMatrix, sf::Color::White);
+        drawVectorOfVertexArray(vertexArray, window);
+        vertexArray = transformLinesToVertexArray(c2.calculateFaceNormals(50), viewMatrix, sf::Color::Red);
+        drawVectorOfVertexArray(vertexArray, window);
+        vertexArray = transformLinesToVertexArray(normals, viewMatrix, sf::Color::Green);
+        drawVectorOfVertexArray(vertexArray, window);
 
         window.display();
 
-        deltaT = clock.getElapsedTime().asSeconds() ;
+        deltaT = clock.getElapsedTime().asSeconds();
     }
 
     return 0;

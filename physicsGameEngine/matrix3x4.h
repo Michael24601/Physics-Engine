@@ -260,7 +260,7 @@ namespace pe {
 		/*
 			Applies inverse transformation of the calling object's matrix
 			on a vector. Instead of first getting the inverse then
-			multiplying the vector by the matric, this function does this in
+			multiplying the vector by the matrix, this function does this in
 			one operation. The function should be used for performance when
 			converting from local to world coordinates after transformation,
 			instead of using the inverse and operator* functions.

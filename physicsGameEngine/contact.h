@@ -38,6 +38,8 @@
 #define CONTACT_H
 
 #include "vector3D.h"
+#include "SFML/Graphics.hpp"
+#include "drawingUtil.h"
 
 namespace pe {
 
@@ -69,88 +71,20 @@ namespace pe {
 			halfway point between the two interpenetrating points.
 		*/
 		real penetration;
+
+		std::vector<std::pair<Vector3D, Vector3D>> drawNormals(real length) {
+			std::vector<std::pair<Vector3D, Vector3D>> normalLines;
+
+			// Calculate the start and end points for the normal lines
+			Vector3D start = contactPoint;
+			Vector3D end1 = contactPoint + contactNormal * length; // Normal direction
+			Vector3D end2 = contactPoint - contactNormal * length; // Opposite normal direction
+
+			normalLines.push_back(std::make_pair(start, end1));
+			normalLines.push_back(std::make_pair(start, end2));
+			return normalLines;
+		}
 	};
 }
 
 #endif
-
-\documentclass{ article }
-
-
-% For 3D plots
-\usepackage{ blindtext }
-\usepackage{ pgfplots }
-\pgfplotsset{ compat = 1.9 }
-% For inline color changes
-\usepackage{ xcolor }
-% For vertical brace rcases
-\usepackage{ mathtools }
-% For positioning figures
-\usepackage{ float }
-% makes figure font bold
-\usepackage{ caption }
-\captionsetup[figure]{ labelfont = bf }
-% For text generation
-\usepackage{ lipsum }
-% For drawing
-\usepackage{ tikz }
-% For manipulating coordinates
-\usetikzlibrary{ calc }
-% For relative node positioning
-\usetikzlibrary{ positioning }
-% For smaller or equal sign and not divide sign
-\usepackage{ amssymb }
-% For the diagonal fraction
-\usepackage{ xfrac }
-% For enumerating exercise parts with letters instead of numbers
-\usepackage{ enumitem }
-% For dfrac, which forces the fraction to be in display mode(large) e
-% even in math mode(small)
-\usepackage{ amsmath }
-% For degree sign
-\usepackage{ gensymb }
-% For "\mathbb" macro
-\usepackage{ amsfonts }
-\newcommand{ \N }{\mathbb{ N }}
-\newcommand{ \Z }{\mathbb{ Z }}
-\newcommand{ \Q }{\mathbb{ Q }}
-\newcommand{ \R }{\mathbb{ R }}
-\newcommand{ \C }{\mathbb{ C }}
-\newcommand{ \F }{\mathbb{ F }}
-\newcommand{ \rad }{\text{ rad }}
-\newcommand{ \lcm }{\text{ lcm }}
-\newcommand{ \Aut }{\text{ Aut }}
-\newcommand{ \seq }{\leqslant}
-\newcommand{ \beq }{\geqslant}
-\newcommand{ \sub }{\subseteq}
-\newcommand{ \prosub }{\subset}
-
-\newcommand{ \Ocal }{\mathcal{ O }}
-\newcommand{ \Ccal }{\mathcal{ C }}
-\newcommand{ \Pcal }{\mathcal{ P }}
-\newcommand{ \Scal }{\mathcal{ S }}
-
-% overline short italic
-\newcommand{ \olsi }[1]{ \,\overline{\!{#1}} }
-
-\title{ %
-	\Huge Discrete Mathematics and its Applications \\
-	\large by \\
-	\Large Kenneth H.Rosen \\~\\
-	\huge Chapter 1: The Foundations \\
-	\LARGE Section 1: Propositional Logic \\
-}
-\date{ 2023 - 09 - 24 }
-\author{ Michael Saba }
-
-\begin{ document }
-\pagenumbering{ gobble }
-\maketitle
-\newpage
-\pagenumbering{ arabic }
-
-
-\section* { Exercise 1 }
-This is the first Exercise.Back to TEX!!!
-
-\end{ document }

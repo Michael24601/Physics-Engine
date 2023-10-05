@@ -17,13 +17,14 @@ global variables or typedef instead.
 
 Include H in header guards.
 
-Fix the tetrahedron inertia tensor, which is wobbly now.
+Fix the tetrahedron inertia tensor, which is wobbly now (DONE).
 
 Use the wrapper transform function to transform world and local
 coordinates instead of doing direct multiplication (DONE).
 
 Fix the issue where body->transformMatrix.transform(connectionPoint)
-doesn't work and the definition is not recognized in the source file.
+doesn't work and the definition is not recognized in the source file
+(DONE).
 
 Add a comment explaining each header for the headers that don't
 have it.
@@ -94,3 +95,12 @@ Place your code in folders so it's more organized.
 Detail and resolve the tradeoff between recalcuting normals, bouding
 volume spheres each frame (accuracy) vs once, and then transforming
 them (speed).
+
+Test bounding volume hierarchy visually.
+
+Test collision contact generation (not resoltuion).
+
+Instead of multiplying directily by the transform matrix, use
+the transform matrice's built in transform function.
+
+Make sure BHV is self balancing for maximum performance.

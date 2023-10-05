@@ -25,31 +25,12 @@ std::vector<std::pair<Vector3D, Vector3D>>
 }
 
 
-sf::VertexArray Primitive::drawLine(Vector3D* c1, Vector3D* c2,
-	sf::Color color) const {
-	sf::VertexArray line(sf::LineStrip, 2);
-	line[0].position = sf::Vector2f(c1->x, c1->y);
-	line[1].position = sf::Vector2f(c2->x, c2->y);
-	line[0].color = line[1].color = color;
-
-	return line;
-}
-
-
-std::vector<sf::VertexArray> Primitive::drawLines() const {
-	std::vector<sf::VertexArray> lines;
+std::vector<std::pair<Vector3D, Vector3D>> Primitive::drawLines() const {
+	std::vector<std::pair<Vector3D, Vector3D>> lines;
 
 	for (int i = 0; i < edges.size(); i++) {
-		lines.push_back(drawLine(edges[i].vertices[0],
-			edges[i].vertices[1], sf::Color::White));
-	}
-
-	// Also draws the normals
-	std::vector<std::pair<Vector3D, Vector3D>> normals
-		= calculateFaceNormals(40);
-	for (int i = 0; i < normals.size(); i++) {
-		lines.push_back(drawLine(&normals[i].first,
-			&normals[i].second, sf::Color::Red));
+		lines.push_back(std::make_pair(*edges[i].vertices[0],
+			*edges[i].vertices[1]));
 	}
 
 	return lines;

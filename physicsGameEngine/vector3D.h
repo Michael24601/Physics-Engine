@@ -138,6 +138,10 @@ namespace pe {
 		void clear() {
 			x = y = z = 0;
 		}
+
+		void display() const {
+			std::cout << "x: " << x << ", y: " << y << ", z: " << z << "\n";
+		}
 	};
 
 

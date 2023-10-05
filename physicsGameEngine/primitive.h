@@ -5,6 +5,7 @@
 #include <SFML/Graphics.hpp>
 #include <iostream>
 #include "rigidBody.h"
+#include "drawingUtil.h"
 
 namespace pe {
 
@@ -55,7 +56,9 @@ namespace pe {
 	};
 
 	struct Edge {
-		Vector3D* vertices[2];
+		// Should have 2 elements
+		std::vector<Vector3D*> vertices;
+		Edge() : vertices(2) {}
 	};
 
 	/*
@@ -93,11 +96,9 @@ namespace pe {
 		std::vector<std::pair<Vector3D, Vector3D>> 
 			calculateFaceNormals(real length) const;
 
-		sf::VertexArray drawLine(Vector3D* c1, Vector3D* c2,
-			sf::Color color) const;
 
 		// Returns lines to draw, which are the edges
-		std::vector<sf::VertexArray> drawLines() const;
+		std::vector<std::pair<Vector3D, Vector3D>> drawLines() const;
 
 		/*
 			Updates the global variables using the transform matrix.

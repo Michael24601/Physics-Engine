@@ -149,6 +149,7 @@
     <ClCompile Include="boundingSphere.cpp" />
     <ClCompile Include="collisionDetector.cpp" />
     <ClCompile Include="cone.h" />
+    <ClCompile Include="drawingUtil.cpp" />
     <ClCompile Include="particle.cpp" />
     <ClCompile Include="particleBungeeForce.cpp" />
     <ClCompile Include="particleBuoyancy.cpp" />
@@ -169,6 +170,7 @@
     <ClCompile Include="rigidBodyGravity.cpp" />
     <ClCompile Include="rigidBodySpringForce.cpp" />
     <ClCompile Include="rigidBodyWorld.cpp" />
+    <ClCompile Include="sat.cpp" />
     <ClCompile Include="vector3D.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -179,8 +181,10 @@
     <ClInclude Include="collisionDetector.h" />
     <ClInclude Include="contact.h" />
     <ClInclude Include="contactData.h" />
+    <ClInclude Include="contactGeneration.h" />
     <ClInclude Include="cube.h" />
     <ClInclude Include="cylinder.h" />
+    <ClInclude Include="drawingUtil.h" />
     <ClInclude Include="geometricShape.h" />
     <ClInclude Include="matrix3x3.h" />
     <ClInclude Include="matrix3x4.h" />

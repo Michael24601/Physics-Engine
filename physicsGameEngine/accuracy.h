@@ -4,6 +4,12 @@
 #define ACCURACY_H
 
 #include <cfloat>
+#include <limits>
+#include <iostream>
+
+// Used for camera change
+#include <glm.hpp>
+#include <gtc/matrix_transform.hpp>
 
 #define realSqrt sqrtf
 #define realPow powf
@@ -12,7 +18,7 @@
 
 namespace pe {
 	typedef float real;
-	constexpr real PI = 3.141592;
+	constexpr real PI = 3.141592f;
 }
 
 #endif
