@@ -218,7 +218,15 @@ bool pe::returnMaxContact(const Primitive& p1, const Primitive& p2,
             prioritizedContact = contact;
         }
     }
-    contactsToBeResolved.push_back(prioritizedContact);
+
+    Contact maxContact = *max_element(contacts.begin(), contacts.end(),
+        [](const Contact& c1, const Contact& c2)->bool {
+            return c1.penetration > c2.penetration;
+        });
+
+
+    // contactsToBeResolved.push_back(prioritizedContact);
+    contactsToBeResolved.push_back(maxContact);
 
     return true;
 }

@@ -168,6 +168,7 @@
     <ClCompile Include="particleContact.cpp" />
     <ClCompile Include="primitive.cpp" />
     <ClCompile Include="rigidBody.cpp" />
+    <ClCompile Include="rigidBodyCableForce.cpp" />
     <ClCompile Include="rigidBodyGravity.cpp" />
     <ClCompile Include="rigidBodySpringForce.cpp" />
     <ClCompile Include="rigidBodyWorld.cpp" />
@@ -210,6 +211,7 @@
     <ClInclude Include="pyramid.h" />
     <ClInclude Include="quaternion.h" />
     <ClInclude Include="rigidBody.h" />
+    <ClInclude Include="rigidBodyCableForce.h" />
     <ClInclude Include="rigidBodyForceGenerator.h" />
     <ClInclude Include="rigidBodyGravity.h" />
     <ClInclude Include="rigidBodySpringForce.h" />

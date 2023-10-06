@@ -8,7 +8,7 @@
 namespace pe {
 
 	/*
-		Transform lines(made up of a pair of points) in 3D space to lines
+		Transforms lines (made up of a pair of points) in 3D space to lines
 		in 2D space transformed using a viewMatrix according to a specific
 		camera angle.
 	*/

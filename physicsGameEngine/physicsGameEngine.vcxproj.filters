@@ -99,6 +99,9 @@
     <ClCompile Include="contactGeneration.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="rigidBodyCableForce.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="particleDrag.h">
@@ -231,6 +234,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="drawingUtil.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="rigidBodyCableForce.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

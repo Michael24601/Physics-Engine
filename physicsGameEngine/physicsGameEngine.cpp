@@ -26,6 +26,13 @@
 #include "boundingSphere.h"
 
 #include "collisionDetector.h"
+#include "SAT.h"
+#include "cube.h"
+#include "pyramid.h"
+#include "contactGeneration.h"
+#include "drawingUtil.h"
+
+#include "rigidBodyCableForce.h"
 
 using namespace pe;
 using namespace std;
@@ -234,56 +241,52 @@ int main() {
 }
 */
 
+
+
 // Body testing
-/*
+
 int main() {
+
+    // Define camera properties
+    glm::vec3 cameraPosition = glm::vec3(0.0f, 0.0f, 400.0f); // Camera's position in world coordinates
+    glm::vec3 cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);   // Point the camera is looking at
+    glm::vec3 upVector = glm::vec3(0.0f, 1.0f, 0.0f);        // Up vector
+
+    // Create a view matrix
+    glm::mat4 viewMatrix = glm::lookAt(cameraPosition, cameraTarget, upVector);
 
     sf::RenderWindow window(sf::VideoMode(800, 800), "Test");
 
     // Just in order to flip y axis
     sf::View view = window.getDefaultView();
     view.setSize(800, -800);
+    view.setCenter(0, 0);
     window.setView(view);
 
     sf::Clock clock;
     real deltaT = 0;
 
     real side = 100;
-    real side2 = 60;
-    RectangularPrism c(side, side, side, 150, Vector3D(400, 200, 0), sf::Color::Yellow);
-    RectangularPrism c2(side2, side2, side2, 60, Vector3D(400, 100, 0), sf::Color::Red);
+    Cube c(new RigidBody(), side, 150, Vector3D(0, 100, 0));
 
-    real height = 50;
-    real radius = 30;
-    Cone sp(radius, height, 100, Vector3D(400, 100, 0), sf::Color::Cyan);
+    real side2 = 200;
+    Cube c2(new RigidBody(), side2, 150, Vector3D(-200, 0, 0));
+
+
     RigidBody fixed;
-    fixed.position = Vector3D(400, 700, 0);
-
+    fixed.position = Vector3D(200, 200, 0);
 
     c.body->angularDamping = 0.80;
-    c.body->linearDamping= 0.95;
+    c.body->linearDamping= 0.80;
 
-    c2.body->angularDamping = 0.80;
-    c2.body->linearDamping = 0.95;
-
-    sp.body->angularDamping = 0.80;
-    sp.body->linearDamping = 0.95;
 
     RigidBodyGravity g(Vector3D(0, -10, 0));
     Vector3D app(-side/2.0, side / 2.0, -side / 2.0);
     Vector3D origin;
-    RigidBodySpringForce s(app, &fixed, origin, 15, 100);
+    RigidBodySpringForce s(app, &fixed, origin, 10, 100);
 
-    Vector3D app2(side / 2.0, -side / 2.0, side / 2.0);
-    Vector3D app3(-side2 / 2.0, side2 / 2.0, -side2 / 2.0);
-    RigidBodySpringForce s2(app3, c.body, app2, 10, 20);
-    RigidBodySpringForce s3(app2, c2.body, app3, 10, 20);
-
-    Vector3D app4(-side / 2.0, -side / 2.0, side / 2.0);
-    Vector3D app5 = sp.vertices[0];
-
-    RigidBodySpringForce s4(app5, c.body, app4, 10, 10);
-    RigidBodySpringForce s5(app4, sp.body, app5, 10, 10);
+    real rotationSpeed = 0.1;
+    bool pause = false;
 
     while (window.isOpen()) {
 
@@ -302,85 +305,80 @@ int main() {
                 RigidBodyGravity force(Vector3D(-3000, 0, 0));
                 force.updateForce(c.body, deltaT);
             }
+            else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
+                float newX = cos(rotationSpeed) * cameraPosition.x
+                    - sin(rotationSpeed) * cameraPosition.z;
+                float newZ = sin(rotationSpeed) * cameraPosition.x
+                    + cos(rotationSpeed) * cameraPosition.z;
+                cameraPosition.x = newX;
+                cameraPosition.z = newZ;
+                viewMatrix = glm::lookAt(cameraPosition, cameraTarget, upVector);
+            }
+            else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
+                float newX = cos(-rotationSpeed) * cameraPosition.x
+                    - sin(-rotationSpeed) * cameraPosition.z;
+                float newZ = sin(-rotationSpeed) * cameraPosition.x
+                    + cos(-rotationSpeed) * cameraPosition.z;
+                cameraPosition.x = newX;
+                cameraPosition.z = newZ;
+                viewMatrix = glm::lookAt(cameraPosition, cameraTarget, upVector);
+            }
+            else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
+                // Increase the pitch angle to rotate the camera upwards
+                cameraPosition.y += rotationSpeed * 50;
+                viewMatrix = glm::lookAt(cameraPosition, cameraTarget, upVector);
+            }
+            else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
+                // Decrease the pitch angle to rotate the camera downwards
+                cameraPosition.y -= rotationSpeed * 50;
+                viewMatrix = glm::lookAt(cameraPosition, cameraTarget, upVector);
+            }
         }
 
         c.body->calculateDerivedData();
         c2.body->calculateDerivedData();
-        sp.body->calculateDerivedData();
         fixed.calculateDerivedData();
 
         s.updateForce((c.body), deltaT);
-        s2.updateForce((c2.body), deltaT);
-        s3.updateForce((c.body), deltaT);
-        s4.updateForce((sp.body), deltaT);
-        s5.updateForce((c.body), deltaT);
-        g.updateForce((c2.body), deltaT);
         g.updateForce((c.body), deltaT);
-        g.updateForce((sp.body), deltaT);
+
+        vector<std::pair<Vector3D, Vector3D>> normals;
+        // Resolves collisions
+        if (c.isColliding(c2)) {
+            std::vector<Contact> contacts;
+            returnMaxContact(c, c2, contacts);
+            for (int i = 0; i < contacts.size(); i++) {
+                vector<std::pair<Vector3D, Vector3D>> a = contacts[i].drawNormals(100);
+                for (int i = 0; i < a.size(); i++) {
+                    normals.push_back(a[i]);
+                }
+            }
+            pause = true;
+        }
+
 
         c.body->integrate(deltaT);
-        c.recalculateVertices();
         c2.body->integrate(deltaT);
-        c2.recalculateVertices();
-        sp.body->integrate(deltaT);
-        sp.recalculateVertices();
+        c.updateVertices();
+        c2.updateVertices();
 
+        // Draw cable/spring
         Vector3D point = c.body->transformMatrix.transform(app);
-        sf::Vector2f p3(point.x, point.y);
-        sf::Vector2f p4(fixed.position.x, fixed.position.y);
-        sf::VertexArray a(sf::LineStrip, 2);
-
-        a[0].position = p3;
-        a[1].position = p4;
-        a[0].color = a[1].color = sf::Color::Green;
-
-        point = c2.body->transformMatrix.transform(app3);
-        sf::Vector2f p1(point.x, point.y);
-        point = c.body->transformMatrix.transform(app2);
-        sf::Vector2f p2(point.x, point.y);
-        sf::VertexArray b(sf::LineStrip, 2);
-
-        b[0].position = p1;
-        b[1].position = p2;
-        b[0].color = b[1].color = sf::Color::Green;
-
-        point = sp.body->transformMatrix.transform(app5);
-        sf::Vector2f p5(point.x, point.y);
-        point = c.body->transformMatrix.transform(app4);
-        sf::Vector2f p6(point.x, point.y);
-        sf::VertexArray d(sf::LineStrip, 2);
-
-        d[0].position = p5;
-        d[1].position = p6;
-        d[0].color = d[1].color = sf::Color::Green;
+        vector<pair<Vector3D, Vector3D>> v(1);
+        v[0].first = point;
+        v[0].second = fixed.position;
 
         window.clear(sf::Color::Black);
 
-        vector<sf::VertexArray> v = c.drawLines();
-        for (int j = 0; j < v.size(); j++) {
-            window.draw(v[j]);
-        }
-
-        v = c2.drawLines();
-        for (int j = 0; j < v.size(); j++) {
-            window.draw(v[j]);
-        }
-
-        v = sp.drawLines();
-        for (int j = 0; j < v.size(); j++) {
-            window.draw(v[j]);
-        }
-
-        sf::CircleShape shape;
-        shape.setFillColor(sf::Color::Red);
-        shape.setOrigin(2, 2);
-        shape.setRadius(4);
-        shape.setPosition(fixed.position.x, fixed.position.y);
-        window.draw(shape);
-
-        window.draw(a);
-        window.draw(b);
-        window.draw(d);
+        vector<sf::VertexArray> vertexArray;
+        vertexArray = transformLinesToVertexArray(c.drawLines(), viewMatrix, sf::Color::White);
+        drawVectorOfVertexArray(vertexArray, window);
+        vertexArray = transformLinesToVertexArray(v, viewMatrix, sf::Color::Green);
+        drawVectorOfVertexArray(vertexArray, window);
+        vertexArray = transformLinesToVertexArray(c2.drawLines(), viewMatrix, sf::Color::White);
+        drawVectorOfVertexArray(vertexArray, window);
+        vertexArray = transformLinesToVertexArray(normals, viewMatrix, sf::Color::Red);
+        drawVectorOfVertexArray(vertexArray, window);
 
         window.display();
 
@@ -389,7 +387,7 @@ int main() {
 
     return 0;
 }
-*/
+
 
 // Collision test
 /*
@@ -499,7 +497,7 @@ int main() {
 }
 */
 
-
+/*
 #include "SAT.h"
 #include "cube.h"
 #include "pyramid.h"
@@ -535,9 +533,6 @@ int main() {
     orientation.normalize();
     
     c.body->orientation = orientation;
-
-    Vector3D g(0, -10, 0);
-    RigidBodyGravity gravity(g);
 
     real side2 = 150;
     Cube c2(new RigidBody(), side2, 10, Vector3D(-200, -100, 0));
@@ -592,9 +587,6 @@ int main() {
             c.body->calculateDerivedData();
             c2.body->calculateDerivedData();
 
-            // Adds force
-            gravity.updateForce(c.body, deltaT);
-
             // Resolves collisions
             if (c.isColliding(c2)) {
                 cout << "Contact!\n";
@@ -602,15 +594,19 @@ int main() {
                 returnMaxContact(c, c2, contacts);
                 for (int i = 0; i < contacts.size(); i++) {
                     contacts[i].contactNormal.display();
-                    normals = contacts[i].drawNormals(100);
+                    vector<std::pair<Vector3D, Vector3D>> a = contacts[i].drawNormals(100);
+                    for (int i = 0; i < a.size(); i++) {
+                        normals.push_back(a[i]);
+                    }
                     contacts[i].contactPoint.display();
                 }
                 pause = true;
             }
 
+
             // To move based on force
             c.body->integrate(deltaT);
-            // c2.body->integrate(deltaT);
+            c2.body->integrate(deltaT);
         }
 
         // To tranform local vertices
@@ -640,3 +636,4 @@ int main() {
 
     return 0;
 }
+*/

@@ -1,8 +1,8 @@
 
 #include "rigidBodySpringForce.h"
-#include <iostream>
 
 using namespace pe;
+
 
 RigidBodySpringForce::RigidBodySpringForce(const Vector3D& connectionPoint,
 	RigidBody* otherBody, const Vector3D& otherConnectionPoint,

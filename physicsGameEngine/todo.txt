@@ -104,3 +104,10 @@ Instead of multiplying directily by the transform matrix, use
 the transform matrice's built in transform function.
 
 Make sure BHV is self balancing for maximum performance.
+
+UNCLEAR WHY BUT USING body->getPointInWorldCoordinates(connectionPoint)
+gives an error, so instead the transform matrix is used directly
+in spring and cable forces.
+
+Replace body cable and rod with contacts rather than ordinary
+forces like a spring, more realistic.

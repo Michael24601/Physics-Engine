@@ -2,7 +2,6 @@
 #ifndef PRIMITIVE_H
 #define PRIMITIVE_H
 
-#include <SFML/Graphics.hpp>
 #include <iostream>
 #include "rigidBody.h"
 #include "drawingUtil.h"

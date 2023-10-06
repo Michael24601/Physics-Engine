@@ -11,10 +11,10 @@ std::vector<std::pair<Vector3D, Vector3D>>
 	std::vector<std::pair<Vector3D, Vector3D>> normals;
 
 	for (const auto& face : this->faces) {
-		// Calculate the average of the face vertices (center)
+		// Calculates the average of the face vertices (centre)
 		Vector3D center = face.centroid();
 
-		// Calculate the endpoint of the normal line
+		// Calculates the endpoint of the normal line
 		Vector3D normal = face.normal();
 		Vector3D endpoint = center + (normal * length);
 
