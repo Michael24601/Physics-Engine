@@ -39,7 +39,7 @@ void Particle::integrate(real duration) {
 		velocity.linearCombination(newAcceleration, duration);
 
 		/*
-			Adds drag effect using v = v * d^ t, instead of v = v * d, in 
+			Adds drag effect using v = v * d^t, instead of v = v * d, in 
 			order to make drag proportional to the duration.
 		*/
 		velocity *= realPow(damping, duration);

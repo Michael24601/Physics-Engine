@@ -1,5 +1,9 @@
 
+#ifndef CUBE_H
+#define CUBE_H
+
 #include "primitive.h"
+
 
 namespace pe {
 
@@ -102,3 +106,6 @@ namespace pe {
 		}
 	};
 }
+
+
+#endif

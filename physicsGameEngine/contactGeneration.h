@@ -14,6 +14,9 @@
     generation between convex polyhedra, so the only contacts generated
     are of the latter two types. Other types of contact like point to point
     aren't common enough that omitting them is noticeable.
+    This file and the SAT file replace the collisionDetector file in the
+    original book, as we go a different approach, with a general purpose
+    primitive collision detection and generation algorithm.
 */
 
 #include "primitive.h"

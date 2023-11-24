@@ -25,7 +25,7 @@ std::vector<std::pair<Vector3D, Vector3D>>
 }
 
 
-std::vector<std::pair<Vector3D, Vector3D>> Primitive::drawLines() const {
+std::vector<std::pair<Vector3D, Vector3D>> Primitive::getEdges() const {
 	std::vector<std::pair<Vector3D, Vector3D>> lines;
 
 	for (int i = 0; i < edges.size(); i++) {

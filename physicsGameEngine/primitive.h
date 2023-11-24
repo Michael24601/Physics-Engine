@@ -96,8 +96,8 @@ namespace pe {
 			calculateFaceNormals(real length) const;
 
 
-		// Returns lines to draw, which are the edges
-		std::vector<std::pair<Vector3D, Vector3D>> drawLines() const;
+		// Returns the edges of the shape (used to draw it, or for debugging)
+		std::vector<std::pair<Vector3D, Vector3D>> getEdges() const;
 
 		/*
 			Updates the global variables using the transform matrix.

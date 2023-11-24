@@ -69,9 +69,6 @@
     <ClCompile Include="rigidBodyWorld.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="cone.h">
-      <Filter>Header Files</Filter>
-    </ClCompile>
     <ClCompile Include="rigidBodyGravity.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -82,9 +79,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="boundingSphere.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="collisionDetector.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="primitive.cpp">
@@ -170,25 +164,7 @@
     <ClInclude Include="quaternion.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="rectangularPrism.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="pyramid.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="triangularPrism.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="geometricShape.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="sphere.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="cylinder.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="tetrahedron.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="rigidBodyGravity.h">
@@ -213,9 +189,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="contactData.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="collisionDetector.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="plane.h">

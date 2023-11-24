@@ -1,5 +1,6 @@
 /*
 	File used for drawing util functions.
+	Temporarily here for debugging, not used in the final project.
 */
 
 #include <SFML/Graphics.hpp>
@@ -10,7 +11,7 @@ namespace pe {
 	/*
 		Transforms lines (made up of a pair of points) in 3D space to lines
 		in 2D space transformed using a viewMatrix according to a specific
-		camera angle.
+		camera angle (allows for rotations, zooming, etc).
 	*/
 	std::vector<sf::VertexArray> transformLinesToVertexArray(
 		const std::vector<std::pair<Vector3D, Vector3D>>& lines,

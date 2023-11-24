@@ -16,11 +16,11 @@
 #ifndef PLANE_H
 #define PLANE_H
 
-#include "geometricShape.h"
+#include "vector3D.h"
 
 namespace pe {
 	
-	class Plane : public GeometricShape {
+	class Plane {
 
 	public:
 
@@ -47,7 +47,7 @@ namespace pe {
 
 		// Argumented constructor
 		Plane(const Vector3D& normal, real offset) :
-			GeometricShape(), normal{ normal }, offset{offset} {}
+			normal{ normal }, offset{offset} {}
 
 		/*
 			Draws nothing for now.
