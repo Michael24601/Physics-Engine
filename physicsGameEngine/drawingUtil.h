@@ -4,22 +4,40 @@
 */
 
 #include <SFML/Graphics.hpp>
+#include <glm.hpp>
+#include <gtc/type_ptr.hpp>
+#include <gtc/matrix_transform.hpp>
+#include <SFML/OpenGL.hpp>
 #include "vector3D.h"
 
 namespace pe {
+	/*
+		Given an sfml window, draws a shape.
+		The shape is sent via a vector of pairs of points that are meant
+		to be connected. They are they then drawn as vertex arrays,
+		with a color, specifying how to draw them.
+		This function is used with normal, 2D sfml.
+	*/
+	void drawVectorOfLines(
+		const std::vector<std::pair<Vector3D, Vector3D>>& vector,
+		sf::RenderWindow& window,
+		sf::Color color);
 
 	/*
-		Transforms lines (made up of a pair of points) in 3D space to lines
-		in 2D space transformed using a viewMatrix according to a specific
-		camera angle (allows for rotations, zooming, etc).
+		Same, but works in 3D opengl in sfml.
+		Note that we send a viewProjection matrix as a parameters.
+		This transforms each Vector3D point int 3D space into another point,
+		before drawing it, in the sfml/opengl world, according to the
+		position and angle of the camera (view) and perspective (projection).
+		This matrix is a glm concept, and can be used to rotate, project,
+		zoom, and translate points in space.
+		This function is used with 2D opengl integrated sfml.
 	*/
-	std::vector<sf::VertexArray> transformLinesToVertexArray(
+	void drawVectorOfLines3D(
 		const std::vector<std::pair<Vector3D, Vector3D>>& lines,
-		const glm::mat4& viewMatrix, sf::Color color);
-
-
-	// Draws a whole vector of lines in a given window
-	void drawVectorOfVertexArray(std::vector<sf::VertexArray>& vector,
-		sf::RenderWindow& window);
+		glm::mat4& viewProjectionMatrix,
+		sf::RenderWindow& window,
+		sf::Color color
+	);
 }
 

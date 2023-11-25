@@ -3,37 +3,39 @@
 
 using namespace pe;
 
-void pe::drawVectorOfVertexArray(std::vector<sf::VertexArray>& vector,
-	sf::RenderWindow& window) {
-	for (const sf::VertexArray& vertexArray : vector) {
-		window.draw(vertexArray);
-	}
+
+void pe::drawVectorOfLines(
+    const std::vector<std::pair<Vector3D, Vector3D>>& vector,
+    sf::RenderWindow& window,
+    sf::Color color) {
+
+    for (const std::pair<Vector3D, Vector3D> pair : vector) {
+        sf::VertexArray line(sf::LinesStrip, 2);
+        line[0] = sf::Vector2f(pair.first.x, pair.first.y);
+        line[1] = sf::Vector2f(pair.second.x, pair.second.y);
+        line[0].color = line[1].color = color;
+        window.draw(line);
+    }
 }
 
 
-std::vector<sf::VertexArray> pe::transformLinesToVertexArray(
+void pe::drawVectorOfLines3D(
     const std::vector<std::pair<Vector3D, Vector3D>>& lines,
-    const glm::mat4& viewMatrix, sf::Color color) {
+    glm::mat4& viewProjectionMatrix,
+    sf::RenderWindow& window,
+    sf::Color color) {
 
-    std::vector<sf::VertexArray> transformedVertexArrays;
-    transformedVertexArrays.reserve(lines.size()); // Reserve space for efficiency
+    glMatrixMode(GL_PROJECTION);
+    glLoadMatrixf(glm::value_ptr(viewProjectionMatrix));
 
-    for (const auto& line : lines) {
-        sf::VertexArray transformedArray(sf::Lines, 2); // Create a vertex array to represent the line
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
 
-        // Transform the start point of the line
-        glm::vec3 start(line.first.x, line.first.y, line.first.z);
-        glm::vec4 transformedStart = viewMatrix * glm::vec4(start, 1.0f);
-        transformedArray[0].position = sf::Vector2f(transformedStart.x, transformedStart.y);
-
-        // Transform the end point of the line
-        glm::vec3 end(line.second.x, line.second.y, line.second.z);
-        glm::vec4 transformedEnd = viewMatrix * glm::vec4(end, 1.0f);
-        transformedArray[1].position = sf::Vector2f(transformedEnd.x, transformedEnd.y);
-        transformedArray[1].color = transformedArray[0].color = color;
-
-        transformedVertexArrays.push_back(transformedArray);
+    for (const std::pair<Vector3D, Vector3D>& pair : lines) {
+        glBegin(GL_LINES);
+        glColor3ub(color.r, color.g, color.b);
+        glVertex3f(pair.first.x, pair.first.y, pair.first.z);
+        glVertex3f(pair.second.x, pair.second.y, pair.second.z);
+        glEnd();
     }
-
-    return transformedVertexArrays;
 }

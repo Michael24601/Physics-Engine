@@ -54,6 +54,7 @@ namespace pe {
 		}
 	};
 
+	// An edge in a primitive contains pointers to the points in the edges
 	struct Edge {
 		// Should have 2 elements
 		std::vector<Vector3D*> vertices;
@@ -90,13 +91,28 @@ namespace pe {
 		/*
 			Function that returns the normals of each face using the built in
 			face normal function, which means they don't need to be 
-			transformed and are calculates each frame in this function.
+			transformed and are calculated each frame in this function.
+			(The other strategy would be to clauclate them only once, but
+			transform them using the built in transform matrix of the body
+			each time).
+			Since normals are really only a vector, with only a direction,
+			and no concrete length or position, this function returns a pair
+			of points, the first, the base, always at the center of the face
+			of the normal, and the second, some length away in the normal's
+			outward direction.
+			This function is mainly used for debugging purposes (visualizing
+			the normals).
 		*/
 		std::vector<std::pair<Vector3D, Vector3D>> 
-			calculateFaceNormals(real length) const;
+			getFaceNormals(real length) const;
 
 
-		// Returns the edges of the shape (used to draw it, or for debugging)
+		/*
+			Returns the edges, but instead of returning a vector of Edge
+			objects, with pointers to the vertices, for security, a vector
+			of pairs of new vertices (Vector3D objects) is returned, which is
+			slower, but safer.
+		*/
 		std::vector<std::pair<Vector3D, Vector3D>> getEdges() const;
 
 		/*
@@ -107,7 +123,11 @@ namespace pe {
 		*/
 		void updateVertices();
 
-		// Used to set teh edges and faces when the class is extended
+		/* 
+			Used to set the edgesand faces when the class is extended
+			(telling the class which points are connected by adding an
+			Edge object with a pointer to the each of the vertices.
+		*/
 		virtual void setEdges() = 0;
 
 		/*

@@ -1,5 +1,7 @@
 
 #include <SFML/Graphics.hpp>
+#include <SFML/OpenGL.hpp>
+
 #include <iostream>
 #include "rigidBody.h"
 #include <vector>
@@ -13,24 +15,45 @@
 #include "drawingUtil.h"
 #include "rigidBodyCableForce.h"
 
-
 using namespace pe;
 using namespace std;
 
 int main() {
 
+    // Needed for 3D rendering
+    sf::ContextSettings settings;
+    settings.depthBits = 32;
+    sf::RenderWindow window(sf::VideoMode(800, 800), "Test",
+        sf::Style::Default, settings);
+    
+    // Sets up OpenGL states (for 3D)
+    glEnable(GL_DEPTH_TEST);
+
+    // View matrix, used for positioning and angling the camera
+
     // Camera's position in world coordinates
-    glm::vec3 cameraPosition = glm::vec3(0.0f, 0.0f, 400.0f);
+    real cameraDistance = 600.0f;
+    glm::vec3 cameraPosition = glm::vec3(cameraDistance, 0.0f, 0.0f);
     // Point the camera is looking at
     glm::vec3 cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);
     // Up vector
     glm::vec3 upVector = glm::vec3(0.0f, 1.0f, 0.0f);
-
-    // Create a view matrix
-    glm::mat4 viewMatrix = glm::lookAt(cameraPosition, 
+    glm::mat4 viewMatrix = glm::lookAt(cameraPosition,
         cameraTarget, upVector);
 
-    sf::RenderWindow window(sf::VideoMode(800, 800), "Test");
+    // Projection matrix, used for perspective
+
+    // Field of View(FOV) in degrees
+    real fov = 90.0f;
+    // Aspect ratio
+    real aspectRatio = window.getSize().x / static_cast<real>(window.getSize().y);
+    // Near and far clipping planes
+    real nearPlane = 0.1f;
+    real farPlane = 10000.0f;
+
+    // Create a perspective projection matrix
+    glm::mat4 projectionMatrix = glm::perspective(glm::radians(fov),
+        aspectRatio, nearPlane, farPlane);
 
     // Just in order to flip y axis
     sf::View view = window.getDefaultView();
@@ -42,26 +65,28 @@ int main() {
     real deltaT = 0;
 
     real side = 100;
-    Cube c(new RigidBody(), side, 150, Vector3D(0, 100, 0));
+    Cube c(new RigidBody(), side, 150, Vector3D(100, 100, 0));
 
     real side2 = 200;
     Cube c2(new RigidBody(), side2, 150, Vector3D(-200, 0, 0));
 
 
     RigidBody fixed;
-    fixed.position = Vector3D(200, 200, 0);
+    fixed.position = Vector3D(100, 200, 0);
 
-    c.body->angularDamping = 0.80;
-    c.body->linearDamping= 0.80;
+    c.body->angularDamping = 0.75;
+    c.body->linearDamping = 0.90;
 
 
     RigidBodyGravity g(Vector3D(0, -10, 0));
-    Vector3D app(-side/2.0, side / 2.0, -side / 2.0);
+    Vector3D app(-side / 2.0, side / 2.0, -side / 2.0);
     Vector3D origin;
     RigidBodySpringForce s(app, &fixed, origin, 10, 100);
 
-    real rotationSpeed = 0.1;
-  
+    real rotationSpeed = 0.05;
+    real angle = PI/2;
+    bool isButtonPressed = false;
+
     while (window.isOpen()) {
 
         clock.restart();
@@ -71,31 +96,27 @@ int main() {
         {
             if (event.type == sf::Event::Closed)
                 window.close();
-            else if (sf::Mouse::isButtonPressed(sf::Mouse::Right)) {
-                RigidBodyGravity force(Vector3D(3000, 0, 0));
-                force.updateForce(c.body, deltaT);
-            }
             else if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
-                RigidBodyGravity force(Vector3D(-3000, 0, 0));
-                force.updateForce(c.body, deltaT);
+                isButtonPressed = true;
             }
+            else if (event.type == sf::Event::MouseButtonReleased
+                && event.mouseButton.button == sf::Mouse::Left){
+                isButtonPressed = false;
+            }
+            // Rotates camera
             else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
-                float newX = cos(rotationSpeed) * cameraPosition.x
-                    - sin(rotationSpeed) * cameraPosition.z;
-                float newZ = sin(rotationSpeed) * cameraPosition.x
-                    + cos(rotationSpeed) * cameraPosition.z;
-                cameraPosition.x = newX;
-                cameraPosition.z = newZ;
+                angle += rotationSpeed;
+                cameraPosition.x = sin(angle) * cameraDistance;
+                cameraPosition.z = cos(angle) * cameraDistance;
                 viewMatrix = glm::lookAt(cameraPosition, cameraTarget, upVector);
+                
+                cout << cameraPosition.x << " " << cameraPosition.z << "\n";
             }
             else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
-                float newX = cos(-rotationSpeed) * cameraPosition.x
-                    - sin(-rotationSpeed) * cameraPosition.z;
-                float newZ = sin(-rotationSpeed) * cameraPosition.x
-                    + cos(-rotationSpeed) * cameraPosition.z;
-                cameraPosition.x = newX;
-                cameraPosition.z = newZ;
-                viewMatrix = glm::lookAt(cameraPosition, cameraTarget, upVector);
+                angle -= rotationSpeed;
+                cameraPosition.x = sin(angle) * cameraDistance;
+                cameraPosition.z = cos(angle) * cameraDistance;
+                viewMatrix = glm::lookAt(cameraPosition, cameraTarget, upVector);;
             }
         }
 
@@ -105,6 +126,13 @@ int main() {
 
         s.updateForce((c.body), deltaT);
         g.updateForce((c.body), deltaT);
+
+        if (isButtonPressed) {
+            sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
+            sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);
+            c.body->position.x = worldPos.x;
+            c.body->position.y = worldPos.y;
+        }
 
         vector<std::pair<Vector3D, Vector3D>> normals;
         // Resolves collisions
@@ -133,20 +161,24 @@ int main() {
         v[0].second = fixed.position;
 
         window.clear(sf::Color::Black);
+        // Clears the depth buffer (for 3D)
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        vector<sf::VertexArray> vertexArray;
-        vertexArray = transformLinesToVertexArray(c.getEdges(), 
-            viewMatrix, sf::Color::White);
-        drawVectorOfVertexArray(vertexArray, window);
-        vertexArray = transformLinesToVertexArray(v, viewMatrix, 
-            sf::Color::Green);
-        drawVectorOfVertexArray(vertexArray, window);
-        vertexArray = transformLinesToVertexArray(c2.getEdges(), 
-            viewMatrix, sf::Color::White);
-        drawVectorOfVertexArray(vertexArray, window);
-        vertexArray = transformLinesToVertexArray(normals, 
-            viewMatrix, sf::Color::Red);
-        drawVectorOfVertexArray(vertexArray, window);
+
+        // Now we combine the two matrices to create our final view
+        glm::mat4 viewProjectionMatrix = projectionMatrix * viewMatrix;
+
+        // Shape
+        drawVectorOfLines3D(c.getEdges(), viewProjectionMatrix, window, sf::Color::White);
+
+        // Spring/Cable
+        drawVectorOfLines3D(v, viewProjectionMatrix, window, sf::Color::Green);
+
+        // Second shape
+        drawVectorOfLines3D(c2.getEdges(), viewProjectionMatrix, window, sf::Color::White);
+
+        // Normal vectors of the collision
+        drawVectorOfLines3D(normals, viewProjectionMatrix, window, sf::Color::Red);
 
         window.display();
 

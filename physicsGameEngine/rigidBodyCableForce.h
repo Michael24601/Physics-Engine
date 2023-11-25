@@ -10,8 +10,8 @@
 	however, modify or apply a force on the body in any way, and a seperate
 	force object is needed for that.
 
-	Note that it is better to simulate cables and rods as contacts, not
-	forces directly, so this is just temporary.
+	Note that it is better to simulate cables and rods as contacts
+	(collisions), not forces directly, so this is just temporary.
 */
 
 #ifndef RIGID_BODY_CABLE_FORCE_H

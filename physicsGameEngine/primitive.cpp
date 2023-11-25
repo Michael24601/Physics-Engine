@@ -6,7 +6,7 @@ using namespace pe;
 
 
 std::vector<std::pair<Vector3D, Vector3D>> 
-	Primitive::calculateFaceNormals(real length) const {
+	Primitive::getFaceNormals(real length) const {
 
 	std::vector<std::pair<Vector3D, Vector3D>> normals;
 

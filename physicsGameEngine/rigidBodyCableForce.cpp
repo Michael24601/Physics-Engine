@@ -13,7 +13,7 @@ RigidBodyCableForce::RigidBodyCableForce(const Vector3D& connectionPoint,
 
 
 void RigidBodyCableForce::updateForce(RigidBody* body, real duration) {
-	// Calculate the two ends in world space.
+	// Calculates the two ends in world space.
 	/*
 		UNCLEAR WHY BUT USING body->getPointInWorldCoordinates(connectionPoint)
 		gives an error, so instead the transform matrix is used directly.
@@ -32,15 +32,15 @@ void RigidBodyCableForce::updateForce(RigidBody* body, real duration) {
 	// Magnitude of the spring force
 	real currentLength = force.magnitude();
 
-	// Check if the cable has extended beyond its allowed length.
+	// Checks if the cable has extended beyond its allowed length.
 	if (currentLength > length) {
-		// Calculate the amount by which to shorten the cable.
+		// Calculates the amount by which to shorten the cable.
 		real excessLength = currentLength - length;
-		// Normalize the direction vector
+		// Normalizes the direction vector
 		force.normalize();
 		force *= excessLength * (-1 / duration) * restitutionCoefficient;
 		body->addForceAtLocalPoint(force, connectionPoint);
 	}
 
-	// Otherwise apply no force, since max has not been reached
+	// Otherwise we apply no force, since max has not been reached
 }
