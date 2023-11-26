@@ -4,9 +4,16 @@
 
 // Must be before any SFML or glfw or glm or glew files
 #include <GL/glew.h>
+#include <SFML/Graphics.hpp>
+#include <SFML/Window.hpp>
+#include <SFML/OpenGL.hpp>
+#include <GL/gl.h>
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <GL/gl.h>
 
 #include <iostream>
-#include "rigidBody.h"
 #include <vector>
 
 #include "rigidBodyGravity.h"
@@ -18,15 +25,6 @@
 #include "contactGeneration.h"
 #include "drawingUtil.h"
 #include "rigidBodyCableForce.h"
-
-#include <SFML/Graphics.hpp>
-#include <SFML/Window.hpp>
-#include <SFML/OpenGL.hpp>
-#include <GL/gl.h>
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <GL/gl.h>
 
 using namespace pe;
 using namespace std;
@@ -118,14 +116,16 @@ int main() {
     glDepthFunc(GL_LESS);
 
     // Set to clockwise or counter-clockwise depending on face vertex order
-    // (Counter for us).
+    // (Counter Clockwise for us).
     glFrontFace(GL_CCW);
     // This only displays faces from one side, depending on the order of
     // vertices, and what is considered front facce in the above option.
     // Disable to show both faces (but lose on performance).
     // Set to off in case our faces are both clockwise and counter clockwise
     // (mixed), so we can't consisently render only one.
-    glDisable(GL_CULL_FACE);
+    // Note that if we have opacity of face under 1 (opaque), it is definitely
+    // best not to render both sides (enable culling) so it appears correct.
+    glEnable(GL_CULL_FACE);
 
     // Enables blending for transparency
     glEnable(GL_BLEND);
@@ -154,10 +154,10 @@ int main() {
     // Object color is uniform set by user
     const std::string fragmentShaderCode = R"(
         #version 330 core
-        uniform vec3 objectColor;
+        uniform vec4 objectColor;
         out vec4 FragColor;
         void main(){
-            FragColor = vec4(objectColor, 1.0);
+            FragColor = objectColor;
         }
     )";
 
@@ -308,20 +308,26 @@ int main() {
         glm::mat4 viewProjectionMatrix = projectionMatrix * viewMatrix;
 
         // Shape
-        drawVectorOfLines3D(c.getEdges(), viewProjectionMatrix, shaderProgram, 40, 40, 200);
+        drawVectorOfLines3D(c.getEdges(), viewProjectionMatrix, shaderProgram, 
+            40, 40, 200, 255);
 
         // Spring/Cable
-        drawVectorOfLines3D(v, viewProjectionMatrix, shaderProgram, 5, 200, 200);
+        drawVectorOfLines3D(v, viewProjectionMatrix, shaderProgram, 
+            5, 200, 200, 255);
 
         // Second shape
-        drawVectorOfLines3D(c2.getEdges(), viewProjectionMatrix, shaderProgram, 10, 40, 50);
+        drawVectorOfLines3D(c2.getEdges(), viewProjectionMatrix, shaderProgram, 
+            10, 255, 50, 255);
 
         // Normal vectors of the collision
-        drawVectorOfLines3D(normals, viewProjectionMatrix, shaderProgram, 255, 0, 0);
+        drawVectorOfLines3D(normals, viewProjectionMatrix, shaderProgram, 
+            255, 0, 0, 255);
 
         // Draws the faces
-        drawVectorOfPolygons3D(c2.getFaces(), viewProjectionMatrix, shaderProgram, 100, 100, 200);
-        drawVectorOfPolygons3D(c.getFaces(), viewProjectionMatrix, shaderProgram, 200, 205, 20);
+        drawVectorOfPolygons3D(c2.getFaces(), viewProjectionMatrix, shaderProgram, 
+            100, 100, 200, 255);
+        drawVectorOfPolygons3D(c.getFaces(), viewProjectionMatrix, shaderProgram, 
+            200, 205, 20, 255);
 
         // draw(shaderProgram);
 

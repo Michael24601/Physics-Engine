@@ -116,7 +116,7 @@ void pe::drawVectorOfPolygons3D(
     const std::vector<std::vector<Vector3D>>& polygons,
     glm::mat4& viewProjectionMatrix,
     GLuint& shaderProgram,
-    real r, real g, real b) {
+    real r, real g, real b, real a) {
 
     // Flatten the cube data and triangulate the faces
     std::vector<Vector3D> flattenedData;
@@ -132,10 +132,11 @@ void pe::drawVectorOfPolygons3D(
     // position, and objects won't move or be colored correctly.
     GLuint vao = createVAO(flattenedData);
 
-    glm::vec3 objectColor(
+    glm::vec4 objectColor(
         static_cast<real>(r) / 255.0f,
         static_cast<real>(g) / 255.0f,
-        static_cast<real>(b) / 255.0f
+        static_cast<real>(b) / 255.0f,
+        static_cast<real>(a) / 255.0f
     );
 
     GLint viewProjectionLoc = glGetUniformLocation(shaderProgram, "viewProjection");
@@ -144,7 +145,7 @@ void pe::drawVectorOfPolygons3D(
     glUseProgram(shaderProgram);
 
     glUniformMatrix4fv(viewProjectionLoc, 1, GL_FALSE, glm::value_ptr(viewProjectionMatrix));
-    glUniform3fv(objectColorLoc, 1, &objectColor[0]);
+    glUniform4fv(objectColorLoc, 1, &objectColor[0]);
 
     glBindVertexArray(vao);
 
@@ -162,21 +163,22 @@ void pe::drawVectorOfLines3D(
     const std::vector<std::pair<Vector3D, Vector3D>>& lines,
     glm::mat4& viewProjectionMatrix,
     GLuint shaderProgram,
-    real r, real g, real b
+    real r, real g, real b, real a
 ) {
     glUseProgram(shaderProgram);
 
     GLint viewProjectionLoc = glGetUniformLocation(shaderProgram, "viewProjection");
     GLint objectColorLoc = glGetUniformLocation(shaderProgram, "objectColor");
 
-    glm::vec3 objectColor(
+    glm::vec4 objectColor(
         static_cast<real>(r) / 255.0f,
         static_cast<real>(g) / 255.0f,
-        static_cast<real>(b) / 255.0f
+        static_cast<real>(b) / 255.0f,
+        static_cast<real>(a) / 255.0f
     );
 
     glUniformMatrix4fv(viewProjectionLoc, 1, GL_FALSE, glm::value_ptr(viewProjectionMatrix));
-    glUniform3fv(objectColorLoc, 1, &objectColor[0]);
+    glUniform4fv(objectColorLoc, 1, &objectColor[0]);
 
     GLuint vao, vbo;
     glGenVertexArrays(1, &vao);
