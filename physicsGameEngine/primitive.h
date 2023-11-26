@@ -115,6 +115,16 @@ namespace pe {
 		*/
 		std::vector<std::pair<Vector3D, Vector3D>> getEdges() const;
 
+
+		/*
+			Returns the faces, but instead of returning a vector of Face
+			objects, with pointers to the vertices, for security, a vector
+			of vectors of new vertices (Vector3D objects) is returned, which
+			is slower, but safer.
+		*/
+		std::vector<std::vector<Vector3D>> getFaces() const;
+
+
 		/*
 			Updates the global variables using the transform matrix.
 			Since the faces and edges use pointers, they don't need

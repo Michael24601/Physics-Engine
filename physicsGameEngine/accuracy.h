@@ -7,7 +7,6 @@
 #include <limits>
 #include <iostream>
 
-// Used for camera change
 #include <glm.hpp>
 #include <gtc/matrix_transform.hpp>
 

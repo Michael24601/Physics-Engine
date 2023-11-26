@@ -3,6 +3,12 @@
 	Temporarily here for debugging, not used in the final project.
 */
 
+#include <GL/glew.h>
+#include <SFML/Graphics.hpp>
+#include <SFML/Window.hpp>
+#include <SFML/OpenGL.hpp>
+#include <GL/gl.h>
+
 #include <SFML/Graphics.hpp>
 #include <glm.hpp>
 #include <gtc/type_ptr.hpp>
@@ -36,8 +42,36 @@ namespace pe {
 	void drawVectorOfLines3D(
 		const std::vector<std::pair<Vector3D, Vector3D>>& lines,
 		glm::mat4& viewProjectionMatrix,
-		sf::RenderWindow& window,
 		sf::Color color
+	);
+
+
+	/*
+		Same, but draws faces, instead of lines.
+	*/
+	void drawVectorOfPolygons3D(
+		const std::vector<std::vector<Vector3D>>& polygons,
+		glm::mat4& viewProjectionMatrix,
+		sf::Color color,
+		real opacity
+	);
+
+
+	/*
+		Same, but draws using shaders, not solid colors.
+	*/
+	void drawVectorOfPolygons3D(
+		const std::vector<std::vector<Vector3D>>& polygons,
+		glm::mat4& viewProjectionMatrix,
+		GLuint& shaderProgram,
+		real r, real g, real b
+	);
+
+	void drawVectorOfLines3D(
+		const std::vector<std::pair<Vector3D, Vector3D>>& lines,
+		glm::mat4& viewProjectionMatrix,
+		GLuint shaderProgram,
+		real r, real g, real b
 	);
 }
 
