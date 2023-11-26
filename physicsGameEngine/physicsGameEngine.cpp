@@ -138,26 +138,62 @@ int main() {
     // in the shader, and later set the uniform.
     // Note that usually, we have model * view * projection, first one turns
     // local to world coordinates of model, second is the camera angle, and
-    // third is the perspective. In our code, we combine the last two, and do
-    // the first one manually before sending the positions, so the model is just
-    // the identity (we otherwise have to input it as a uniform).
+    // third is the perspective. In our code, we combine the last two, and 
+    // while we do have getGlobalFaces and Edges functions, we use a model
+    // matrix in order to adhere to the design pattern.
     const std::string vertexShaderCode = R"(
         #version 330 core
         layout(location = 0) in vec3 aPos;
-        mat4 model = mat4(1.0);
-        uniform mat4 viewProjection;
+        layout(location = 1) in vec3 aNormal;  // Add a normal attribute
+
+        out vec3 FragPos;  // Pass the fragment position to the fragment shader
+        out vec3 Normal;    // Pass the normal to the fragment shader
+
+        uniform mat4 model;
+        uniform mat4 view;
+        uniform mat4 projection;
+
         void main(){
-            gl_Position = model * viewProjection * vec4(aPos, 1.0);
+            FragPos = vec3(model * vec4(aPos, 1.0)); // Transform the position to world space
+            Normal = mat3(transpose(inverse(model))) * aNormal; // Transform the normal to world space
+            gl_Position = projection * view * vec4(FragPos, 1.0);
         }
     )";
     
     // Object color is uniform set by user
+    // This has 3 light sources
     const std::string fragmentShaderCode = R"(
         #version 330 core
+        in vec3 FragPos; // Received from the vertex shader
+        in vec3 Normal;  // Received from the vertex shader
+
         uniform vec4 objectColor;
+        uniform vec3 lightPos1; // Position of the light source
+        uniform vec3 lightPos2; // Position of the light source
+        uniform vec3 lightPos3; // Position of the light source
+
         out vec4 FragColor;
+
         void main(){
-            FragColor = objectColor;
+            // Light source 1
+            vec3 lightDir1 = normalize(lightPos1 - FragPos);
+            float diff1 = max(dot(Normal, lightDir1), 0.0);
+            vec3 diffuse1 = objectColor.rgb * diff1;
+
+            // Light source 2
+            vec3 lightDir2 = normalize(lightPos2 - FragPos);
+            float diff2 = max(dot(Normal, lightDir2), 0.0);
+            vec3 diffuse2 = objectColor.rgb * diff2;
+
+            // Light source 3
+            vec3 lightDir3 = normalize(lightPos3 - FragPos);
+            float diff3 = max(dot(Normal, lightDir3), 0.0);
+            vec3 diffuse3 = objectColor.rgb * diff3;
+
+            // Combine the diffuse contributions from all light sources
+            vec3 finalDiffuse = diffuse1 + diffuse2 + diffuse3;
+
+            FragColor = vec4(finalDiffuse, objectColor.a);
         }
     )";
 
@@ -210,7 +246,10 @@ int main() {
     Cube c(new RigidBody(), side, 150, Vector3D(100, 100, 0));
 
     real side2 = 200;
+    Quaternion orinetation(0.1, 0.5, 0.7, 0.0);
     Cube c2(new RigidBody(), side2, 150, Vector3D(-200, 0, 0));
+    orinetation.normalize();
+    c2.body->orientation = orinetation;
 
 
     RigidBody fixed;
@@ -288,7 +327,6 @@ int main() {
             }
         }
 
-
         c.body->integrate(deltaT);
         c2.body->integrate(deltaT);
         c.updateVertices();
@@ -304,32 +342,31 @@ int main() {
         // Clears the depth buffer (for 3D)
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // Now we combine the two matrices to create our final view
-        glm::mat4 viewProjectionMatrix = projectionMatrix * viewMatrix;
-
         // Shape
-        drawVectorOfLines3D(c.getEdges(), viewProjectionMatrix, shaderProgram, 
-            40, 40, 200, 255);
+        glm::mat4 cTransform = c.body->transformMatrix.getGlmMatrix();
+        drawVectorOfLines3D(c.getLocalEdges(), projectionMatrix, viewMatrix,
+            cTransform, shaderProgram, 150, 150, 0, 255);
+        drawVectorOfPolygons3D(c.getLocalFaces(), projectionMatrix, viewMatrix,
+            cTransform, shaderProgram, 150, 50, 250, 255);
 
         // Spring/Cable
-        drawVectorOfLines3D(v, viewProjectionMatrix, shaderProgram, 
-            5, 200, 200, 255);
+        // Note that the model is the identity since the cable is in world
+        // coordinates
+        glm::mat4 identity = glm::mat4(1.0);
+        drawVectorOfLines3D(v, projectionMatrix, viewMatrix,
+            identity, shaderProgram, 255, 0, 100, 255);
 
         // Second shape
-        drawVectorOfLines3D(c2.getEdges(), viewProjectionMatrix, shaderProgram, 
-            10, 255, 50, 255);
+        glm::mat4 c2Transform = c2.body->transformMatrix.getGlmMatrix();
+        drawVectorOfLines3D(c2.getLocalEdges(), projectionMatrix, viewMatrix,
+            c2Transform, shaderProgram, 255, 100, 100, 255);
+        drawVectorOfPolygons3D(c2.getLocalFaces(), projectionMatrix, viewMatrix,
+            c2Transform, shaderProgram, 100, 255, 100, 255);
 
         // Normal vectors of the collision
-        drawVectorOfLines3D(normals, viewProjectionMatrix, shaderProgram, 
-            255, 0, 0, 255);
-
-        // Draws the faces
-        drawVectorOfPolygons3D(c2.getFaces(), viewProjectionMatrix, shaderProgram, 
-            100, 100, 200, 255);
-        drawVectorOfPolygons3D(c.getFaces(), viewProjectionMatrix, shaderProgram, 
-            200, 205, 20, 255);
-
-        // draw(shaderProgram);
+        // Likewise, the collision normal is in world coordinates
+        drawVectorOfLines3D(normals , projectionMatrix, viewMatrix,
+            identity, shaderProgram, 255, 255, 0, 255);
 
         window.display();
 

@@ -51,7 +51,7 @@ namespace pe {
 
 		/*
 			The coefficients of the matrix are kept in a 1D array where
-			data[0] is the top right element and data[1] is the one to its
+			data[0] is the top left element and data[1] is the one to its
 			right and data[4] is underneath it.
 		*/
 		real data[12];
@@ -335,6 +335,20 @@ namespace pe {
 		*/
 		Vector3D getColumnVector(int i) const {
 			return Vector3D(data[i], data[i + 4], data[i + 8]);
+		}
+
+
+		/*
+			Returns the homogeneous matrix in glm mat4 format.
+			Used in the graphics.
+		*/
+		glm::mat4 getGlmMatrix() const {
+			return glm::mat4(
+				data[0], data[4], data[8], 0.0f,
+				data[1], data[5], data[9], 0.0f,
+				data[2], data[6], data[10], 0.0f,
+				data[3], data[7], data[11], 1.0f
+			);
 		}
 	};
 }

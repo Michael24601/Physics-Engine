@@ -51,6 +51,32 @@ std::vector<std::vector<Vector3D>> Primitive::getFaces() const {
 }
 
 
+std::vector<std::pair<Vector3D, Vector3D>> Primitive::getLocalEdges() const {
+	std::vector<std::pair<Vector3D, Vector3D>> lines;
+
+	for (int i = 0; i < localEdges.size(); i++) {
+		lines.push_back(std::make_pair(*localEdges[i].vertices[0],
+			*localEdges[i].vertices[1]));
+	}
+
+	return lines;
+}
+
+
+std::vector<std::vector<Vector3D>> Primitive::getLocalFaces() const {
+	std::vector<std::vector<Vector3D>> vectors;
+
+	for (int i = 0; i < localFaces.size(); i++) {
+		vectors.push_back(std::vector<Vector3D>(0));
+		for (int j = 0; j < localFaces[i].vertices.size(); j++) {
+			vectors[i].push_back(*localFaces[i].vertices[j]);
+		}
+	}
+
+	return vectors;
+}
+
+
 void Primitive::updateVertices() {
 	for (int i = 0; i < globalVertices.size(); i++) {
 		globalVertices[i] =

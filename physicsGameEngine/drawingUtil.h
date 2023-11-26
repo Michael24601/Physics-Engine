@@ -62,14 +62,18 @@ namespace pe {
 	*/
 	void drawVectorOfPolygons3D(
 		const std::vector<std::vector<Vector3D>>& polygons,
-		glm::mat4& viewProjectionMatrix,
+		glm::mat4& projection,
+		glm::mat4& view,
+		glm::mat4& model,
 		GLuint& shaderProgram,
 		real r, real g, real b, real a
 	);
 
 	void drawVectorOfLines3D(
 		const std::vector<std::pair<Vector3D, Vector3D>>& lines,
-		glm::mat4& viewProjectionMatrix,
+		glm::mat4& projection,
+		glm::mat4& view,
+		glm::mat4& model,
 		GLuint shaderProgram,
 		real r, real g, real b, real a
 	);

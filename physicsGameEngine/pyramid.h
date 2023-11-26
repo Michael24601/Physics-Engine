@@ -38,8 +38,11 @@ namespace pe {
 			updateVertices();
 
 			// Sets the faces and edges connections
+			
 			setEdges();
-			setFaces();
+			setFaces(); 
+			setLocalEdges();
+			setLocalFaces();
 		}
 
 		virtual void setEdges() override {
@@ -88,6 +91,52 @@ namespace pe {
 				&globalVertices[3] };
 			faces[4].vertices = { &globalVertices[0], &globalVertices[3],
 				&globalVertices[4] };
+		}
+
+
+
+		// Update setEdges to populate localEdges using local vertices
+		virtual void setLocalEdges() override {
+			localEdges.resize(8);
+
+			// Define the edges of the pyramid using local vertices
+			localEdges[0].vertices[0] = &localVertices[1];
+			localEdges[0].vertices[1] = &localVertices[2];
+
+			localEdges[1].vertices[0] = &localVertices[2];
+			localEdges[1].vertices[1] = &localVertices[3];
+
+			localEdges[2].vertices[0] = &localVertices[3];
+			localEdges[2].vertices[1] = &localVertices[4];
+
+			localEdges[3].vertices[0] = &localVertices[4];
+			localEdges[3].vertices[1] = &localVertices[1];
+
+			localEdges[4].vertices[0] = &localVertices[0];
+			localEdges[4].vertices[1] = &localVertices[1];
+
+			localEdges[5].vertices[0] = &localVertices[0];
+			localEdges[5].vertices[1] = &localVertices[2];
+
+			localEdges[6].vertices[0] = &localVertices[0];
+			localEdges[6].vertices[1] = &localVertices[3];
+
+			localEdges[7].vertices[0] = &localVertices[0];
+			localEdges[7].vertices[1] = &localVertices[4];
+		}
+
+		// Update setFaces to populate localFaces using local vertices
+		virtual void setLocalFaces() override {
+			localFaces.resize(5); // Pyramid has 5 faces
+
+			// Base face using local vertices
+			localFaces[0].vertices = { &localVertices[1], &localVertices[4],
+				&localVertices[3], &localVertices[2] };
+			// Side faces using local vertices
+			localFaces[1].vertices = { &localVertices[0], &localVertices[4], &localVertices[1] };
+			localFaces[2].vertices = { &localVertices[0], &localVertices[1], &localVertices[2] };
+			localFaces[3].vertices = { &localVertices[0], &localVertices[2], &localVertices[3] };
+			localFaces[4].vertices = { &localVertices[0], &localVertices[3], &localVertices[4] };
 		}
 	};
 }

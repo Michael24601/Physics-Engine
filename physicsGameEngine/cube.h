@@ -44,6 +44,8 @@ namespace pe {
 			// Sets the faces and edges connections
 			setEdges();
 			setFaces();
+			setLocalEdges();
+			setLocalFaces();
 		}
 
 		// Connects the correct edges
@@ -104,6 +106,70 @@ namespace pe {
 			faces[5].vertices = { &globalVertices[3], &globalVertices[2],
 				&globalVertices[6], &globalVertices[7] }; // Right face
 		}
+
+		// Connects the correct edges using local coordinates
+		virtual void setLocalEdges() override {
+			localEdges.resize(12);
+
+			localEdges[0].vertices[0] = &localVertices[0];
+			localEdges[0].vertices[1] = &localVertices[1];
+
+			localEdges[1].vertices[0] = &localVertices[1];
+			localEdges[1].vertices[1] = &localVertices[2];
+
+			localEdges[2].vertices[0] = &localVertices[2];
+			localEdges[2].vertices[1] = &localVertices[3];
+
+			localEdges[3].vertices[0] = &localVertices[3];
+			localEdges[3].vertices[1] = &localVertices[0];
+
+			localEdges[4].vertices[0] = &localVertices[4];
+			localEdges[4].vertices[1] = &localVertices[5];
+
+			localEdges[5].vertices[0] = &localVertices[5];
+			localEdges[5].vertices[1] = &localVertices[6];
+
+			localEdges[6].vertices[0] = &localVertices[6];
+			localEdges[6].vertices[1] = &localVertices[7];
+
+			localEdges[7].vertices[0] = &localVertices[7];
+			localEdges[7].vertices[1] = &localVertices[4];
+
+			localEdges[8].vertices[0] = &localVertices[0];
+			localEdges[8].vertices[1] = &localVertices[4];
+
+			localEdges[9].vertices[0] = &localVertices[1];
+			localEdges[9].vertices[1] = &localVertices[5];
+
+			localEdges[10].vertices[0] = &localVertices[2];
+			localEdges[10].vertices[1] = &localVertices[6];
+
+			localEdges[11].vertices[0] = &localVertices[3];
+			localEdges[11].vertices[1] = &localVertices[7];
+		}
+
+		virtual void setLocalFaces() override {
+			localFaces.resize(6);
+
+			localFaces[0].vertices = { &localVertices[0], &localVertices[1],
+				&localVertices[2], &localVertices[3] }; // Bottom face
+
+			localFaces[1].vertices = { &localVertices[7], &localVertices[6],
+				&localVertices[5], &localVertices[4] }; // Top face
+
+			localFaces[2].vertices = { &localVertices[0], &localVertices[3],
+				&localVertices[7], &localVertices[4] }; // Front face
+
+			localFaces[3].vertices = { &localVertices[1], &localVertices[5],
+				&localVertices[6], &localVertices[2] }; // Back face
+
+			localFaces[4].vertices = { &localVertices[0], &localVertices[4],
+				&localVertices[5], &localVertices[1] }; // Left face
+
+			localFaces[5].vertices = { &localVertices[3], &localVertices[2],
+				&localVertices[6], &localVertices[7] }; // Right face
+		}
+
 	};
 }
 

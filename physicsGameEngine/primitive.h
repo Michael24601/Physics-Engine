@@ -81,6 +81,10 @@ namespace pe {
 		std::vector<Face> faces;
 		std::vector<Edge> edges;
 
+		// Faces and edges in local variables
+		std::vector<Face> localFaces;
+		std::vector<Edge> localEdges;
+
 		// Constructor, only takes body at this stage
 		Primitive(RigidBody* body, real mass,
 			const Vector3D& position) : body{ body } {
@@ -126,6 +130,18 @@ namespace pe {
 
 
 		/*
+			Returns the edges, but in local coordinates.
+		*/
+		std::vector<std::pair<Vector3D, Vector3D>> getLocalEdges() const;
+
+
+		/*
+			Returns the faces, but in local coordinates.
+		*/
+		std::vector<std::vector<Vector3D>> getLocalFaces() const;
+
+
+		/*
 			Updates the global variables using the transform matrix.
 			Since the faces and edges use pointers, they don't need
 			to be updated. The normal of the face is returned from
@@ -148,6 +164,16 @@ namespace pe {
 			calculated by the Face class.
 		*/
 		virtual void setFaces() = 0;
+
+		/*
+			Same for local vertices.
+		*/
+		virtual void setLocalEdges() = 0;
+
+		/*
+			Same for local vertices.
+		*/
+		virtual void setLocalFaces() = 0;
 
 		// Uses SAT to check if the convex shapes are colliding
 		bool isColliding(const Primitive& primitive) const;
