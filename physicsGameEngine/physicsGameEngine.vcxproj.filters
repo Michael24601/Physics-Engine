@@ -13,204 +13,240 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Header Files\Core">
+      <UniqueIdentifier>{b8d3bd48-4fe8-4080-a803-52707b6fc09e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Core">
+      <UniqueIdentifier>{f5aff096-7f54-4aaa-b748-2937d995450b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Collision">
+      <UniqueIdentifier>{8babd3e6-dbe3-4fc7-a49c-44e0499734cc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\RigidBodyPhysics">
+      <UniqueIdentifier>{27d350cb-62cd-4235-a7e1-62eb7ebd53ef}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\ParticlePhysics">
+      <UniqueIdentifier>{5d5b9a04-b632-4614-8414-8ff74fd86bf1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\OpenglGraphics">
+      <UniqueIdentifier>{e4fa7591-0a94-4b52-aa56-eb5ea051abb8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\RigidBodyPhysics">
+      <UniqueIdentifier>{35eb21b0-2fc4-4289-85b1-015077ea6ae6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\ParticlePhysics">
+      <UniqueIdentifier>{c2a9592f-8f0a-4101-8581-b675e5d41f3a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Collision">
+      <UniqueIdentifier>{daf10cc5-698b-46c7-b412-42350ceef7af}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\OpenglGraphics">
+      <UniqueIdentifier>{528a04ee-a99a-4fac-9ff7-2720c586fe4d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="physicsGameEngine.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="particle.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="particleForceRegistry.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="particleGravity.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="particleDrag.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="particleSpringForce.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="anchoredSpringForce.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="particleBungeeForce.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="particleBuoyancy.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="particleContact.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="vector3D.cpp">
+      <Filter>Source Files\Core</Filter>
     </ClCompile>
     <ClCompile Include="particleContactResolver.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\ParticlePhysics</Filter>
     </ClCompile>
-    <ClCompile Include="particleContactResolver.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="particleLink.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="particleCable.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="particleRod.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="particleWorld.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="vector3D.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="rigidBodyWorld.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="rigidBodyGravity.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="rigidBodySpringForce.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="rigidBody.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="anchoredSpringForce.cpp">
+      <Filter>Source Files\ParticlePhysics</Filter>
     </ClCompile>
     <ClCompile Include="boundingSphere.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="primitive.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="sat.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="drawingUtil.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Collision</Filter>
     </ClCompile>
     <ClCompile Include="contactGeneration.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\RigidBodyPhysics</Filter>
+    </ClCompile>
+    <ClCompile Include="drawingUtil.cpp">
+      <Filter>Source Files\OpenglGraphics</Filter>
+    </ClCompile>
+    <ClCompile Include="particle.cpp">
+      <Filter>Source Files\ParticlePhysics</Filter>
+    </ClCompile>
+    <ClCompile Include="particleBungeeForce.cpp">
+      <Filter>Source Files\ParticlePhysics</Filter>
+    </ClCompile>
+    <ClCompile Include="particleBuoyancy.cpp">
+      <Filter>Source Files\ParticlePhysics</Filter>
+    </ClCompile>
+    <ClCompile Include="particleWorld.cpp">
+      <Filter>Source Files\ParticlePhysics</Filter>
+    </ClCompile>
+    <ClCompile Include="particleSpringForce.cpp">
+      <Filter>Source Files\ParticlePhysics</Filter>
+    </ClCompile>
+    <ClCompile Include="particleRod.cpp">
+      <Filter>Source Files\ParticlePhysics</Filter>
+    </ClCompile>
+    <ClCompile Include="particleLink.cpp">
+      <Filter>Source Files\ParticlePhysics</Filter>
+    </ClCompile>
+    <ClCompile Include="particleGravity.cpp">
+      <Filter>Source Files\ParticlePhysics</Filter>
+    </ClCompile>
+    <ClCompile Include="particleForceRegistry.cpp">
+      <Filter>Source Files\ParticlePhysics</Filter>
+    </ClCompile>
+    <ClCompile Include="particleDrag.cpp">
+      <Filter>Source Files\ParticlePhysics</Filter>
+    </ClCompile>
+    <ClCompile Include="particleContactResolver.cpp">
+      <Filter>Source Files\ParticlePhysics</Filter>
+    </ClCompile>
+    <ClCompile Include="particleContact.cpp">
+      <Filter>Source Files\ParticlePhysics</Filter>
+    </ClCompile>
+    <ClCompile Include="particleCable.cpp">
+      <Filter>Source Files\ParticlePhysics</Filter>
+    </ClCompile>
+    <ClCompile Include="primitive.cpp">
+      <Filter>Source Files\RigidBodyPhysics</Filter>
+    </ClCompile>
+    <ClCompile Include="rigidBody.cpp">
+      <Filter>Source Files\RigidBodyPhysics</Filter>
     </ClCompile>
     <ClCompile Include="rigidBodyCableForce.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\RigidBodyPhysics</Filter>
+    </ClCompile>
+    <ClCompile Include="rigidBodyGravity.cpp">
+      <Filter>Source Files\RigidBodyPhysics</Filter>
+    </ClCompile>
+    <ClCompile Include="rigidBodySpringForce.cpp">
+      <Filter>Source Files\RigidBodyPhysics</Filter>
+    </ClCompile>
+    <ClCompile Include="rigidBodyWorld.cpp">
+      <Filter>Source Files\RigidBodyPhysics</Filter>
+    </ClCompile>
+    <ClCompile Include="sat.cpp">
+      <Filter>Source Files\Collision</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="particleDrag.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="accuracy.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="particle.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="particleForceGenerator.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="particleForceRegistry.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="particleGravity.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="vector3D.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="particleSpringForce.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="anchoredSpringForce.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="particleBungeeForce.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="particleBuoyancy.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="particleContact.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="particleLink.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="particleCable.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="particleRod.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="particleWorld.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="particleContactGenerator.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Core</Filter>
     </ClInclude>
     <ClInclude Include="matrix3x3.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Core</Filter>
     </ClInclude>
     <ClInclude Include="matrix3x4.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Core</Filter>
     </ClInclude>
-    <ClInclude Include="rigidBody.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="vector3D.h">
+      <Filter>Header Files\Core</Filter>
     </ClInclude>
-    <ClInclude Include="rigidBodyWorld.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="quaternion.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="pyramid.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="rigidBodyGravity.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="rigidBodyForceGenerator.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="rigidBodySpringForce.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="BVHNode.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="anchoredSpringForce.h">
+      <Filter>Header Files\ParticlePhysics</Filter>
     </ClInclude>
     <ClInclude Include="boundingSphere.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Collision</Filter>
     </ClInclude>
     <ClInclude Include="boundingVolumeHierarchy.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="BVHNode.h">
+      <Filter>Header Files\Collision</Filter>
     </ClInclude>
     <ClInclude Include="contact.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\RigidBodyPhysics</Filter>
     </ClInclude>
     <ClInclude Include="contactData.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="plane.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="sat.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="primitive.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="cube.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\RigidBodyPhysics</Filter>
     </ClInclude>
     <ClInclude Include="contactGeneration.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\RigidBodyPhysics</Filter>
+    </ClInclude>
+    <ClInclude Include="cube.h">
+      <Filter>Header Files\RigidBodyPhysics</Filter>
     </ClInclude>
     <ClInclude Include="drawingUtil.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\OpenglGraphics</Filter>
+    </ClInclude>
+    <ClInclude Include="particle.h">
+      <Filter>Header Files\ParticlePhysics</Filter>
+    </ClInclude>
+    <ClInclude Include="particleBungeeForce.h">
+      <Filter>Header Files\ParticlePhysics</Filter>
+    </ClInclude>
+    <ClInclude Include="particleBuoyancy.h">
+      <Filter>Header Files\ParticlePhysics</Filter>
+    </ClInclude>
+    <ClInclude Include="particleCable.h">
+      <Filter>Header Files\ParticlePhysics</Filter>
+    </ClInclude>
+    <ClInclude Include="particleContact.h">
+      <Filter>Header Files\ParticlePhysics</Filter>
+    </ClInclude>
+    <ClInclude Include="particleContactGenerator.h">
+      <Filter>Header Files\ParticlePhysics</Filter>
+    </ClInclude>
+    <ClInclude Include="particleWorld.h">
+      <Filter>Header Files\ParticlePhysics</Filter>
+    </ClInclude>
+    <ClInclude Include="particleSpringForce.h">
+      <Filter>Header Files\ParticlePhysics</Filter>
+    </ClInclude>
+    <ClInclude Include="particleRod.h">
+      <Filter>Header Files\ParticlePhysics</Filter>
+    </ClInclude>
+    <ClInclude Include="particleLink.h">
+      <Filter>Header Files\ParticlePhysics</Filter>
+    </ClInclude>
+    <ClInclude Include="particleGravity.h">
+      <Filter>Header Files\ParticlePhysics</Filter>
+    </ClInclude>
+    <ClInclude Include="particleForceRegistry.h">
+      <Filter>Header Files\ParticlePhysics</Filter>
+    </ClInclude>
+    <ClInclude Include="particleForceGenerator.h">
+      <Filter>Header Files\ParticlePhysics</Filter>
+    </ClInclude>
+    <ClInclude Include="particleDrag.h">
+      <Filter>Header Files\ParticlePhysics</Filter>
+    </ClInclude>
+    <ClInclude Include="plane.h">
+      <Filter>Header Files\RigidBodyPhysics</Filter>
+    </ClInclude>
+    <ClInclude Include="primitive.h">
+      <Filter>Header Files\RigidBodyPhysics</Filter>
+    </ClInclude>
+    <ClInclude Include="pyramid.h">
+      <Filter>Header Files\RigidBodyPhysics</Filter>
+    </ClInclude>
+    <ClInclude Include="rigidBody.h">
+      <Filter>Header Files\RigidBodyPhysics</Filter>
+    </ClInclude>
+    <ClInclude Include="quaternion.h">
+      <Filter>Header Files\Core</Filter>
     </ClInclude>
     <ClInclude Include="rigidBodyCableForce.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\RigidBodyPhysics</Filter>
+    </ClInclude>
+    <ClInclude Include="rigidBodyForceGenerator.h">
+      <Filter>Header Files\RigidBodyPhysics</Filter>
+    </ClInclude>
+    <ClInclude Include="rigidBodyGravity.h">
+      <Filter>Header Files\RigidBodyPhysics</Filter>
+    </ClInclude>
+    <ClInclude Include="rigidBodySpringForce.h">
+      <Filter>Header Files\RigidBodyPhysics</Filter>
+    </ClInclude>
+    <ClInclude Include="rigidBodyWorld.h">
+      <Filter>Header Files\RigidBodyPhysics</Filter>
+    </ClInclude>
+    <ClInclude Include="sat.h">
+      <Filter>Header Files\Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="shaderProgram.h">
+      <Filter>Header Files\OpenglGraphics</Filter>
+    </ClInclude>
+    <ClInclude Include="solidColorShader.h">
+      <Filter>Header Files\OpenglGraphics</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

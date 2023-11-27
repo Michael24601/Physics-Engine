@@ -111,3 +111,7 @@ in spring and cable forces.
 
 Replace body cable and rod with contacts rather than ordinary
 forces like a spring, more realistic.
+
+Ensure that all opengl / sfml / gml code is seperate from the physcis
+and collision modules. This ensures the engine does not depend on a
+specific graphics library in order to run and simulate physics.

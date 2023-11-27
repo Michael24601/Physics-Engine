@@ -3,7 +3,6 @@
 
 using namespace pe;
 
-
 void pe::drawVectorOfLines(
     const std::vector<std::pair<Vector3D, Vector3D>>& vector,
     sf::RenderWindow& window,
@@ -21,11 +20,15 @@ void pe::drawVectorOfLines(
 
 void pe::drawVectorOfLines3D(
     const std::vector<std::pair<Vector3D, Vector3D>>& lines,
-    glm::mat4& viewProjectionMatrix,
+    glm::mat4& projection,
+    glm::mat4& view,
+    glm::mat4& model,
     sf::Color color) {
 
+    glm::mat4 matrix = projection * view * model;
+
     glMatrixMode(GL_PROJECTION);
-    glLoadMatrixf(glm::value_ptr(viewProjectionMatrix));
+    glLoadMatrixf(glm::value_ptr(matrix));
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
@@ -42,14 +45,16 @@ void pe::drawVectorOfLines3D(
 
 void pe::drawVectorOfPolygons3D(
     const std::vector<std::vector<Vector3D>>& polygons,
-    glm::mat4& viewProjectionMatrix,
+    glm::mat4& projection,
+    glm::mat4& view,
+    glm::mat4& model,
     sf::Color color, 
     real opacity) {
 
-    // We need to manually use the projection matrix as we don't have a
-    // vertex shader.
+    glm::mat4 matrix = projection * view * model;
+
     glMatrixMode(GL_PROJECTION);
-    glLoadMatrixf(glm::value_ptr(viewProjectionMatrix));
+    glLoadMatrixf(glm::value_ptr(matrix));
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
@@ -65,9 +70,24 @@ void pe::drawVectorOfPolygons3D(
 }
 
 
-// Works because all vertices are ordered (clockwise or counter clockwise).
-// Assumes the points are in order and convex.
-std::vector<std::vector<Vector3D>> triangulateFace(
+glm::mat4 pe::convertToGLM(const Matrix3x4& m) {
+    return glm::mat4(
+        m.data[0], m.data[4], m.data[8], 0.0f,
+        m.data[1], m.data[5], m.data[9], 0.0f,
+        m.data[2], m.data[6], m.data[10], 0.0f,
+        m.data[3], m.data[7], m.data[11], 1.0f
+    );
+}
+
+/*
+    Returns a 3D matrix in the glm format.
+*/
+glm::vec3 pe::convertToGLM(const Vector3D& v) {
+    return glm::vec3(v.x, v.y, v.z);
+}
+
+
+std::vector<std::vector<Vector3D>> pe::triangulateFace(
     const std::vector<Vector3D>& vertices
 ) {
     std::vector<std::vector<Vector3D>> triangles;

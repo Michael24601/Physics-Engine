@@ -99,6 +99,7 @@ int main() {
     // Needed for 3D rendering
     sf::ContextSettings settings;
     settings.depthBits = 24;
+    settings.antialiasingLevel = 8;
     sf::RenderWindow window(sf::VideoMode(800, 800), "Test",
         sf::Style::Default, settings);
     window.setActive();
@@ -246,18 +247,16 @@ int main() {
     Cube c(new RigidBody(), side, 150, Vector3D(100, 100, 0));
 
     real side2 = 200;
-    Quaternion orinetation(0.1, 0.5, 0.7, 0.0);
-    Cube c2(new RigidBody(), side2, 150, Vector3D(-200, 0, 0));
+    Quaternion orinetation(0.8, -0.5, -0.1, 0.0);
+    Pyramid c2(new RigidBody(), side2, 150, 150, Vector3D(-200, 0, 0));
     orinetation.normalize();
     c2.body->orientation = orinetation;
-
 
     RigidBody fixed;
     fixed.position = Vector3D(100, 200, 0);
 
     c.body->angularDamping = 0.75;
     c.body->linearDamping = 0.90;
-
 
     RigidBodyGravity g(Vector3D(0, -10, 0));
     Vector3D app(-side / 2.0, side / 2.0, -side / 2.0);
@@ -342,26 +341,26 @@ int main() {
         // Clears the depth buffer (for 3D)
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // Shape
-        glm::mat4 cTransform = c.body->transformMatrix.getGlmMatrix();
-        drawVectorOfLines3D(c.getLocalEdges(), projectionMatrix, viewMatrix,
-            cTransform, shaderProgram, 150, 150, 0, 255);
-        drawVectorOfPolygons3D(c.getLocalFaces(), projectionMatrix, viewMatrix,
-            cTransform, shaderProgram, 150, 50, 250, 255);
-
         // Spring/Cable
         // Note that the model is the identity since the cable is in world
         // coordinates
         glm::mat4 identity = glm::mat4(1.0);
-        drawVectorOfLines3D(v, projectionMatrix, viewMatrix,
-            identity, shaderProgram, 255, 0, 100, 255);
+        drawVectorOfLines3D(v, projectionMatrix, viewMatrix, identity,
+            sf::Color::White);
+
+        // Shape
+        glm::mat4 cTransform = convertToGLM(c.body->transformMatrix);
+        //drawVectorOfLines3D(c.getLocalEdges(), projectionMatrix, viewMatrix,
+        //    cTransform, shaderProgram, 150, 150, 0, 255);
+        drawVectorOfPolygons3D(c.getLocalFaces(), projectionMatrix, viewMatrix,
+            cTransform, shaderProgram, 150, 50, 250, 255);
 
         // Second shape
-        glm::mat4 c2Transform = c2.body->transformMatrix.getGlmMatrix();
-        drawVectorOfLines3D(c2.getLocalEdges(), projectionMatrix, viewMatrix,
-            c2Transform, shaderProgram, 255, 100, 100, 255);
+        glm::mat4 c2Transform = convertToGLM(c2.body->transformMatrix);
+        //drawVectorOfLines3D(c2.getLocalEdges(), projectionMatrix, viewMatrix,
+        //    c2Transform, shaderProgram, 255, 100, 100, 255);
         drawVectorOfPolygons3D(c2.getLocalFaces(), projectionMatrix, viewMatrix,
-            c2Transform, shaderProgram, 100, 255, 100, 255);
+           c2Transform, shaderProgram, 100, 255, 100, 255);
 
         // Normal vectors of the collision
         // Likewise, the collision normal is in world coordinates

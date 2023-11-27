@@ -1,7 +1,13 @@
 /*
 	File used for drawing util functions.
-	Temporarily here for debugging, not used in the final project.
+	It uses both old and new openGl (with and without shaders).
+	They should never be mixed. Either use or don't use shaders, and
+	if you do mix, draw all old openGL functions first, then use the
+	shaders.
 */
+
+#ifndef DRAWING_UTIL_H
+#define DRAWING_UTIL_H
 
 #include <GL/glew.h>
 #include <SFML/Graphics.hpp>
@@ -15,6 +21,7 @@
 #include <gtc/matrix_transform.hpp>
 #include <SFML/OpenGL.hpp>
 #include "vector3D.h"
+#include "matrix3x4.h"
 
 namespace pe {
 	/*
@@ -41,7 +48,9 @@ namespace pe {
 	*/
 	void drawVectorOfLines3D(
 		const std::vector<std::pair<Vector3D, Vector3D>>& lines,
-		glm::mat4& viewProjectionMatrix,
+		glm::mat4& projection,
+		glm::mat4& view,
+		glm::mat4& model,
 		sf::Color color
 	);
 
@@ -51,9 +60,31 @@ namespace pe {
 	*/
 	void drawVectorOfPolygons3D(
 		const std::vector<std::vector<Vector3D>>& polygons,
-		glm::mat4& viewProjectionMatrix,
+		glm::mat4& projection,
+		glm::mat4& view,
+		glm::mat4& model,
 		sf::Color color,
 		real opacity
+	);
+
+	/*
+		Returns a homogeneous matrix in glm mat4 format.
+		Used in the graphics module.
+	*/
+	glm::mat4 convertToGLM(const Matrix3x4& m);
+
+	/*
+		Returns a 3D matrix in the glm format.
+	*/
+	glm::vec3 convertToGLM(const Vector3D& v);
+
+
+	/*
+		Works because all vertices are ordered(clockwise or counter
+		clockwise). Assumes the points are in order and convex.
+	*/
+	std::vector<std::vector<Vector3D>> triangulateFace(
+		const std::vector<Vector3D>& vertices
 	);
 
 
@@ -79,3 +110,5 @@ namespace pe {
 	);
 }
 
+
+#endif
