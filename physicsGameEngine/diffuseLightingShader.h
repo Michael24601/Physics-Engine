@@ -57,6 +57,8 @@ const std::string diffuseLightingFragmentShader = R"(
         for (int i = 0; i < numActiveLights; ++i) {
             vec3 lightDir = normalize(lightPos[i] - FragPos);
             float diff =  max(dot(Normal, lightDir), 0.0);
+            // Note that in diffuse lighting, the color of the light
+            // is irrelevant, only in the phong effect is it considered. 
             vec3 diffuse = objectColor.rgb * diff;
             finalDiffuse += diffuse;
         }

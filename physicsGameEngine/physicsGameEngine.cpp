@@ -39,7 +39,7 @@ int main() {
     sf::ContextSettings settings;
     settings.depthBits = 24;
     settings.antialiasingLevel = 8;
-    sf::RenderWindow window(sf::VideoMode(800, 800), "Test",
+    sf::RenderWindow window(sf::VideoMode(800, 800), "Physics Simulation",
         sf::Style::Default, settings);
     window.setActive();
 
@@ -49,7 +49,7 @@ int main() {
         std::cerr << "Error: GLEW initialization failed: " << glewGetErrorString(err) << std::endl;
         return -1;
     }
-    
+
     // Sets up OpenGL states (for 3D)
     // Makes objects in front of others cover them
     glEnable(GL_DEPTH_TEST);
@@ -112,15 +112,19 @@ int main() {
     real deltaT = 0;
 
     real side = 100;
-    RectangularPrism c(new RigidBody(), side, side, side, 150, Vector3D(100, 100, 0));
+    Quaternion orientation(-1.0, -0.6, 0.4, 0.3);
+    orientation.normalize();
+    RectangularPrism c(new RigidBody(), side, side, side, 150, Vector3D(200, -100, 0));
+    c.body->orientation = orientation;
 
-    real height = 200;
-    Pyramid c2(new RigidBody(), 150, height, 150, Vector3D(-200, 0, 0));
+    real height = 150;
+    real sideT = 150;
+    Pyramid c2(new RigidBody(), sideT, height, 150, Vector3D(-300, 0, 0));
 
     RigidBody fixed;
-    fixed.position = Vector3D(100, 200, 0);
+    fixed.position = Vector3D(200, 200, 0);
     RigidBody fixed2;
-    fixed2.position = Vector3D(-200, 200, 0);
+    fixed2.position = Vector3D(-300, 200, 0);
 
     c.body->angularDamping = 0.75;
     c.body->linearDamping = 0.90;
@@ -134,7 +138,7 @@ int main() {
     RigidBodySpringForce s2(c2.localVertices[0], &fixed2, origin, 10, 100);
 
     real rotationSpeed = 0.05;
-    real angle = PI/2;
+    real angle = PI / 2;
     bool isButtonPressed = false;
     bool isSecondButtonPressed = false;
 
@@ -154,7 +158,7 @@ int main() {
                 isSecondButtonPressed = true;
             }
             else if (event.type == sf::Event::MouseButtonReleased
-                && event.mouseButton.button == sf::Mouse::Left){
+                && event.mouseButton.button == sf::Mouse::Left) {
                 isButtonPressed = false;
             }
             else if (event.type == sf::Event::MouseButtonReleased
@@ -191,7 +195,8 @@ int main() {
             sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);
             c.body->position.x = worldPos.x;
             c.body->position.y = worldPos.y;
-        } else if (isSecondButtonPressed) {
+        }
+        else if (isSecondButtonPressed) {
             sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
             sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);
             c2.body->position.x = worldPos.x;
@@ -204,7 +209,7 @@ int main() {
             std::vector<Contact> contacts;
             returnMaxContact(c, c2, contacts);
             for (int i = 0; i < contacts.size(); i++) {
-                vector<std::pair<Vector3D, Vector3D>> a = 
+                vector<std::pair<Vector3D, Vector3D>> a =
                     contacts[i].drawNormals(100);
                 for (int i = 0; i < a.size(); i++) {
                     normals.push_back(a[i]);
@@ -242,23 +247,25 @@ int main() {
         glm::mat4 cTransform = convertToGLM(c.body->transformMatrix);
         glm::vec4 colorPurple = glm::vec4(0.6, 0.2, 0.95, 1.0);
         glm::vec3 lightPos[]{
-            glm::vec3(0.0f, 300.0f, 0.0f),
+            glm::vec3(0.0f, 200.0f, 0.0f),
             glm::vec3(200.0f, -200.0f, -200.0f),
             glm::vec3(-200.0f, -200.0f, 200.0f),
         };
         glm::vec4 lightColors[]{
-            glm::vec4(1.0f, 1.0f, 1.0f, 1.0f),
-            glm::vec4(1.0f, 1.0f, 1.0f, 1.0f),
-            glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)
+            glm::vec4(1.0f, 1.0f, 1.0f, 0.5f),
+            glm::vec4(1.0f, 1.0f, 1.0f, 0.5f),
+            glm::vec4(1.0f, 1.0f, 1.0f, 0.5f)
         };
-        lightShader.drawFaces(c.getLocalFaces(), cTransform, viewMatrix,
-            projectionMatrix, colorPurple, 3, lightPos, lightColors);
+        phongShader.drawFaces(c.getLocalFaces(), cTransform, viewMatrix,
+            projectionMatrix, colorPurple, 3, lightPos, lightColors,
+            cameraPosition, 100);
 
         // Second shape
         glm::mat4 c2Transform = convertToGLM(c2.body->transformMatrix);
-        glm::vec4 colorGreen = glm::vec4(0.4, 1.0, 0.4, 1.0);
-        lightShader.drawFaces(c2.getLocalFaces(), c2Transform, viewMatrix,
-            projectionMatrix, colorGreen, 3, lightPos, lightColors);
+        glm::vec4 colorGreen = glm::vec4(0.3, 0.8, 0.2, 1.0);
+        phongShader.drawFaces(c2.getLocalFaces(), c2Transform, viewMatrix,
+            projectionMatrix, colorGreen, 3, lightPos, lightColors,
+            cameraPosition, 100);
 
         // Normal vectors of the collision
         // Likewise, the collision normal is in world coordinates
@@ -268,8 +275,6 @@ int main() {
 
         deltaT = clock.getElapsedTime().asSeconds() * 10;
     }
-
-    glDisable(GL_DEPTH_TEST);
 
     return 0;
 }

@@ -62,12 +62,14 @@ const std::string diffuseSpecularLightingFragmentShader = R"(
             vec3 viewDir = normalize(viewPos - FragPos);
             vec3 reflectDir = reflect(-lightDir, Normal);
             float spec = pow(max(dot(viewDir, reflectDir), 0.0), shininess);
-            vec3 specular = lightColors[i].rgb * spec;
+            // The opacity of the phong effect is determined through the alpha value
+            vec3 specular = lightColors[i].rgb * spec * lightColors[i].a;
             finalSpecular += specular;
         }
 
-        // Combine diffuse and specular with some ambient lighting
-        vec3 ambientColor = 0.1 * objectColor.rgb; // Adjust the ambient factor as needed
+        // Combines diffuse and specular with some ambient lighting (0.1 looks best)
+        // Adjusts the ambient factor as needed
+        vec3 ambientColor = 0.1 * objectColor.rgb;
         vec3 resultColor = finalDiffuse + finalSpecular + ambientColor;
 
         FragColor = vec4(resultColor, objectColor.a);

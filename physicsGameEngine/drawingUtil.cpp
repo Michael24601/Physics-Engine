@@ -9,7 +9,8 @@ void pe::drawVectorOfLines3D(
     glm::mat4& projection,
     glm::mat4& view,
     glm::mat4& model,
-    sf::Color color) {
+    sf::Color color,
+    real lineWidth) {
 
     glm::mat4 matrix = projection * view * model;
 
@@ -21,6 +22,7 @@ void pe::drawVectorOfLines3D(
 
     for (const std::pair<Vector3D, Vector3D>& pair : lines) {
         glBegin(GL_LINES);
+        glLineWidth(lineWidth);
         glColor3ub(color.r, color.g, color.b);
         glVertex3f(pair.first.x, pair.first.y, pair.first.z);
         glVertex3f(pair.second.x, pair.second.y, pair.second.z);
