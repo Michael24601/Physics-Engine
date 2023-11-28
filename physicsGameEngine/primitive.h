@@ -25,6 +25,9 @@ namespace pe {
 			clockwise in one face, it needs to be consistent in the others.
 			This ensure the outer normal, not inner normal (opposite
 			direction), is returned each time.
+			This is also important for the graphics, where some engines
+			require the face vertices to be returned in order, so that the
+			normal, depth, etc, can work as expected.
 		*/
 		Vector3D normal() const {
 			// Calculate the local normal using cross product

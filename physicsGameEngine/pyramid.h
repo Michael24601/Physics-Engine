@@ -19,16 +19,17 @@ namespace pe {
 			side{ side }, height{ height } {
 			localVertices.resize(5);
 			globalVertices.resize(5);
-			localVertices[0] = Vector3D(0, -3 * height / 4.0, 0);
-			localVertices[1] = Vector3D(-side / 2, height / 4.0, -side / 2);
-			localVertices[2] = Vector3D(side / 2, height / 4.0, -side / 2);
-			localVertices[3] = Vector3D(side / 2, height / 4.0, side / 2);
-			localVertices[4] = Vector3D(-side / 2, height / 4.0, side / 2);
+			localVertices[0] = Vector3D(0, 3 * height / 4.0, 0);
+			localVertices[1] = Vector3D(-side / 2, -height / 4.0, -side / 2);
+			localVertices[2] = Vector3D(side / 2, -height / 4.0, -side / 2);
+			localVertices[3] = Vector3D(side / 2, -height / 4.0, side / 2);
+			localVertices[4] = Vector3D(-side / 2, -height / 4.0, side / 2);
 
 			Matrix3x3 inertiaTensor(
-				mass* (3 * height * height + side * side) / 12.0f,
-				0, 0, 0, mass* (3 * height * height + side * side) / 12.0f,
-				0, 0, 0, (mass* side* side) / 6.0f);
+				(mass / 10.0)* (3 * side * side + height * height), 0, 0,
+				0, (mass / 10.0)* (3 * side * side + height * height), 0,
+				0, 0, (mass / 5.0)* side* side
+			);
 			body->setInertiaTensor(inertiaTensor);
 
 			body->angularDamping = 1;
@@ -79,18 +80,18 @@ namespace pe {
 			faces.resize(5); // Pyramid has 5 faces
 
 			// Base face
-			faces[0].vertices = { &globalVertices[1], &globalVertices[4],
-				&globalVertices[3], &globalVertices[2] };
+			faces[0].vertices = { &globalVertices[1], &globalVertices[2],
+				&globalVertices[3], &globalVertices[4] };
 
 			// Side faces
-			faces[1].vertices = { &globalVertices[0], &globalVertices[4],
-				&globalVertices[1] };
-			faces[2].vertices = { &globalVertices[0], &globalVertices[1],
-				&globalVertices[2] };
-			faces[3].vertices = { &globalVertices[0], &globalVertices[2],
-				&globalVertices[3] };
-			faces[4].vertices = { &globalVertices[0], &globalVertices[3],
+			faces[1].vertices = { &globalVertices[0], &globalVertices[1],
 				&globalVertices[4] };
+			faces[2].vertices = { &globalVertices[0], &globalVertices[4],
+				&globalVertices[3] };
+			faces[3].vertices = { &globalVertices[0], &globalVertices[3],
+				&globalVertices[2] };
+			faces[4].vertices = { &globalVertices[0], &globalVertices[2],
+				&globalVertices[1] };
 		}
 
 
@@ -130,13 +131,17 @@ namespace pe {
 			localFaces.resize(5); // Pyramid has 5 faces
 
 			// Base face using local vertices
-			localFaces[0].vertices = { &localVertices[1], &localVertices[4],
-				&localVertices[3], &localVertices[2] };
+			localFaces[0].vertices = { &localVertices[1], &localVertices[2],
+				&localVertices[3], &localVertices[4] };
 			// Side faces using local vertices
-			localFaces[1].vertices = { &localVertices[0], &localVertices[4], &localVertices[1] };
-			localFaces[2].vertices = { &localVertices[0], &localVertices[1], &localVertices[2] };
-			localFaces[3].vertices = { &localVertices[0], &localVertices[2], &localVertices[3] };
-			localFaces[4].vertices = { &localVertices[0], &localVertices[3], &localVertices[4] };
+			localFaces[1].vertices = { &localVertices[0], &localVertices[1], 
+				&localVertices[4] };
+			localFaces[2].vertices = { &localVertices[0], &localVertices[4],
+				&localVertices[3] };
+			localFaces[3].vertices = { &localVertices[0], &localVertices[3], 
+				&localVertices[2] };
+			localFaces[4].vertices = { &localVertices[0], &localVertices[2],
+				&localVertices[1] };
 		}
 	};
 }

@@ -1,9 +1,13 @@
 /*
 	File used for drawing util functions.
-	It uses both old and new openGl (with and without shaders).
-	They should never be mixed. Either use or don't use shaders, and
-	if you do mix, draw all old openGL functions first, then use the
-	shaders.
+	This file contains functions that facilitate the drawing process,
+	others that act as an interface between the physics module and the
+	openGl graphics module.
+	Finally, there are "quick and dirty" functions that use old openGl
+	(without shaders), to draw lines and faces in solid colors.
+	These should only be used for quick testing/debugging, and never
+	when other faces/lines are being rendered with shaders elsewhere in
+	the code, as they can't be mixed.
 */
 
 #ifndef DRAWING_UTIL_H
@@ -24,20 +28,9 @@
 #include "matrix3x4.h"
 
 namespace pe {
-	/*
-		Given an sfml window, draws a shape.
-		The shape is sent via a vector of pairs of points that are meant
-		to be connected. They are they then drawn as vertex arrays,
-		with a color, specifying how to draw them.
-		This function is used with normal, 2D sfml.
-	*/
-	void drawVectorOfLines(
-		const std::vector<std::pair<Vector3D, Vector3D>>& vector,
-		sf::RenderWindow& window,
-		sf::Color color);
 
 	/*
-		Same, but works in 3D opengl in sfml.
+		Draws lines in 3D openGl.
 		Note that we send a viewProjection matrix as a parameters.
 		This transforms each Vector3D point int 3D space into another point,
 		before drawing it, in the sfml/opengl world, according to the
@@ -80,6 +73,7 @@ namespace pe {
 
 
 	/*
+		Turns an n-polygon into n-2 triangles.
 		Works because all vertices are ordered(clockwise or counter
 		clockwise). Assumes the points are in order and convex.
 	*/
@@ -87,27 +81,13 @@ namespace pe {
 		const std::vector<Vector3D>& vertices
 	);
 
-
 	/*
-		Same, but draws using shaders, not solid colors.
+		Returns the normal of a triangle face (3 vertices).
+		Assumes they are not colinear.
+		It works because vectors are in the same order
 	*/
-	void drawVectorOfPolygons3D(
-		const std::vector<std::vector<Vector3D>>& polygons,
-		glm::mat4& projection,
-		glm::mat4& view,
-		glm::mat4& model,
-		GLuint& shaderProgram,
-		real r, real g, real b, real a
-	);
-
-	void drawVectorOfLines3D(
-		const std::vector<std::pair<Vector3D, Vector3D>>& lines,
-		glm::mat4& projection,
-		glm::mat4& view,
-		glm::mat4& model,
-		GLuint shaderProgram,
-		real r, real g, real b, real a
-	);
+	Vector3D getNormal(const Vector3D& v1, const Vector3D& v2,
+		const Vector3D& v3);
 }
 
 

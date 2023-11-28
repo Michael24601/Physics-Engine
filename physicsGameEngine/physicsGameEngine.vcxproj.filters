@@ -126,6 +126,15 @@
     <ClCompile Include="sat.cpp">
       <Filter>Source Files\Collision</Filter>
     </ClCompile>
+    <ClCompile Include="solidColorShader.cpp">
+      <Filter>Source Files\OpenglGraphics</Filter>
+    </ClCompile>
+    <ClCompile Include="diffuseLightingShader.cpp">
+      <Filter>Source Files\OpenglGraphics</Filter>
+    </ClCompile>
+    <ClCompile Include="diffuseSpecularLightingShader.cpp">
+      <Filter>Source Files\OpenglGraphics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="accuracy.h">
@@ -161,7 +170,7 @@
     <ClInclude Include="contactGeneration.h">
       <Filter>Header Files\RigidBodyPhysics</Filter>
     </ClInclude>
-    <ClInclude Include="cube.h">
+    <ClInclude Include="rectangularPrism.h">
       <Filter>Header Files\RigidBodyPhysics</Filter>
     </ClInclude>
     <ClInclude Include="drawingUtil.h">
@@ -246,6 +255,12 @@
       <Filter>Header Files\OpenglGraphics</Filter>
     </ClInclude>
     <ClInclude Include="solidColorShader.h">
+      <Filter>Header Files\OpenglGraphics</Filter>
+    </ClInclude>
+    <ClInclude Include="diffuseLightingShader.h">
+      <Filter>Header Files\OpenglGraphics</Filter>
+    </ClInclude>
+    <ClInclude Include="diffuseSpecularLightingShader.h">
       <Filter>Header Files\OpenglGraphics</Filter>
     </ClInclude>
   </ItemGroup>

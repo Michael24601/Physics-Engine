@@ -152,6 +152,8 @@
     <ClCompile Include="anchoredSpringForce.cpp" />
     <ClCompile Include="boundingSphere.cpp" />
     <ClCompile Include="contactGeneration.cpp" />
+    <ClCompile Include="diffuseLightingShader.cpp" />
+    <ClCompile Include="diffuseSpecularLightingShader.cpp" />
     <ClCompile Include="drawingUtil.cpp" />
     <ClCompile Include="particle.cpp" />
     <ClCompile Include="particleBungeeForce.cpp" />
@@ -175,6 +177,7 @@
     <ClCompile Include="rigidBodySpringForce.cpp" />
     <ClCompile Include="rigidBodyWorld.cpp" />
     <ClCompile Include="sat.cpp" />
+    <ClCompile Include="solidColorShader.cpp" />
     <ClCompile Include="vector3D.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -185,7 +188,9 @@
     <ClInclude Include="contact.h" />
     <ClInclude Include="contactData.h" />
     <ClInclude Include="contactGeneration.h" />
-    <ClInclude Include="cube.h" />
+    <ClInclude Include="rectangularPrism.h" />
+    <ClInclude Include="diffuseLightingShader.h" />
+    <ClInclude Include="diffuseSpecularLightingShader.h" />
     <ClInclude Include="drawingUtil.h" />
     <ClInclude Include="matrix3x3.h" />
     <ClInclude Include="matrix3x4.h" />

@@ -1,38 +1,41 @@
 
-#ifndef CUBE_H
-#define CUBE_H
+#ifndef RECTANGULAR_PRISM_H
+#define RECTANGULAR_PRISM_H
 
 #include "primitive.h"
 
-
 namespace pe {
 
-	class Cube : public Primitive {
+	class RectangularPrism : public Primitive {
 
 	public:
 
-		pe::real side;
+		real width;
+		real height;
+		real depth;
 
-		Cube(pe::RigidBody* body, const pe::real side, pe::real mass,
-			pe::Vector3D position) : Primitive(body, mass, position),
-			side{ side } {
+		RectangularPrism(RigidBody* body, real width, real height,
+			real depth, real mass, Vector3D position)
+			: Primitive(body, mass, position), width{ width }, 
+			height{ height }, depth{ depth } {
 
 			localVertices.resize(8);
 			globalVertices.resize(8);
 
-			localVertices[0] = pe::Vector3D(-side / 2, -side / 2, -side / 2);
-			localVertices[1] = pe::Vector3D(side / 2, -side / 2, -side / 2);
-			localVertices[2] = pe::Vector3D(side / 2, -side / 2, side / 2);
-			localVertices[3] = pe::Vector3D(-side / 2, -side / 2, side / 2);
-			localVertices[4] = pe::Vector3D(-side / 2, side / 2, -side / 2);
-			localVertices[5] = pe::Vector3D(side / 2, side / 2, -side / 2);
-			localVertices[6] = pe::Vector3D(side / 2, side / 2, side / 2);
-			localVertices[7] = pe::Vector3D(-side / 2, side / 2, side / 2);
+			localVertices[0] = pe::Vector3D(-width / 2, -height / 2, -depth / 2);
+			localVertices[1] = pe::Vector3D(width / 2, -height / 2, -depth / 2);
+			localVertices[2] = pe::Vector3D(width / 2, -height / 2, depth / 2);
+			localVertices[3] = pe::Vector3D(-width / 2, -height / 2, depth / 2);
+			localVertices[4] = pe::Vector3D(-width / 2, height / 2, -depth / 2);
+			localVertices[5] = pe::Vector3D(width / 2, height / 2, -depth / 2);
+			localVertices[6] = pe::Vector3D(width / 2, height / 2, depth / 2);
+			localVertices[7] = pe::Vector3D(-width / 2, height / 2, depth / 2);
 
-			pe::Matrix3x3 inertiaTensor((side* side + side * side),
-				0, 0, 0, (side* side + side * side),
-				0, 0, 0, (side* side + side * side));
-			inertiaTensor *= (mass / 12.0f);
+			pe::Matrix3x3 inertiaTensor(
+				(mass / 12.0)* (height* height + depth * depth), 0, 0,
+				0, (mass / 12.0)* (width* width + depth * depth), 0,
+				0, 0, (mass / 12.0)* (width* width + height * height)
+			);
 			body->setInertiaTensor(inertiaTensor);
 
 			body->angularDamping = 1;

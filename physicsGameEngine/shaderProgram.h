@@ -127,6 +127,11 @@ namespace pe {
             compileAndLinkShaderProgram(vertexShaderSource,
                 fragmentShaderSource);
         }
+
+        // Returns the shader program itself (by reference)
+        GLuint& getShaderProgram() {
+            return shaderProgram;
+        }
 	};
 }
 
