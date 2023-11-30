@@ -16,14 +16,13 @@ void SphereDiffuseLightingShader::drawFace(
     glm::vec4* lightSourcesColor
 ) {
 
-    std::vector<glm::vec3> flattenedData;
-    for (int i = 0; i < faces.size(); i++) {
-        for (int j = 0; j < faces[i].size(); j++) {
-            flattenedData.push_back(glm::vec3{
-                faces[i][j].x,
-                faces[i][j].y,
-                faces[i][j].z,
-            });
+    std::vector<Vector3D> flattenedData;
+    for (const auto& face : faces) {
+        auto triangles = triangulateFace(face);
+        flattenedData.reserve(triangles.size() * 3);
+        for (const auto& triangle : triangles) {
+            flattenedData.insert(flattenedData.end(),
+                triangle.begin(), triangle.end());
         }
     }
 
@@ -44,7 +43,7 @@ void SphereDiffuseLightingShader::drawFace(
     // Uploads the vertices data to the VBO
     glBufferData(
         GL_ARRAY_BUFFER,
-        flattenedData.size() * sizeof(glm::vec3),
+        flattenedData.size() * sizeof(Vector3D),
         flattenedData.data(), GL_STATIC_DRAW
     );
 
@@ -52,7 +51,7 @@ void SphereDiffuseLightingShader::drawFace(
     glVertexAttribPointer(
         0, 3,
         GL_FLOAT, GL_FALSE,
-        sizeof(glm::vec3),
+        sizeof(Vector3D),
         (void*)0
     );
 

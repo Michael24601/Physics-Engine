@@ -278,6 +278,8 @@ int main() {
         auto edges = returnTesselatedEdges(vertices, 10, 10);
         lightShader.drawFaces(faces, identity, viewMatrix, 
             projectionMatrix, colorRed, 3, lightPos, lightColors);
+        shader.drawEdges(edges, identity, viewMatrix,
+            projectionMatrix, color);
         //lightShader.drawFaces(c3.getLocalFaces(), identity, viewMatrix, 
           //   projectionMatrix, colorRed, 3, lightPos, lightColors);
 
