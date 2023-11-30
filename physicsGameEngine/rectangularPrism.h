@@ -172,7 +172,6 @@ namespace pe {
 			localFaces[5].vertices = { &localVertices[3], &localVertices[2],
 				&localVertices[6], &localVertices[7] }; // Right face
 		}
-
 	};
 }
 

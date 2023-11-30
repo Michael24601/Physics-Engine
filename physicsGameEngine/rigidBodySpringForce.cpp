@@ -22,7 +22,7 @@ void RigidBodySpringForce::updateForce(RigidBody* body, real duration) {
 	Vector3D otherPointOfApplication =
 		otherBody->transformMatrix.transform(otherConnectionPoint);
 	/*
-		Calculates the directiomn vector of the spring pull force.
+		Calculates the direction vector of the spring pull force.
 		It should be normalized before the real calculated magnitude is
 		multiplied by it since this step only concerns its direction.
 	*/

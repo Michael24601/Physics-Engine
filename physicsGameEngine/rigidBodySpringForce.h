@@ -25,8 +25,8 @@
 namespace pe {
 
 	class RigidBodySpringForce : public RigidBodyForceGenerator {
-
-	private:
+	
+	public:
 
 		/*
 			The local(relative) coordinates of the spring's connection to

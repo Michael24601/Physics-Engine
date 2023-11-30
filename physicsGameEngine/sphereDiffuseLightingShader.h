@@ -40,14 +40,9 @@ const std::string sphereDiffuseLightingVertexShader = R"(
     uniform mat4 view;
     uniform mat4 projection;
 
-    uniform vec3 sphereCenter;
-    uniform float sphereRadius;
-
     void main() {
-        vec3 spherePos = aPos;
-
-        gl_Position = projection * view * model * vec4(spherePos, 1.0);
-        FragPos = spherePos;
+        FragPos = vec3(model * vec4(aPos, 1.0));
+        gl_Position = projection * view * vec4(FragPos, 1.0);
     }
 )";
 
@@ -68,11 +63,10 @@ const std::string sphereDiffuseLightingFragmentShader = R"(
     // Number of active lights
     uniform int numActiveLights;
 
-    // Center and radius of the sphere
+    out vec4 FragColor;
+
     uniform vec3 sphereCenter;
     uniform float sphereRadius;
-
-    out vec4 FragColor;
 
     void main(){
         // Calculate the sphere's normal based on its center and radius

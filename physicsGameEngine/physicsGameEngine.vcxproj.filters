@@ -138,6 +138,9 @@
     <ClCompile Include="sphereDiffuseLightingShader.cpp">
       <Filter>Source Files\OpenglGraphics</Filter>
     </ClCompile>
+    <ClCompile Include="tesselationUtil.cpp">
+      <Filter>Source Files\RigidBodyPhysics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="accuracy.h">
@@ -271,6 +274,9 @@
     </ClInclude>
     <ClInclude Include="sphereDiffuseLightingShader.h">
       <Filter>Header Files\OpenglGraphics</Filter>
+    </ClInclude>
+    <ClInclude Include="tesselationUtil.h">
+      <Filter>Header Files\RigidBodyPhysics</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -31,6 +31,7 @@
 #include "diffuseLightingShader.h"
 #include "diffuseSpecularLightingShader.h"
 #include "sphereDiffuseLightingShader.h"
+#include "tesselationUtil.h"
 
 using namespace pe;
 using namespace std;
@@ -48,7 +49,8 @@ int main() {
     GLenum err = glewInit();
     if (GLEW_OK != err) {
         // GLEW initialization failed
-        std::cerr << "Error: GLEW initialization failed: " << glewGetErrorString(err) << std::endl;
+        std::cerr << "Error: GLEW initialization failed: " 
+            << glewGetErrorString(err) << std::endl;
         return -1;
     }
 
@@ -96,7 +98,8 @@ int main() {
     // Field of View (FOV) in degrees
     real fov = 90.0f;
     // Aspect ratio
-    real aspectRatio = window.getSize().x / static_cast<real>(window.getSize().y);
+    real aspectRatio = window.getSize().x 
+        / static_cast<real>(window.getSize().y);
     // Near and far clipping planes
     real nearPlane = 0.1f;
     real farPlane = 10000.0f;
@@ -115,15 +118,12 @@ int main() {
     real deltaT = 0;
 
     real side = 100;
-    Quaternion orientation(-1.0, -0.6, 0.4, 0.3);
-    orientation.normalize();
-    RectangularPrism c(new RigidBody(), side, side, side, 150, Vector3D(200, -100, 0));
-    c.body->orientation = orientation;
+    RectangularPrism c(new RigidBody(), side, side, side, 150, 
+        Vector3D(200, -100, 0));
 
     real height = 150;
     real sideT = 150;
-    Pyramid c2(new RigidBody(), sideT, height, 150, Vector3D(-300, 0, 0));
-    SolidSphere c3(new RigidBody(), 100, 100, 10, 10, Vector3D(100, 0, 100));
+    SolidSphere c2(new RigidBody(), 100, 150, 20, 20, Vector3D(-300, 0, 0));
 
     RigidBody fixed;
     fixed.position = Vector3D(200, 200, 0);
@@ -135,13 +135,14 @@ int main() {
     c2.body->angularDamping = 0.75;
     c2.body->linearDamping = 0.90;
 
+
     RigidBodyGravity g(Vector3D(0, -10, 0));
     Vector3D origin;
     // Applies it to the first vertex
     RigidBodySpringForce s(c.localVertices[0], &fixed, origin, 10, 100);
-    RigidBodySpringForce s2(c2.localVertices[0], &fixed2, origin, 10, 100);
+    RigidBodySpringForce s2(c2.localVertices[200], &fixed2, origin, 10, 100);
 
-    real rotationSpeed = 0.05;
+    real rotationSpeed = 0.25;
     real angle = PI / 2;
     bool isButtonPressed = false;
     bool isSecondButtonPressed = false;
@@ -227,12 +228,12 @@ int main() {
         c2.updateVertices();
 
         // Draw cables/springs
-        // (Could laos use global here)
-        Vector3D point = c.body->transformMatrix.transform(c.localVertices[0]);
+        // (Could also use global here)
+        Vector3D point = c.body->transformMatrix.transform(s.connectionPoint);
         vector<pair<Vector3D, Vector3D>> v(2);
         v[0].first = point;
         v[0].second = fixed.position;
-        point = c2.body->transformMatrix.transform(c2.localVertices[0]);
+        point = c2.body->transformMatrix.transform(s2.connectionPoint);
         v[1].first = point;
         v[1].second = fixed2.position;
 
@@ -266,22 +267,11 @@ int main() {
 
         // Second shape
         glm::mat4 c2Transform = convertToGLM(c2.body->transformMatrix);
-        glm::vec4 colorGreen = glm::vec4(0.3, 0.8, 0.2, 1.0);
-        phongShader.drawFaces(c2.getLocalFaces(), c2Transform, viewMatrix,
-            projectionMatrix, colorGreen, 3, lightPos, lightColors,
-            cameraPosition, 50);
-
-        glm::vec3 pos(100, 0, 100);
         glm::vec4 colorRed(0.8, 0.1, 0.1, 1.0);
-        auto vertices = generateSphereVertices(c3.body->position, c3.radius, 10, 10);
-        auto faces = returnTesselatedFaces(vertices, 10, 10);
-        auto edges = returnTesselatedEdges(vertices, 10, 10);
-        lightShader.drawFaces(faces, identity, viewMatrix, 
-            projectionMatrix, colorRed, 3, lightPos, lightColors);
-        shader.drawEdges(edges, identity, viewMatrix,
-            projectionMatrix, color);
-        //lightShader.drawFaces(c3.getLocalFaces(), identity, viewMatrix, 
-          //   projectionMatrix, colorRed, 3, lightPos, lightColors);
+        //phongShader.drawFaces(c2.getLocalFaces(), c2Transform, viewMatrix,
+          //  projectionMatrix, colorRed, 3, lightPos, lightColors, cameraPosition, 50);
+        shader.drawEdges(c2.getLocalEdges(), c2Transform, viewMatrix,
+            projectionMatrix, colorRed);
 
         // Normal vectors of the collision
         // Likewise, the collision normal is in world coordinates

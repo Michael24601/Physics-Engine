@@ -3,7 +3,7 @@
 #define SOLID_SPHERE_H
 
 #include "primitive.h"
-#include "drawingUtil.h"
+#include "tesselationUtil.h"
 
 namespace pe {
 
@@ -27,13 +27,13 @@ namespace pe {
 				0, inertiaScalar, 0,
 				0, 0, inertiaScalar
 			);
+			body->setInertiaTensor(inertiaTensor);
 
+			Vector3D origin(0, 0, 0);
 			// Sets vertices using tessalation
-			localVertices = generateSphereVertices(position, radius,
+			localVertices = generateSphereVertices(origin, radius,
 				latitudeSegments, longitudeSegments);
 			globalVertices.resize(localVertices.size());
-
-			body->setInertiaTensor(inertiaTensor);
 
 			body->angularDamping = 1;
 			body->linearDamping = 1;
