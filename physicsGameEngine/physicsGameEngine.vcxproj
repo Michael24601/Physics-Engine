@@ -178,6 +178,7 @@
     <ClCompile Include="rigidBodyWorld.cpp" />
     <ClCompile Include="sat.cpp" />
     <ClCompile Include="solidColorShader.cpp" />
+    <ClCompile Include="sphereDiffuseLightingShader.cpp" />
     <ClCompile Include="vector3D.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -222,6 +223,8 @@
     <ClInclude Include="sat.h" />
     <ClInclude Include="shaderProgram.h" />
     <ClInclude Include="solidColorShader.h" />
+    <ClInclude Include="solidSphere.h" />
+    <ClInclude Include="sphereDiffuseLightingShader.h" />
     <ClInclude Include="vector3D.h" />
   </ItemGroup>
   <ItemGroup>

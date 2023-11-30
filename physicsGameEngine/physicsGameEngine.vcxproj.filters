@@ -135,6 +135,9 @@
     <ClCompile Include="diffuseSpecularLightingShader.cpp">
       <Filter>Source Files\OpenglGraphics</Filter>
     </ClCompile>
+    <ClCompile Include="sphereDiffuseLightingShader.cpp">
+      <Filter>Source Files\OpenglGraphics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="accuracy.h">
@@ -261,6 +264,12 @@
       <Filter>Header Files\OpenglGraphics</Filter>
     </ClInclude>
     <ClInclude Include="diffuseSpecularLightingShader.h">
+      <Filter>Header Files\OpenglGraphics</Filter>
+    </ClInclude>
+    <ClInclude Include="solidSphere.h">
+      <Filter>Header Files\RigidBodyPhysics</Filter>
+    </ClInclude>
+    <ClInclude Include="sphereDiffuseLightingShader.h">
       <Filter>Header Files\OpenglGraphics</Filter>
     </ClInclude>
   </ItemGroup>

@@ -21,6 +21,7 @@
 #include "boundingVolumeHierarchy.h"
 
 #include "rectangularPrism.h"
+#include "solidSphere.h"
 #include "pyramid.h"
 #include "contactGeneration.h"
 #include "drawingUtil.h"
@@ -29,6 +30,7 @@
 #include "solidColorShader.h"
 #include "diffuseLightingShader.h"
 #include "diffuseSpecularLightingShader.h"
+#include "sphereDiffuseLightingShader.h"
 
 using namespace pe;
 using namespace std;
@@ -77,6 +79,7 @@ int main() {
     SolidColorShader shader;
     DiffuseLightingShader lightShader;
     DiffuseSpecularLightingShader phongShader;
+    SphereDiffuseLightingShader sphereShader;
 
     // View matrix, used for positioning and angling the camera
     // Camera's position in world coordinates
@@ -120,6 +123,7 @@ int main() {
     real height = 150;
     real sideT = 150;
     Pyramid c2(new RigidBody(), sideT, height, 150, Vector3D(-300, 0, 0));
+    SolidSphere c3(new RigidBody(), 100, 100, 10, 10, Vector3D(100, 0, 100));
 
     RigidBody fixed;
     fixed.position = Vector3D(200, 200, 0);
@@ -151,7 +155,7 @@ int main() {
         {
             if (event.type == sf::Event::Closed)
                 window.close();
-            else if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
+            if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
                 isButtonPressed = true;
             }
             else if (sf::Mouse::isButtonPressed(sf::Mouse::Right)) {
@@ -166,7 +170,7 @@ int main() {
                 isSecondButtonPressed = false;
             }
             // Rotates camera
-            else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
                 angle += rotationSpeed;
                 cameraPosition.x = sin(angle) * cameraDistance;
                 cameraPosition.z = cos(angle) * cameraDistance;
@@ -245,27 +249,37 @@ int main() {
 
         // Shape
         glm::mat4 cTransform = convertToGLM(c.body->transformMatrix);
-        glm::vec4 colorPurple = glm::vec4(0.6, 0.2, 0.95, 1.0);
+        glm::vec4 colorPurple = glm::vec4(0.4, 0.1, 0.8, 1.0);
         glm::vec3 lightPos[]{
             glm::vec3(0.0f, 200.0f, 0.0f),
             glm::vec3(200.0f, -200.0f, -200.0f),
-            glm::vec3(-200.0f, -200.0f, 200.0f),
+            glm::vec3(-200.0f, -200.0f, 200.0f)
         };
         glm::vec4 lightColors[]{
-            glm::vec4(1.0f, 1.0f, 1.0f, 0.5f),
-            glm::vec4(1.0f, 1.0f, 1.0f, 0.5f),
-            glm::vec4(1.0f, 1.0f, 1.0f, 0.5f)
+            glm::vec4(1.0f, 1.0f, 1.0f, 0.4f),
+            glm::vec4(1.0f, 1.0f, 1.0f, 0.4f),
+            glm::vec4(1.0f, 1.0f, 1.0f, 0.4f)
         };
         phongShader.drawFaces(c.getLocalFaces(), cTransform, viewMatrix,
             projectionMatrix, colorPurple, 3, lightPos, lightColors,
-            cameraPosition, 100);
+            cameraPosition, 50);
 
         // Second shape
         glm::mat4 c2Transform = convertToGLM(c2.body->transformMatrix);
         glm::vec4 colorGreen = glm::vec4(0.3, 0.8, 0.2, 1.0);
         phongShader.drawFaces(c2.getLocalFaces(), c2Transform, viewMatrix,
             projectionMatrix, colorGreen, 3, lightPos, lightColors,
-            cameraPosition, 100);
+            cameraPosition, 50);
+
+        glm::vec3 pos(100, 0, 100);
+        glm::vec4 colorRed(0.8, 0.1, 0.1, 1.0);
+        auto vertices = generateSphereVertices(c3.body->position, c3.radius, 10, 10);
+        auto faces = returnTesselatedFaces(vertices, 10, 10);
+        auto edges = returnTesselatedEdges(vertices, 10, 10);
+        lightShader.drawFaces(faces, identity, viewMatrix, 
+            projectionMatrix, colorRed, 3, lightPos, lightColors);
+        //lightShader.drawFaces(c3.getLocalFaces(), identity, viewMatrix, 
+          //   projectionMatrix, colorRed, 3, lightPos, lightColors);
 
         // Normal vectors of the collision
         // Likewise, the collision normal is in world coordinates

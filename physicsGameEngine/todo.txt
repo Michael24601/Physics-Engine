@@ -114,4 +114,6 @@ forces like a spring, more realistic.
 
 Ensure that all opengl / sfml / gml code is seperate from the physcis
 and collision modules. This ensures the engine does not depend on a
-specific graphics library in order to run and simulate physics.
+specific graphics library in order to run and simulate physics (DONE).
+
+Make a file that is just for tessalation (DONE).
