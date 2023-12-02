@@ -1,35 +1,21 @@
 /*
-    In order to simulate the collision of a sphere, we tessalate
-    the sphere (turn it to a polyhedra with several faces).
-    We can use the shader we use for solid shapes on these faces
-    but we face an issue:
-        - The sphere won't look smooth, even if we really increase
-        the number of faces.
-    As such, while we can use the regular diffuse lighting shader
-    on the faces of the sphere, It is better to use this shader,
-    which will create a smoother surface (because it calculates normals
-    programatically, for each point, taking advantage of the fact that this
-    is a sphere).
-    Another thing to consider is that we on't necessarily be taking
-    the faces used in the sphere object (the ones used for collision).
-    We may want to save on performance, and instead have less faces used
-    in the sphere object for collision, and more used in the graphics.
+    This shader works in the same way as the sphere diffuse lighting
+    shader, but with specular lighting (phong).
 */
 
-#ifndef SPHERE_DIFFUSE_LIGHTING_SHADER_H
-#define SPHERE_DIFFUSE_LIGHTING_SHADER_H
+#ifndef SPHERE_DIFFUSE_SPECULAR_LIGHTING_SHADER_H
+#define SPHERE_DIFFUSE_SPECULAR_LIGHTING_SHADER_H
 
 #include "shaderProgram.h"
 #include "vector3D.h"
 #include "drawingUtil.h"
-
 
 /*
     The vertex positions are received, but not their normals, because in
     a sphere, normals are always the vector form the center to the vertex,
     so it can be derived from the position.
 */
-const std::string sphereDiffuseLightingVertexShader = R"(
+const std::string sphereDiffuseSpecularLightingVertexShader = R"(
     #version 330 core
 
     layout(location = 0) in vec3 aPos;
@@ -47,7 +33,7 @@ const std::string sphereDiffuseLightingVertexShader = R"(
 )";
 
 
-const std::string sphereDiffuseLightingFragmentShader = R"(
+const std::string sphereDiffuseSpecularLightingFragmentShader = R"(
     #version 330 core
 
     in vec3 FragPos;
@@ -68,26 +54,44 @@ const std::string sphereDiffuseLightingFragmentShader = R"(
     uniform vec3 sphereCenter;
     uniform float sphereRadius;
 
+    // Specular lighting parameters
+    uniform vec3 viewPos;  // Camera position
+    uniform float shininess;  // Shininess factor
+
     void main(){
         // Calculate the sphere's normal based on its center and radius
         vec3 normal = normalize(FragPos - sphereCenter);
 
         vec3 finalDiffuse = vec3(0.0);
+        vec3 finalSpecular = vec3(0.0);
 
         for (int i = 0; i < numActiveLights; ++i) {
             vec3 lightDir = normalize(lightPos[i] - FragPos);
             float diff = max(dot(normal, lightDir), 0.0);
             vec3 diffuse = objectColor.rgb * diff * lightColors[i].rgb;
             finalDiffuse += diffuse;
+
+            // Specular calculation
+            vec3 viewDir = normalize(viewPos - FragPos);
+            vec3 reflectDir = reflect(-lightDir, normal);
+            float spec = pow(max(dot(viewDir, reflectDir), 0.0), shininess);
+            // The opacity of the phong effect is determined through the alpha value
+            vec3 specular = lightColors[i].rgb * spec * lightColors[i].a;
+            finalSpecular += specular;
         }
 
-        FragColor = vec4(finalDiffuse, objectColor.a);
+        // Combines diffuse and specular with some ambient lighting (0.1 looks best)
+        // Adjusts the ambient factor as needed
+        vec3 ambientColor = 0.1 * objectColor.rgb;
+        vec3 resultColor = finalDiffuse + finalSpecular + ambientColor;
+
+        FragColor = vec4(resultColor, objectColor.a);
     }
 )";
 
 namespace pe {
 
-    class SphereDiffuseLightingShader {
+    class SphereDiffuseSpecularLightingShader {
 
     private:
 
@@ -98,9 +102,9 @@ namespace pe {
 
     public:
 
-        SphereDiffuseLightingShader() : shaderProgramObject(
-            sphereDiffuseLightingVertexShader,
-            sphereDiffuseLightingFragmentShader) {}
+        SphereDiffuseSpecularLightingShader() : shaderProgramObject(
+            sphereDiffuseSpecularLightingVertexShader,
+            sphereDiffuseSpecularLightingFragmentShader) {}
 
         void drawFace(
             const std::vector<std::vector<Vector3D>>& faces,
@@ -112,7 +116,9 @@ namespace pe {
             const glm::vec4& objectColor,
             int activeLightSources,
             glm::vec3* lightSourcesPosition,
-            glm::vec4* lightSourcesColor
+            glm::vec4* lightSourcesColor,
+            const glm::vec3& viewPosition,
+            real shininess
         );
     };
 }

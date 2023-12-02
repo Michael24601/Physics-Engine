@@ -31,6 +31,7 @@
 #include "diffuseLightingShader.h"
 #include "diffuseSpecularLightingShader.h"
 #include "sphereDiffuseLightingShader.h"
+#include "sphereDiffuseSpecularLightingShader.h"
 #include "tesselationUtil.h"
 
 using namespace pe;
@@ -82,6 +83,7 @@ int main() {
     DiffuseLightingShader lightShader;
     DiffuseSpecularLightingShader phongShader;
     SphereDiffuseLightingShader sphereShader;
+    SphereDiffuseSpecularLightingShader spherePhongShader;
 
     // View matrix, used for positioning and angling the camera
     // Camera's position in world coordinates
@@ -140,7 +142,7 @@ int main() {
     Vector3D origin;
     // Applies it to the first vertex
     RigidBodySpringForce s(c.localVertices[0], &fixed, origin, 10, 100);
-    RigidBodySpringForce s2(c2.localVertices[200], &fixed2, origin, 10, 100);
+    RigidBodySpringForce s2(c2.localVertices[0], &fixed2, origin, 10, 100);
 
     real rotationSpeed = 0.25;
     real angle = PI / 2;
@@ -253,25 +255,23 @@ int main() {
         glm::vec4 colorPurple = glm::vec4(0.4, 0.1, 0.8, 1.0);
         glm::vec3 lightPos[]{
             glm::vec3(0.0f, 200.0f, 0.0f),
-            glm::vec3(200.0f, -200.0f, -200.0f),
-            glm::vec3(-200.0f, -200.0f, 200.0f)
         };
         glm::vec4 lightColors[]{
-            glm::vec4(1.0f, 1.0f, 1.0f, 0.4f),
-            glm::vec4(1.0f, 1.0f, 1.0f, 0.4f),
-            glm::vec4(1.0f, 1.0f, 1.0f, 0.4f)
+            glm::vec4(1.0f, 1.0f, 1.0f, 0.6f),
         };
         phongShader.drawFaces(c.getLocalFaces(), cTransform, viewMatrix,
-            projectionMatrix, colorPurple, 3, lightPos, lightColors,
-            cameraPosition, 50);
+            projectionMatrix, colorPurple, 1, lightPos, lightColors,
+            cameraPosition, 40);
 
         // Second shape
         glm::mat4 c2Transform = convertToGLM(c2.body->transformMatrix);
         glm::vec4 colorRed(0.8, 0.1, 0.1, 1.0);
-        //phongShader.drawFaces(c2.getLocalFaces(), c2Transform, viewMatrix,
-          //  projectionMatrix, colorRed, 3, lightPos, lightColors, cameraPosition, 50);
-        shader.drawEdges(c2.getLocalEdges(), c2Transform, viewMatrix,
-            projectionMatrix, colorRed);
+        spherePhongShader.drawFace(c2.getLocalFaces(), convertToGLM(c2.body->position),
+            c2.radius, c2Transform, viewMatrix,
+            projectionMatrix, colorRed, 1, lightPos, lightColors,
+            cameraPosition, 40);
+        //shader.drawEdges(c2.getLocalEdges(), c2Transform, viewMatrix,
+          //  projectionMatrix, colorRed);
 
         // Normal vectors of the collision
         // Likewise, the collision normal is in world coordinates

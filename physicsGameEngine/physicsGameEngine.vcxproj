@@ -179,6 +179,7 @@
     <ClCompile Include="sat.cpp" />
     <ClCompile Include="solidColorShader.cpp" />
     <ClCompile Include="sphereDiffuseLightingShader.cpp" />
+    <ClCompile Include="sphereDiffuseSpecularLightingShader.cpp" />
     <ClCompile Include="tesselationUtil.cpp" />
     <ClCompile Include="vector3D.cpp" />
   </ItemGroup>
@@ -226,6 +227,7 @@
     <ClInclude Include="solidColorShader.h" />
     <ClInclude Include="solidSphere.h" />
     <ClInclude Include="sphereDiffuseLightingShader.h" />
+    <ClInclude Include="sphereDiffuseSpecularLightingShader.h" />
     <ClInclude Include="tesselationUtil.h" />
     <ClInclude Include="vector3D.h" />
   </ItemGroup>
