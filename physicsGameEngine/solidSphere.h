@@ -51,7 +51,7 @@ namespace pe {
 		// Connects the correct edges using local coordinates
 		virtual void setFaces() override {
 			std::vector<std::vector<Vector3D*>> vertexFaces = 
-				returnTesselatedFacesPointers(globalVertices, latitudeSegments, 
+				returnTesselatedFaces(globalVertices, latitudeSegments, 
 					longitudeSegments);
 
 			for (int i = 0; i < vertexFaces.size(); i++) {
@@ -65,7 +65,7 @@ namespace pe {
 
 		virtual void setEdges() override {
 			std::vector<std::pair<Vector3D*, Vector3D*>> vertexEdges =
-				returnTesselatedEdgesPointers(globalVertices, latitudeSegments,
+				returnTesselatedEdges(globalVertices, latitudeSegments,
 					longitudeSegments);
 
 			for (int i = 0; i < vertexEdges.size(); i++) {
@@ -77,7 +77,7 @@ namespace pe {
 
 		virtual void setLocalFaces() override {
 			std::vector<std::vector<Vector3D*>> vertexFaces =
-				returnTesselatedFacesPointers(localVertices, latitudeSegments,
+				returnTesselatedFaces(localVertices, latitudeSegments,
 					longitudeSegments);
 
 			for (int i = 0; i < vertexFaces.size(); i++) {
@@ -91,7 +91,7 @@ namespace pe {
 
 		virtual void setLocalEdges() override {
 			std::vector<std::pair<Vector3D*, Vector3D*>> vertexEdges =
-				returnTesselatedEdgesPointers(localVertices, latitudeSegments,
+				returnTesselatedEdges(localVertices, latitudeSegments,
 					longitudeSegments);
 
 			for (int i = 0; i < vertexEdges.size(); i++) {

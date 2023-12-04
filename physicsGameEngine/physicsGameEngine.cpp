@@ -183,7 +183,7 @@ int main() {
                 angle -= rotationSpeed;
                 cameraPosition.x = sin(angle) * cameraDistance;
                 cameraPosition.z = cos(angle) * cameraDistance;
-                viewMatrix = glm::lookAt(cameraPosition, cameraTarget, upVector);;
+                viewMatrix = glm::lookAt(cameraPosition, cameraTarget, upVector);
             }
         }
 
@@ -270,8 +270,8 @@ int main() {
             c2.radius, c2Transform, viewMatrix,
             projectionMatrix, colorRed, 1, lightPos, lightColors,
             cameraPosition, 40);
-        //shader.drawEdges(c2.getLocalEdges(), c2Transform, viewMatrix,
-          //  projectionMatrix, colorRed);
+        shader.drawEdges(c2.getLocalEdges(), c2Transform, viewMatrix,
+           projectionMatrix, color);
 
         // Normal vectors of the collision
         // Likewise, the collision normal is in world coordinates

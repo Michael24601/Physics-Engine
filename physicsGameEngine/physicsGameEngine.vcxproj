@@ -170,6 +170,7 @@
     <ClCompile Include="particleWorld.cpp" />
     <ClCompile Include="physicsGameEngine.cpp" />
     <ClCompile Include="particleContact.cpp" />
+    <ClCompile Include="polyhedron.cpp" />
     <ClCompile Include="primitive.cpp" />
     <ClCompile Include="rigidBody.cpp" />
     <ClCompile Include="rigidBodyCableForce.cpp" />
@@ -191,6 +192,8 @@
     <ClInclude Include="contact.h" />
     <ClInclude Include="contactData.h" />
     <ClInclude Include="contactGeneration.h" />
+    <ClInclude Include="polyhedron.h" />
+    <ClInclude Include="polyhedronInterface.h" />
     <ClInclude Include="rectangularPrism.h" />
     <ClInclude Include="diffuseLightingShader.h" />
     <ClInclude Include="diffuseSpecularLightingShader.h" />

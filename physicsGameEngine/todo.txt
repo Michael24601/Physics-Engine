@@ -117,3 +117,15 @@ and collision modules. This ensures the engine does not depend on a
 specific graphics library in order to run and simulate physics (DONE).
 
 Make a file that is just for tessalation (DONE).
+
+Create a primitive class that can handle all different kinds of
+primitives, and provides a graphics engine independent interface to
+its vertices, and vertex/face normals, edges, in such a way as to cover
+all bases (for instance, in a cube, the vertex normals are themselves
+the same as the face's, while in a sphere, the vertex normals are
+can be calculated individually for the best effect). This will help,
+as it ensures the same shaders can be used for any type of primitive,
+and special shaders no longer need to be employed. It also removes
+some of the calculations from the shader programs.
+
+Sdd checking in primitive for counter clockwise order.

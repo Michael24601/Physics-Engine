@@ -22,7 +22,6 @@ void SolidColorShader::drawEdges(
         vertices.push_back(pair.second.z);
     }
 
-
     GLuint vao;
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);

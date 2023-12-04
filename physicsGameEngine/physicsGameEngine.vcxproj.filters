@@ -43,6 +43,12 @@
     <Filter Include="Source Files\OpenglGraphics">
       <UniqueIdentifier>{528a04ee-a99a-4fac-9ff7-2720c586fe4d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Primitive">
+      <UniqueIdentifier>{e5aad90b-164c-4750-bd25-a7f3e7990117}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Primitive">
+      <UniqueIdentifier>{7dd8a706-bc57-4ab6-a35b-dedc63bec38e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="physicsGameEngine.cpp">
@@ -105,9 +111,6 @@
     <ClCompile Include="particleCable.cpp">
       <Filter>Source Files\ParticlePhysics</Filter>
     </ClCompile>
-    <ClCompile Include="primitive.cpp">
-      <Filter>Source Files\RigidBodyPhysics</Filter>
-    </ClCompile>
     <ClCompile Include="rigidBody.cpp">
       <Filter>Source Files\RigidBodyPhysics</Filter>
     </ClCompile>
@@ -138,11 +141,17 @@
     <ClCompile Include="sphereDiffuseLightingShader.cpp">
       <Filter>Source Files\OpenglGraphics</Filter>
     </ClCompile>
-    <ClCompile Include="tesselationUtil.cpp">
-      <Filter>Source Files\RigidBodyPhysics</Filter>
-    </ClCompile>
     <ClCompile Include="sphereDiffuseSpecularLightingShader.cpp">
       <Filter>Source Files\OpenglGraphics</Filter>
+    </ClCompile>
+    <ClCompile Include="primitive.cpp">
+      <Filter>Source Files\Primitive</Filter>
+    </ClCompile>
+    <ClCompile Include="tesselationUtil.cpp">
+      <Filter>Source Files\Primitive</Filter>
+    </ClCompile>
+    <ClCompile Include="polyhedron.cpp">
+      <Filter>Source Files\Primitive</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -177,9 +186,6 @@
       <Filter>Header Files\RigidBodyPhysics</Filter>
     </ClInclude>
     <ClInclude Include="contactGeneration.h">
-      <Filter>Header Files\RigidBodyPhysics</Filter>
-    </ClInclude>
-    <ClInclude Include="rectangularPrism.h">
       <Filter>Header Files\RigidBodyPhysics</Filter>
     </ClInclude>
     <ClInclude Include="drawingUtil.h">
@@ -227,15 +233,6 @@
     <ClInclude Include="particleDrag.h">
       <Filter>Header Files\ParticlePhysics</Filter>
     </ClInclude>
-    <ClInclude Include="plane.h">
-      <Filter>Header Files\RigidBodyPhysics</Filter>
-    </ClInclude>
-    <ClInclude Include="primitive.h">
-      <Filter>Header Files\RigidBodyPhysics</Filter>
-    </ClInclude>
-    <ClInclude Include="pyramid.h">
-      <Filter>Header Files\RigidBodyPhysics</Filter>
-    </ClInclude>
     <ClInclude Include="rigidBody.h">
       <Filter>Header Files\RigidBodyPhysics</Filter>
     </ClInclude>
@@ -272,16 +269,34 @@
     <ClInclude Include="diffuseSpecularLightingShader.h">
       <Filter>Header Files\OpenglGraphics</Filter>
     </ClInclude>
-    <ClInclude Include="solidSphere.h">
-      <Filter>Header Files\RigidBodyPhysics</Filter>
-    </ClInclude>
     <ClInclude Include="sphereDiffuseLightingShader.h">
       <Filter>Header Files\OpenglGraphics</Filter>
     </ClInclude>
-    <ClInclude Include="tesselationUtil.h">
-      <Filter>Header Files\RigidBodyPhysics</Filter>
-    </ClInclude>
     <ClInclude Include="sphereDiffuseSpecularLightingShader.h">
+      <Filter>Header Files\OpenglGraphics</Filter>
+    </ClInclude>
+    <ClInclude Include="polyhedron.h">
+      <Filter>Header Files\Primitive</Filter>
+    </ClInclude>
+    <ClInclude Include="primitive.h">
+      <Filter>Header Files\Primitive</Filter>
+    </ClInclude>
+    <ClInclude Include="plane.h">
+      <Filter>Header Files\Primitive</Filter>
+    </ClInclude>
+    <ClInclude Include="solidSphere.h">
+      <Filter>Header Files\Primitive</Filter>
+    </ClInclude>
+    <ClInclude Include="tesselationUtil.h">
+      <Filter>Header Files\Primitive</Filter>
+    </ClInclude>
+    <ClInclude Include="rectangularPrism.h">
+      <Filter>Header Files\Primitive</Filter>
+    </ClInclude>
+    <ClInclude Include="pyramid.h">
+      <Filter>Header Files\Primitive</Filter>
+    </ClInclude>
+    <ClInclude Include="polyhedronInterface.h">
       <Filter>Header Files\OpenglGraphics</Filter>
     </ClInclude>
   </ItemGroup>

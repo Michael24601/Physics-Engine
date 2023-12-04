@@ -110,6 +110,20 @@ namespace pe {
             const glm::vec3& viewPosition,
             real shininess
         );
+
+        void drawFaces(
+            const std::vector<glm::vec3>& faces,
+            const std::vector<glm::vec3>& normals,
+            const glm::mat4& model,
+            const glm::mat4& view,
+            const glm::mat4& projection,
+            const glm::vec4& objectColor,
+            int activeLightSources,
+            glm::vec3* lightSourcesPosition,
+            glm::vec4* lightSourcesColor,
+            const glm::vec3& viewPosition,
+            real shininess
+        );
     };
 }
 
