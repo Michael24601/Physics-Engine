@@ -22,21 +22,23 @@
 	of the primitive depend on SAT to immeditaly implement collision
 	detection within the primitive class.
 */
-#include "primitive.h"
+#include "polyhedron.h"
 
 namespace pe {
-
 
 	/* 
 		Function that is used to check whether a line(defined by Pand D)
 		separates the vertices of a polygon or not.
 	*/
-	int whichSide(const Primitive& C, const pe::Vector3D& P,
-		const pe::Vector3D& D);
+	int whichSide(
+		const Polyhedron& C,
+		const pe::Vector3D& P,
+		const pe::Vector3D& D
+	);
 
 
 	// Function that returns true if the two primitives intersect
-	bool testIntersection(const Primitive& C0, const Primitive& C1);
+	bool testIntersection(const Polyhedron& C0, const Polyhedron& C1);
 }
 
 #endif

@@ -5,6 +5,7 @@
 #include "shaderProgram.h"
 #include "vector3D.h"
 #include "drawingUtil.h"
+#include "polyhedronInterface.h"
 
 const std::string diffuseSpecularLightingVertexShader = R"(
     #version 330 core
@@ -95,22 +96,11 @@ namespace pe {
             diffuseSpecularLightingFragmentShader
         ) {}
 
-        // Here, the view position is just the camera position
-        // Shininess is how shiny the specular effect is, with
-        // 1 being extremly strong, and 100000 being very weak
-        void drawFaces(
-            const std::vector<std::vector<Vector3D>>& faces,
-            const glm::mat4& model,
-            const glm::mat4& view,
-            const glm::mat4& projection,
-            const glm::vec4& objectColor,
-            int activeLightSources,
-            glm::vec3* lightSourcesPosition,
-            glm::vec4* lightSourcesColor,
-            const glm::vec3& viewPosition,
-            real shininess
-        );
-
+        /*
+            Here, the view position is just the camera position.
+            Shininess is how shiny the specular effect is, with
+            1 being extremly strong, and 100000 being very weak.
+        */
         void drawFaces(
             const std::vector<glm::vec3>& faces,
             const std::vector<glm::vec3>& normals,

@@ -5,9 +5,9 @@ using namespace pe;
 
 
 unsigned int pe::pointAndConvexPolyhedron(
-    const Primitive& polyhedron,
+    const Polyhedron& polyhedron,
     const Vector3D& point,
-    const Primitive& secondPolyhedron,
+    const Polyhedron& secondPolyhedron,
     std::vector<Contact>& data) {
 
     // Transform the point into the local space of the polyhedron
@@ -23,8 +23,8 @@ unsigned int pe::pointAndConvexPolyhedron(
     for (size_t i = 0; i < polyhedron.faces.size(); i++)
     {
         // Get the face normal and any point on the face in local space
-        Vector3D faceNormal = polyhedron.faces[i].normal();
-        Vector3D pointOnFace = *polyhedron.faces[i].vertices[0];
+        Vector3D faceNormal = polyhedron.faces[i].normal;
+        Vector3D pointOnFace = polyhedron.faces[i].vertices[0];
 
         // Compute the vector from the point to the point on the face
         Vector3D toPointOnFace = pointOnFace - localPoint;
@@ -78,8 +78,8 @@ unsigned int pe::pointAndConvexPolyhedron(
 unsigned int pe::edgeToEdge(
     const Edge& edgeA,
     const Edge& edgeB,
-    const Primitive& p1,
-    const Primitive& p2,
+    const Polyhedron& p1,
+    const Polyhedron& p2,
     std::vector<Contact>& data) {
 
     // We initialize variables to track the shallowest penetration
@@ -87,60 +87,53 @@ unsigned int pe::edgeToEdge(
     // And corresponding edge pair
     Contact contact;
 
-    // We iterate through each pair of edges
-    for (size_t i = 0; i < edgeA.vertices.size() - 1; ++i)
+    // Get the two vertices of the current edges
+    Vector3D a0 = edgeA.vertices.first;
+    Vector3D a1 = edgeA.vertices.second;
+    Vector3D b0 = edgeB.vertices.first;
+    Vector3D b1 = edgeB.vertices.second;
+
+    // Calculate the direction vectors of the edges
+    Vector3D dirA = a1 - a0;
+    Vector3D dirB = b1 - b0;
+
+    // Calculate the vector between the two edge starting points
+    Vector3D offset = b0 - a0;
+
+    // Calculate the determinant and squared lengths of the edges
+    real det = dirA.vectorProduct(dirB).magnitude();
+    real lenA = dirA.magnitudeSquared();
+    real lenB = dirB.magnitudeSquared();
+
+    // Calculate parameters for edge intersection
+    real s = dirA.vectorProduct(offset).magnitude() / det;
+    real t = dirB.vectorProduct(offset).magnitude() / det;
+
+    // Check if edges intersect within their segments
+    if (s >= 0 && s <= 1 && t >= 0 && t <= 1)
     {
-        for (size_t j = 0; j < edgeB.vertices.size() - 1; ++j)
+        // Calculate penetration depth (negative if edges overlap)
+        real penetration = (s < t) ? s : t;
+
+        // If this penetration is shallower, we add a contact
+        if (penetration < minPenetration)
         {
-            // Get the two vertices of the current edges
-            Vector3D a0 = *edgeA.vertices[i];
-            Vector3D a1 = *edgeA.vertices[i + 1];
-            Vector3D b0 = *edgeB.vertices[j];
-            Vector3D b1 = *edgeB.vertices[j + 1];
+            minPenetration = penetration;
 
-            // Calculate the direction vectors of the edges
-            Vector3D dirA = a1 - a0;
-            Vector3D dirB = b1 - b0;
+            // Calculate contact normal (perpendicular to the edges)
+            contact.contactNormal = dirA.vectorProduct(dirB);
+            contact.contactNormal.normalize();
 
-            // Calculate the vector between the two edge starting points
-            Vector3D offset = b0 - a0;
+            // Calculate contact point on edgeA
+            contact.contactPoint = a0 + dirA * s;
 
-            // Calculate the determinant and squared lengths of the edges
-            real det = dirA.vectorProduct(dirB).magnitude();
-            real lenA = dirA.magnitudeSquared();
-            real lenB = dirB.magnitudeSquared();
-
-            // Calculate parameters for edge intersection
-            real s = dirA.vectorProduct(offset).magnitude() / det;
-            real t = dirB.vectorProduct(offset).magnitude() / det;
-
-            // Check if edges intersect within their segments
-            if (s >= 0 && s <= 1 && t >= 0 && t <= 1)
-            {
-                // Calculate penetration depth (negative if edges overlap)
-                real penetration = (s < t) ? s : t;
-
-                // If this penetration is shallower, we add a contact
-                if (penetration < minPenetration)
-                {
-                    minPenetration = penetration;
-
-                    // Calculate contact normal (perpendicular to the edges)
-                    contact.contactNormal = dirA.vectorProduct(dirB);
-                    contact.contactNormal.normalize();
-
-                    // Calculate contact point on edgeA
-                    contact.contactPoint = a0 + dirA * s;
-
-                    /*
-                        body[0] is the one in respect to whom the contact
-                        normal is pointing. The contact normal of body[1] is
-                        the opposite of that which is saved in the contact.
-                    */
-                    contact.body[0] = p1.body;
-                    contact.body[1] = p2.body;
-                }
-            }
+            /*
+                body[0] is the one in respect to whom the contact
+                normal is pointing. The contact normal of body[1] is
+                the opposite of that which is saved in the contact.
+            */
+            contact.body[0] = p1.body;
+            contact.body[1] = p2.body;
         }
     }
 
@@ -166,7 +159,7 @@ unsigned int pe::edgeToEdge(
     In our case, we choose the one closest to the velocity (travel)
     direction of the two objects.
 */
-bool pe::returnMaxContact(const Primitive& p1, const Primitive& p2,
+bool pe::returnMaxContact(const Polyhedron& p1, const Polyhedron& p2,
     std::vector<Contact>& contactsToBeResolved) {
 
     std::vector<Contact> contacts;
@@ -177,7 +170,7 @@ bool pe::returnMaxContact(const Primitive& p1, const Primitive& p2,
         pointAndConvexPolyhedron(p1, vertex, p2, contacts);
     }
     for (const Edge& edge1 : p1.edges) {
-        for (Edge edge2 : p2.edges) {
+        for (const Edge& edge2 : p2.edges) {
             edgeToEdge(edge1, edge2, p1, p2, contacts);
         }
     }

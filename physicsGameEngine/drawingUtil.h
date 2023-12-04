@@ -60,35 +60,6 @@ namespace pe {
 		sf::Color color,
 		real opacity
 	);
-
-	/*
-		Returns a homogeneous matrix in glm mat4 format.
-		Used in the graphics module.
-	*/
-	glm::mat4 convertToGLM(const Matrix3x4& m);
-
-	/*
-		Returns a 3D matrix in the glm format.
-	*/
-	glm::vec3 convertToGLM(const Vector3D& v);
-
-
-	/*
-		Turns an n-polygon into n-2 triangles.
-		Works because all vertices are ordered(clockwise or counter
-		clockwise). Assumes the points are in order and convex.
-	*/
-	std::vector<std::vector<Vector3D>> triangulateFace(
-		const std::vector<Vector3D>& vertices
-	);
-
-	/*
-		Returns the normal of a triangle face (3 vertices).
-		Assumes they are not colinear.
-		It works because vectors are in the same order
-	*/
-	Vector3D getNormal(const Vector3D& v1, const Vector3D& v2,
-		const Vector3D& v3);
 }
 
 

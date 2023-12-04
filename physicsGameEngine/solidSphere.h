@@ -2,12 +2,12 @@
 #ifndef SOLID_SPHERE_H
 #define SOLID_SPHERE_H
 
-#include "primitive.h"
+#include "polyhedron.h"
 #include "tesselationUtil.h"
 
 namespace pe {
 
-	class SolidSphere : public Primitive {
+	class SolidSphere : public Polyhedron {
 
 	public:
 
@@ -16,89 +16,61 @@ namespace pe {
 		int longitudeSegments;
 
 		SolidSphere(RigidBody* body, real radius, real mass, int latitudeSegments,
-			int longtitudeSegments, Vector3D position) : Primitive(body, mass, position),
+			int longtitudeSegments, Vector3D position) :
+			Polyhedron(
+				body,
+				mass,
+				position,
+				Matrix3x3(
+					(2.0 / 5.0) * mass * radius * radius, 0, 0,
+					0, (2.0 / 5.0) * mass * radius * radius, 0,
+					0, 0, (2.0 / 5.0) * mass * radius * radius
+				),
+				generateSphereVertices(
+					Vector3D(0, 0, 0),
+					radius,
+					latitudeSegments,
+					longtitudeSegments
+				)
+			),
 			radius{ radius }, latitudeSegments{ latitudeSegments }, 
-			longitudeSegments{ longtitudeSegments } {
+			longitudeSegments{ longtitudeSegments } {}
 
-			real inertiaScalar = (2.0 / 5.0) * mass * radius * radius;
-			
-			pe::Matrix3x3 inertiaTensor(
-				inertiaScalar, 0, 0,
-				0, inertiaScalar, 0,
-				0, 0, inertiaScalar
-			);
-			body->setInertiaTensor(inertiaTensor);
 
-			Vector3D origin(0, 0, 0);
-			// Sets vertices using tessalation
-			localVertices = generateSphereVertices(origin, radius,
-				latitudeSegments, longitudeSegments);
-			globalVertices.resize(localVertices.size());
+		virtual std::vector<Face> calculateFaces(
+			const std::vector<Vector3D>& vertices
+		) const override {
 
-			body->angularDamping = 1;
-			body->linearDamping = 1;
+			std::vector<Face> faces;
 
-			body->calculateDerivedData();
-			updateVertices();
-
-			// Sets the face and edge connection
-			setEdges();
-			setFaces();
-			setLocalEdges();
-			setLocalFaces();
-		}
-
-		// Connects the correct edges using local coordinates
-		virtual void setFaces() override {
-			std::vector<std::vector<Vector3D*>> vertexFaces = 
-				returnTesselatedFaces(globalVertices, latitudeSegments, 
+			std::vector<std::vector<Vector3D>> vertexFaces = 
+				returnTesselatedFaces(vertices, latitudeSegments, 
 					longitudeSegments);
 
 			for (int i = 0; i < vertexFaces.size(); i++) {
-				Face face;
-				for (int j = 0; j < vertexFaces[i].size(); j++) {
-					face.vertices.push_back(vertexFaces[i][j]);
-				}
+				Face face(vertexFaces[i]);
 				faces.push_back(face);
 			}
+
+			return faces;
 		}
 
-		virtual void setEdges() override {
-			std::vector<std::pair<Vector3D*, Vector3D*>> vertexEdges =
-				returnTesselatedEdges(globalVertices, latitudeSegments,
+		virtual std::vector<Edge> calculateEdges(
+			const std::vector<Vector3D>& vertices
+		) const override {
+
+			std::vector<Edge> edges;
+
+			std::vector<std::pair<Vector3D, Vector3D>> vertexEdges =
+				returnTesselatedEdges(vertices, latitudeSegments,
 					longitudeSegments);
 
 			for (int i = 0; i < vertexEdges.size(); i++) {
-				Edge edge;
-				edge.vertices = { vertexEdges[i].first, vertexEdges[i].second };
+				Edge edge(vertexEdges[i].first, vertexEdges[i].second);
 				edges.push_back(edge);
 			}
-		}
 
-		virtual void setLocalFaces() override {
-			std::vector<std::vector<Vector3D*>> vertexFaces =
-				returnTesselatedFaces(localVertices, latitudeSegments,
-					longitudeSegments);
-
-			for (int i = 0; i < vertexFaces.size(); i++) {
-				Face face;
-				for (int j = 0; j < vertexFaces[i].size(); j++) {
-					face.vertices.push_back(vertexFaces[i][j]);
-				}
-				localFaces.push_back(face);
-			}
-		}
-
-		virtual void setLocalEdges() override {
-			std::vector<std::pair<Vector3D*, Vector3D*>> vertexEdges =
-				returnTesselatedEdges(localVertices, latitudeSegments,
-					longitudeSegments);
-
-			for (int i = 0; i < vertexEdges.size(); i++) {
-				Edge edge;
-				edge.vertices = { vertexEdges[i].first, vertexEdges[i].second };
-				localEdges.push_back(edge);
-			}
+			return edges;
 		}
 	};
 }

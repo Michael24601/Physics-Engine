@@ -19,7 +19,7 @@
     primitive collision detection and generation algorithm.
 */
 
-#include "primitive.h"
+#include "polyhedron.h"
 #include "contact.h"
 
 namespace pe {
@@ -29,8 +29,8 @@ namespace pe {
         polyhedron. We send the second polyhdron as an argument as we will
         need to set its adress in the resulting contact object.
     */
-    unsigned pointAndConvexPolyhedron(const Primitive& polyhedron,
-        const Vector3D& point, const Primitive& secondPolyhedron,
+    unsigned pointAndConvexPolyhedron(const Polyhedron& polyhedron,
+        const Vector3D& point, const Polyhedron& secondPolyhedron,
         std::vector<Contact>& data);
 
 
@@ -40,7 +40,7 @@ namespace pe {
         need to set their adress in the resulting contact object.
     */
     unsigned edgeToEdge(const Edge& edgeA, const Edge& edgeB,
-        const Primitive& p1, const Primitive& p2,
+        const Polyhedron& p1, const Polyhedron& p2,
         std::vector<Contact>& data);
 
 
@@ -54,6 +54,6 @@ namespace pe {
         In our case, we choose the one closest to the velocity (travel)
         direction of the two objects.
     */
-    bool returnMaxContact(const Primitive& p1, const Primitive& p2,
+    bool returnMaxContact(const Polyhedron& p1, const Polyhedron& p2,
         std::vector<Contact>& contactsToBeResolved);
 }

@@ -138,19 +138,13 @@
     <ClCompile Include="diffuseSpecularLightingShader.cpp">
       <Filter>Source Files\OpenglGraphics</Filter>
     </ClCompile>
-    <ClCompile Include="sphereDiffuseLightingShader.cpp">
-      <Filter>Source Files\OpenglGraphics</Filter>
-    </ClCompile>
-    <ClCompile Include="sphereDiffuseSpecularLightingShader.cpp">
-      <Filter>Source Files\OpenglGraphics</Filter>
-    </ClCompile>
-    <ClCompile Include="primitive.cpp">
-      <Filter>Source Files\Primitive</Filter>
-    </ClCompile>
     <ClCompile Include="tesselationUtil.cpp">
       <Filter>Source Files\Primitive</Filter>
     </ClCompile>
     <ClCompile Include="polyhedron.cpp">
+      <Filter>Source Files\Primitive</Filter>
+    </ClCompile>
+    <ClCompile Include="polyhedronInterface.cpp">
       <Filter>Source Files\Primitive</Filter>
     </ClCompile>
   </ItemGroup>
@@ -269,16 +263,7 @@
     <ClInclude Include="diffuseSpecularLightingShader.h">
       <Filter>Header Files\OpenglGraphics</Filter>
     </ClInclude>
-    <ClInclude Include="sphereDiffuseLightingShader.h">
-      <Filter>Header Files\OpenglGraphics</Filter>
-    </ClInclude>
-    <ClInclude Include="sphereDiffuseSpecularLightingShader.h">
-      <Filter>Header Files\OpenglGraphics</Filter>
-    </ClInclude>
     <ClInclude Include="polyhedron.h">
-      <Filter>Header Files\Primitive</Filter>
-    </ClInclude>
-    <ClInclude Include="primitive.h">
       <Filter>Header Files\Primitive</Filter>
     </ClInclude>
     <ClInclude Include="plane.h">

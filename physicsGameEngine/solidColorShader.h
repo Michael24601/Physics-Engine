@@ -5,6 +5,7 @@
 #include "shaderProgram.h"
 #include "vector3D.h"
 #include "drawingUtil.h"
+#include "polyhedronInterface.h"
 
 const std::string solidColorVertexShader = R"(
 	#version 330 core
@@ -45,7 +46,7 @@ namespace pe {
             solidColorFragmentShader) {}
 
         void drawEdges(
-            const std::vector<std::pair<Vector3D, Vector3D>>& edges,
+            const std::vector<glm::vec3>& edges,
             const glm::mat4& model,
             const glm::mat4& view,
             const glm::mat4& projection,
@@ -53,7 +54,7 @@ namespace pe {
         );
 
         void drawFaces(
-            const std::vector<std::vector<Vector3D>>& faces,
+            const std::vector<glm::vec3>& faces,
             const glm::mat4& model,
             const glm::mat4& view,
             const glm::mat4& projection,

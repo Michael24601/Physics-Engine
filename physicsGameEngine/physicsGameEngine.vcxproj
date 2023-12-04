@@ -171,7 +171,7 @@
     <ClCompile Include="physicsGameEngine.cpp" />
     <ClCompile Include="particleContact.cpp" />
     <ClCompile Include="polyhedron.cpp" />
-    <ClCompile Include="primitive.cpp" />
+    <ClCompile Include="polyhedronInterface.cpp" />
     <ClCompile Include="rigidBody.cpp" />
     <ClCompile Include="rigidBodyCableForce.cpp" />
     <ClCompile Include="rigidBodyGravity.cpp" />
@@ -179,8 +179,6 @@
     <ClCompile Include="rigidBodyWorld.cpp" />
     <ClCompile Include="sat.cpp" />
     <ClCompile Include="solidColorShader.cpp" />
-    <ClCompile Include="sphereDiffuseLightingShader.cpp" />
-    <ClCompile Include="sphereDiffuseSpecularLightingShader.cpp" />
     <ClCompile Include="tesselationUtil.cpp" />
     <ClCompile Include="vector3D.cpp" />
   </ItemGroup>
@@ -216,7 +214,6 @@
     <ClInclude Include="particleSpringForce.h" />
     <ClInclude Include="particleWorld.h" />
     <ClInclude Include="plane.h" />
-    <ClInclude Include="primitive.h" />
     <ClInclude Include="pyramid.h" />
     <ClInclude Include="quaternion.h" />
     <ClInclude Include="rigidBody.h" />
@@ -229,8 +226,6 @@
     <ClInclude Include="shaderProgram.h" />
     <ClInclude Include="solidColorShader.h" />
     <ClInclude Include="solidSphere.h" />
-    <ClInclude Include="sphereDiffuseLightingShader.h" />
-    <ClInclude Include="sphereDiffuseSpecularLightingShader.h" />
     <ClInclude Include="tesselationUtil.h" />
     <ClInclude Include="vector3D.h" />
   </ItemGroup>

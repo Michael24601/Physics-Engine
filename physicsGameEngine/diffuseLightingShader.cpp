@@ -4,7 +4,8 @@
 using namespace pe;
 
 void DiffuseLightingShader::drawFaces(
-    const std::vector<std::vector<Vector3D>>& faces,
+    const std::vector<glm::vec3>& faces,
+    const std::vector<glm::vec3>& normals,
     const glm::mat4& model,
     const glm::mat4& view,
     const glm::mat4& projection,
@@ -20,27 +21,6 @@ void DiffuseLightingShader::drawFaces(
         return;
     }
 
-    // First we flatten the polyhedra data and triangulate the faces
-    // And extract the normals
-    std::vector<Vector3D> flattenedPositions;
-    std::vector<Vector3D> flattenedNormals;
-
-    // Flatten the cube data and triangulate the faces
-    for (const auto& face : faces) {
-        auto triangles = triangulateFace(face);
-        flattenedPositions.reserve(triangles.size() * 3);
-        flattenedNormals.reserve(triangles.size() * 3);
-        for (const auto& triangle : triangles) {
-            flattenedPositions.insert(flattenedPositions.end(), 
-                triangle.begin(), triangle.end());
-            // Calculate the normal for the triangle and replicate it for each vertex
-            Vector3D faceNormal = getNormal(triangle[0], triangle[1], triangle[2]);
-            flattenedNormals.push_back(faceNormal);
-            flattenedNormals.push_back(faceNormal);
-            flattenedNormals.push_back(faceNormal);
-        }
-    }
-
     GLuint vao;
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
@@ -50,32 +30,29 @@ void DiffuseLightingShader::drawFaces(
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
     // Calculate the total size of the data
-    size_t totalSize = flattenedPositions.size() * sizeof(Vector3D) 
-        + flattenedNormals.size() * sizeof(Vector3D);
+    size_t totalSize = faces.size() * sizeof(glm::vec3)
+        + normals.size() * sizeof(glm::vec3);
 
     // Create a buffer to hold both position and normal data
-    std::vector<Vector3D> combinedData;
-    combinedData.reserve(flattenedPositions.size() 
-        + flattenedNormals.size());
-    combinedData.insert(combinedData.end(), 
-        flattenedPositions.begin(), flattenedPositions.end());
-    combinedData.insert(combinedData.end(), 
-        flattenedNormals.begin(), flattenedNormals.end());
+    std::vector<glm::vec3> combinedData;
+    combinedData.reserve(faces.size() + normals.size());
+    combinedData.insert(combinedData.end(), faces.begin(), faces.end());
+    combinedData.insert(combinedData.end(), normals.begin(), normals.end());
 
     // Upload combined data to VBO
     glBufferData(
-        GL_ARRAY_BUFFER, 
-        totalSize, 
-        combinedData.data(), 
+        GL_ARRAY_BUFFER,
+        totalSize,
+        combinedData.data(),
         GL_STATIC_DRAW
     );
 
     // Specify vertex attribute pointers for position
     glVertexAttribPointer(
-        0, 3, 
-        GL_FLOAT, 
-        GL_FALSE, 
-        sizeof(Vector3D), 
+        0, 3,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(glm::vec3),
         (void*)0
     );
 
@@ -86,8 +63,8 @@ void DiffuseLightingShader::drawFaces(
         1, 3,
         GL_FLOAT,
         GL_FALSE,
-        sizeof(Vector3D),
-        (void*)(flattenedPositions.size() * sizeof(Vector3D))
+        sizeof(glm::vec3),
+        (void*)(faces.size() * sizeof(glm::vec3))
     );
     // Here, 1, is the (location = 1) in the "in" of the shader
     glEnableVertexAttribArray(1);
@@ -120,7 +97,7 @@ void DiffuseLightingShader::drawFaces(
 
     glBindVertexArray(vao);
 
-    glDrawArrays(GL_TRIANGLES, 0, flattenedPositions.size());
+    glDrawArrays(GL_TRIANGLES, 0, faces.size());
     glBindVertexArray(0);
 
     glDeleteVertexArrays(1, &vao);

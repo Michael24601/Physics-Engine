@@ -38,15 +38,43 @@ namespace pe {
 		Vector3D normal;
 		Vector3D centroid;
 
+		Face() {}
+
 		Face(const std::vector<Vector3D>& vertices) : vertices(vertices) {
 			calculateNormal();
 			calculateCentroid();
 		}
 
+		
+		// This function assumes we have at least 3 vertices
 		void calculateNormal() {
-			// This function assumes we have at least 3 vertices
-			Vector3D AB = vertices[1] - vertices[0];
-			Vector3D AC = vertices[2] - vertices[0];
+			/*
+				Sometimes, we get degenerate vertices, where some vertices
+				in a face aren't all distinct. This makes calculating the
+				normal difficult. this function assumes that there are at
+				least 3 distinct vertices, finds the first 3, and then
+				calculates the normal.
+			*/
+
+			Vector3D firstVertex = vertices[0];
+			Vector3D secondVertex;
+			for (int i = 1; i < vertices.size(); i++) {
+				if (vertices[i] != firstVertex) {
+					secondVertex = vertices[i];
+					break;
+				}
+			}
+			Vector3D thirdVertex;
+			for (int i = 1; i < vertices.size(); i++) {
+				if (vertices[i] != firstVertex 
+					&& vertices[i] != secondVertex) {
+					thirdVertex = vertices[i];
+					break;
+				}
+			}
+
+			Vector3D AB = secondVertex - firstVertex;
+			Vector3D AC = thirdVertex - firstVertex;;
 			normal = AB.vectorProduct(AC);
 			normal.normalize();
 		}
@@ -69,6 +97,8 @@ namespace pe {
 	struct Edge {
 		std::pair<Vector3D, Vector3D> vertices;
 
+		Edge() {}
+
 		Edge(const Vector3D& first, const Vector3D& second) {
 			vertices = std::make_pair(first, second);
 		}
@@ -76,33 +106,6 @@ namespace pe {
 
 
 	class Polyhedron {
-
-	private:
-
-		/*
-			Returns the edges associations of the given vertices as defined
-			in the class that extends Polyhedron.
-			Needs to be overriden in such a way as to return an array of
-			Edge objects based on which vertices the edges connect in the
-			shape.
-			Designed to provide a way to get the edges of the current
-			polyhedron regardless of what the value of the actual vertices
-			are (wether they're local or transformed), so long as they are
-			of the expected order of the local vertices as defined by the
-			class extending Polyhedron and overriding this function.
-		*/
-		virtual std::vector<Edge> calculateEdges(
-			std::vector<Vector3D> vertices
-		) const = 0;
-
-		/*
-			Returns the faces associations.
-			Everything said about the edges applies here.
-		*/
-		virtual std::vector<Face> calculateFaces(
-			std::vector<Vector3D> vertices
-		) const = 0;
-
 
 	public:
 
@@ -141,7 +144,38 @@ namespace pe {
 			this->localVertices = localVertices;
 			// Initially, the global vertices are the same as the local ones
 			globalVertices = localVertices;
+
+			body->angularDamping = 1;
+			body->linearDamping = 1;
+			body->calculateDerivedData();
 		}
+
+
+		/*
+			Returns the edges associations of the given vertices as defined
+			in the class that extends Polyhedron.
+			Needs to be overriden in such a way as to return an array of
+			Edge objects based on which vertices the edges connect in the
+			shape.
+			Designed to provide a way to get the edges of the current
+			polyhedron regardless of what the value of the actual vertices
+			are (wether they're local or transformed), so long as they are
+			of the expected order of the local vertices as defined by the
+			class extending Polyhedron and overriding this function.
+		*/
+		virtual std::vector<Edge> calculateEdges(
+			const std::vector<Vector3D>& vertices
+		) const = 0;
+
+
+		/*
+			Returns the faces associations.
+			Everything said about the edges applies here.
+		*/
+		virtual std::vector<Face> calculateFaces(
+			const std::vector<Vector3D>& vertices
+		) const = 0;
+
 
 		/*
 			Updates the faces and edges by the body's transform matrix.

@@ -85,6 +85,22 @@ namespace pe {
 			z -= vector.z;
 		}
 
+		bool operator==(const Vector3D& vector) {
+			return (
+				x == vector.x
+				&& y == vector.y
+				&& z == vector.z
+			);
+		}
+
+		bool operator!=(const Vector3D& vector) {
+			return (
+				x != vector.x
+				|| y != vector.y
+				|| z != vector.z
+				);
+		}
+
 		// Adds a scaled vector to the calling object
 		void linearCombination(const Vector3D& vector, const real scalar) {
 			x += scalar * vector.x;

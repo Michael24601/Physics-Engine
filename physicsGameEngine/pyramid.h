@@ -2,11 +2,11 @@
 #ifndef PYRAMID_H
 #define PYRAMID_H
 
-#include "primitive.h"
+#include "polyhedron.h"
 
 namespace pe {
 
-	class Pyramid : public Primitive {
+	class Pyramid : public Polyhedron {
 
 	public:
 
@@ -14,134 +14,68 @@ namespace pe {
 		real side;
 		real height;
 
-		Pyramid(pe::RigidBody* body, real side, real height, real mass,
-			Vector3D position) : Primitive(body, mass, position),
-			side{ side }, height{ height } {
-			localVertices.resize(5);
-			globalVertices.resize(5);
-			localVertices[0] = Vector3D(0, 3 * height / 4.0, 0);
-			localVertices[1] = Vector3D(-side / 2, -height / 4.0, -side / 2);
-			localVertices[2] = Vector3D(side / 2, -height / 4.0, -side / 2);
-			localVertices[3] = Vector3D(side / 2, -height / 4.0, side / 2);
-			localVertices[4] = Vector3D(-side / 2, -height / 4.0, side / 2);
+		Pyramid(RigidBody* body, real side, real height, real mass,
+			Vector3D position) : 
+			Polyhedron(
+				body,
+				mass,
+				position,
+				Matrix3x3(
+					(mass / 10.0)* (3 * side * side + height * height), 0, 0,
+					0, (mass / 10.0)* (3 * side * side + height * height), 0,
+					0, 0, (mass / 5.0)* side* side
+				),
+				std::vector<Vector3D>{
+					Vector3D(0, 3 * height / 4.0, 0),
+					Vector3D(-side / 2, -height / 4.0, -side / 2),
+					Vector3D(side / 2, -height / 4.0, -side / 2),
+					Vector3D(side / 2, -height / 4.0, side / 2),
+					Vector3D(-side / 2, -height / 4.0, side / 2),
+				}
+			),
+			side{ side }, height{ height } {}
 
-			Matrix3x3 inertiaTensor(
-				(mass / 10.0)* (3 * side * side + height * height), 0, 0,
-				0, (mass / 10.0)* (3 * side * side + height * height), 0,
-				0, 0, (mass / 5.0)* side* side
-			);
-			body->setInertiaTensor(inertiaTensor);
 
-			body->angularDamping = 1;
-			body->linearDamping = 1;
+		virtual std::vector<Edge> calculateEdges(
+			const std::vector<Vector3D>& vertices
+		) const override {
 
-			body->calculateDerivedData();
-			updateVertices();
-
-			// Sets the faces and edges connections
-			
-			setEdges();
-			setFaces(); 
-			setLocalEdges();
-			setLocalFaces();
-		}
-
-		virtual void setEdges() override {
+			std::vector<Edge> edges;
 			edges.resize(8);
 
 			// Define the edges of the pyramid
-			edges[0].vertices[0] = &globalVertices[1];
-			edges[0].vertices[1] = &globalVertices[2];
+			edges[0] = Edge(vertices[1], vertices[2]);
+			edges[1] = Edge(vertices[2], vertices[3]);
+			edges[2] = Edge(vertices[3], vertices[4]);
+			edges[3] = Edge(vertices[4], vertices[1]);
+			edges[4] = Edge(vertices[0], vertices[1]);
+			edges[5] = Edge(vertices[0], vertices[2]);
+			edges[6] = Edge(vertices[0], vertices[3]);
+			edges[7] = Edge(vertices[0], vertices[4]);
 
-			edges[1].vertices[0] = &globalVertices[2];
-			edges[1].vertices[1] = &globalVertices[3];
-
-			edges[2].vertices[0] = &globalVertices[3];
-			edges[2].vertices[1] = &globalVertices[4];
-
-			edges[3].vertices[0] = &globalVertices[4];
-			edges[3].vertices[1] = &globalVertices[1];
-
-			edges[4].vertices[0] = &globalVertices[0];
-			edges[4].vertices[1] = &globalVertices[1];
-
-			edges[5].vertices[0] = &globalVertices[0];
-			edges[5].vertices[1] = &globalVertices[2];
-
-			edges[6].vertices[0] = &globalVertices[0];
-			edges[6].vertices[1] = &globalVertices[3];
-
-			edges[7].vertices[0] = &globalVertices[0];
-			edges[7].vertices[1] = &globalVertices[4];
+			return edges;
 		}
 
 		// All vertices are in clockwise order
-		virtual void setFaces() override {
-			faces.resize(5); // Pyramid has 5 faces
+		virtual std::vector<Face> calculateFaces(
+			const std::vector<Vector3D>& vertices
+		) const override {
+
+			std::vector<Face> faces;
 
 			// Base face
-			faces[0].vertices = { &globalVertices[1], &globalVertices[2],
-				&globalVertices[3], &globalVertices[4] };
+			faces[0] = Face(std::vector<Vector3D>{ vertices[1], vertices[2],
+				vertices[3], vertices[4] });
 
 			// Side faces
-			faces[1].vertices = { &globalVertices[0], &globalVertices[1],
-				&globalVertices[4] };
-			faces[2].vertices = { &globalVertices[0], &globalVertices[4],
-				&globalVertices[3] };
-			faces[3].vertices = { &globalVertices[0], &globalVertices[3],
-				&globalVertices[2] };
-			faces[4].vertices = { &globalVertices[0], &globalVertices[2],
-				&globalVertices[1] };
-		}
-
-
-
-		// Update setEdges to populate localEdges using local vertices
-		virtual void setLocalEdges() override {
-			localEdges.resize(8);
-
-			// Define the edges of the pyramid using local vertices
-			localEdges[0].vertices[0] = &localVertices[1];
-			localEdges[0].vertices[1] = &localVertices[2];
-
-			localEdges[1].vertices[0] = &localVertices[2];
-			localEdges[1].vertices[1] = &localVertices[3];
-
-			localEdges[2].vertices[0] = &localVertices[3];
-			localEdges[2].vertices[1] = &localVertices[4];
-
-			localEdges[3].vertices[0] = &localVertices[4];
-			localEdges[3].vertices[1] = &localVertices[1];
-
-			localEdges[4].vertices[0] = &localVertices[0];
-			localEdges[4].vertices[1] = &localVertices[1];
-
-			localEdges[5].vertices[0] = &localVertices[0];
-			localEdges[5].vertices[1] = &localVertices[2];
-
-			localEdges[6].vertices[0] = &localVertices[0];
-			localEdges[6].vertices[1] = &localVertices[3];
-
-			localEdges[7].vertices[0] = &localVertices[0];
-			localEdges[7].vertices[1] = &localVertices[4];
-		}
-
-		// Update setFaces to populate localFaces using local vertices
-		virtual void setLocalFaces() override {
-			localFaces.resize(5); // Pyramid has 5 faces
-
-			// Base face using local vertices
-			localFaces[0].vertices = { &localVertices[1], &localVertices[2],
-				&localVertices[3], &localVertices[4] };
-			// Side faces using local vertices
-			localFaces[1].vertices = { &localVertices[0], &localVertices[1], 
-				&localVertices[4] };
-			localFaces[2].vertices = { &localVertices[0], &localVertices[4],
-				&localVertices[3] };
-			localFaces[3].vertices = { &localVertices[0], &localVertices[3], 
-				&localVertices[2] };
-			localFaces[4].vertices = { &localVertices[0], &localVertices[2],
-				&localVertices[1] };
+			faces[1] = Face(std::vector<Vector3D>{ vertices[0], vertices[1],
+				vertices[4] });
+			faces[2] = Face(std::vector<Vector3D>{ vertices[0], vertices[4],
+				vertices[3] });
+			faces[3] = Face(std::vector<Vector3D>{ vertices[0], vertices[3],
+				vertices[2] });
+			faces[4] = Face(std::vector<Vector3D>{ vertices[0], vertices[2],
+				vertices[1] });
 		}
 	};
 }

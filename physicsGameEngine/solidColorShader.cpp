@@ -4,23 +4,12 @@
 using namespace pe;
 
 void SolidColorShader::drawEdges(
-    const std::vector<std::pair<Vector3D, Vector3D>>& edges,
+    const std::vector<glm::vec3>& edges,
     const glm::mat4& model,
     const glm::mat4& view,
     const glm::mat4& projection,
     const glm::vec4& objectColor
 ) {
-    // First we extract the pair of vertices from the eges
-    std::vector<real> vertices;
-    for (const auto& pair : edges) {
-        vertices.push_back(pair.first.x);
-        vertices.push_back(pair.first.y);
-        vertices.push_back(pair.first.z);
-
-        vertices.push_back(pair.second.x);
-        vertices.push_back(pair.second.y);
-        vertices.push_back(pair.second.z);
-    }
 
     GLuint vao;
     glGenVertexArrays(1, &vao);
@@ -33,8 +22,8 @@ void SolidColorShader::drawEdges(
     // Uploads the vertices data to the VBO
     glBufferData(
         GL_ARRAY_BUFFER, 
-        vertices.size() * sizeof(float), 
-        vertices.data(), 
+        edges.size() * sizeof(glm::vec3), 
+        edges.data(), 
         GL_STATIC_DRAW
     );
 
@@ -43,7 +32,7 @@ void SolidColorShader::drawEdges(
         0, 3, 
         GL_FLOAT, 
         GL_FALSE, 
-        3 * sizeof(float), 
+        sizeof(glm::vec3), 
         (void*)0
     );
 
@@ -72,7 +61,7 @@ void SolidColorShader::drawEdges(
     glBindVertexArray(vao);
 
     // Draws the lines
-    glDrawArrays(GL_LINES, 0, vertices.size() / 3);
+    glDrawArrays(GL_LINES, 0, edges.size());
     glBindVertexArray(0);
 
     glDeleteVertexArrays(1, &vao);
@@ -86,22 +75,12 @@ void SolidColorShader::drawEdges(
 }
 
 void SolidColorShader::drawFaces(
-    const std::vector<std::vector<Vector3D>>& faces,
+    const std::vector<glm::vec3>& faces,
     const glm::mat4& model,
     const glm::mat4& view,
     const glm::mat4& projection,
     const glm::vec4& objectColor
 ) {
-    // First we flatten the polyhedra data and triangulate the faces
-    std::vector<Vector3D> flattenedData;
-    for (const auto& face : faces) {
-        auto triangles = triangulateFace(face);
-        flattenedData.reserve(triangles.size() * 3);
-        for (const auto& triangle : triangles) {
-            flattenedData.insert(flattenedData.end(), triangle.begin(),
-                triangle.end());
-        }
-    }
 
     GLuint vao;
     glGenVertexArrays(1, &vao);
@@ -114,15 +93,15 @@ void SolidColorShader::drawFaces(
     // Uploads the vertices data to the VBO
     glBufferData(
         GL_ARRAY_BUFFER, 
-        flattenedData.size() * sizeof(Vector3D),
-        flattenedData.data(), GL_STATIC_DRAW
+        faces.size() * sizeof(glm::vec3),
+        faces.data(), GL_STATIC_DRAW
     );
 
     // Specifies vertex attribute pointers
     glVertexAttribPointer(
         0, 3, 
         GL_FLOAT, GL_FALSE, 
-        sizeof(Vector3D), 
+        sizeof(glm::vec3), 
         (void*)0
     );
 
@@ -150,7 +129,7 @@ void SolidColorShader::drawFaces(
 
     glBindVertexArray(vao);
 
-    glDrawArrays(GL_TRIANGLES, 0, flattenedData.size());
+    glDrawArrays(GL_TRIANGLES, 0, faces.size());
     glBindVertexArray(0);
 
     glDeleteVertexArrays(1, &vao);

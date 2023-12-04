@@ -2,11 +2,11 @@
 #ifndef RECTANGULAR_PRISM_H
 #define RECTANGULAR_PRISM_H
 
-#include "primitive.h"
+#include "polyhedron.h"
 
 namespace pe {
 
-	class RectangularPrism : public Primitive {
+	class RectangularPrism : public Polyhedron {
 
 	public:
 
@@ -15,162 +15,77 @@ namespace pe {
 		real depth;
 
 		RectangularPrism(RigidBody* body, real width, real height,
-			real depth, real mass, Vector3D position)
-			: Primitive(body, mass, position), width{ width }, 
-			height{ height }, depth{ depth } {
+			real depth, real mass, Vector3D position) :
+			Polyhedron(
+				body,
+				mass,
+				position,
+				Matrix3x3 (
+					(mass / 12.0)* (height* height + depth * depth), 0, 0,
+					0, (mass / 12.0)* (width* width + depth * depth), 0,
+					0, 0, (mass / 12.0)* (width* width + height * height)
+				),
+				std::vector<Vector3D>{
+					Vector3D(-width / 2, -height / 2, -depth / 2),
+					Vector3D(width / 2, -height / 2, -depth / 2),
+					Vector3D(width / 2, -height / 2, depth / 2),
+					Vector3D(-width / 2, -height / 2, depth / 2),
+					Vector3D(-width / 2, height / 2, -depth / 2),
+					Vector3D(width / 2, height / 2, -depth / 2),
+					Vector3D(width / 2, height / 2, depth / 2),
+					Vector3D(-width / 2, height / 2, depth / 2)
+				}
+			),
+			width{ width }, height{ height }, depth{ depth } {}
 
-			localVertices.resize(8);
-			globalVertices.resize(8);
 
-			localVertices[0] = pe::Vector3D(-width / 2, -height / 2, -depth / 2);
-			localVertices[1] = pe::Vector3D(width / 2, -height / 2, -depth / 2);
-			localVertices[2] = pe::Vector3D(width / 2, -height / 2, depth / 2);
-			localVertices[3] = pe::Vector3D(-width / 2, -height / 2, depth / 2);
-			localVertices[4] = pe::Vector3D(-width / 2, height / 2, -depth / 2);
-			localVertices[5] = pe::Vector3D(width / 2, height / 2, -depth / 2);
-			localVertices[6] = pe::Vector3D(width / 2, height / 2, depth / 2);
-			localVertices[7] = pe::Vector3D(-width / 2, height / 2, depth / 2);
+		virtual std::vector<Edge> calculateEdges(
+			const std::vector<Vector3D>& vertices
+		) const override {
 
-			pe::Matrix3x3 inertiaTensor(
-				(mass / 12.0)* (height* height + depth * depth), 0, 0,
-				0, (mass / 12.0)* (width* width + depth * depth), 0,
-				0, 0, (mass / 12.0)* (width* width + height * height)
-			);
-			body->setInertiaTensor(inertiaTensor);
-
-			body->angularDamping = 1;
-			body->linearDamping = 1;
-
-			body->calculateDerivedData();
-			updateVertices();
-
-			// Sets the faces and edges connections
-			setEdges();
-			setFaces();
-			setLocalEdges();
-			setLocalFaces();
-		}
-
-		// Connects the correct edges
-		virtual void setEdges() override {
+			std::vector<Edge> edges;
 			edges.resize(12);
 
-			edges[0].vertices[0] = &globalVertices[0];
-			edges[0].vertices[1] = &globalVertices[1];
+			// Define the edges of the pyramid
+			edges[0] = Edge(vertices[0], vertices[1]);
+			edges[1] = Edge(vertices[1], vertices[2]);
+			edges[2] = Edge(vertices[2], vertices[3]);
+			edges[3] = Edge(vertices[3], vertices[0]);
+			edges[4] = Edge(vertices[4], vertices[5]);
+			edges[5] = Edge(vertices[5], vertices[6]);
+			edges[6] = Edge(vertices[6], vertices[7]);
+			edges[7] = Edge(vertices[7], vertices[4]);
+			edges[8] = Edge(vertices[0], vertices[4]);
+			edges[9] = Edge(vertices[1], vertices[5]);
+			edges[10] = Edge(vertices[2], vertices[6]);
+			edges[11] = Edge(vertices[3], vertices[7]);
 
-			edges[1].vertices[0] = &globalVertices[1];
-			edges[1].vertices[1] = &globalVertices[2];
-
-			edges[2].vertices[0] = &globalVertices[2];
-			edges[2].vertices[1] = &globalVertices[3];
-
-			edges[3].vertices[0] = &globalVertices[3];
-			edges[3].vertices[1] = &globalVertices[0];
-
-			edges[4].vertices[0] = &globalVertices[4];
-			edges[4].vertices[1] = &globalVertices[5];
-
-			edges[5].vertices[0] = &globalVertices[5];
-			edges[5].vertices[1] = &globalVertices[6];
-
-			edges[6].vertices[0] = &globalVertices[6];
-			edges[6].vertices[1] = &globalVertices[7];
-
-			edges[7].vertices[0] = &globalVertices[7];
-			edges[7].vertices[1] = &globalVertices[4];
-
-			edges[8].vertices[0] = &globalVertices[0];
-			edges[8].vertices[1] = &globalVertices[4];
-
-			edges[9].vertices[0] = &globalVertices[1];
-			edges[9].vertices[1] = &globalVertices[5];
-
-			edges[10].vertices[0] = &globalVertices[2];
-			edges[10].vertices[1] = &globalVertices[6];
-
-			edges[11].vertices[0] = &globalVertices[3];
-			edges[11].vertices[1] = &globalVertices[7];
+			return edges;
 		}
 
-		virtual void setFaces() override {
+
+		// All vertices are in clockwise order
+		virtual std::vector<Face> calculateFaces(
+			const std::vector<Vector3D>& vertices
+		) const override {
+
+			std::vector<Face> faces;
 			faces.resize(6);
 
-			// Defines the vertices for each face in a consistent clockwise order
-			faces[0].vertices = { &globalVertices[0], &globalVertices[1],
-				&globalVertices[2], &globalVertices[3] }; // Bottom face
-			faces[1].vertices = { &globalVertices[7], &globalVertices[6],
-				&globalVertices[5], &globalVertices[4] }; // Top face
-			faces[2].vertices = { &globalVertices[0], &globalVertices[3],
-				&globalVertices[7], &globalVertices[4] }; // Front face
-			faces[3].vertices = { &globalVertices[1], &globalVertices[5],
-				&globalVertices[6], &globalVertices[2] }; // Back face
-			faces[4].vertices = { &globalVertices[0], &globalVertices[4],
-				&globalVertices[5], &globalVertices[1] }; // Left face
-			faces[5].vertices = { &globalVertices[3], &globalVertices[2],
-				&globalVertices[6], &globalVertices[7] }; // Right face
-		}
+			faces[0] = Face(std::vector<Vector3D>{ vertices[0], 
+				vertices[1], vertices[2], vertices[3] });
+			faces[1] = Face(std::vector<Vector3D>{ vertices[7],
+				vertices[6], vertices[5], vertices[4] });
+			faces[2] = Face(std::vector<Vector3D>{ vertices[0],
+				vertices[3], vertices[7], vertices[4] });
+			faces[3] = Face(std::vector<Vector3D>{ vertices[1],
+				vertices[5], vertices[6], vertices[2]});
+			faces[4] = Face(std::vector<Vector3D>{ vertices[0],
+				vertices[4], vertices[5], vertices[1] });
+			faces[5] = Face(std::vector<Vector3D>{ vertices[3],
+				vertices[2], vertices[6], vertices[7] });
 
-		// Connects the correct edges using local coordinates
-		virtual void setLocalEdges() override {
-			localEdges.resize(12);
-
-			localEdges[0].vertices[0] = &localVertices[0];
-			localEdges[0].vertices[1] = &localVertices[1];
-
-			localEdges[1].vertices[0] = &localVertices[1];
-			localEdges[1].vertices[1] = &localVertices[2];
-
-			localEdges[2].vertices[0] = &localVertices[2];
-			localEdges[2].vertices[1] = &localVertices[3];
-
-			localEdges[3].vertices[0] = &localVertices[3];
-			localEdges[3].vertices[1] = &localVertices[0];
-
-			localEdges[4].vertices[0] = &localVertices[4];
-			localEdges[4].vertices[1] = &localVertices[5];
-
-			localEdges[5].vertices[0] = &localVertices[5];
-			localEdges[5].vertices[1] = &localVertices[6];
-
-			localEdges[6].vertices[0] = &localVertices[6];
-			localEdges[6].vertices[1] = &localVertices[7];
-
-			localEdges[7].vertices[0] = &localVertices[7];
-			localEdges[7].vertices[1] = &localVertices[4];
-
-			localEdges[8].vertices[0] = &localVertices[0];
-			localEdges[8].vertices[1] = &localVertices[4];
-
-			localEdges[9].vertices[0] = &localVertices[1];
-			localEdges[9].vertices[1] = &localVertices[5];
-
-			localEdges[10].vertices[0] = &localVertices[2];
-			localEdges[10].vertices[1] = &localVertices[6];
-
-			localEdges[11].vertices[0] = &localVertices[3];
-			localEdges[11].vertices[1] = &localVertices[7];
-		}
-
-		virtual void setLocalFaces() override {
-			localFaces.resize(6);
-
-			localFaces[0].vertices = { &localVertices[0], &localVertices[1],
-				&localVertices[2], &localVertices[3] }; // Bottom face
-
-			localFaces[1].vertices = { &localVertices[7], &localVertices[6],
-				&localVertices[5], &localVertices[4] }; // Top face
-
-			localFaces[2].vertices = { &localVertices[0], &localVertices[3],
-				&localVertices[7], &localVertices[4] }; // Front face
-
-			localFaces[3].vertices = { &localVertices[1], &localVertices[5],
-				&localVertices[6], &localVertices[2] }; // Back face
-
-			localFaces[4].vertices = { &localVertices[0], &localVertices[4],
-				&localVertices[5], &localVertices[1] }; // Left face
-
-			localFaces[5].vertices = { &localVertices[3], &localVertices[2],
-				&localVertices[6], &localVertices[7] }; // Right face
+			return faces;
 		}
 	};
 }

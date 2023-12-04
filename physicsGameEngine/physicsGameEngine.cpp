@@ -30,9 +30,8 @@
 #include "solidColorShader.h"
 #include "diffuseLightingShader.h"
 #include "diffuseSpecularLightingShader.h"
-#include "sphereDiffuseLightingShader.h"
-#include "sphereDiffuseSpecularLightingShader.h"
 #include "tesselationUtil.h"
+#include "polyhedronInterface.h"
 
 using namespace pe;
 using namespace std;
@@ -82,8 +81,6 @@ int main() {
     SolidColorShader shader;
     DiffuseLightingShader lightShader;
     DiffuseSpecularLightingShader phongShader;
-    SphereDiffuseLightingShader sphereShader;
-    SphereDiffuseSpecularLightingShader spherePhongShader;
 
     // View matrix, used for positioning and angling the camera
     // Camera's position in world coordinates
@@ -211,33 +208,24 @@ int main() {
         }
 
         vector<std::pair<Vector3D, Vector3D>> normals;
-        // Resolves collisions
-        if (c.isColliding(c2)) {
-            std::vector<Contact> contacts;
-            returnMaxContact(c, c2, contacts);
-            for (int i = 0; i < contacts.size(); i++) {
-                vector<std::pair<Vector3D, Vector3D>> a =
-                    contacts[i].drawNormals(100);
-                for (int i = 0; i < a.size(); i++) {
-                    normals.push_back(a[i]);
-                }
-            }
-        }
+        
+        // Here we would later resolves collisions
 
         c.body->integrate(deltaT);
         c2.body->integrate(deltaT);
-        c.updateVertices();
-        c2.updateVertices();
+        c.update();
+        c2.update();
 
         // Draw cables/springs
         // (Could also use global here)
-        Vector3D point = c.body->transformMatrix.transform(s.connectionPoint);
-        vector<pair<Vector3D, Vector3D>> v(2);
-        v[0].first = point;
-        v[0].second = fixed.position;
+        Vector3D point = 
+            c.body->transformMatrix.transform(s.connectionPoint);
+        vector<glm::vec3> v(4);
+        v[0] = convertToGLM(point);
+        v[1] = convertToGLM(fixed.position);
         point = c2.body->transformMatrix.transform(s2.connectionPoint);
-        v[1].first = point;
-        v[1].second = fixed2.position;
+        v[2] = convertToGLM(point);
+        v[3] = convertToGLM(fixed2.position);
 
         window.clear(sf::Color::Black);
         // Clears the depth buffer (for 3D)
@@ -251,7 +239,6 @@ int main() {
         shader.drawEdges(v, identity, viewMatrix, projectionMatrix, color);
 
         // Shape
-        glm::mat4 cTransform = convertToGLM(c.body->transformMatrix);
         glm::vec4 colorPurple = glm::vec4(0.4, 0.1, 0.8, 1.0);
         glm::vec3 lightPos[]{
             glm::vec3(0.0f, 200.0f, 0.0f),
@@ -259,23 +246,24 @@ int main() {
         glm::vec4 lightColors[]{
             glm::vec4(1.0f, 1.0f, 1.0f, 0.6f),
         };
-        phongShader.drawFaces(c.getLocalFaces(), cTransform, viewMatrix,
+
+        // Data
+        faceData data = getPolyhedronFaceData(c);
+        edgeData edgeData = getPolyhedronEdgeData(c);
+        phongShader.drawFaces(data.vertices, data.normals, identity, viewMatrix,
             projectionMatrix, colorPurple, 1, lightPos, lightColors,
             cameraPosition, 40);
 
         // Second shape
-        glm::mat4 c2Transform = convertToGLM(c2.body->transformMatrix);
         glm::vec4 colorRed(0.8, 0.1, 0.1, 1.0);
-        spherePhongShader.drawFace(c2.getLocalFaces(), convertToGLM(c2.body->position),
-            c2.radius, c2Transform, viewMatrix,
+        data = getSphereFaceData(c2);
+        phongShader.drawFaces(data.vertices, data.normals, identity, viewMatrix,
             projectionMatrix, colorRed, 1, lightPos, lightColors,
             cameraPosition, 40);
-        shader.drawEdges(c2.getLocalEdges(), c2Transform, viewMatrix,
-           projectionMatrix, color);
-
+  
         // Normal vectors of the collision
         // Likewise, the collision normal is in world coordinates
-        shader.drawEdges(normals, identity, viewMatrix, projectionMatrix, color);
+        // shader.drawEdges(normals, identity, viewMatrix, projectionMatrix, color);
 
         window.display();
 

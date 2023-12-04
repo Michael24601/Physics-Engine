@@ -5,7 +5,7 @@
 #include "shaderProgram.h"
 #include "vector3D.h"
 #include "drawingUtil.h"
-
+#include "polyhedronInterface.h"
 
 const std::string diffuseLightingVertexShader = R"(
 	#version 330 core
@@ -85,7 +85,8 @@ namespace pe {
             diffuseLightingFragmentShader) {}
 
         void drawFaces(
-            const std::vector<std::vector<Vector3D>>& faces,
+            const std::vector<glm::vec3>& faces,
+            const std::vector<glm::vec3>& normals,
             const glm::mat4& model,
             const glm::mat4& view,
             const glm::mat4& projection,
