@@ -17,6 +17,7 @@
 
 #include "polyhedron.h"
 #include "solidSphere.h"
+#include "cylinder.h"
 #include <vector>
 
 namespace pe {
@@ -87,6 +88,19 @@ namespace pe {
 		individually, instead of relying on the normal of the faces.
 	*/
 	faceData getSphereFaceData(const SolidSphere& sphere);
+
+
+	/*
+		Returns the face data for a cylinder.
+		The vertices of the top and bottom circular faces have the afore-
+		mentioned faces' normals, just like a polyhedron.
+		On the other hand, the vertices of the tesselated strips making
+		up the curved surface will have a normal similar to that of the
+		normals of the vertices of a sphere. We can calculate it as the
+		vector from the centroid of the circular face to the vertex on
+		said circular face.
+	*/
+	faceData getCylinderFaceData(const Cylinder& cylinder);
 }
 
 #endif

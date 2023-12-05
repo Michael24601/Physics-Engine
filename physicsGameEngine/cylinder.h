@@ -1,45 +1,46 @@
 
-#ifndef SOLID_SPHERE_H
-#define SOLID_SPHERE_H
+#ifndef CYLINDER_H
+#define CYLINDER_H
 
 #include "polyhedron.h"
 #include "tesselationUtil.h"
 
 namespace pe {
 
-	class SolidSphere : public Polyhedron {
+	class Cylinder : public Polyhedron {
 
 	public:
 
 		real radius;
-		int latitudeSegments;
-		int longitudeSegments;
+		real length;
+		int segments;
 
-		SolidSphere(
-			RigidBody* body,
-			real radius,
-			real mass,
-			int latitudeSegments,
-			int longtitudeSegments,
+		Cylinder(
+			RigidBody* body, 
+			real radius, 
+			real length, 
+			real mass, 
+			int segments, 
 			Vector3D position) :
 			Polyhedron(
 				body,
 				mass,
 				position,
 				Matrix3x3(
-					(2.0 / 5.0) * mass * radius * radius, 0, 0,
-					0, (2.0 / 5.0) * mass * radius * radius, 0,
-					0, 0, (2.0 / 5.0) * mass * radius * radius
+					(1.0 / 12.0) * mass *
+					(3.0 * radius * radius + length * length), 0, 0,
+					0, (1.0 / 12.0) * mass * 
+					(3.0 * radius * radius + length * length), 0,
+					0, 0, (1.0 / 12.0)* mass* (3.0 * radius * radius)
 				),
-				generateSphereVertices(
+				generateCylinderVertices(
 					Vector3D(0, 0, 0),
 					radius,
-					latitudeSegments,
-					longtitudeSegments
+					length,
+					segments
 				)
 			),
-			radius{ radius }, latitudeSegments{ latitudeSegments }, 
-			longitudeSegments{ longtitudeSegments } {}
+			radius{ radius }, length{length}, segments{ segments } {}
 
 
 		virtual std::vector<Face> calculateFaces(
@@ -48,9 +49,8 @@ namespace pe {
 
 			std::vector<Face> faces;
 
-			std::vector<std::vector<Vector3D>> vertexFaces = 
-				returnTesselatedFaces(vertices, latitudeSegments, 
-					longitudeSegments);
+			std::vector<std::vector<Vector3D>> vertexFaces =
+				returnCylinderFaces(vertices, segments);
 
 			for (int i = 0; i < vertexFaces.size(); i++) {
 				Face face(vertexFaces[i]);
@@ -67,8 +67,7 @@ namespace pe {
 			std::vector<Edge> edges;
 
 			std::vector<std::pair<Vector3D, Vector3D>> vertexEdges =
-				returnTesselatedEdges(vertices, latitudeSegments,
-					longitudeSegments);
+				returnCylinderEdges(vertices, segments);
 
 			for (int i = 0; i < vertexEdges.size(); i++) {
 				Edge edge(vertexEdges[i].first, vertexEdges[i].second);

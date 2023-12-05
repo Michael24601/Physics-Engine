@@ -1,4 +1,5 @@
 
+// For SFML and GLEW static version (no dlls)
 #define SFML_STATIC
 #define GLEW_STATIC
 
@@ -23,6 +24,7 @@
 #include "rectangularPrism.h"
 #include "solidSphere.h"
 #include "pyramid.h"
+#include "cylinder.h"
 #include "contactGeneration.h"
 #include "drawingUtil.h"
 #include "rigidBodyCableForce.h"
@@ -117,34 +119,54 @@ int main() {
     real deltaT = 0;
 
     real side = 100;
-    RectangularPrism c(new RigidBody(), side, side, side, 150, 
-        Vector3D(200, -100, 0));
+    RectangularPrism c1(new RigidBody(), side, side, side, 150, Vector3D(200, 0, -200));
 
     real height = 150;
-    real sideT = 150;
-    SolidSphere c2(new RigidBody(), 100, 150, 20, 20, Vector3D(-300, 0, 0));
+    real radius = 50;
+    Cylinder c2(new RigidBody(), radius, height, 150, 20, Vector3D(200, 0, 200));
 
-    RigidBody fixed;
-    fixed.position = Vector3D(200, 200, 0);
+    radius = 100;
+    SolidSphere c3(new RigidBody(), radius, 150, 20, 20, Vector3D(-200, 0, -200));
+
+    height = 150;
+    side = 100;
+    Pyramid c4(new RigidBody(), side, height, 150, Vector3D(-200, 0, 200));
+
+    RigidBody fixed1;
+    fixed1.position = Vector3D(200, 200, -200);
     RigidBody fixed2;
-    fixed2.position = Vector3D(-300, 200, 0);
+    fixed2.position = Vector3D(200, 200, 200);
+    RigidBody fixed3;
+    fixed3.position = Vector3D(-200, 200, -200);
+    RigidBody fixed4;
+    fixed4.position = Vector3D(-200, 200, 200);
 
-    c.body->angularDamping = 0.75;
-    c.body->linearDamping = 0.90;
+    c1.body->angularDamping = 0.75;
+    c1.body->linearDamping = 0.90;
     c2.body->angularDamping = 0.75;
     c2.body->linearDamping = 0.90;
+    c3.body->angularDamping = 0.75;
+    c3.body->linearDamping = 0.90;
+    c4.body->angularDamping = 0.75;
+    c4.body->linearDamping = 0.90;
 
 
     RigidBodyGravity g(Vector3D(0, -10, 0));
     Vector3D origin;
     // Applies it to the first vertex
-    RigidBodySpringForce s(c.localVertices[0], &fixed, origin, 10, 100);
+    RigidBodySpringForce s1(c1.localVertices[0], &fixed1, origin, 10, 100);
     RigidBodySpringForce s2(c2.localVertices[0], &fixed2, origin, 10, 100);
+    RigidBodySpringForce s3(c3.localVertices[0], &fixed3, origin, 10, 100);
+    RigidBodySpringForce s4(c4.localVertices[0], &fixed4, origin, 10, 100);
 
     real rotationSpeed = 0.25;
     real angle = PI / 2;
-    bool isButtonPressed = false;
-    bool isSecondButtonPressed = false;
+    bool isButtonPressed[]{
+        false,
+        false,
+        false,
+        false
+    };
 
     while (window.isOpen()) {
 
@@ -155,19 +177,21 @@ int main() {
         {
             if (event.type == sf::Event::Closed)
                 window.close();
-            if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
-                isButtonPressed = true;
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::R)) {
+                isButtonPressed[0] = true;
             }
-            else if (sf::Mouse::isButtonPressed(sf::Mouse::Right)) {
-                isSecondButtonPressed = true;
+            else if (sf::Keyboard::isKeyPressed(sf::Keyboard::C)) {
+                isButtonPressed[1] = true;
             }
-            else if (event.type == sf::Event::MouseButtonReleased
-                && event.mouseButton.button == sf::Mouse::Left) {
-                isButtonPressed = false;
+            else if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {
+                isButtonPressed[2] = true;
             }
-            else if (event.type == sf::Event::MouseButtonReleased
-                && event.mouseButton.button == sf::Mouse::Right) {
-                isSecondButtonPressed = false;
+            else if (sf::Keyboard::isKeyPressed(sf::Keyboard::P)) {
+                isButtonPressed[3] = true;
+            }
+            else if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
+                isButtonPressed[0] = isButtonPressed[1] =
+                    isButtonPressed[2] = isButtonPressed[3] = false;
             }
             // Rotates camera
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
@@ -184,48 +208,78 @@ int main() {
             }
         }
 
-        c.body->calculateDerivedData();
+        c1.body->calculateDerivedData();
         c2.body->calculateDerivedData();
-        fixed.calculateDerivedData();
+        c3.body->calculateDerivedData();
+        c4.body->calculateDerivedData();
+
+        fixed1.calculateDerivedData();
         fixed2.calculateDerivedData();
+        fixed3.calculateDerivedData();
+        fixed4.calculateDerivedData();
 
-        s.updateForce((c.body), deltaT);
-        g.updateForce((c.body), deltaT);
+        s1.updateForce((c1.body), deltaT);
         s2.updateForce((c2.body), deltaT);
-        g.updateForce((c2.body), deltaT);
+        s3.updateForce((c3.body), deltaT);
+        s4.updateForce((c4.body), deltaT);
 
-        if (isButtonPressed) {
+        g.updateForce((c1.body), deltaT);
+        g.updateForce((c2.body), deltaT);
+        g.updateForce((c3.body), deltaT);
+        g.updateForce((c4.body), deltaT);
+
+        if (isButtonPressed[0]) {
             sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
             sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);
-            c.body->position.x = worldPos.x;
-            c.body->position.y = worldPos.y;
+            c1.body->position.x = worldPos.x;
+            c1.body->position.y = worldPos.y;
         }
-        else if (isSecondButtonPressed) {
+        else if (isButtonPressed[1]) {
             sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
             sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);
             c2.body->position.x = worldPos.x;
             c2.body->position.y = worldPos.y;
         }
-
-        vector<std::pair<Vector3D, Vector3D>> normals;
+        else if (isButtonPressed[2]) {
+            sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
+            sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);
+            c3.body->position.x = worldPos.x;
+            c3.body->position.y = worldPos.y;
+        }
+        else if (isButtonPressed[3]) {
+            sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
+            sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);
+            c4.body->position.x = worldPos.x;
+            c4.body->position.y = worldPos.y;
+        }
         
         // Here we would later resolves collisions
 
-        c.body->integrate(deltaT);
+        c1.body->integrate(deltaT);
         c2.body->integrate(deltaT);
-        c.update();
+        c3.body->integrate(deltaT);
+        c4.body->integrate(deltaT);
+        c1.update();
         c2.update();
+        c3.update();
+        c4.update();
 
         // Draw cables/springs
         // (Could also use global here)
-        Vector3D point = 
-            c.body->transformMatrix.transform(s.connectionPoint);
-        vector<glm::vec3> v(4);
+        vector<glm::vec3> v(8);
+        Vector3D point = c1.body->transformMatrix.transform(s1.connectionPoint);
         v[0] = convertToGLM(point);
-        v[1] = convertToGLM(fixed.position);
+        v[1] = convertToGLM(fixed1.position);
         point = c2.body->transformMatrix.transform(s2.connectionPoint);
         v[2] = convertToGLM(point);
         v[3] = convertToGLM(fixed2.position);
+        point = c3.body->transformMatrix.transform(s3.connectionPoint);
+        v[4] = convertToGLM(point);
+        v[5] = convertToGLM(fixed3.position);
+        point = c4.body->transformMatrix.transform(s4.connectionPoint);
+        v[6] = convertToGLM(point);
+        v[7] = convertToGLM(fixed4.position);
+
 
         window.clear(sf::Color::Black);
         // Clears the depth buffer (for 3D)
@@ -235,35 +289,45 @@ int main() {
         // Note that the model is the identity since the cable is in world
         // coordinates
         glm::mat4 identity = glm::mat4(1.0);
-        glm::vec4 color = glm::vec4(1.0, 1.0, 1.0, 1.0);
-        shader.drawEdges(v, identity, viewMatrix, projectionMatrix, color);
+        glm::vec4 colorWhite(1.0, 1.0, 1.0, 1.0);
+        glm::vec4 colorRed(0.8, 0.1, 0.1, 1.0);
+        glm::vec4 colorBlue(0.5, 0.7, 1.0, 1.0);
+        glm::vec4 colorGreen(0.3, 0.9, 0.3, 1.0);
+        glm::vec4 colorPurple = glm::vec4(0.4, 0.1, 0.8, 1.0);
+
+        shader.drawEdges(v, identity, viewMatrix, projectionMatrix, colorWhite);
 
         // Shape
-        glm::vec4 colorPurple = glm::vec4(0.4, 0.1, 0.8, 1.0);
         glm::vec3 lightPos[]{
-            glm::vec3(0.0f, 200.0f, 0.0f),
+            glm::vec3(0.0f, 100.0f, 0.0f),
         };
         glm::vec4 lightColors[]{
             glm::vec4(1.0f, 1.0f, 1.0f, 0.6f),
         };
 
         // Data
-        faceData data = getPolyhedronFaceData(c);
-        edgeData edgeData = getPolyhedronEdgeData(c);
+        faceData data = getPolyhedronFaceData(c1);
         phongShader.drawFaces(data.vertices, data.normals, identity, viewMatrix,
             projectionMatrix, colorPurple, 1, lightPos, lightColors,
             cameraPosition, 40);
 
         // Second shape
-        glm::vec4 colorRed(0.8, 0.1, 0.1, 1.0);
-        data = getSphereFaceData(c2);
+        data = getCylinderFaceData(c2);
+        phongShader.drawFaces(data.vertices, data.normals, identity, viewMatrix,
+            projectionMatrix, colorBlue, 1, lightPos, lightColors,
+            cameraPosition, 40);
+
+        data = getSphereFaceData(c3);
         phongShader.drawFaces(data.vertices, data.normals, identity, viewMatrix,
             projectionMatrix, colorRed, 1, lightPos, lightColors,
             cameraPosition, 40);
-  
-        // Normal vectors of the collision
-        // Likewise, the collision normal is in world coordinates
-        // shader.drawEdges(normals, identity, viewMatrix, projectionMatrix, color);
+
+        data = getPolyhedronFaceData(c4);
+        phongShader.drawFaces(data.vertices, data.normals, identity, viewMatrix,
+            projectionMatrix, colorGreen, 1, lightPos, lightColors,
+            cameraPosition, 40);
+
+        // shader.drawEdges(edgeData.vertices, identity, viewMatrix, projectionMatrix, color);
 
         window.display();
 

@@ -94,3 +94,104 @@ std::vector<std::pair<Vector3D, Vector3D>> pe::returnTesselatedEdges(
     return edges;
 }
 
+
+std::vector<Vector3D> pe::generateCylinderVertices(const Vector3D& center,
+    real radius, real height, int segments) {
+
+    std::vector<Vector3D> vertices;
+
+    for (int i = 0; i <= segments; ++i) {
+        // Calculate the angle for each segment
+        real theta = 2.0f * PI * static_cast<real>(i) / static_cast<real>(segments);
+
+        // Vertices of the current point on the side of the cylinder
+        Vector3D v_side;
+        v_side += Vector3D(
+            radius * cos(theta),
+            height / 2.0f,
+            radius * sin(theta)
+        );
+        v_side += center;
+
+        // Vertices of the corresponding point at the bottom of the cylinder
+        Vector3D v_bottom = v_side - Vector3D(0.0f, height, 0.0f);
+
+        vertices.push_back(v_side);
+        vertices.push_back(v_bottom);
+    }
+
+    return vertices;
+}
+
+
+std::vector<std::vector<Vector3D>> pe::returnCylinderFaces(
+    const std::vector<Vector3D>& vertices,
+    int segments
+) {
+    std::vector<std::vector<Vector3D>> faces;
+
+    // Add top face
+    std::vector<Vector3D> top_face;
+    for (size_t i = 0; i < segments; ++i) {
+        size_t v0 = 2 * i;
+        top_face.push_back(vertices[v0]);
+    }
+    // Make sure top_face is in counterclockwise order
+    std::reverse(top_face.begin(), top_face.end());
+    faces.push_back(top_face);
+
+    // Add bottom face
+    std::vector<Vector3D> bottom_face;
+    for (size_t i = 0; i < segments; ++i) {
+        size_t v1 = 2 * i + 1;
+        bottom_face.push_back(vertices[v1]);
+    }
+    faces.push_back(bottom_face);
+
+    // Add side faces
+    for (size_t i = 0; i < segments; ++i) {
+        // Indices of the four vertices of the current rectangle
+        size_t v0 = 2 * i;
+        size_t v1 = v0 + 1;
+        size_t v2 = (v0 + 2) % (2 * segments);
+        size_t v3 = v2 + 1;
+
+        // Connect vertices to form faces
+        std::vector<Vector3D> side_face1 = { vertices[v0], vertices[v3], vertices[v1] };
+        std::vector<Vector3D> side_face2 = { vertices[v0], vertices[v2], vertices[v3] };
+
+        faces.push_back(side_face1);
+        faces.push_back(side_face2);
+    }
+
+    return faces;
+}
+
+
+std::vector<std::pair<Vector3D, Vector3D>> pe::returnCylinderEdges(
+    const std::vector<Vector3D>& vertices,
+    int segments
+) {
+    std::vector<std::pair<Vector3D, Vector3D>> edges;
+
+    for (size_t i = 0; i < segments; ++i) {
+        // Indices of the four vertices of the current rectangle
+        size_t v0 = 2 * i;
+        size_t v1 = v0 + 1;
+        size_t v2 = (v0 + 2) % (2 * segments);
+        size_t v3 = v2 + 1;
+
+        // Connect vertices to form edges based on the rectangles
+        std::pair<Vector3D, Vector3D> edge1 = { vertices[v0], vertices[v1] };
+        std::pair<Vector3D, Vector3D> edge2 = { vertices[v1], vertices[v3] };
+        std::pair<Vector3D, Vector3D> edge3 = { vertices[v3], vertices[v2] };
+        std::pair<Vector3D, Vector3D> edge4 = { vertices[v2], vertices[v0] };
+
+        edges.push_back(edge1);
+        edges.push_back(edge2);
+        edges.push_back(edge3);
+        edges.push_back(edge4);
+    }
+
+    return edges;
+}

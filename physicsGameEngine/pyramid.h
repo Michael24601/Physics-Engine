@@ -14,7 +14,11 @@ namespace pe {
 		real side;
 		real height;
 
-		Pyramid(RigidBody* body, real side, real height, real mass,
+		Pyramid(
+			RigidBody* body, 
+			real side, 
+			real height, 
+			real mass,
 			Vector3D position) : 
 			Polyhedron(
 				body,
@@ -62,6 +66,7 @@ namespace pe {
 		) const override {
 
 			std::vector<Face> faces;
+			faces.resize(5);
 
 			// Base face
 			faces[0] = Face(std::vector<Vector3D>{ vertices[1], vertices[2],
@@ -76,6 +81,8 @@ namespace pe {
 				vertices[2] });
 			faces[4] = Face(std::vector<Vector3D>{ vertices[0], vertices[2],
 				vertices[1] });
+
+			return faces;
 		}
 	};
 }

@@ -284,6 +284,9 @@
     <ClInclude Include="polyhedronInterface.h">
       <Filter>Header Files\OpenglGraphics</Filter>
     </ClInclude>
+    <ClInclude Include="cylinder.h">
+      <Filter>Header Files\Primitive</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="todo.txt" />

@@ -14,8 +14,13 @@ namespace pe {
 		real height;
 		real depth;
 
-		RectangularPrism(RigidBody* body, real width, real height,
-			real depth, real mass, Vector3D position) :
+		RectangularPrism(
+			RigidBody* body, 
+			real width, 
+			real height,
+			real depth, 
+			real mass, 
+			Vector3D position) :
 			Polyhedron(
 				body,
 				mass,

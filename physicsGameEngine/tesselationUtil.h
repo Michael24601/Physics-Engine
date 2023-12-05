@@ -29,9 +29,12 @@ namespace pe {
 		sphere, the center we send to define the vertices around should be
 		the origin (0, 0, 0), because these vertices are local.
 	*/
-	std::vector<Vector3D> generateSphereVertices(const Vector3D& center,
-		real radius, int latitudeSegments, int longitudeSegments);
-
+	std::vector<Vector3D> generateSphereVertices(
+		const Vector3D& center,
+		real radius,
+		int latitudeSegments,
+		int longitudeSegments
+	);
 
 	/*
 		Returns a vector of vectors of pointer to vertices that represents
@@ -52,6 +55,23 @@ namespace pe {
 		int latitudeSegments,
 		int longitudeSegments
 	);
+
+	std::vector<Vector3D> generateCylinderVertices(
+		const Vector3D& center,
+		real radius,
+		real height,
+		int segments
+	);
+
+	std::vector<std::vector<Vector3D>> returnCylinderFaces(
+		const std::vector<Vector3D>& vertices,
+		int segments
+	);
+
+    std::vector<std::pair<Vector3D, Vector3D>> returnCylinderEdges(
+        const std::vector<Vector3D>& vertices,
+        int segments
+    );
 }
 
 
