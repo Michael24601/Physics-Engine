@@ -76,8 +76,19 @@ namespace pe {
 			Updates positionand velocity using duration(time between 
 			frames). Uses a linear approximation of the integral, so
 			may not be perfectly accurate.
+			The approximation used here is Euler integration.
 		*/
 		void integrate(real duration);
+
+		/*
+			Updates positionand velocity using duration(time between
+			frames). Uses a linear approximation of the integral, so
+			may not be perfectly accurate.
+			The approximation used here is the verlet integration,
+			and is usually better when many particles are involved,
+			and connected, such as in cloth simulation.
+		*/
+		void verletIntegrate(real duration);
 
 		void addForce(const Vector3D& force);
 

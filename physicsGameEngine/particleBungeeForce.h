@@ -13,7 +13,7 @@ namespace pe {
 
 	class ParticleBungeeForce : public ParticleForceGenerator {
 
-	private:
+	public:
 
 		// Other particle connected to the bungee rope (force not acting on it)
 		Particle* otherParticle;
@@ -23,8 +23,6 @@ namespace pe {
 
 		// Resting length of the bungee rope l0
 		real restingLength;
-
-	public:
 
 		ParticleBungeeForce(Particle* otherParticle, real springConstant,
 			real restingLength) : otherParticle{ otherParticle },

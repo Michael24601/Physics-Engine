@@ -49,6 +49,32 @@ void Particle::integrate(real duration) {
 	}
 }
 
+
+
+void Particle::verletIntegrate(real duration) {
+	if (inverseMass > 0) {
+
+		// Saves the current position
+		Vector3D currentPosition = position;
+
+		Vector3D newAcceleration = acceleration;
+		newAcceleration.linearCombination(accumulatedForce, inverseMass);
+
+		// Update the position using Verlet integration
+		position += (velocity * duration) + (newAcceleration * duration * duration * 0.5);
+
+		// Update velocity using the difference in positions
+		velocity = (position - currentPosition) * (duration);
+
+		// Apply damping to velocity
+		velocity *= realPow(damping, duration);
+
+		// Clear accumulated force
+		clearAccumulatedForce();
+	}
+}
+
+
 void Particle::addForce(const Vector3D& force) {
 	accumulatedForce += force;
 }
