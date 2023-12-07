@@ -18,6 +18,12 @@
 namespace pe {
 	typedef float real;
 	constexpr real PI = 3.141592f;
+
+	// Enum
+	enum class order {
+		CLOCKWISE,
+		COUNTER_CLOCKWISE
+	};
 }
 
 #endif

@@ -33,7 +33,7 @@ namespace pe {
 
 	class ParticleSpringForce : public ParticleForceGenerator {
 
-	private:
+	public:
 
 		// Other particle connected to the spring (force not acting on it)
 		Particle* otherParticle;

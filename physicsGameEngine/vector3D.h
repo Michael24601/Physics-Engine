@@ -5,6 +5,7 @@
 
 #include <math.h>
 #include "accuracy.h"
+#include <iostream>
 
 namespace pe {
 

@@ -102,9 +102,6 @@
     <ClCompile Include="particleDrag.cpp">
       <Filter>Source Files\ParticlePhysics</Filter>
     </ClCompile>
-    <ClCompile Include="particleContactResolver.cpp">
-      <Filter>Source Files\ParticlePhysics</Filter>
-    </ClCompile>
     <ClCompile Include="particleContact.cpp">
       <Filter>Source Files\ParticlePhysics</Filter>
     </ClCompile>

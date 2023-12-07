@@ -159,7 +159,6 @@
     <ClCompile Include="particleBungeeForce.cpp" />
     <ClCompile Include="particleBuoyancy.cpp" />
     <ClCompile Include="particleCable.cpp" />
-    <ClCompile Include="particleContactResolver.cpp" />
     <ClCompile Include="particleContactResolver.h" />
     <ClCompile Include="particleDrag.cpp" />
     <ClCompile Include="particleForceRegistry.cpp" />

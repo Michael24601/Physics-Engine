@@ -20,8 +20,19 @@ real ParticleContact::calculateSeperationVecolity() const {
 		If the second object is a movable particle, its velocity is 
 		considered.
 	*/
-	if (particle[1] != NULL) {
-		relativeVelocity -= particle[1]->velocity;
+
+	try{
+		if (particle[1] != NULL) {
+			relativeVelocity -= particle[1]->velocity;
+		}
+	}
+	catch (const std::out_of_range& e) {
+		std::cerr << "Error: Out of range exception caught: " 
+			<< e.what() << "\n";
+	}
+	catch (const std::exception& e) {
+		// Handle other exceptions if necessary
+		std::cerr << "Error: " << e.what() << "\n";
 	}
 
 	return contactNormal.scalarProduct(relativeVelocity);
@@ -79,6 +90,7 @@ void ParticleContact::resolveVelocity(real duration) {
 	if (totalInverseMass <= 0) {
 		return;
 	}
+
 	real impulse = changeInVelocity / totalInverseMass;
 	Vector3D impulseVector = contactNormal * impulse;
 
@@ -94,6 +106,7 @@ void ParticleContact::resolveVelocity(real duration) {
 }
 
 void ParticleContact::resolveInterpenetration(real duration) {
+
 	// If the two objects are still within each other afer the collision
 	if (interpenetration > 0) {
 		real totalInverseMass = particle[0]->inverseMass;
