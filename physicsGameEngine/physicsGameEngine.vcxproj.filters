@@ -49,6 +49,9 @@
     <Filter Include="Source Files\Primitive">
       <UniqueIdentifier>{7dd8a706-bc57-4ab6-a35b-dedc63bec38e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\ParticleMesh">
+      <UniqueIdentifier>{1aa70bbb-545d-4597-8b7f-bec87747f6db}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="physicsGameEngine.cpp">
@@ -141,7 +144,7 @@
     <ClCompile Include="polyhedron.cpp">
       <Filter>Source Files\Primitive</Filter>
     </ClCompile>
-    <ClCompile Include="polyhedronInterface.cpp">
+    <ClCompile Include="shaderInterface.cpp">
       <Filter>Source Files\Primitive</Filter>
     </ClCompile>
   </ItemGroup>
@@ -278,11 +281,17 @@
     <ClInclude Include="pyramid.h">
       <Filter>Header Files\Primitive</Filter>
     </ClInclude>
-    <ClInclude Include="polyhedronInterface.h">
+    <ClInclude Include="shaderInterface.h">
       <Filter>Header Files\OpenglGraphics</Filter>
     </ClInclude>
     <ClInclude Include="cylinder.h">
       <Filter>Header Files\Primitive</Filter>
+    </ClInclude>
+    <ClInclude Include="particleMesh.h">
+      <Filter>Header Files\ParticleMesh</Filter>
+    </ClInclude>
+    <ClInclude Include="clothWithBungeeCord.h">
+      <Filter>Header Files\ParticleMesh</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

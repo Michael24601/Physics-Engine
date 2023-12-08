@@ -12,12 +12,13 @@
 */
 
 
-#ifndef POLYHEDRON_INTERFACE_H
-#define POLYHEDRON_INTERFACE_H
+#ifndef SHADER_INTERFACE_H
+#define SHADER_INTERFACE_H
 
 #include "polyhedron.h"
 #include "solidSphere.h"
 #include "cylinder.h"
+#include "clothWithBungeeCord.h"
 #include <vector>
 
 namespace pe {
@@ -101,6 +102,50 @@ namespace pe {
 		said circular face.
 	*/
 	faceData getCylinderFaceData(const Cylinder& cylinder);
+
+
+    /*
+        Returns individual vertex index in particle mesh.
+    */
+    glm::vec3 calculateMeshVertexNormal(
+        const std::vector<Particle>& particles,
+        int targetIndex,
+        int columnSize,
+        int rowSize
+    );
+
+
+    /*
+        Returns the face data for a mesh. Note that the normals used
+        for each vertex is the face normal, so it will look triangulated.
+        We can specify if we want the faces in clockwise or counter-clockwise
+        order.
+    */
+    faceData getMeshFaceData(
+        const ParticleMesh& mesh,
+        int columnSize,
+        int rowSize,
+        order order
+    );
+
+
+    /*
+        Also returns the face data, but the vertices calculate their normals
+        individually, so it looks smooth. This function is specific to
+		cloth.
+    */
+	faceData getSmoothMeshFaceData(
+		const ClothWithBungeeCord& mesh,
+		int columnSize,
+		int rowSize,
+		order order
+	);
+
+	/*
+		Returns mesh edge data.
+	*/
+	edgeData getMeshEdgeData(const ParticleMesh& mesh);
+
 }
 
 #endif

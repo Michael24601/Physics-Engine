@@ -5,7 +5,7 @@
 #include "shaderProgram.h"
 #include "vector3D.h"
 #include "drawingUtil.h"
-#include "polyhedronInterface.h"
+#include "shaderInterface.h"
 
 const std::string diffuseSpecularLightingVertexShader = R"(
     #version 330 core

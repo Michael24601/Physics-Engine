@@ -170,7 +170,7 @@
     <ClCompile Include="physicsGameEngine.cpp" />
     <ClCompile Include="particleContact.cpp" />
     <ClCompile Include="polyhedron.cpp" />
-    <ClCompile Include="polyhedronInterface.cpp" />
+    <ClCompile Include="shaderInterface.cpp" />
     <ClCompile Include="rigidBody.cpp" />
     <ClCompile Include="rigidBodyCableForce.cpp" />
     <ClCompile Include="rigidBodyGravity.cpp" />
@@ -186,12 +186,14 @@
     <ClInclude Include="BVHNode.h" />
     <ClInclude Include="boundingSphere.h" />
     <ClInclude Include="boundingVolumeHierarchy.h" />
+    <ClInclude Include="clothWithBungeeCord.h" />
     <ClInclude Include="contact.h" />
     <ClInclude Include="contactData.h" />
     <ClInclude Include="contactGeneration.h" />
     <ClInclude Include="cylinder.h" />
+    <ClInclude Include="particleMesh.h" />
     <ClInclude Include="polyhedron.h" />
-    <ClInclude Include="polyhedronInterface.h" />
+    <ClInclude Include="shaderInterface.h" />
     <ClInclude Include="rectangularPrism.h" />
     <ClInclude Include="diffuseLightingShader.h" />
     <ClInclude Include="diffuseSpecularLightingShader.h" />

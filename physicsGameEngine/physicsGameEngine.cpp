@@ -34,207 +34,16 @@
 #include "cylinder.h"
 #include "contactGeneration.h"
 #include "drawingUtil.h"
-#include "rigidBodyCableForce.h"
+#include "clothWithBungeeCord.h"
 
 #include "solidColorShader.h"
 #include "diffuseLightingShader.h"
 #include "diffuseSpecularLightingShader.h"
 #include "tesselationUtil.h"
-#include "polyhedronInterface.h"
+#include "shaderInterface.h"
 
 using namespace pe;
 using namespace std;
-glm::vec3 calculateNormal(const std::vector<Particle>& particles, int targetIndex, int size) {
-    glm::vec3 averageNormal(0.0f);
-
-    // Find the index of the target particle in the array
-    Particle targetParticle = particles[targetIndex];
-    glm::vec3 targetPosition = convertToGLM(targetParticle.position);
-
-    // Calculate indices of adjacent particles (assuming a regular grid)
-    int row = targetIndex / size;
-    int col = targetIndex % size;
-
-    int leftIndex = (col > 0) ? targetIndex - 1 : -1;
-    int rightIndex = (col < size - 1) ? targetIndex + 1 : -1;
-    int topIndex = (row > 0) ? targetIndex - size : -1;
-    int bottomIndex = (row < size - 1) ? targetIndex + size : -1;
-
-    // Check if adjacent particles are within bounds
-    if (leftIndex != -1) {
-        glm::vec3 leftPosition = convertToGLM(particles[leftIndex].position);
-        averageNormal += glm::cross(leftPosition - targetPosition, glm::vec3(0, 1, 0));
-    }
-
-    if (rightIndex != -1) {
-        glm::vec3 rightPosition = convertToGLM(particles[rightIndex].position);
-        averageNormal += glm::cross(glm::vec3(0, 1, 0), rightPosition - targetPosition);
-    }
-
-    if (topIndex != -1) {
-        glm::vec3 topPosition = convertToGLM(particles[topIndex].position);
-        averageNormal += glm::cross(topPosition - targetPosition, glm::vec3(1, 0, 0));
-    }
-
-    if (bottomIndex != -1) {
-        glm::vec3 bottomPosition = convertToGLM(particles[bottomIndex].position);
-        averageNormal += glm::cross(glm::vec3(1, 0, 0), bottomPosition - targetPosition);
-    }
-
-    // Normalize the average normal
-    averageNormal = glm::normalize(averageNormal);
-
-    return averageNormal;
-}
-
-
-
-faceData generateSmoothTriangles(
-    const vector<Particle>& particles,
-    int size,
-    order order
-) {
-
-    vector<glm::vec3> particleNormals;
-    for (int i = 0; i < particles.size(); i++) {
-        glm::vec3 normal = calculateNormal(particles, i, size);
-        if (order == order::CLOCKWISE) {
-            normal *= -1;
-        }
-        particleNormals.push_back(normal);
-    }
-    vector<glm::vec3> triangles;
-    vector<glm::vec3> normals;
-
-    for (int i = 0; i < size - 1; ++i) {
-        for (int j = 0; j < size - 1; ++j) {
-
-            int targetIndex = i * size + j;
-
-            // Indices
-            int topLeft = i * size + j;
-            int topRight = i * size + (j + 1);
-            int bottomLeft = (i + 1) * size + j;
-            int bottomRight = (i + 1) * size + (j + 1);
-
-            // Add two triangles for the square
-            if (order == order::COUNTER_CLOCKWISE) {
-                triangles.push_back(convertToGLM(particles[topRight].position));
-                triangles.push_back(convertToGLM(particles[topLeft].position));
-                triangles.push_back(convertToGLM(particles[bottomLeft].position));
-
-                triangles.push_back(convertToGLM(particles[topRight].position));
-                triangles.push_back(convertToGLM(particles[bottomLeft].position));
-                triangles.push_back(convertToGLM(particles[bottomRight].position));
-
-                // Add normals for each vertex
-                normals.push_back(particleNormals[topRight]);
-                normals.push_back(particleNormals[topLeft]);
-                normals.push_back(particleNormals[bottomLeft]);
-
-                normals.push_back(particleNormals[topRight]);
-                normals.push_back(particleNormals[bottomLeft]);
-                normals.push_back(particleNormals[bottomRight]);
-            }
-            else if (order == order::CLOCKWISE) {
-                triangles.push_back(convertToGLM(particles[topLeft].position));
-                triangles.push_back(convertToGLM(particles[topRight].position));
-                triangles.push_back(convertToGLM(particles[bottomLeft].position));
-
-                triangles.push_back(convertToGLM(particles[bottomLeft].position));
-                triangles.push_back(convertToGLM(particles[topRight].position));
-                triangles.push_back(convertToGLM(particles[bottomRight].position));
-
-                // Add normals for each vertex
-                normals.push_back(particleNormals[topLeft]);
-                normals.push_back(particleNormals[topRight]);
-                normals.push_back(particleNormals[bottomLeft]);
-
-                normals.push_back(particleNormals[bottomLeft]);
-                normals.push_back(particleNormals[topRight]);
-                normals.push_back(particleNormals[bottomRight]);
-            }
-        }
-    }
-
-    return faceData{ triangles, normals };
-}
-
-
-
-faceData generateTriangles(
-    const vector<Particle>& particles,
-    int size,
-    order order
-) {
-    vector<glm::vec3> triangles;
-    vector<glm::vec3> normals;
-
-    for (int i = 0; i < size - 1; ++i) {
-        for (int j = 0; j < size - 1; ++j) {
-
-            // Indices
-            int topLeft = i * size + j;
-            int topRight = i * size + (j + 1);
-            int bottomLeft = (i + 1) * size + j;
-            int bottomRight = (i + 1) * size + (j + 1);
-
-            // Calculate normals for the triangles
-            glm::vec3 normal1 = glm::normalize(glm::cross(
-                convertToGLM(particles[topLeft].position) - convertToGLM(particles[topRight].position),
-                convertToGLM(particles[bottomLeft].position) - convertToGLM(particles[topRight].position)
-            ));
-
-            glm::vec3 normal2 = glm::normalize(glm::cross(
-                convertToGLM(particles[bottomLeft].position) - convertToGLM(particles[topRight].position),
-                convertToGLM(particles[bottomRight].position) - convertToGLM(particles[topRight].position)
-            ));
-
-            // Add two triangles for the square
-            if (order == order::COUNTER_CLOCKWISE) {
-                triangles.push_back(convertToGLM(particles[topRight].position));
-                triangles.push_back(convertToGLM(particles[topLeft].position));
-                triangles.push_back(convertToGLM(particles[bottomLeft].position));
-
-                triangles.push_back(convertToGLM(particles[topRight].position));
-                triangles.push_back(convertToGLM(particles[bottomLeft].position));
-                triangles.push_back(convertToGLM(particles[bottomRight].position));
-
-                // Add normals for each vertex
-                normals.push_back(normal1);
-                normals.push_back(normal1);
-                normals.push_back(normal1);
-
-                normals.push_back(normal2);
-                normals.push_back(normal2);
-                normals.push_back(normal2);
-            }
-            else if (order == order::CLOCKWISE) {
-                triangles.push_back(convertToGLM(particles[topLeft].position));
-                triangles.push_back(convertToGLM(particles[topRight].position));
-                triangles.push_back(convertToGLM(particles[bottomLeft].position));
-
-                triangles.push_back(convertToGLM(particles[bottomLeft].position));
-                triangles.push_back(convertToGLM(particles[topRight].position));
-                triangles.push_back(convertToGLM(particles[bottomRight].position));
-
-                normal1 *= -1;
-                normal2 *= -1;
-
-                // Add normals for each vertex
-                normals.push_back(normal1);
-                normals.push_back(normal1);
-                normals.push_back(normal1);
-
-                normals.push_back(normal2);
-                normals.push_back(normal2);
-                normals.push_back(normal2);
-            }
-        }
-    }
-
-    return faceData{ triangles, normals };
-}
 
 
 int main() {
@@ -319,100 +128,13 @@ int main() {
 
     int size = 20;
     real strength = 0.5;
-    std::vector<Particle> p(size*size);
+    real mass = 0.3;
+    real damping = 0.9;
 
-    for (int i = 0; i < size; i++) {
-        for (int j = 0; j < size; j++) {
-            float x = -200.0 + j * (400 / (size - 1));
-            float y = 200.0 - i * (400 / (size - 1));
-            float z = 0.0;
-
-            int index = i * size + j;
-            p[index].position = Vector3D(x, y, z);
-        }
-    }
-
-    for (auto& particle : p) {
-        particle.setMass(0.3);
-        particle.damping = 0.95;
-    }
+    ClothWithBungeeCord mesh(mass, damping, strength, size, size, 
+        Vector3D(-200, 200, 0), Vector3D(200, -200, 0));
 
     ParticleGravity g(Vector3D(0, -10, 0));
-
-    struct BungeeForce{
-        ParticleBungeeForce force;
-        Particle* on;
-    };
-
-    vector<BungeeForce> forces;
-
-    for (int i = 0; i < size * size; i++) {
-        real length = (400.0f / (real)(size - 1)) / 1.0f;
-        real dLength = (400.0f / (real)(size - 1)) * 1.4141f;
-        if (i - size >= 0) {
-            forces.push_back({
-                ParticleBungeeForce(&p[i - size], strength, length),
-                &p[i]
-            });
-        }
-        if (i - 1 >= 0 && i % size != 0) {
-            forces.push_back({
-                ParticleBungeeForce(&p[i - 1], strength, length),
-                &p[i]
-            });
-        }
-        if (i + size < size*size) {
-            forces.push_back({
-                ParticleBungeeForce(&p[i + size], strength, length),
-                &p[i]
-             });
-        }
-        if (i + 1 < size * size && (i+1)% size != 0) {
-            forces.push_back({
-                ParticleBungeeForce(&p[i + 1], strength, length),
-                &p[i]
-            });
-        }
-
-        if (i - 2*size >= 0) {
-            forces.push_back({
-                ParticleBungeeForce(&p[i - 2*size], strength, length),
-                &p[i]
-                });
-        }
-        if (i + 2 * size < size * size) {
-            forces.push_back({
-                ParticleBungeeForce(&p[i + 2*size], strength, length),
-                &p[i]
-                });
-        }
-
-        // diagonals
-        if (i - size - 1 >= 0 && i % size != 0) {
-            forces.push_back({
-                ParticleBungeeForce(&p[i - size - 1], strength, dLength),
-                &p[i]
-            });
-        }
-        if (i - size + 1 >= 0 && (i + 1) % size != 0) {
-            forces.push_back({
-                ParticleBungeeForce(&p[i - size + 1], strength, dLength),
-                &p[i]
-            });
-        }
-        if (i + size - 1 < size * size && i % size != 0) {
-            forces.push_back({
-                ParticleBungeeForce(&p[i + size - 1], strength, dLength),
-                &p[i]
-            });
-        }
-        if (i + size + 1 < size * size && (i + 1) % size != 0) {
-            forces.push_back({
-                ParticleBungeeForce(&p[i + size + 1], strength, dLength),
-                &p[i]
-            });
-        }
-    }
 
     real rotationSpeed = 0.10;
     real angle = PI / 2;
@@ -449,45 +171,38 @@ int main() {
             }
         }
 
-        for (auto& particle : p) {
+        for (auto& particle : mesh.particles) {
             g.updateForce(&particle, deltaT);
         }
 
         vector<ParticleContact> contacts;
-        for (auto& force : forces) {
-            force.force.updateForce(force.on, deltaT);
+        for (auto& force : mesh.forces) {
+            force.force1.updateForce(force.force2.otherParticle, deltaT);
+            force.force2.updateForce(force.force1.otherParticle, deltaT);
         }
 
         for (int i = 0; i < size * size; i++) {
             if(i >= size)
-                p[i].verletIntegrate(deltaT);
+                mesh.particles[i].verletIntegrate(deltaT);
         }
 
         if (isButtonPressed) {
             sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
             sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);
             Vector3D move;
-            move.x = worldPos.x - p[size * size / 2].position.x;
-            move.y = worldPos.y - p[size * size / 2].position.y;
-            move.z = worldPos.x - p[size * size / 2].position.z;
+            move.x = worldPos.x - mesh.particles[size * size / 2].position.x;
+            move.y = worldPos.y - mesh.particles[size * size / 2].position.y;
+            move.z = worldPos.x - mesh.particles[size * size / 2].position.z;
 
-            move *= 1;
+            move *= 0.5;
             ParticleGravity f(move);
             for (int i = 0; i < 2; i++) {
-                f.updateForce(&p[size * size / 2 + i + size/2], deltaT);
-                f.updateForce(&p[size * size / 2 - i + size/2], deltaT);
+                f.updateForce(&mesh.particles[size * size / 2 + i + size/2], deltaT);
+                f.updateForce(&mesh.particles[size * size / 2 - i + size/2], deltaT);
 
-                f.updateForce(&p[size * size / 2 + i * size + size / 2], deltaT);
-                f.updateForce(&p[size * size / 2 - i * size + size / 2], deltaT);
+                f.updateForce(&mesh.particles[size * size / 2 + i * size + size / 2], deltaT);
+                f.updateForce(&mesh.particles[size * size / 2 - i * size + size / 2], deltaT);
             }
-        }
-
-        // Draw cables/springs
-        // (Could also use global here)
-        vector<glm::vec3> v;
-        for (auto& force : forces) {
-            v.push_back(convertToGLM(force.force.otherParticle->position));
-            v.push_back(convertToGLM(force.on->position));
         }
 
         window.clear(sf::Color::Black);
@@ -502,10 +217,15 @@ int main() {
         glm::vec4 colorRed(1.0, 0.2, 0.2, 1);
         glm::vec4 colorBlue(0.2, 0.2, 1.0, 1);
 
-        //shader.drawEdges(v, identity, viewMatrix, projectionMatrix, colorWhite);
+        edgeData edgeData = getMeshEdgeData(mesh);
 
-        faceData data = generateSmoothTriangles(p, size, order::COUNTER_CLOCKWISE);
-        faceData backData = generateSmoothTriangles(p, size, order::CLOCKWISE);
+        //shader.drawEdges(edgeData.vertices, identity, viewMatrix, 
+          //  projectionMatrix, colorWhite);
+
+        faceData data = getSmoothMeshFaceData(mesh, size, size, 
+            order::COUNTER_CLOCKWISE);
+        faceData backData = getSmoothMeshFaceData(mesh, size, size, 
+            order::CLOCKWISE);
 
         glm::vec3 lightPos[]{ glm::vec3(500, 0, 500), 
             glm::vec3(-500, 0, -500) };
