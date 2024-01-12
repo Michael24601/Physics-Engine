@@ -204,6 +204,18 @@ namespace pe {
 	*/
 	Vector3D worldToLocalDirection(const Vector3D& absoluteDirection, const
 		Matrix3x4& transformation);
+
+	/*
+		Creates an orthonormal basis with the given x vector.
+		The y vector is also taken into consideration, but can be changed.
+		Both y and z are written to, x is not, and is kept as is.
+		We assume x is already normalized, and the written y and z are
+		normalized in the function.
+	*/
+	void makeOrthonormalBasis(const Vector3D& x, Vector3D* y, Vector3D* z);
+
+	// Prints the vector
+	std::ostream& operator<<(std::ostream& out, const Vector3D& vector);
 }
 
 #endif

@@ -38,8 +38,9 @@
 #define CONTACT_H
 
 #include "vector3D.h"
-#include "SFML/Graphics.hpp"
-#include "drawingUtil.h"
+#include "rigidBody.h"
+#include "matrix3x3.h"
+#include <assert.h>
 
 namespace pe {
 
@@ -72,18 +73,121 @@ namespace pe {
 		*/
 		real penetration;
 
-		std::vector<std::pair<Vector3D, Vector3D>> drawNormals(real length) {
-			std::vector<std::pair<Vector3D, Vector3D>> normalLines;
 
-			// Calculate the start and end points for the normal lines
-			Vector3D start = contactPoint;
-			Vector3D end1 = contactPoint + contactNormal * length; // Normal direction
-			Vector3D end2 = contactPoint - contactNormal * length; // Opposite normal direction
+		/*
+			In the same way that we can turn local rigid body coordinates
+			into world coordinates, a contact has its own orthonormal
+			basis, which we can transform into world coordinates.
+			The basis has the x axis as the contact normal, and the y and
+			z axes are at right angles to it.
 
-			normalLines.push_back(std::make_pair(start, end1));
-			normalLines.push_back(std::make_pair(start, end2));
-			return normalLines;
-		}
+			This matrix transforms the local contact coordinates into world
+			coordinates. It is made up of three columns that form the
+			orthonormal basis in world coordinates (the contact normal we
+			have is stored in world coordinates of course, otherwise all
+			contact normals would just be (1, 0, 0)).
+
+			One thing to note is that, since the matrix represents a 
+			transformation between one orthonormal base and another, there
+			is no scaling or skewing. And since it is a 3 by 3 matrix, there
+			is no translation either. That makes it a rotation matrix,
+			meaning that its inverse is its transpose. So when we want to go
+			from world to contact coordinates, we can use the transpose,
+			instead of calculating the inverse from scratch, which is
+			costlier.
+		*/
+		Matrix3x3 contactToWorld;
+
+
+		/*
+			Position of the contact in the local coordinates of each of
+			the two bodies in contact (if there is a second body).
+		*/
+		Vector3D relativeContactPosition[2];
+
+
+		/*
+			The velocity needed to resolve the contacts based on the
+			restitution and other variables.
+		*/
+		real desiredDeltaVelocity;
+
+
+		/*
+			The closing velocity of the two objects in contact coordinates.
+		*/
+		Vector3D contactVelocity;
+
+
+		void applyPositionChange(
+			Vector3D linearChange[2],
+			Vector3D angularChange[2],
+			real penetration
+		);
+
+
+		inline Vector3D calculateFrictionlessImpulse(
+			Matrix3x3* inverseInertiaTensor
+		);
+
+
+
+
+		inline Vector3D calculateFrictionImpulse(
+			Matrix3x3* inverseInertiaTensor
+		);
+
+
+		void applyVelocityChange(
+			Vector3D velocityChange[2],
+			Vector3D rotationChange[2]
+		);
+
+
+		/*
+			If one of the bodies is null, then it needs to be the second
+			one. If not, this function switches the two, and then switches
+			the direction of the contact normal as it must always be
+			relative to the first body.
+		*/
+		void swapBodies();
+
+
+		/*
+			Calculates the orthonormal basis of the contact based on the 
+			contact normal.
+			We could use the makeOrthonormalBasis function, but instead, we
+			rewrite the logic in a more performant way.
+		*/
+		void calculateContactBasis();
+
+
+		/*
+			Calculates internal contact data at the start of the collision.
+		*/
+		void calculateInternals(real duration);
+
+
+		/*
+			Calculates the closing velocity of one of the two bodies (if the
+			two bodies exist) in world coordinates.
+		*/
+		Vector3D calculateLocalVelocity(
+			unsigned int bodyIndex,
+			real duration
+		);
+
+
+		/*
+			Calculates the desired delta velocity of the contact (the two
+			bodies), all while considering the restitution coefficient.
+			The result is given in contact coordinates.
+
+			Desired delta velocity, unlike delta velocity, is not a
+			a function of the collision position, or the body masses, but
+			is instead the velocity that counters the closing velocity.
+		*/
+		void calculateDesiredDeltaVelocity(real duration);
 	};
 }
 

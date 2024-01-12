@@ -52,6 +52,12 @@
     <Filter Include="Header Files\ParticleMesh">
       <UniqueIdentifier>{1aa70bbb-545d-4597-8b7f-bec87747f6db}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Interfaces">
+      <UniqueIdentifier>{7022ec70-1863-4c8a-8abd-87020da1f78d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Interfaces">
+      <UniqueIdentifier>{52cde102-5ed5-42d9-b616-32e02268d7fd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="physicsGameEngine.cpp">
@@ -68,9 +74,6 @@
     </ClCompile>
     <ClCompile Include="boundingSphere.cpp">
       <Filter>Source Files\Collision</Filter>
-    </ClCompile>
-    <ClCompile Include="contactGeneration.cpp">
-      <Filter>Source Files\RigidBodyPhysics</Filter>
     </ClCompile>
     <ClCompile Include="drawingUtil.cpp">
       <Filter>Source Files\OpenglGraphics</Filter>
@@ -145,7 +148,16 @@
       <Filter>Source Files\Primitive</Filter>
     </ClCompile>
     <ClCompile Include="shaderInterface.cpp">
-      <Filter>Source Files\Primitive</Filter>
+      <Filter>Source Files\Interfaces</Filter>
+    </ClCompile>
+    <ClCompile Include="contactGeneration.cpp">
+      <Filter>Source Files\Collision</Filter>
+    </ClCompile>
+    <ClCompile Include="contact.cpp">
+      <Filter>Source Files\Collision</Filter>
+    </ClCompile>
+    <ClCompile Include="collisionResolver.cpp">
+      <Filter>Source Files\Collision</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -172,15 +184,6 @@
     </ClInclude>
     <ClInclude Include="BVHNode.h">
       <Filter>Header Files\Collision</Filter>
-    </ClInclude>
-    <ClInclude Include="contact.h">
-      <Filter>Header Files\RigidBodyPhysics</Filter>
-    </ClInclude>
-    <ClInclude Include="contactData.h">
-      <Filter>Header Files\RigidBodyPhysics</Filter>
-    </ClInclude>
-    <ClInclude Include="contactGeneration.h">
-      <Filter>Header Files\RigidBodyPhysics</Filter>
     </ClInclude>
     <ClInclude Include="drawingUtil.h">
       <Filter>Header Files\OpenglGraphics</Filter>
@@ -281,9 +284,6 @@
     <ClInclude Include="pyramid.h">
       <Filter>Header Files\Primitive</Filter>
     </ClInclude>
-    <ClInclude Include="shaderInterface.h">
-      <Filter>Header Files\OpenglGraphics</Filter>
-    </ClInclude>
     <ClInclude Include="cylinder.h">
       <Filter>Header Files\Primitive</Filter>
     </ClInclude>
@@ -292,6 +292,30 @@
     </ClInclude>
     <ClInclude Include="clothWithBungeeCord.h">
       <Filter>Header Files\ParticleMesh</Filter>
+    </ClInclude>
+    <ClInclude Include="cord.h">
+      <Filter>Header Files\ParticleMesh</Filter>
+    </ClInclude>
+    <ClInclude Include="vector3DAdapter.h">
+      <Filter>Header Files\ParticlePhysics</Filter>
+    </ClInclude>
+    <ClInclude Include="shaderInterface.h">
+      <Filter>Header Files\Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="bodyCordAdapter.h">
+      <Filter>Header Files\Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="contact.h">
+      <Filter>Header Files\Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="contactData.h">
+      <Filter>Header Files\Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="contactGeneration.h">
+      <Filter>Header Files\Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="collisionResolver.h">
+      <Filter>Header Files\Collision</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

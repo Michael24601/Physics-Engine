@@ -4,22 +4,23 @@
 using namespace pe;
 
 
-int pe::whichSide(const Polyhedron& C, const pe::Vector3D& P,
-	const pe::Vector3D& D) {
+int pe::whichSide(const Polyhedron& C, const Vector3D& P,
+	const Vector3D& D) {
+
 	/*
 		The vertices are projected to the form P + t * D. The return
-		value is +1 if all t>0, = 1 if all t<0, but 0 otherwise, in
+		value is +1 if all t > 0, = 1 if all t < 0, but 0 otherwise, in
 		which case the line splits the polygon projection.
 	*/
 	int positive = 0, negative = 0;
-	for (int i = 0; i < C.globalVertices.size(); ++i) {
+	for (int i = 0; i < C.globalVertices.size(); i++) {
 		// Project a vertex onto the line.
-		pe::real t = D.scalarProduct(C.globalVertices[i] - P);
+		real t = D.scalarProduct(C.globalVertices[i] - P);
 		if (t > 0) {
-			++positive;
+			positive++;
 		}
 		else if (t < 0) {
-			++negative;
+			negative++;
 		}
 		if (positive && negative) {
 			/*
@@ -31,7 +32,7 @@ int pe::whichSide(const Polyhedron& C, const pe::Vector3D& P,
 		}
 	}
 	// Either positive > 0 or negative > 0 but not both are positive.
-	return (positive > 0 ? +1 : -1);
+	return (positive > 0 ? 1 : -1);
 }
 
 
@@ -41,7 +42,19 @@ bool pe::testIntersection(const Polyhedron& C0, const Polyhedron& C1) {
 		ordering, the  projection interval for C0 is [T,0] whereT<0.
 		Determine whether C1 is on the  positive side of the line.
 	*/
-	for (int i = 0; i < C0.faces.size(); ++i) {
+
+	/*
+		On the first frame, the face data may not yet have been calculated
+		(it's calculated once per frame, and there's no guarantee the code
+		calculating it is executed before the collision detection), so
+		if that's the case, we automatically return false (no collision).
+		This only applies to the first frame.
+	*/
+	if (C0.faces.size() == 0 || C1.faces.size() == 0) {
+		return false;
+	}
+
+	for (int i = 0; i < C0.faces.size(); i++) {
 		pe::Vector3D P = C0.faces[i].vertices[0];
 		pe::Vector3D N = C0.faces[i].normal; // outward pointing
 		if (whichSide(C1, P, N) > 0) {
@@ -95,5 +108,6 @@ bool pe::testIntersection(const Polyhedron& C0, const Polyhedron& C1) {
 			}
 		}
 	}
+
 	return true;
 }

@@ -21,6 +21,7 @@
 
 #include "polyhedron.h"
 #include "contact.h"
+#include <algorithm>
 
 namespace pe {
 

@@ -55,6 +55,22 @@ edgeData pe::getPolyhedronEdgeData(const Polyhedron& polyhedron) {
 }
 
 
+edgeData pe::getPolyhedronNormalsData(
+	const Polyhedron& polyhedron,
+	real length
+) {
+	std::vector<glm::vec3> normals;
+	for (const Face& face : polyhedron.faces) {
+		normals.push_back(convertToGLM(face.centroid));
+		Vector3D secondPoint = face.centroid + face.normal * length;
+		normals.push_back(convertToGLM(secondPoint));
+	}
+
+	edgeData data{ normals };
+	return data;
+}
+
+
 faceData pe::getPolyhedronFaceData(const Polyhedron& polyhedron) {
 	std::vector<glm::vec3> flattenedPositions;
 	std::vector<glm::vec3> flattenedNormals;

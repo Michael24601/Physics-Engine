@@ -45,6 +45,15 @@ namespace pe {
 			return positions;
 		}
 
+		/*
+			Bungee force, where each force applies from one particle onto
+			the other (two sided).
+		*/
+		struct BungeeForce {
+			ParticleBungeeForce force1;
+			ParticleBungeeForce force2;
+		};
+
 	public:
 
 		/*
@@ -54,14 +63,6 @@ namespace pe {
 		int columnSize;
 		int rowSize;
 
-		/*
-			Bungee force, where each force applies from one particle onto
-			the other (two sided).
-		*/
-		struct BungeeForce {
-			ParticleBungeeForce force1;
-			ParticleBungeeForce force2;
-		};
 		std::vector<BungeeForce> forces;
 
 		ClothWithBungeeCord(

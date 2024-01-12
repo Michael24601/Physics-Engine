@@ -58,6 +58,28 @@ namespace pe {
 			*this = matrix;
 		}
 
+		
+		/*
+			Setter for the matrix.
+			Takes in 3 vectors, whose components are then set in as the 
+			columns of the matrix.
+		*/
+		void setComponents(
+			const Vector3D& first,
+			const Vector3D& second,
+			const Vector3D& third
+		) {
+			data[0] = first.x;
+			data[1] = second.x;
+			data[2] = third.x;
+			data[3] = first.y;
+			data[4] = second.y;
+			data[5] = third.y;
+			data[6] = first.z;
+			data[7] = second.z;
+			data[8] = third.z;
+		}
+
 		// Overloaded = operator
 		Matrix3x3& operator=(const Matrix3x3& matrix) {
 			for (int i = 0; i < 9; i++) {
@@ -178,6 +200,25 @@ namespace pe {
 			);
 		}
 
+
+		/*
+			Adds two matrices.
+		*/
+		Matrix3x3 operator+ (const Matrix3x3& matrix) const {
+			return Matrix3x3(
+				data[0] + matrix.data[0],
+				data[1] + matrix.data[1],
+				data[2] + matrix.data[2],
+				data[3] + matrix.data[3],
+				data[4] + matrix.data[4],
+				data[5] + matrix.data[5],
+				data[6] + matrix.data[6],
+				data[7] + matrix.data[7],
+				data[8] + matrix.data[8]
+			);
+		}
+
+
 		/*
 			Multiplies a matrix by a scaler and applies the result
 		*/
@@ -224,6 +265,18 @@ namespace pe {
 			data[6] = 2 * q.i * q.k + 2 * q.j * q.r;
 			data[7] = 2 * q.j * q.k - 2 * q.i * q.r;
 			data[8] = 1 - (2 * q.i * q.i + 2 * q.j * q.j);
+		}
+
+
+		void setSkewSymmetric(const Vector3D vector)
+		{
+			data[0] = data[4] = data[8] = 0;
+			data[1] = -vector.z;
+			data[2] = vector.y;
+			data[3] = vector.z;
+			data[5] = -vector.x;
+			data[6] = -vector.y;
+			data[7] = vector.x;
 		}
 
 		/*

@@ -128,4 +128,11 @@ as it ensures the same shaders can be used for any type of primitive,
 and special shaders no longer need to be employed. It also removes
 some of the calculations from the shader programs.
 
-Sdd checking in primitive for counter clockwise order.
+Add checking in primitive for counter clockwise order.
+
+Add a comment to setSkewSymmetric function in the matrix class.
+
+One of the two contact generation types isn't working well.
+
+Also, the total number of iterations in the collision resolution 
+causes the objects to fly to infinity when it's set to more than 1.

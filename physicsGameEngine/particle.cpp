@@ -50,9 +50,11 @@ void Particle::integrate(real duration) {
 }
 
 
-
 void Particle::verletIntegrate(real duration) {
 	if (inverseMass > 0) {
+
+		// Converts the time so it is calibrated to be the same as Euler
+		duration *= 5;
 
 		// Saves the current position
 		Vector3D currentPosition = position;

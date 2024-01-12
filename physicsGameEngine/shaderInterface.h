@@ -78,6 +78,16 @@ namespace pe {
 
 
 	/*
+		Returns each face's normal vector for drawing, from the face
+		centroid, with the specified length in the normal's direction.
+	*/
+	edgeData getPolyhedronNormalsData(
+		const Polyhedron& polyhedron,
+		real length
+	);
+
+
+	/*
 		Polyhedron with no curved surfaces.
 	*/
 	faceData getPolyhedronFaceData(const Polyhedron& polyhedron);
@@ -129,6 +139,12 @@ namespace pe {
     );
 
 
+	/*
+		Returns mesh edge data.
+	*/
+	edgeData getMeshEdgeData(const ParticleMesh& mesh);
+
+
     /*
         Also returns the face data, but the vertices calculate their normals
         individually, so it looks smooth. This function is specific to
@@ -140,12 +156,6 @@ namespace pe {
 		int rowSize,
 		order order
 	);
-
-	/*
-		Returns mesh edge data.
-	*/
-	edgeData getMeshEdgeData(const ParticleMesh& mesh);
-
 }
 
 #endif

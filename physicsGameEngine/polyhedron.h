@@ -24,7 +24,7 @@ namespace pe {
 			and calculateCentroid again.
 			- We can do the same as above, but use the transformation also
 			on the normal and centroid, instead of recalculating it.
-			- Or we can scrap the object and create a new face each time we 
+			- Or we can scrap the object and create a new face each time we
 			update the Polyhedron.
 
 		Recalculating the normal and centroid is cheaper than using the
@@ -45,7 +45,7 @@ namespace pe {
 			calculateCentroid();
 		}
 
-		
+
 		// This function assumes we have at least 3 vertices
 		void calculateNormal() {
 			/*
@@ -66,7 +66,7 @@ namespace pe {
 			}
 			Vector3D thirdVertex;
 			for (int i = 1; i < vertices.size(); i++) {
-				if (vertices[i] != firstVertex 
+				if (vertices[i] != firstVertex
 					&& vertices[i] != secondVertex) {
 					thirdVertex = vertices[i];
 					break;
@@ -79,7 +79,7 @@ namespace pe {
 			normal.normalize();
 		}
 
-		void calculateCentroid(){
+		void calculateCentroid() {
 			Vector3D sum;
 			// Calculate the sum of vertex positions
 			for (const Vector3D vertex : vertices) {
@@ -187,7 +187,7 @@ namespace pe {
 					body->transformMatrix.transform(vertex)
 				);
 			}
-			
+
 			edges = calculateEdges(globalVertices);
 			faces = calculateFaces(globalVertices);
 		}

@@ -86,9 +86,10 @@ namespace pe {
 		Vector3D linearVelocity;
 
 		/*
-			Holds the anglar velocity of the object.
+			Holds the angular velocity of the object.
 			With rotations, unlike orientations, gimbal lock is not an
 			issue, so we use a 3D vector to hold the value of rotations.
+			This is also sometimes called the rotation of the body.
 		 */
 		Vector3D angularVelocity;
 

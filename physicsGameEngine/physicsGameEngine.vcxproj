@@ -90,12 +90,15 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>GLEW_STATIC;SFML_STATIC;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>C:\Users\msaba\OneDrive\Documents\college\personal\SFML-2.5.1\include;C:\Users\msaba\OneDrive\Documents\college\personal\glm-master\glm;C:\Users\msaba\OneDrive\Documents\college\personal\glew-2.2.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>sfml-graphics-s-d.lib;sfml-window-s-d.lib;sfml-system-s-d.lib;opengl32.lib;freetype.lib;winmm.lib;gdi32.lib;glu32.lib;glew32s.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Users\msaba\OneDrive\Documents\college\personal\SFML-2.5.1\lib;C:\Users\msaba\OneDrive\Documents\college\personal\glew-2.2.0\lib\Release\Win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -121,12 +124,15 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>GLEW_STATIC;SFML_STATIC;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>C:\Users\msaba\OneDrive\Documents\college\personal\SFML-2.5.1\include;C:\Users\msaba\OneDrive\Documents\college\personal\glm-master\glm;C:\Users\msaba\OneDrive\Documents\college\personal\glew-2.2.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>sfml-graphics-s-d.lib;sfml-window-s-d.lib;sfml-system-s-d.lib;opengl32.lib;freetype.lib;winmm.lib;gdi32.lib;glu32.lib;glew32s.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Users\msaba\OneDrive\Documents\college\personal\SFML-2.5.1\lib;C:\Users\msaba\OneDrive\Documents\college\personal\glew-2.2.0\lib\Release\Win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -151,6 +157,8 @@
   <ItemGroup>
     <ClCompile Include="anchoredSpringForce.cpp" />
     <ClCompile Include="boundingSphere.cpp" />
+    <ClCompile Include="collisionResolver.cpp" />
+    <ClCompile Include="contact.cpp" />
     <ClCompile Include="contactGeneration.cpp" />
     <ClCompile Include="diffuseLightingShader.cpp" />
     <ClCompile Include="diffuseSpecularLightingShader.cpp" />
@@ -183,13 +191,16 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="accuracy.h" />
+    <ClInclude Include="bodyCordAdapter.h" />
     <ClInclude Include="BVHNode.h" />
     <ClInclude Include="boundingSphere.h" />
     <ClInclude Include="boundingVolumeHierarchy.h" />
     <ClInclude Include="clothWithBungeeCord.h" />
+    <ClInclude Include="collisionResolver.h" />
     <ClInclude Include="contact.h" />
     <ClInclude Include="contactData.h" />
     <ClInclude Include="contactGeneration.h" />
+    <ClInclude Include="cord.h" />
     <ClInclude Include="cylinder.h" />
     <ClInclude Include="particleMesh.h" />
     <ClInclude Include="polyhedron.h" />
@@ -230,6 +241,7 @@
     <ClInclude Include="solidSphere.h" />
     <ClInclude Include="tesselationUtil.h" />
     <ClInclude Include="vector3D.h" />
+    <ClInclude Include="vector3DAdapter.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="todo.txt" />

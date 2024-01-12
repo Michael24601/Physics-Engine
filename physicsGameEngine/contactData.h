@@ -1,6 +1,9 @@
 /*
 	Header file for structure used to facilitate writing contact onto an
 	array every frame.
+	This class hold all the contacts that need to be resolved in a single
+	frame, and provides limits to the number of collisions generated and
+	resolved for performance purposes.
 */
 
 #ifndef CONTACT_DATA_H

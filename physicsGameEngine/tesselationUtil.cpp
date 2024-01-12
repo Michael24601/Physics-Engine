@@ -157,11 +157,10 @@ std::vector<std::vector<Vector3D>> pe::returnCylinderFaces(
         size_t v3 = v2 + 1;
 
         // Connect vertices to form faces
-        std::vector<Vector3D> side_face1 = { vertices[v0], vertices[v3], vertices[v1] };
-        std::vector<Vector3D> side_face2 = { vertices[v0], vertices[v2], vertices[v3] };
+        std::vector<Vector3D> side_face = { vertices[v0], vertices[v2], 
+            vertices[v3], vertices[v1] };
 
-        faces.push_back(side_face1);
-        faces.push_back(side_face2);
+        faces.push_back(side_face);
     }
 
     return faces;
