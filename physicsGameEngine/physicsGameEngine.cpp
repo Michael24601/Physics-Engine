@@ -154,14 +154,6 @@ int main() {
     Pyramid c4(new RigidBody(), side, height, 150, 
         Vector3D(-200, 0, 200));
 
-    RigidBody fixed1;
-    fixed1.position = Vector3D(200, 200, -200);
-    RigidBody fixed2;
-    fixed2.position = Vector3D(200, 200, 200);
-    RigidBody fixed3;
-    fixed3.position = Vector3D(-200, 200, -200);
-    RigidBody fixed4;
-    fixed4.position = Vector3D(-200, 200, 200);
 
     c1.body->angularDamping = 0.75;
     c1.body->linearDamping = 0.90;
@@ -174,11 +166,6 @@ int main() {
 
     RigidBodyGravity g(Vector3D(0, -10, 0));
     Vector3D origin;
-    // Applies it to the first vertex
-    RigidBodySpringForce s1(c1.localVertices[0], &fixed1, origin, 10, 100);
-    RigidBodySpringForce s2(c2.localVertices[0], &fixed2, origin, 10, 100);
-    RigidBodySpringForce s3(c3.localVertices[0], &fixed3, origin, 10, 100);
-    RigidBodySpringForce s4(c4.localVertices[0], &fixed4, origin, 10, 100);
 
     int particleNum = 2;
 
@@ -204,7 +191,7 @@ int main() {
         c1.localVertices[0], 
         100, 
         10, 
-        Vector3D(200, 200, -200)
+        Vector3D(100, 200, -200)
     );
 
     BodyCordAdapter adapter2(
@@ -319,7 +306,7 @@ int main() {
                 contact.contactNormal * length;
             contactEdges.vertices.push_back(convertToGLM(otherPoint));
 
-            contact.friction = 0.5;
+            contact.friction = 0.3;
             contact.restitution = 1;
         }
 

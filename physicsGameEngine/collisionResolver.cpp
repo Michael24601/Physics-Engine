@@ -42,8 +42,8 @@ void CollisionResolver::adjustPositions(
 
 	// Iteratively resolve interpenetration in order of severity.
 	positionIterationsUsed = 0;
-	while (positionIterationsUsed < positionIterations)
-	{
+	while (positionIterationsUsed < positionIterations){
+
 		// Find biggest penetration.
 		max = positionEpsilon;
 		index = numContacts;

@@ -185,41 +185,9 @@ bool pe::returnMaxContact(const Polyhedron& p1, const Polyhedron& p2,
         return false;
     }
 
-    /*
-        This part does that, checks the one with the normal closest
-        to the velocity direction.
-    */
-    Contact prioritizedContact;
-    Vector3D relativeVelocity = p1.body->linearVelocity
-        - p2.body->linearVelocity;
-    relativeVelocity.normalize();
-    real highestDotProduct = -REAL_MAX;
-
-    // We iterate through contacts and prioritize based on the dot product
     for (const Contact& contact : contacts) {
-
-        real dotProduct = relativeVelocity.scalarProduct(
-            contact.contactNormal);
-
-        /*
-            Note that we care about alignment with the direction of the
-            normal not necessatily with the same sign, we use the
-            aboslute value of the dot product.
-        */
-        if (realAbs(dotProduct) > highestDotProduct) {
-            highestDotProduct = realAbs(dotProduct);
-            prioritizedContact = contact;
-        }
+        contactsToBeResolved.push_back(contact);
     }
-
-    Contact maxContact = *max_element(contacts.begin(), contacts.end(),
-        [](const Contact& c1, const Contact& c2)->bool {
-            return c1.penetration > c2.penetration;
-        });
-
-
-    // contactsToBeResolved.push_back(prioritizedContact);
-    contactsToBeResolved.push_back(maxContact);
 
     return true;
 }
