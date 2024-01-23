@@ -197,6 +197,7 @@
     <ClInclude Include="boundingVolumeHierarchy.h" />
     <ClInclude Include="clothWithBungeeCord.h" />
     <ClInclude Include="collisionResolver.h" />
+    <ClInclude Include="cone.h" />
     <ClInclude Include="contact.h" />
     <ClInclude Include="contactData.h" />
     <ClInclude Include="contactGeneration.h" />

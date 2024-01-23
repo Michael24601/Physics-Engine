@@ -72,6 +72,32 @@ namespace pe {
         const std::vector<Vector3D>& vertices,
         int segments
     );
+
+
+	/*
+		Generates the vertices of the cone. These vertices are each
+		unique (meaning that just because a vertex may appear in multiple
+		edges/faces in the shape, doesn't mean it's counted multiple times).
+		In this function, the first element in the returned vector is the
+		apex of the cone, and the rest are the vertices along the bottom
+		circular face.
+	*/
+	std::vector<Vector3D> generateConeVertices(
+		const Vector3D& center,
+		real radius, real height, int segments
+	);
+
+
+	std::vector<std::vector<Vector3D>> returnConeFaces(
+		const std::vector<Vector3D>& vertices,
+		int segments
+	);
+
+
+    std::vector<std::pair<Vector3D, Vector3D>> returnConeEdges(
+        const std::vector<Vector3D>& vertices,
+        int segments
+    );
 }
 
 

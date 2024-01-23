@@ -194,3 +194,91 @@ std::vector<std::pair<Vector3D, Vector3D>> pe::returnCylinderEdges(
 
     return edges;
 }
+
+
+std::vector<Vector3D> pe::generateConeVertices(const Vector3D& center,
+    real radius, real height, int segments) {
+
+    std::vector<Vector3D> vertices;
+
+    // Adds the apex of the cone at the top
+    vertices.push_back(center + Vector3D(0.0f, height / 2.0f, 0.0f));
+
+    for (int i = 0; i <= segments; ++i) {
+        // Calculate the angle for each segment
+        real theta = 2.0f * PI * static_cast<real>(i) / static_cast<real>(segments);
+
+        // Vertices of the current point on the base of the cone
+        Vector3D v_base = center + Vector3D(
+            radius * cos(theta), 
+            -height / 2.0f, 
+            radius * sin(theta)
+        );
+
+        vertices.push_back(v_base);
+    }
+
+    return vertices;
+}
+
+std::vector<std::vector<Vector3D>> pe::returnConeFaces(
+    const std::vector<Vector3D>& vertices,
+    int segments
+) {
+    std::vector<std::vector<Vector3D>> faces;
+
+    // The first vertex is the apex
+    Vector3D apex = vertices[0];
+
+    // Add base face
+    std::vector<Vector3D> base_face;
+    for (size_t i = 1; i <= segments; ++i) {
+        size_t v0 = i;
+        base_face.push_back(vertices[v0]);
+    }
+    faces.push_back(base_face);
+
+    // Add side faces
+    for (size_t i = 1; i <= segments; ++i) {
+        size_t v0 = i;
+        size_t v1 = (i % segments) + 1;
+
+        /*
+            Connects vertices to form faces.
+        */
+        std::vector<Vector3D> side_face = { 
+            apex, 
+            vertices[v1], 
+            vertices[v0]
+        };
+
+        faces.push_back(side_face);
+    }
+
+    return faces;
+}
+
+std::vector<std::pair<Vector3D, Vector3D>> pe::returnConeEdges(
+    const std::vector<Vector3D>& vertices,
+    int segments
+) {
+    std::vector<std::pair<Vector3D, Vector3D>> edges;
+
+    for (size_t i = 1; i <= segments; ++i) {
+        // Indices of the two vertices of the current edge
+        size_t v0 = i;
+        size_t v1 = (i % segments) + 1;
+
+        // Connect vertices to form edges based on the side faces
+        std::pair<Vector3D, Vector3D> edge = { vertices[v0], vertices[v1] };
+
+        edges.push_back(edge);
+    }
+
+    // Add edges from the apex to the base vertices
+    for (size_t i = 1; i <= segments; ++i) {
+        edges.push_back({ vertices[0], vertices[i] });
+    }
+
+    return edges;
+}

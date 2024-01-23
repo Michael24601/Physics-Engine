@@ -207,6 +207,66 @@ faceData pe::getCylinderFaceData(const Cylinder& cylinder) {
 }
 
 
+faceData pe::getConeFaceData(const Cone& cone) {
+	std::vector<glm::vec3> flattenedPositions;
+	std::vector<glm::vec3> flattenedNormals;
+
+	Vector3D apex = cone.globalVertices[0];
+
+	std::vector<Face> faces = cone.faces;
+
+	/*
+		The first face is the base and all the vertices have
+		the same normal as it is flat.
+	*/
+	Face base = faces[0];
+
+	// The center of the base
+	Vector3D baseCenter = (cone.body->position - apex) 
+		+ cone.body->position;
+
+	/*
+		The normal of the bottom circular face is the opposite of the
+		center of the cone to apex
+	*/
+	Vector3D bottomNormal = cone.body->position - apex;
+	bottomNormal.normalize();
+
+	auto triangles = triangulateFace(base.vertices);
+	for (const auto& triangle : triangles) {
+		for (const auto& vertex : triangle) {
+			flattenedPositions.push_back(convertToGLM(vertex));
+			flattenedNormals.push_back(convertToGLM(bottomNormal));
+		}
+	}
+
+	// Curved triangle strips
+	for (size_t i = 1; i < faces.size(); ++i) {
+		Face face = faces[i];
+
+		flattenedPositions.push_back(convertToGLM(face.vertices[0]));
+		flattenedPositions.push_back(convertToGLM(face.vertices[1]));
+		flattenedPositions.push_back(convertToGLM(face.vertices[2]));
+
+		Vector3D normalBase1 = face.vertices[1] - base.centroid;
+		Vector3D normalBase2 = face.vertices[2] - base.centroid;
+		Vector3D normalApex = normalBase1 + normalBase2;
+
+		normalApex.normalize();
+		normalBase1.normalize();
+		normalBase2.normalize();
+
+		flattenedNormals.push_back(convertToGLM(normalApex));
+		flattenedNormals.push_back(convertToGLM(normalBase1));
+		flattenedNormals.push_back(convertToGLM(normalBase2));
+	}
+
+	faceData data{ flattenedPositions, flattenedNormals };
+	return data;
+}
+
+
+
 glm::vec3 pe::calculateMeshVertexNormal(
 	const std::vector<Particle>& particles,
 	int targetIndex,

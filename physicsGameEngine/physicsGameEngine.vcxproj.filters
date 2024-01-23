@@ -317,6 +317,9 @@
     <ClInclude Include="collisionResolver.h">
       <Filter>Header Files\Collision</Filter>
     </ClInclude>
+    <ClInclude Include="cone.h">
+      <Filter>Header Files\Primitive</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="todo.txt" />

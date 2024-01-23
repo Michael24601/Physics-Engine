@@ -19,6 +19,7 @@
 #include "solidSphere.h"
 #include "cylinder.h"
 #include "clothWithBungeeCord.h"
+#include "cone.h"
 #include <vector>
 
 namespace pe {
@@ -112,6 +113,9 @@ namespace pe {
 		said circular face.
 	*/
 	faceData getCylinderFaceData(const Cylinder& cylinder);
+
+
+	faceData getConeFaceData(const Cone& cone);
 
 
     /*

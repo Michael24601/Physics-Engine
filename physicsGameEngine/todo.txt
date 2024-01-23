@@ -136,3 +136,15 @@ One of the two contact generation types isn't working well.
 
 Also, the total number of iterations in the collision resolution 
 causes the objects to fly to infinity when it's set to more than 1.
+
+Add comments explaining the tessalation ouptut format for each shape.
+
+Add an isAwake state for the rigidBody class. This should be checked
+inside the contact functions before we integrate them or move them.
+
+Add for each shape a function that initially calculates the furthest
+point in the polyhedron from the center. Which we can then use for the
+coarse collision detection.
+
+Explain in detail what each function in the collision detection
+classes do, as well as the datafields in the contact class. 

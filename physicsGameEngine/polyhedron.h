@@ -3,7 +3,9 @@
 #define POLYHEDRON_H
 
 #include "rigidBody.h"
+#include "boundingSphere.h"
 #include <vector>
+#include <algorithm>
 
 namespace pe {
 
@@ -131,13 +133,24 @@ namespace pe {
 		std::vector<Edge> edges;
 		std::vector<Vector3D> globalVertices;
 
+		/*
+			Bounding volume sphere, used for coarse collision detection.
+			It is better to save it here than have a function return it
+			as it will need to be used each iteration of the loop.
+		*/
+		BoundingSphere boundingSphere;
 
 		Polyhedron(
 			RigidBody* body,
 			real mass,
 			const Vector3D& position,
 			const Matrix3x3& inertiaTensor,
-			const std::vector<Vector3D>& localVertices) : body{ body } {
+			const std::vector<Vector3D>& localVertices) : body{ body },
+			// Initializes the bounding volume sphere
+			boundingSphere(
+				body->position,
+				findFurthestPoint().magnitude()
+			) {
 			body->setMass(mass);
 			body->position = position;
 			body->setInertiaTensor(inertiaTensor);
@@ -190,6 +203,27 @@ namespace pe {
 
 			edges = calculateEdges(globalVertices);
 			faces = calculateFaces(globalVertices);
+		}
+
+
+		/*
+			Given the local vertices defining the polyhedron, finds the one
+			that is furthest away from the center. 
+		*/
+		Vector3D& findFurthestPoint() const {
+			/*
+				We can use the magnitude squared as it is faster and achieves
+				the same thing.
+			*/
+			Vector3D furthestPoint = *std::max_element(
+				localVertices.begin(),
+				localVertices.end(),
+				[](const Vector3D& first, const Vector3D& second) -> bool {
+					return first.magnitudeSquared()
+						< second.magnitudeSquared();
+				}
+			);
+			return furthestPoint;
 		}
 	};
 }

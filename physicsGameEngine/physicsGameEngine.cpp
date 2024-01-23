@@ -35,6 +35,7 @@
 #include "contactGeneration.h"
 #include "drawingUtil.h"
 #include "clothWithBungeeCord.h"
+#include "cone.h"
 
 #include "solidColorShader.h"
 #include "diffuseLightingShader.h"
@@ -142,11 +143,11 @@ int main() {
 
     real height = 150;
     real radius = 50;
-    Cylinder c2(new RigidBody(), radius, height, 150, 20, 
+    Cone c2(new RigidBody(), radius, height, 150, 20, 
         Vector3D(200, 0, 200));
 
     radius = 100;
-    SolidSphere c3(new RigidBody(), radius, 150, 10, 10, 
+    SolidSphere c3(new RigidBody(), radius, 150, 25, 25,
         Vector3D(-200, 0, -200));
 
     height = 150;
@@ -306,7 +307,7 @@ int main() {
                 contact.contactNormal * length;
             contactEdges.vertices.push_back(convertToGLM(otherPoint));
 
-            contact.friction = 0.3;
+            contact.friction = 0.5;
             contact.restitution = 1;
         }
 
@@ -401,7 +402,7 @@ int main() {
         };
         glm::vec4 lightColors[]{
             glm::vec4(1.0f, 1.0f, 1.0f, 0.6f),
-        };
+        }; 
 
         // Data
         faceData data = getPolyhedronFaceData(c1);
@@ -410,12 +411,12 @@ int main() {
             lightColors, cameraPosition, 40);
 
         // Second shape
-        data = getPolyhedronFaceData(c2);
+        data = getConeFaceData(c2);
         phongShader.drawFaces(data.vertices, data.normals, identity,
             viewMatrix, projectionMatrix, colorBlue, 1, lightPos,
             lightColors, cameraPosition, 40);
 
-        data = getPolyhedronFaceData(c3);
+        data = getSphereFaceData(c3);
         phongShader.drawFaces(data.vertices, data.normals, identity,
             viewMatrix, projectionMatrix, colorRed, 1, lightPos,
             lightColors, cameraPosition, 40);

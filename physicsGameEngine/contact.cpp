@@ -406,8 +406,8 @@ void Contact::applyVelocityChange(
 	body[0]->linearVelocity += velocityChange[0];
 	body[0]->angularVelocity += rotationChange[0];
 
-	if (body[1])
-	{
+	if (body[1]){
+
 		// Work out body one's linear and angular changes
 		Vector3D impulsiveTorque = impulse.vectorProduct(relativeContactPosition[1]);
 		rotationChange[1] = inverseInertiaTensor[1].transform(impulsiveTorque);
