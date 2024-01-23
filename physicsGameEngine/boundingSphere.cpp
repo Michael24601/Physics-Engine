@@ -5,7 +5,7 @@ using namespace pe;
 
 
 BoundingSphere::BoundingSphere(const Vector3D& centre, real radius) :
-    centre{ centre }, radius{ radius } {}
+    radius{ radius }, centre{ centre } {}
 
 
 BoundingSphere::BoundingSphere(const BoundingSphere& sphere1,

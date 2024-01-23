@@ -146,6 +146,7 @@ namespace pe {
 			const Vector3D& position,
 			const Matrix3x3& inertiaTensor,
 			const std::vector<Vector3D>& localVertices) : body{ body },
+			localVertices{localVertices},
 			// Initializes the bounding volume sphere
 			boundingSphere(
 				body->position,
@@ -154,7 +155,6 @@ namespace pe {
 			body->setMass(mass);
 			body->position = position;
 			body->setInertiaTensor(inertiaTensor);
-			this->localVertices = localVertices;
 			// Initially, the global vertices are the same as the local ones
 			globalVertices = localVertices;
 
@@ -210,7 +210,7 @@ namespace pe {
 			Given the local vertices defining the polyhedron, finds the one
 			that is furthest away from the center. 
 		*/
-		Vector3D& findFurthestPoint() const {
+		Vector3D findFurthestPoint() const {
 			/*
 				We can use the magnitude squared as it is faster and achieves
 				the same thing.
