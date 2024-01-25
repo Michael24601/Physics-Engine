@@ -71,11 +71,13 @@ namespace pe {
 		BoundingVolumeHierarchy() : root {nullptr} {}
 
 		/*
-			Inserts a rigid body accompanied by its bounding volume into
+			Inserts a polyhedron accompanied by its bounding volume into
 			the tree.
 		*/
-		void insert(RigidBody* rigidBody,
-			const BoundingVolumeClass& boundingVolume);
+		void insert(
+			Polyhedron* polyhedron,
+			const BoundingVolumeClass& boundingVolume
+		);
 
 		/*
 			Removes an entire subtree (could just be a leaf) from the tree by
@@ -99,11 +101,10 @@ namespace pe {
 			displayAux(out, ptr->children[1], indent + 16);
 		}
 
-		// Remove later
+		// Displays tree (can be removed later)
 		void display() {
 			if (root != nullptr) {
 				displayAux(std::cout, root, 0);
-				std::cout << "================================\n";
 			}
 			else
 				std::cout << "Empty tree.\n";
@@ -120,14 +121,18 @@ namespace pe {
 
 	template<class BoundingVolumeClass>
 	void BoundingVolumeHierarchy<BoundingVolumeClass>::insert(
-		RigidBody* rigidBody, const BoundingVolumeClass& boundingVolume) {
+		Polyhedron* polyhedron, 
+		const BoundingVolumeClass& boundingVolume
+	) {
 		// If the tree is empty, create a root with the body in it, and no parent
 		if (root == nullptr) {
-			root = new BVHNode<BoundingVolumeClass>(rigidBody, boundingVolume, nullptr);
+			root = new BVHNode<BoundingVolumeClass>(
+				polyhedron, boundingVolume, nullptr
+			);
 		}
 		// Otherwise, call the insert function at the root
 		else {
-			root->insertInSubtree(rigidBody, boundingVolume);
+			root->insertInSubtree(polyhedron, boundingVolume);
 		}
 	}
 

@@ -146,6 +146,9 @@ Add for each shape a function that initially calculates the furthest
 point in the polyhedron from the center. Which we can then use for the
 coarse collision detection.
 
+Implement the bounding volume as inheritance instead of templates,
+with an overriden function that checks if two bounding volumes overlap
+based on their geometry.
 Explain in detail what each function in the collision detection
 classes do, as well as the datafields in the contact class. 
 

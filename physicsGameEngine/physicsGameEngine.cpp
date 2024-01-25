@@ -230,10 +230,10 @@ int main() {
 
     // Bounding volume hierarchy, used for coarse collision detection
     BoundingVolumeHierarchy<BoundingSphere> hierarchy;
-    hierarchy.insert(c1.body, c1.boundingSphere);
-    hierarchy.insert(c2.body, c2.boundingSphere);
-    hierarchy.insert(c3.body, c3.boundingSphere);
-    hierarchy.insert(c4.body, c4.boundingSphere);
+    hierarchy.insert(&c1, c1.boundingSphere);
+    hierarchy.insert(&c2, c2.boundingSphere);
+    hierarchy.insert(&c3, c3.boundingSphere);
+    hierarchy.insert(&c4, c4.boundingSphere);
 
     while (window.isOpen()) {
 
