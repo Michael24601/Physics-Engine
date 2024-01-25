@@ -11,17 +11,15 @@ unsigned int pe::pointAndConvexPolyhedron(
     std::vector<Contact>& data) {
 
     // Transform the point into the local space of the polyhedron
-    Vector3D localPoint
-        = polyhedron.body->transformMatrix.inverseTransform(point);
+    Vector3D localPoint = polyhedron.body->transformMatrix.inverseTransform(point);
 
     // Initialize variables to track the closest face
     Vector3D closestFaceNormal;
-    // And track the minimum penetration depth
-    real minDepth = REAL_MAX;
+    // Initialize minDepth to a value larger than REAL_MAX
+    real minDepth = std::numeric_limits<real>::max();
 
     // Iterate through each face of the convex polyhedron
-    for (size_t i = 0; i < polyhedron.faces.size(); i++)
-    {
+    for (size_t i = 0; i < polyhedron.faces.size(); i++) {
         // Get the face normal and any point on the face in local space
         Vector3D faceNormal = polyhedron.faces[i].normal;
         Vector3D pointOnFace = polyhedron.faces[i].vertices[0];
@@ -33,8 +31,7 @@ unsigned int pe::pointAndConvexPolyhedron(
         real depth = faceNormal.scalarProduct(toPointOnFace);
 
         // Check if the point is inside or in front of the face
-        if (depth > 0)
-        {
+        if (depth < 0) {
             /*
                 The point is in front of the face, meaning it's on the
                 outside of the polyhedron.
@@ -44,10 +41,9 @@ unsigned int pe::pointAndConvexPolyhedron(
 
         /*
             If the depth is smaller than the current minimum, update the
-            minimum depthand closest face normal.
+            minimum depth and closest face normal.
         */
-        if (depth < minDepth)
-        {
+        if (depth < minDepth) {
             minDepth = depth;
             closestFaceNormal = faceNormal;
         }
@@ -55,8 +51,7 @@ unsigned int pe::pointAndConvexPolyhedron(
 
     Contact contact;
     // We transform the normal back to world space
-    contact.contactNormal = polyhedron.body->transformMatrix.transform(
-        closestFaceNormal);
+    contact.contactNormal = polyhedron.body->transformMatrix.transform(closestFaceNormal);
     contact.contactPoint = point;
     // Negative depth since the point is inside the polyhedron
     contact.penetration = -minDepth;
@@ -74,7 +69,6 @@ unsigned int pe::pointAndConvexPolyhedron(
     return 1;
 }
 
-
 unsigned int pe::edgeToEdge(
     const Edge& edgeA,
     const Edge& edgeB,
@@ -83,7 +77,7 @@ unsigned int pe::edgeToEdge(
     std::vector<Contact>& data) {
 
     // We initialize variables to track the shallowest penetration
-    real minPenetration = REAL_MAX;
+    real minPenetration = std::numeric_limits<real>::max();
     // And corresponding edge pair
     Contact contact;
 
@@ -110,19 +104,20 @@ unsigned int pe::edgeToEdge(
     real t = dirB.vectorProduct(offset).magnitude() / det;
 
     // Check if edges intersect within their segments
-    if (s >= 0 && s <= 1 && t >= 0 && t <= 1)
-    {
+    if (s >= 0 && s <= 1 && t >= 0 && t <= 1) {
         // Calculate penetration depth (negative if edges overlap)
-        real penetration = (s < t) ? s : t;
+        real penetration = std::min(s, t);
 
         // If this penetration is shallower, we add a contact
-        if (penetration < minPenetration)
-        {
+        if (penetration < minPenetration) {
             minPenetration = penetration;
 
             // Calculate contact normal (perpendicular to the edges)
             contact.contactNormal = dirA.vectorProduct(dirB);
-            contact.contactNormal.normalize();
+            // Check if the magnitude of the normal is not close to zero before normalization
+            if (contact.contactNormal.magnitudeSquared() > std::numeric_limits<real>::epsilon()) {
+                contact.contactNormal.normalize();
+            }
 
             // Calculate contact point on edgeA
             contact.contactPoint = a0 + dirA * s;
@@ -138,8 +133,7 @@ unsigned int pe::edgeToEdge(
     }
 
     // If there was a collision, add the contact to the data vector
-    if (minPenetration < REAL_MAX)
-    {
+    if (minPenetration < std::numeric_limits<real>::max()) {
         contact.penetration = minPenetration;
         data.push_back(contact);
         return 1; // Indicate a collision was detected

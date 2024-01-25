@@ -268,8 +268,14 @@ namespace pe {
 		}
 
 
-		void setSkewSymmetric(const Vector3D vector)
-		{
+		/*
+			Function that sets the elements of the matrix to be those of a
+			skew matrix. A skew matrix is used in the calculation of
+			rotational dynamics; specifically, relating angular velocity
+			with angular displacement, something that will be useful in the
+			collision resolution module.
+		*/
+		void setSkewSymmetric(const Vector3D vector){
 			data[0] = data[4] = data[8] = 0;
 			data[1] = -vector.z;
 			data[2] = vector.y;

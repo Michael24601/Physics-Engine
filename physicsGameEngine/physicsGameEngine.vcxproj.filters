@@ -159,6 +159,9 @@
     <ClCompile Include="collisionResolver.cpp">
       <Filter>Source Files\Collision</Filter>
     </ClCompile>
+    <ClCompile Include="cookTorranceShader.cpp">
+      <Filter>Source Files\OpenglGraphics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="accuracy.h">
@@ -319,6 +322,12 @@
     </ClInclude>
     <ClInclude Include="cone.h">
       <Filter>Header Files\Primitive</Filter>
+    </ClInclude>
+    <ClInclude Include="vector2D.h">
+      <Filter>Header Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="cookTorranceShader.h">
+      <Filter>Header Files\OpenglGraphics</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

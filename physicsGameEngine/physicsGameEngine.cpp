@@ -40,6 +40,7 @@
 #include "solidColorShader.h"
 #include "diffuseLightingShader.h"
 #include "diffuseSpecularLightingShader.h"
+#include "cookTorranceShader.h"
 #include "tesselationUtil.h"
 #include "shaderInterface.h"
 #include "cord.h"
@@ -50,6 +51,10 @@
 #include "contact.h"
 #include "contactGeneration.h"
 #include "collisionResolver.h"
+
+#include "BVHNode.h"
+#include "boundingVolumeHierarchy.h"
+#include "boundingSphere.h"
 
 
 using namespace pe;
@@ -102,6 +107,7 @@ int main() {
     SolidColorShader shader;
     DiffuseLightingShader lightShader;
     DiffuseSpecularLightingShader phongShader;
+    CookTorranceShader cookShader;
 
     // View matrix, used for positioning and angling the camera
     // Camera's position in world coordinates
@@ -143,7 +149,7 @@ int main() {
 
     real height = 150;
     real radius = 50;
-    Cone c2(new RigidBody(), radius, height, 150, 20, 
+    Cylinder c2(new RigidBody(), radius, height, 150, 20, 
         Vector3D(200, 0, 200));
 
     radius = 100;
@@ -222,6 +228,13 @@ int main() {
         Vector3D(-200, 200, 200)
     );
 
+    // Bounding volume hierarchy, used for coarse collision detection
+    BoundingVolumeHierarchy<BoundingSphere> hierarchy;
+    hierarchy.insert(c1.body, c1.boundingSphere);
+    hierarchy.insert(c2.body, c2.boundingSphere);
+    hierarchy.insert(c3.body, c3.boundingSphere);
+    hierarchy.insert(c4.body, c4.boundingSphere);
+
     while (window.isOpen()) {
 
         clock.restart();
@@ -294,6 +307,17 @@ int main() {
 
         std::vector<Contact> contacts;
         // Here we check for collision
+
+        /*
+            constexpr int LIMIT = 100;
+            PotentialContact contactArray[LIMIT];
+            int num = hierarchy.getRoot()->getPotentialContacts(contactArray, LIMIT);
+            for (int i = 0; i < num; i++) {
+                if (testIntersection(contactArray[i].rigidBody[0], c3)) {
+                    returnMaxContact(c1, c3, contacts);
+                }
+            }
+        */
         if (testIntersection(c1, c3)) {
             returnMaxContact(c1, c3, contacts);
         }
@@ -406,20 +430,20 @@ int main() {
 
         // Data
         faceData data = getPolyhedronFaceData(c1);
-        phongShader.drawFaces(data.vertices, data.normals, identity,
+        cookShader.drawFaces(data.vertices, data.normals, identity,
             viewMatrix, projectionMatrix, colorPurple, 1, lightPos,
-            lightColors, cameraPosition, 40);
+            lightColors, cameraPosition, 0.1, 0.05);
 
         // Second shape
-        data = getConeFaceData(c2);
+        data = getCylinderFaceData(c2);
         phongShader.drawFaces(data.vertices, data.normals, identity,
             viewMatrix, projectionMatrix, colorBlue, 1, lightPos,
             lightColors, cameraPosition, 40);
 
         data = getSphereFaceData(c3);
-        phongShader.drawFaces(data.vertices, data.normals, identity,
+        cookShader.drawFaces(data.vertices, data.normals, identity,
             viewMatrix, projectionMatrix, colorRed, 1, lightPos,
-            lightColors, cameraPosition, 40);
+            lightColors, cameraPosition, 0.05, 1);
 
         data = getPolyhedronFaceData(c4);
         phongShader.drawFaces(data.vertices, data.normals, identity,

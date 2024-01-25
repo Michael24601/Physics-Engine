@@ -2,6 +2,7 @@
 #ifndef POLYHEDRON_H
 #define POLYHEDRON_H
 
+#include "vector2D.h"
 #include "rigidBody.h"
 #include "boundingSphere.h"
 #include <vector>
@@ -134,9 +135,15 @@ namespace pe {
 		std::vector<Vector3D> globalVertices;
 
 		/*
+			Texture coordinates used to tell the engine how the shape's
+			vertices (the vertices in each face, not the unique vertices
+			that define the polyhedron) map onto a 2D surface. Used in
+			the calculation of the tangent and bitangents of each vertex.
+		*/
+		std::vector<Vector2D> textureCoordinates;
+
+		/*
 			Bounding volume sphere, used for coarse collision detection.
-			It is better to save it here than have a function return it
-			as it will need to be used each iteration of the loop.
 		*/
 		BoundingSphere boundingSphere;
 
@@ -145,7 +152,8 @@ namespace pe {
 			real mass,
 			const Vector3D& position,
 			const Matrix3x3& inertiaTensor,
-			const std::vector<Vector3D>& localVertices) : body{ body },
+			const std::vector<Vector3D>& localVertices
+		) : body{ body },
 			localVertices{localVertices},
 			// Initializes the bounding volume sphere
 			boundingSphere(
@@ -188,7 +196,6 @@ namespace pe {
 		virtual std::vector<Face> calculateFaces(
 			const std::vector<Vector3D>& vertices
 		) const = 0;
-
 
 		/*
 			Updates the faces and edges by the body's transform matrix.

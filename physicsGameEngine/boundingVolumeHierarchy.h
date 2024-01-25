@@ -109,6 +109,11 @@ namespace pe {
 				std::cout << "Empty tree.\n";
 		}
 
+
+		BVHNode<BoundingVolumeClass>* getRoot() {
+			return root;
+		}
+
 	};
 
 	// Function definitions (included in header because of the template)

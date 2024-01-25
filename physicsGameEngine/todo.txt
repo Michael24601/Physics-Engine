@@ -130,7 +130,7 @@ some of the calculations from the shader programs.
 
 Add checking in primitive for counter clockwise order.
 
-Add a comment to setSkewSymmetric function in the matrix class.
+Add a comment to setSkewSymmetric function in the matrix class (DONE).
 
 One of the two contact generation types isn't working well.
 
@@ -148,3 +148,11 @@ coarse collision detection.
 
 Explain in detail what each function in the collision detection
 classes do, as well as the datafields in the contact class. 
+
+Fix the coarse collision detection class; currently the class works
+on rigid bodies, not polyhedrons, which is fine, but also means that
+when we do get an array of potential contacts, we have to then map
+them back to their polyhedrons. One way to do that would be to send
+the entire polyhedron to the hierarchy, not just the, body, or have
+a way of mapping the body to the polyhedron in a quick way.
+

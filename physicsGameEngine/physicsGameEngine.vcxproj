@@ -160,6 +160,7 @@
     <ClCompile Include="collisionResolver.cpp" />
     <ClCompile Include="contact.cpp" />
     <ClCompile Include="contactGeneration.cpp" />
+    <ClCompile Include="cookTorranceShader.cpp" />
     <ClCompile Include="diffuseLightingShader.cpp" />
     <ClCompile Include="diffuseSpecularLightingShader.cpp" />
     <ClCompile Include="drawingUtil.cpp" />
@@ -201,6 +202,7 @@
     <ClInclude Include="contact.h" />
     <ClInclude Include="contactData.h" />
     <ClInclude Include="contactGeneration.h" />
+    <ClInclude Include="cookTorranceShader.h" />
     <ClInclude Include="cord.h" />
     <ClInclude Include="cylinder.h" />
     <ClInclude Include="particleMesh.h" />
@@ -241,6 +243,7 @@
     <ClInclude Include="solidColorShader.h" />
     <ClInclude Include="solidSphere.h" />
     <ClInclude Include="tesselationUtil.h" />
+    <ClInclude Include="vector2D.h" />
     <ClInclude Include="vector3D.h" />
     <ClInclude Include="vector3DAdapter.h" />
   </ItemGroup>
