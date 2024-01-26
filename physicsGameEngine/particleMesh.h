@@ -130,7 +130,7 @@ namespace pe {
 
 
 		/*
-			Returns the faces associations.
+			Sets the face associations.
 			Everything said about the edges applies here.
 		*/
 		virtual void setFaces() = 0;

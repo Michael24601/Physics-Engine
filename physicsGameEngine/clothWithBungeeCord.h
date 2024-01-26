@@ -4,6 +4,9 @@
 
 #include "particleMesh.h"
 #include "particleBungeeForce.h"
+#include "particleSpringForce.h"
+#include "particleAngleConstraint.h"
+#include "particleDistanceConstraint.h"
 #include <assert.h>
 
 namespace pe {
@@ -54,6 +57,12 @@ namespace pe {
 			ParticleBungeeForce force2;
 		};
 
+		// Distance constraints to maintain resting lengths
+		std::vector<ParticleDistanceConstraint> distanceConstraints;
+
+		// Angle constraints to maintain bending behavior
+		std::vector<ParticleAngleConstraint> angleConstraints;
+
 	public:
 
 		/*
@@ -94,10 +103,12 @@ namespace pe {
 			setFaces();
 
 			for (const MeshEdge& edge : edges) {
-				// Creates a force for each edge
+
 				Vector3D distanceVector = edge.particles.first->position - 
 					edge.particles.second->position;
 				real distance = distanceVector.magnitude();
+
+				// Adds the bungee force for each edge
 				BungeeForce force{
 					ParticleBungeeForce(edge.particles.first, ropeStrength,
 						distance),
@@ -105,6 +116,46 @@ namespace pe {
 						distance),
 				};
 				forces.push_back(force);
+
+				// Adds the distance constraint for each edge as well
+				Particle* particle1 = edge.particles.first;
+				Particle* particle2 = edge.particles.second;
+				real restLength = distance;
+
+				ParticleDistanceConstraint distanceConstraint(
+					particle1, 
+					particle2, 
+					restLength
+				);
+				distanceConstraints.push_back(distanceConstraint);
+			}
+
+
+			// Adding angle constraints for each particle triplet in a face
+			for (const MeshFace& face : faces) {
+				/*
+					Each triplet in the facem means each angle formed by 3
+					consecutive particles.
+				*/
+				for (int i = 0; i < 4; i++) {
+
+					Particle* particle1 = face.particles[i];
+					Particle* particle2 = face.particles[(i + 1) % 4];
+					Particle* particle3 = face.particles[(i + 2) % 4];
+
+					// Rest angle is 90 degrees as the particles are in a grid
+					real restAngle = PI / 2.0;
+
+					ParticleAngleConstraint angleConstraint(
+						particle1, 
+						particle2, 
+						particle3, 
+						restAngle,
+						(real)0.0001
+					);
+
+					angleConstraints.push_back(angleConstraint);
+				}
 			}
 		}
 
@@ -117,11 +168,6 @@ namespace pe {
 				}
 				if (i - 1 >= 0 && i % rowSize != 0) {
 					edges.push_back(MeshEdge(&particles[i], &particles[i - 1]));
-				}
-				// Other vertical (for extra support)
-				if (i - 2 * rowSize >= 0) {
-					edges.push_back(MeshEdge(&particles[i], 
-						&particles[i - 2 * rowSize]));
 				}
 				// Diagonals (shear)
 				if (i - rowSize - 1 >= 0 && i % rowSize != 0) {
@@ -154,6 +200,24 @@ namespace pe {
 						)
 					);
 				}
+			}
+		}
+
+
+		/*
+			Applies angle and distance constraints on the particles of the 
+			mesh in order to add stability to the structure by preventing
+			the cloth from being too deformed.
+		*/
+		void applyConstraints() {
+			// Apply distance constraints
+			for (ParticleDistanceConstraint& constraint : distanceConstraints) {
+				constraint.applyConstraint();
+			}
+
+			// Apply angle constraints
+			for (ParticleAngleConstraint& constraint : angleConstraints) {
+				constraint.applyConstraint();
 			}
 		}
 	};

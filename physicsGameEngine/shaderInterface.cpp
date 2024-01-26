@@ -326,9 +326,13 @@ faceData pe::getSmoothMeshFaceData(
 
 	std::vector<glm::vec3> particleNormals;
 	for (int i = 0; i < mesh.particles.size(); i++) {
-		glm::vec3 normal = 
-			calculateMeshVertexNormal(mesh.particles, i, columnSize, rowSize);
-		if (order == order::CLOCKWISE) {
+		glm::vec3 normal = calculateMeshVertexNormal(
+			mesh.particles,
+			i,
+			columnSize,
+			rowSize
+		);
+		if (order == order::COUNTER_CLOCKWISE) {
 			normal *= -1;
 		}
 		particleNormals.push_back(normal);

@@ -159,3 +159,6 @@ them back to their polyhedrons. One way to do that would be to send
 the entire polyhedron to the hierarchy, not just the, body, or have
 a way of mapping the body to the polyhedron in a quick way.
 
+Prevent the cloth mesh from passing through itself.
+
+Implement substeppig in a more reusable way.

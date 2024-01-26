@@ -329,6 +329,12 @@
     <ClInclude Include="cookTorranceShader.h">
       <Filter>Header Files\OpenglGraphics</Filter>
     </ClInclude>
+    <ClInclude Include="particleDistanceConstraint.h">
+      <Filter>Header Files\ParticleMesh</Filter>
+    </ClInclude>
+    <ClInclude Include="particleAngleConstraint.h">
+      <Filter>Header Files\ParticleMesh</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="todo.txt" />

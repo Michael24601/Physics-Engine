@@ -43,13 +43,21 @@ namespace pe {
 			return x * x + y * y + z * z;
 		}
 
-		// Turn non-zero vector into one with unit length (1)
+		// Turns non-zero vector into one with unit length (1)
 		void normalize() {
 			real m = magnitude();
 			if (m > 0) {
 				// multiplies vector by scalar
 				(*this) *= ((real)1) / m;
 			}
+		}
+
+		// Retunrs normalized vector without modifying the object
+				// Turn non-zero vector into one with unit length (1)
+		Vector3D normalized() const {
+			Vector3D newVector = *this;
+			newVector.normalize();
+			return newVector;
 		}
 
 		// Multiplication by a scalar (scaling the vector)

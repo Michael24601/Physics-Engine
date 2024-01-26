@@ -59,18 +59,35 @@ namespace pe {
 		Vector3D accumulatedForce;
 
 		/*
+			Non-awake particles don't move, and remain in place, even
+			when forces are applied to them. We use this boolean so that
+			external functions, such as distance constraints and collision,
+			which may move the particles in order to resolve some equation,
+			know that this particle shouldn't move. Likewise for the
+			integration in the main game loop.
+		*/
+		bool isAwake;
+
+
+		Particle() : isAwake{ true } {}
+
+
+		/*
 			Used to set mass directly unless we need to set an infinite
 			mass, in which case it can be set directly.
 		*/
 		void setMass(real mass);
 
+
 		// Returns mass if inverse is not 0, otherwise 0 is returned
 		real getMass() const;
+
 
 		// Checks if mass is finite
 		bool hasFiniteMass() const {
 			return inverseMass != 0;
 		}
+
 
 		/*
 			Updates positionand velocity using duration(time between 
@@ -79,6 +96,7 @@ namespace pe {
 			The approximation used here is Euler integration.
 		*/
 		void integrate(real duration);
+
 
 		/*
 			Updates positionand velocity using duration(time between
@@ -90,11 +108,18 @@ namespace pe {
 		*/
 		void verletIntegrate(real duration);
 
+
 		void addForce(const Vector3D& force);
+
 
 		// Removes all forces each frame before reapplying them
 		void clearAccumulatedForce();
 
+
+		// Sets the wake status
+		void setAwake(bool isAwake) {
+			this->isAwake = isAwake;
+		}
 	};
 }
 

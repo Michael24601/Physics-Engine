@@ -61,6 +61,7 @@ using namespace pe;
 using namespace std;
 
 
+/*
 int main() {
 
     // Needed for 3D rendering
@@ -153,7 +154,7 @@ int main() {
         Vector3D(200, 0, 200));
 
     radius = 100;
-    SolidSphere c3(new RigidBody(), radius, 150, 25, 25,
+    SolidSphere c3(new RigidBody(), radius, 150, 20, 20,
         Vector3D(-200, 0, -200));
 
     height = 150;
@@ -193,11 +194,11 @@ int main() {
     };
 
     BodyCordAdapter adapter1(
-        c1.body, 
-        &cord1, 
-        c1.localVertices[0], 
-        100, 
-        10, 
+        c1.body,
+        &cord1,
+        c1.localVertices[0],
+        100,
+        10,
         Vector3D(100, 200, -200)
     );
 
@@ -234,6 +235,8 @@ int main() {
     hierarchy.insert(&c2, c2.boundingSphere);
     hierarchy.insert(&c3, c3.boundingSphere);
     hierarchy.insert(&c4, c4.boundingSphere);
+
+    hierarchy.display();
 
     while (window.isOpen()) {
 
@@ -308,16 +311,16 @@ int main() {
         std::vector<Contact> contacts;
         // Here we check for collision
 
-        /*
-            constexpr int LIMIT = 100;
-            PotentialContact contactArray[LIMIT];
-            int num = hierarchy.getRoot()->getPotentialContacts(contactArray, LIMIT);
-            for (int i = 0; i < num; i++) {
-                if (testIntersection(contactArray[i].rigidBody[0], c3)) {
-                    returnMaxContact(c1, c3, contacts);
-                }
-            }
-        */
+        
+        //constexpr int LIMIT = 100;
+        //PotentialContact contactArray[LIMIT];
+        //int num = hierarchy.getRoot()->getPotentialContacts(contactArray, LIMIT);
+        //for (int i = 0; i < num; i++) {
+        //   if (testIntersection(contactArray[i].rigidBody[0], c3)) {
+        //        returnMaxContact(c1, c3, contacts);
+        //    }
+        //}
+        
         if (testIntersection(c1, c3)) {
             returnMaxContact(c1, c3, contacts);
         }
@@ -436,11 +439,11 @@ int main() {
 
         // Second shape
         data = getCylinderFaceData(c2);
-        phongShader.drawFaces(data.vertices, data.normals, identity,
+        cookShader.drawFaces(data.vertices, data.normals, identity,
             viewMatrix, projectionMatrix, colorBlue, 1, lightPos,
-            lightColors, cameraPosition, 40);
+            lightColors, cameraPosition, 0.05, 1);
 
-        data = getSphereFaceData(c3);
+        data = getPolyhedronFaceData(c3);
         cookShader.drawFaces(data.vertices, data.normals, identity,
             viewMatrix, projectionMatrix, colorRed, 1, lightPos,
             lightColors, cameraPosition, 0.05, 1);
@@ -453,6 +456,215 @@ int main() {
         window.display();
 
         deltaT = clock.getElapsedTime().asSeconds() * 10;
+    }
+
+    return 0;
+}
+*/
+
+
+
+int main() {
+
+    // Needed for 3D rendering
+    sf::ContextSettings settings;
+    settings.depthBits = 24;
+    settings.antialiasingLevel = 8;
+    sf::RenderWindow window(sf::VideoMode(800, 800), "Physics Simulation",
+        sf::Style::Default, settings);
+    window.setActive();
+
+    GLenum err = glewInit();
+    if (GLEW_OK != err) {
+        // GLEW initialization failed
+        std::cerr << "Error: GLEW initialization failed: "
+            << glewGetErrorString(err) << std::endl;
+        return -1;
+    }
+
+    // Sets up OpenGL states (for 3D)
+    // Makes objects in front of others cover them
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
+
+    // Set to clockwise or counter-clockwise depending on face vertex order
+    // (Counter Clockwise for us).
+    glFrontFace(GL_CCW);
+    // This only displays faces from one side, depending on the order of
+    // vertices, and what is considered front facce in the above option.
+    // Disable to show both faces (but lose on performance).
+    // Set to off in case our faces are both clockwise and counter clockwise
+    // (mixed), so we can't consisently render only one.
+    // Note that if we have opacity of face under 1 (opaque), it is definitely
+    // best not to render both sides (enable culling) so it appears correct.
+    glEnable(GL_CULL_FACE);
+
+    // Enables blending for transparency
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    glDepthFunc(GL_LEQUAL);
+
+    // Shaders
+    SolidColorShader shader;
+    DiffuseLightingShader lightShader;
+    DiffuseSpecularLightingShader phongShader;
+    CookTorranceShader cookShader;
+
+    // View matrix, used for positioning and angling the camera
+    // Camera's position in world coordinates
+    real cameraDistance = 600.0f;
+    glm::vec3 cameraPosition = glm::vec3(cameraDistance, 0.0f, 0.0f);
+    // Point the camera is looking at
+    glm::vec3 cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);
+    // Up vector
+    glm::vec3 upVector = glm::vec3(0.0f, 1.0f, 0.0f);
+    glm::mat4 viewMatrix = glm::lookAt(cameraPosition,
+        cameraTarget, upVector);
+
+    // Projection matrix, used for perspective
+    // Field of View (FOV) in degrees
+    real fov = 90.0f;
+    // Aspect ratio
+    real aspectRatio = window.getSize().x
+        / static_cast<real>(window.getSize().y);
+    // Near and far clipping planes
+    real nearPlane = 0.1f;
+    real farPlane = 10000.0f;
+
+    // Create a perspective projection matrix
+    glm::mat4 projectionMatrix = glm::perspective(glm::radians(fov),
+        aspectRatio, nearPlane, farPlane);
+
+    // Just in order to flip y axis
+    sf::View view = window.getDefaultView();
+    view.setSize(800, -800);
+    view.setCenter(0, 0);
+    window.setView(view);
+
+    sf::Clock clock;
+    real deltaT = 0.3;
+
+    int size = 30;
+    real strength = 0.5;
+    real mass = 0.5;
+    real damping = 0.95;
+
+    ClothWithBungeeCord mesh(mass, damping, strength, size, size,
+        Vector3D(-200, 200, 0), Vector3D(200, -200, 0));
+
+    // The first row of particles is suspended
+    for (int i = 0; i < size; i++) {
+        mesh.particles[i].setAwake(false);
+    }
+
+    ParticleGravity g(Vector3D(0, -10, 0));
+
+    real rotationSpeed = 0.10;
+    real angle = PI / 2;
+    bool isButtonPressed = false;
+
+    while (window.isOpen()) {
+
+
+        sf::Event event;
+        while (window.pollEvent(event)) {
+            if (event.type == sf::Event::Closed) {
+                window.close();
+            }
+            else if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
+                isButtonPressed = true;
+            }
+            else if (event.type == sf::Event::MouseButtonReleased
+                && event.mouseButton.button == sf::Mouse::Left) {
+                isButtonPressed = false;
+            }
+            // Rotates camera
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
+                angle += rotationSpeed;
+                cameraPosition.x = sin(angle) * cameraDistance;
+                cameraPosition.z = cos(angle) * cameraDistance;
+                viewMatrix = glm::lookAt(cameraPosition, cameraTarget, upVector);
+            }
+            else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
+                angle -= rotationSpeed;
+                cameraPosition.x = sin(angle) * cameraDistance;
+                cameraPosition.z = cos(angle) * cameraDistance;
+                viewMatrix = glm::lookAt(cameraPosition, cameraTarget, upVector);
+            }
+        }
+
+        int numSteps = 12;
+        real substep = deltaT / numSteps;
+
+        while (numSteps--) {
+
+            for (auto& particle : mesh.particles) {
+                g.updateForce(&particle, substep);
+            }
+
+            vector<ParticleContact> contacts;
+            for (auto& force : mesh.forces) {
+                force.force1.updateForce(force.force2.otherParticle, substep);
+                force.force2.updateForce(force.force1.otherParticle, substep);
+            }
+
+            if (isButtonPressed) {
+                sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
+                sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);
+                Vector3D move;
+                move.x = worldPos.x - mesh.particles[size * size / 2].position.x;
+                move.y = worldPos.y - mesh.particles[size * size / 2].position.y;
+                move.z = worldPos.x - mesh.particles[size * size / 2].position.z;
+
+                move *= 1.5;
+                ParticleGravity f(move);
+                for (int i = 0; i < size; i++) {
+                    f.updateForce(&mesh.particles[size + i * size - 1], substep);
+                }
+            }
+
+            mesh.applyConstraints();
+
+            for (int i = 0; i < size * size; i++) {
+                if (mesh.particles[i].isAwake) {
+                    mesh.particles[i].verletIntegrate(substep);
+                }
+            }
+        }
+
+        window.clear(sf::Color::Black);
+        // Clears the depth buffer (for 3D)
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        // Spring/Cable
+        // Note that the model is the identity since the cable is in world
+        // coordinates
+        glm::mat4 identity = glm::mat4(1.0);
+        glm::vec4 colorWhite(1.0, 1.0, 1.0, 1.0);
+        glm::vec4 colorRed(1.0, 0.2, 0.2, 1);
+        glm::vec4 colorBlue(0.2, 0.2, 1.0, 1);
+
+        edgeData edgeData = getMeshEdgeData(mesh);
+
+        //shader.drawEdges(edgeData.vertices, identity, viewMatrix, 
+        //     projectionMatrix, colorWhite);
+
+        faceData data = getSmoothMeshFaceData(mesh, size, size,
+            order::COUNTER_CLOCKWISE);
+        faceData backData = getSmoothMeshFaceData(mesh, size, size,
+            order::CLOCKWISE);
+
+        glm::vec3 lightPos[]{ glm::vec3(500, 0, 500), glm::vec3(-500, 0, -500) };
+        glm::vec4 lightColor[]{ glm::vec4(1.0, 1.0, 1.0, 1.0),
+            glm::vec4(1.0, 1.0, 1.0, 1.0) };
+
+        phongShader.drawFaces(data.vertices, data.normals, identity, viewMatrix,
+            projectionMatrix, colorRed, 2, lightPos, lightColor, cameraPosition, 50);
+        phongShader.drawFaces(backData.vertices, backData.normals, identity, viewMatrix,
+            projectionMatrix, colorBlue, 2, lightPos, lightColor, cameraPosition, 50);
+
+        window.display();
     }
 
     return 0;

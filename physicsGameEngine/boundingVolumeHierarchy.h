@@ -97,7 +97,7 @@ namespace pe {
 			real radius = ptr->boundingVolume.radius;
 			std::cout << std::setw(indent) << " " << centre.x << " "
 				<< centre.y << " " << centre.z << " " << radius << " "
-				<< ptr->rigidBody << "\n";
+				<< ptr->polyhedron << "\n";
 			displayAux(out, ptr->children[1], indent + 16);
 		}
 

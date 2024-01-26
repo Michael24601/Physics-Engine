@@ -205,6 +205,8 @@
     <ClInclude Include="cookTorranceShader.h" />
     <ClInclude Include="cord.h" />
     <ClInclude Include="cylinder.h" />
+    <ClInclude Include="particleAngleConstraint.h" />
+    <ClInclude Include="particleDistanceConstraint.h" />
     <ClInclude Include="particleMesh.h" />
     <ClInclude Include="polyhedron.h" />
     <ClInclude Include="shaderInterface.h" />
