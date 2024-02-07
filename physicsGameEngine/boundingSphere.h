@@ -49,6 +49,13 @@ namespace pe{
 		BoundingSphere(const BoundingSphere& sphere1,
 			const BoundingSphere& sphere2);
 
+		/*
+			Returns the volume of the bounding volume sphere.
+		*/
+		real getSize() const{
+			return ((real)1.333333) * PI * radius * radius * radius;
+		}
+
 		// Returns true if the calling object overlaps with 
 		bool overlaps(const BoundingSphere* sphere) const;
 

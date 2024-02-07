@@ -74,6 +74,9 @@ namespace pe {
 
 			return edges;
 		}
+
+
+		virtual void setTextureMap() override {}
 	};
 }
 

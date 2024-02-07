@@ -90,6 +90,7 @@ namespace pe {
 
 
 	class ParticleMesh {
+
 	public:
 		
 		std::vector<Particle> particles;
@@ -118,6 +119,15 @@ namespace pe {
 				particles[i].setMass(mass[i]);
 				particles[i].damping = damping[i];
 			}
+
+
+			/*
+				Because it is unsafe to set the edges and faces of the mesh
+				in the constructor using pure virtual functions not yet
+				defined, we expect the constructors of the classes extending
+				ParticleMesh to call setEdges and setFaces after implimenting
+				them.
+			*/
 		}
 
 		/*
@@ -125,6 +135,9 @@ namespace pe {
 			Needs to be overriden in such a way as to return an array of
 			Edge objects based on which particles the edges connect in the
 			mesh.
+
+			Extending this function in the subclass makes more sense than
+			having the parent class expect a vector of edges after testing.
 		*/
 		virtual void setEdges() = 0;
 

@@ -34,7 +34,6 @@
 #include "cylinder.h"
 #include "contactGeneration.h"
 #include "drawingUtil.h"
-#include "clothWithBungeeCord.h"
 #include "cone.h"
 
 #include "solidColorShader.h"
@@ -43,6 +42,7 @@
 #include "cookTorranceShader.h"
 #include "tesselationUtil.h"
 #include "shaderInterface.h"
+#include "anisotropicShader.h"
 #include "cord.h"
 
 #include "bodyCordAdapter.h"
@@ -56,12 +56,16 @@
 #include "boundingVolumeHierarchy.h"
 #include "boundingSphere.h"
 
+#include "rectangularCloth.h"
+
 
 using namespace pe;
 using namespace std;
 
 
-/*
+
+#ifdef SIM
+
 int main() {
 
     // Needed for 3D rendering
@@ -75,7 +79,7 @@ int main() {
     GLenum err = glewInit();
     if (GLEW_OK != err) {
         // GLEW initialization failed
-        std::cerr << "Error: GLEW initialization failed: " 
+        std::cerr << "Error: GLEW initialization failed: "
             << glewGetErrorString(err) << std::endl;
         return -1;
     }
@@ -109,6 +113,7 @@ int main() {
     DiffuseLightingShader lightShader;
     DiffuseSpecularLightingShader phongShader;
     CookTorranceShader cookShader;
+    AnisotropicShader aniShader;
 
     // View matrix, used for positioning and angling the camera
     // Camera's position in world coordinates
@@ -125,7 +130,7 @@ int main() {
     // Field of View (FOV) in degrees
     real fov = 90.0f;
     // Aspect ratio
-    real aspectRatio = window.getSize().x 
+    real aspectRatio = window.getSize().x
         / static_cast<real>(window.getSize().y);
     // Near and far clipping planes
     real nearPlane = 0.1f;
@@ -142,15 +147,15 @@ int main() {
     window.setView(view);
 
     sf::Clock clock;
-    real deltaT = 0;
+    real deltaT = 0.05;
 
     real side = 100;
-    RectangularPrism c1(new RigidBody(), side, side, side, 
-        150, Vector3D(250, 200, -150));
+    RectangularPrism c1(new RigidBody(), side, side, side,
+        150, Vector3D(250, 0, -150));
 
     real height = 150;
     real radius = 50;
-    Cylinder c2(new RigidBody(), radius, height, 150, 20, 
+    Cylinder c2(new RigidBody(), radius, height, 150, 20,
         Vector3D(200, 0, 200));
 
     radius = 100;
@@ -159,7 +164,7 @@ int main() {
 
     height = 150;
     side = 100;
-    Pyramid c4(new RigidBody(), side, height, 150, 
+    Pyramid c4(new RigidBody(), side, height, 150,
         Vector3D(-200, 0, 200));
 
 
@@ -236,11 +241,8 @@ int main() {
     hierarchy.insert(&c3, c3.boundingSphere);
     hierarchy.insert(&c4, c4.boundingSphere);
 
-    hierarchy.display();
 
     while (window.isOpen()) {
-
-        clock.restart();
 
         sf::Event event;
         while (window.pollEvent(event))
@@ -268,14 +270,14 @@ int main() {
                 angle += rotationSpeed;
                 cameraPosition.x = sin(angle) * cameraDistance;
                 cameraPosition.z = cos(angle) * cameraDistance;
-                viewMatrix = 
+                viewMatrix =
                     glm::lookAt(cameraPosition, cameraTarget, upVector);
             }
             else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
                 angle -= rotationSpeed;
                 cameraPosition.x = sin(angle) * cameraDistance;
                 cameraPosition.z = cos(angle) * cameraDistance;
-                viewMatrix = 
+                viewMatrix =
                     glm::lookAt(cameraPosition, cameraTarget, upVector);
             }
         }
@@ -285,114 +287,128 @@ int main() {
         c3.body->calculateDerivedData();
         c4.body->calculateDerivedData();
 
-        g.updateForce((c1.body), deltaT);
-        g.updateForce((c2.body), deltaT);
-        g.updateForce((c3.body), deltaT);
-        g.updateForce((c4.body), deltaT);
+        int numSteps = 5;
+        real substep = deltaT / numSteps;
 
-        adapter1.updateForce(deltaT);
-        adapter2.updateForce(deltaT);
-        adapter3.updateForce(deltaT);
-        adapter4.updateForce(deltaT);
+        while (numSteps--) {
 
-        for (Particle& p : cord1.particles) {
-            pg.updateForce(&p, deltaT);
-        }
-        for (Particle& p : cord2.particles) {
-            pg.updateForce(&p, deltaT);
-        }
-        for (Particle& p : cord3.particles) {
-            pg.updateForce(&p, deltaT);
-        }
-        for (Particle& p : cord4.particles) {
-            pg.updateForce(&p, deltaT);
-        }
+            g.updateForce((c1.body), substep);
+            g.updateForce((c2.body), substep);
+            g.updateForce((c3.body), substep);
+            g.updateForce((c4.body), substep);
 
-        std::vector<Contact> contacts;
-        // Here we check for collision
+            adapter1.updateForce(substep);
+            adapter2.updateForce(substep);
+            adapter3.updateForce(substep);
+            adapter4.updateForce(substep);
 
-        
-        //constexpr int LIMIT = 100;
-        //PotentialContact contactArray[LIMIT];
-        //int num = hierarchy.getRoot()->getPotentialContacts(contactArray, LIMIT);
-        //for (int i = 0; i < num; i++) {
-        //   if (testIntersection(contactArray[i].rigidBody[0], c3)) {
-        //        returnMaxContact(c1, c3, contacts);
-        //    }
-        //}
-        
-        if (testIntersection(c1, c3)) {
-            returnMaxContact(c1, c3, contacts);
-        }
+            for (Particle& p : cord1.particles) {
+                pg.updateForce(&p, substep);
+            }
+            for (Particle& p : cord2.particles) {
+                pg.updateForce(&p, substep);
+            }
+            for (Particle& p : cord3.particles) {
+                pg.updateForce(&p, substep);
+            }
+            for (Particle& p : cord4.particles) {
+                pg.updateForce(&p, substep);
+            }
 
-        edgeData contactEdges;
-        for (Contact& contact : contacts) {
-            // Stores drawing data
-            contactEdges.vertices.push_back(convertToGLM(contact.contactPoint));
-            real length = 100;
-            Vector3D otherPoint = contact.contactPoint +
-                contact.contactNormal * length;
-            contactEdges.vertices.push_back(convertToGLM(otherPoint));
+            std::vector<Contact> contacts;
+            // Here we check for collision
 
-            contact.friction = 0.5;
-            contact.restitution = 1;
-        }
+            /*
+                constexpr int LIMIT = 100;
+                PotentialContact contactArray[LIMIT];
+                int num = hierarchy.getRoot()->getPotentialContacts(contactArray, LIMIT);
+                for (int i = 0; i < num; i++) {
+                   if (testIntersection(
+                       *contactArray->polyhedron[0],
+                       *contactArray->polyhedron[1]
+                    )) {
+                        returnContacts(
+                            *contactArray->polyhedron[0], 
+                            *contactArray->polyhedron[1], 
+                            contacts
+                        );
+                    }
+                }
+            */
 
-        CollisionResolver resolver(1, 1);
-        resolver.resolveContacts(contacts.data(), contacts.size(), deltaT);
+            if (testIntersection(c1, c3)) {
+                returnContacts(c1, c3, contacts);
+            }
 
-        if (isButtonPressed[0]) {
-            sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
-            sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);
-            c1.body->position.x = worldPos.x;
-            c1.body->position.y = worldPos.y;
-        }
-        else if (isButtonPressed[1]) {
-            sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
-            sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);
-            c2.body->position.x = worldPos.x;
-            c2.body->position.y = worldPos.y;
-        }
-        else if (isButtonPressed[2]) {
-            sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
-            sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);
-            c3.body->position.x = worldPos.x;
-            c3.body->position.y = worldPos.y;
-        }
-        else if (isButtonPressed[3]) {
-            sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
-            sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);
-            c4.body->position.x = worldPos.x;
-            c4.body->position.y = worldPos.y;
-        }
+            edgeData contactEdges;
+            for (Contact& contact : contacts) {
+                // Stores drawing data
+                contactEdges.vertices.push_back(convertToGLM(contact.contactPoint));
+                real length = 100;
+                Vector3D otherPoint = contact.contactPoint +
+                    contact.contactNormal * length;
+                contactEdges.vertices.push_back(convertToGLM(otherPoint));
 
-        c1.body->integrate(deltaT);
-        c2.body->integrate(deltaT);
-        c3.body->integrate(deltaT);
-        c4.body->integrate(deltaT);
+                contact.friction = 0.5;
+                contact.restitution = 0.5;
+            }
 
-        for (Particle& p : cord1.particles) {
-            p.verletIntegrate(deltaT);
-        }
-        for (Particle& p : cord2.particles) {
-            p.verletIntegrate(deltaT);
-        }
-        for (Particle& p : cord3.particles) {
-            p.verletIntegrate(deltaT);
-        }
-        for (Particle& p : cord4.particles) {
-            p.verletIntegrate(deltaT);
-        }
+            CollisionResolver resolver(5, 5);
+            resolver.resolveContacts(contacts.data(), contacts.size(), substep);
 
-        adapter1.reposition();
-        adapter2.reposition();
-        adapter3.reposition();
-        adapter4.reposition();
+            if (isButtonPressed[0]) {
+                sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
+                sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);
+                c1.body->position.x = worldPos.x;
+                c1.body->position.y = worldPos.y;
+            }
+            else if (isButtonPressed[1]) {
+                sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
+                sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);
+                c2.body->position.x = worldPos.x;
+                c2.body->position.y = worldPos.y;
+            }
+            else if (isButtonPressed[2]) {
+                sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
+                sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);
+                c3.body->position.x = worldPos.x;
+                c3.body->position.y = worldPos.y;
+            }
+            else if (isButtonPressed[3]) {
+                sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
+                sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);
+                c4.body->position.x = worldPos.x;
+                c4.body->position.y = worldPos.y;
+            }
 
-        c1.update();
-        c2.update();
-        c3.update();
-        c4.update();
+            c1.body->integrate(substep);
+            c2.body->integrate(substep);
+            c3.body->integrate(substep);
+            c4.body->integrate(substep);
+
+            for (Particle& p : cord1.particles) {
+                p.verletIntegrate(substep);
+            }
+            for (Particle& p : cord2.particles) {
+                p.verletIntegrate(substep);
+            }
+            for (Particle& p : cord3.particles) {
+                p.verletIntegrate(substep);
+            }
+            for (Particle& p : cord4.particles) {
+                p.verletIntegrate(substep);
+            }
+
+            adapter1.reposition();
+            adapter2.reposition();
+            adapter3.reposition();
+            adapter4.reposition();
+
+            c1.update();
+            c2.update();
+            c3.update();
+            c4.update();
+        }
 
         window.clear(sf::Color::Black);
         // Clears the depth buffer (for 3D)
@@ -429,40 +445,40 @@ int main() {
         };
         glm::vec4 lightColors[]{
             glm::vec4(1.0f, 1.0f, 1.0f, 0.6f),
-        }; 
+        };
 
         // Data
         faceData data = getPolyhedronFaceData(c1);
-        cookShader.drawFaces(data.vertices, data.normals, identity,
+        phongShader.drawFaces(data.vertices, data.normals, identity,
             viewMatrix, projectionMatrix, colorPurple, 1, lightPos,
-            lightColors, cameraPosition, 0.1, 0.05);
-
+            lightColors, cameraPosition, 40
+        );
         // Second shape
         data = getCylinderFaceData(c2);
         cookShader.drawFaces(data.vertices, data.normals, identity,
             viewMatrix, projectionMatrix, colorBlue, 1, lightPos,
-            lightColors, cameraPosition, 0.05, 1);
-
-        data = getPolyhedronFaceData(c3);
+            lightColors, cameraPosition, 0.05, 1
+        );
+        data = getSphereFaceData(c3);
         cookShader.drawFaces(data.vertices, data.normals, identity,
             viewMatrix, projectionMatrix, colorRed, 1, lightPos,
-            lightColors, cameraPosition, 0.05, 1);
-
+            lightColors, cameraPosition, 0.05, 1
+        );
         data = getPolyhedronFaceData(c4);
         phongShader.drawFaces(data.vertices, data.normals, identity,
             viewMatrix, projectionMatrix, colorGreen, 1, lightPos,
-            lightColors, cameraPosition, 40);
+            lightColors, cameraPosition, 40
+        );
 
         window.display();
-
-        deltaT = clock.getElapsedTime().asSeconds() * 10;
     }
 
     return 0;
 }
-*/
 
+#endif
 
+#ifndef SIM
 
 int main() {
 
@@ -543,14 +559,14 @@ int main() {
     window.setView(view);
 
     sf::Clock clock;
-    real deltaT = 0.3;
+    real deltaT = 0.05;
 
     int size = 30;
     real strength = 0.5;
     real mass = 0.5;
-    real damping = 0.95;
+    real damping = 0.80;
 
-    ClothWithBungeeCord mesh(mass, damping, strength, size, size,
+    RectangularCloth mesh(mass, damping, strength, size, size,
         Vector3D(-200, 200, 0), Vector3D(200, -200, 0));
 
     // The first row of particles is suspended
@@ -562,7 +578,7 @@ int main() {
 
     real rotationSpeed = 0.10;
     real angle = PI / 2;
-    bool isButtonPressed = false;
+    bool isButtonPressed[2] { false , false};
 
     while (window.isOpen()) {
 
@@ -573,11 +589,18 @@ int main() {
                 window.close();
             }
             else if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
-                isButtonPressed = true;
+                isButtonPressed[0] = true;
             }
             else if (event.type == sf::Event::MouseButtonReleased
                 && event.mouseButton.button == sf::Mouse::Left) {
-                isButtonPressed = false;
+                isButtonPressed[0] = false;
+            }
+            else if (sf::Mouse::isButtonPressed(sf::Mouse::Right)) {
+                isButtonPressed[1] = true;
+            }
+            else if (event.type == sf::Event::MouseButtonReleased
+                && event.mouseButton.button == sf::Mouse::Right) {
+                isButtonPressed[1] = false;
             }
             // Rotates camera
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
@@ -594,33 +617,52 @@ int main() {
             }
         }
 
-        int numSteps = 12;
+        int numSteps = 20;
         real substep = deltaT / numSteps;
 
         while (numSteps--) {
 
             for (auto& particle : mesh.particles) {
-                g.updateForce(&particle, substep);
+                g.updateForce(&particle, deltaT);
             }
 
             vector<ParticleContact> contacts;
             for (auto& force : mesh.forces) {
-                force.force1.updateForce(force.force2.otherParticle, substep);
-                force.force2.updateForce(force.force1.otherParticle, substep);
+                force.force1.updateForce(force.force2.otherParticle, deltaT);
+                force.force2.updateForce(force.force1.otherParticle, deltaT);
             }
 
-            if (isButtonPressed) {
-                sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
-                sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);
-                Vector3D move;
-                move.x = worldPos.x - mesh.particles[size * size / 2].position.x;
-                move.y = worldPos.y - mesh.particles[size * size / 2].position.y;
-                move.z = worldPos.x - mesh.particles[size * size / 2].position.z;
+            if (isButtonPressed[0] || isButtonPressed[1]) {
 
-                move *= 1.5;
-                ParticleGravity f(move);
-                for (int i = 0; i < size; i++) {
-                    f.updateForce(&mesh.particles[size + i * size - 1], substep);
+                if (isButtonPressed[0]) {
+                    sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
+                    sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);
+                    Vector3D move;
+                    move.x = worldPos.x - mesh.particles[size * size / 2].position.x;
+                    move.y = worldPos.y - mesh.particles[size * size / 2].position.y;
+                    move.z = worldPos.x - mesh.particles[size * size / 2].position.z;
+
+                    move *= 1.5;
+                    ParticleGravity f(move);
+
+                    for (int i = 0; i < size; i++) {
+                        f.updateForce(&mesh.particles[size + i * size - 1], deltaT);
+                    }
+                }
+                else if (isButtonPressed[1]) {
+                    sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
+                    sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);
+                    Vector3D move;
+                    move.x = worldPos.x - mesh.particles[size * size / 2].position.x;
+                    move.y = worldPos.y - mesh.particles[size * size / 2].position.y;
+                    move.z = -(worldPos.x + mesh.particles[size * size / 2].position.z);
+
+                    move *= 1.5;
+                    ParticleGravity f(move);
+
+                    for (int i = 0; i < size; i++) {
+                        f.updateForce(&mesh.particles[i * size], deltaT);
+                    }
                 }
             }
 
@@ -628,7 +670,7 @@ int main() {
 
             for (int i = 0; i < size * size; i++) {
                 if (mesh.particles[i].isAwake) {
-                    mesh.particles[i].verletIntegrate(substep);
+                    mesh.particles[i].verletIntegrate(deltaT);
                 }
             }
         }
@@ -648,7 +690,7 @@ int main() {
         edgeData edgeData = getMeshEdgeData(mesh);
 
         //shader.drawEdges(edgeData.vertices, identity, viewMatrix, 
-        //     projectionMatrix, colorWhite);
+          //   projectionMatrix, colorWhite);
 
         faceData data = getSmoothMeshFaceData(mesh, size, size,
             order::COUNTER_CLOCKWISE);
@@ -658,14 +700,37 @@ int main() {
         glm::vec3 lightPos[]{ glm::vec3(500, 0, 500), glm::vec3(-500, 0, -500) };
         glm::vec4 lightColor[]{ glm::vec4(1.0, 1.0, 1.0, 1.0),
             glm::vec4(1.0, 1.0, 1.0, 1.0) };
-
-        phongShader.drawFaces(data.vertices, data.normals, identity, viewMatrix,
-            projectionMatrix, colorRed, 2, lightPos, lightColor, cameraPosition, 50);
-        phongShader.drawFaces(backData.vertices, backData.normals, identity, viewMatrix,
-            projectionMatrix, colorBlue, 2, lightPos, lightColor, cameraPosition, 50);
+        
+        
+        lightShader.drawFaces(
+            data.vertices,
+            data.normals,
+            identity,
+            viewMatrix,
+            projectionMatrix,
+            colorRed,
+            2,
+            lightPos,
+            lightColor
+        );
+        
+        lightShader.drawFaces(
+            backData.vertices,
+            backData.normals,
+            identity,
+            viewMatrix,
+            projectionMatrix,
+            colorRed,
+            2,
+            lightPos,
+            lightColor
+        );
+        
 
         window.display();
     }
 
     return 0;
 }
+
+#endif

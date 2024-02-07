@@ -41,6 +41,16 @@ namespace pe {
 		Vector3D normal;
 		Vector3D centroid;
 
+		/*
+			Texture coordinates used to tell the engine how the shape's
+			vertices(the vertices in each face, not the unique vertices
+			that define the polyhedron) map onto a 2D surface.Used in
+			the calculation of the tangent and bitangents of each vertex.
+		*/
+		std::vector<Vector2D> textureCoordinates;
+
+
+
 		Face() {}
 
 		Face(const std::vector<Vector3D>& vertices) : vertices(vertices) {
@@ -135,14 +145,6 @@ namespace pe {
 		std::vector<Vector3D> globalVertices;
 
 		/*
-			Texture coordinates used to tell the engine how the shape's
-			vertices (the vertices in each face, not the unique vertices
-			that define the polyhedron) map onto a 2D surface. Used in
-			the calculation of the tangent and bitangents of each vertex.
-		*/
-		std::vector<Vector2D> textureCoordinates;
-
-		/*
 			Bounding volume sphere, used for coarse collision detection.
 		*/
 		BoundingSphere boundingSphere;
@@ -197,6 +199,7 @@ namespace pe {
 			const std::vector<Vector3D>& vertices
 		) const = 0;
 
+
 		/*
 			Updates the faces and edges by the body's transform matrix.
 		*/
@@ -232,6 +235,11 @@ namespace pe {
 			);
 			return furthestPoint;
 		}
+
+		/*
+			Sets each face's texture map.
+		*/
+		virtual void setTextureMap() = 0;
 	};
 }
 

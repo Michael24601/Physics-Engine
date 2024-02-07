@@ -101,15 +101,6 @@ namespace pe {
 			displayAux(out, ptr->children[1], indent + 16);
 		}
 
-		// Displays tree (can be removed later)
-		void display() {
-			if (root != nullptr) {
-				displayAux(std::cout, root, 0);
-			}
-			else
-				std::cout << "Empty tree.\n";
-		}
-
 
 		BVHNode<BoundingVolumeClass>* getRoot() {
 			return root;

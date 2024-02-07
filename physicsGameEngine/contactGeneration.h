@@ -48,14 +48,13 @@ namespace pe {
 
     /*
         In this function we test all vertices in both polyhedra against the
-        other, as well as all combinations of edges. Trading accuracy for
-        performance, we then resolve only one of them. There are several
-        criteria to follow in choosing which contact to resolve for this
-        collision. For instance, we can think of the one with the most
-        penetration depth as being the most urgent.
-        In our case, we choose the one closest to the velocity (travel)
-        direction of the two objects.
+        other, as well as all combinations of edges. We dont have to
+        resolve each found contact in a single collision, but resolving more
+        of them is more accurate, and the function returns the number of
+        contacts to let the caller know how many contacts were generated,
+        so the caller can decide how many to resolve based on the accuracy
+        and performance tradeoff.
     */
-    bool returnMaxContact(const Polyhedron& p1, const Polyhedron& p2,
+    int returnContacts(const Polyhedron& p1, const Polyhedron& p2,
         std::vector<Contact>& contactsToBeResolved);
 }

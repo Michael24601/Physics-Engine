@@ -162,6 +162,9 @@
     <ClCompile Include="cookTorranceShader.cpp">
       <Filter>Source Files\OpenglGraphics</Filter>
     </ClCompile>
+    <ClCompile Include="anisotropicShader.cpp">
+      <Filter>Source Files\OpenglGraphics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="accuracy.h">
@@ -293,9 +296,6 @@
     <ClInclude Include="particleMesh.h">
       <Filter>Header Files\ParticleMesh</Filter>
     </ClInclude>
-    <ClInclude Include="clothWithBungeeCord.h">
-      <Filter>Header Files\ParticleMesh</Filter>
-    </ClInclude>
     <ClInclude Include="cord.h">
       <Filter>Header Files\ParticleMesh</Filter>
     </ClInclude>
@@ -309,9 +309,6 @@
       <Filter>Header Files\Interfaces</Filter>
     </ClInclude>
     <ClInclude Include="contact.h">
-      <Filter>Header Files\Collision</Filter>
-    </ClInclude>
-    <ClInclude Include="contactData.h">
       <Filter>Header Files\Collision</Filter>
     </ClInclude>
     <ClInclude Include="contactGeneration.h">
@@ -333,6 +330,27 @@
       <Filter>Header Files\ParticleMesh</Filter>
     </ClInclude>
     <ClInclude Include="particleAngleConstraint.h">
+      <Filter>Header Files\ParticleMesh</Filter>
+    </ClInclude>
+    <ClInclude Include="anisotropicShader.h">
+      <Filter>Header Files\OpenglGraphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Polyhedron2.h">
+      <Filter>Header Files\Primitive</Filter>
+    </ClInclude>
+    <ClInclude Include="face.h">
+      <Filter>Header Files\Primitive</Filter>
+    </ClInclude>
+    <ClInclude Include="curvedFace.h">
+      <Filter>Header Files\Primitive</Filter>
+    </ClInclude>
+    <ClInclude Include="rectangularCloth.h">
+      <Filter>Header Files\ParticleMesh</Filter>
+    </ClInclude>
+    <ClInclude Include="cloth.h">
+      <Filter>Header Files\ParticleMesh</Filter>
+    </ClInclude>
+    <ClInclude Include="cylindricalCloth.h">
       <Filter>Header Files\ParticleMesh</Filter>
     </ClInclude>
   </ItemGroup>

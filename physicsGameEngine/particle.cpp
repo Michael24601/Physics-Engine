@@ -63,7 +63,8 @@ void Particle::verletIntegrate(real duration) {
 		newAcceleration.linearCombination(accumulatedForce, inverseMass);
 
 		// Update the position using Verlet integration
-		position += (velocity * duration) + (newAcceleration * duration * duration * 0.5);
+		position += (velocity * duration) 
+			+ (newAcceleration * duration * duration * 0.5);
 
 		// Update velocity using the difference in positions
 		velocity = (position - currentPosition) * (duration);

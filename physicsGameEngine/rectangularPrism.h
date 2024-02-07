@@ -92,6 +92,17 @@ namespace pe {
 
 			return faces;
 		}
+	
+		virtual void setTextureMap() override {
+			for (Face& face : faces) {
+				face.textureCoordinates = {
+					Vector2D(0.0, 0.0),
+					Vector2D(1.0, 0.0),
+					Vector2D(1.0, 1.0),
+					Vector2D(0.0, 1.0)
+				};
+			}
+		}
 	};
 }
 

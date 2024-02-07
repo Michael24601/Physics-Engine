@@ -18,8 +18,8 @@
 #include "polyhedron.h"
 #include "solidSphere.h"
 #include "cylinder.h"
-#include "clothWithBungeeCord.h"
 #include "cone.h"
+#include "cloth.h"
 #include <vector>
 
 namespace pe {
@@ -44,6 +44,12 @@ namespace pe {
 			to be calculated differently and individually.
 		*/
 		std::vector<glm::vec3> normals;
+
+		/*
+			Then tangents and bitangents.
+		*/
+		std::vector<glm::vec3> tangents;
+		std::vector<glm::vec3> bitangents;
 	};
 
 
@@ -72,6 +78,18 @@ namespace pe {
 
 	std::vector<std::vector<Vector3D>> triangulateFace(
 		const std::vector<Vector3D>& vertices
+	);
+
+
+	/*
+		Calculates the tangents and bitangents of a triangulated face.
+		Assumes that we have a flat surface, so does not require uv, or
+		texture coordinates.
+	*/
+	void calculateTangentBitangent(
+		const std::vector<Vector3D>& triangle,
+		glm::vec3& tangent,
+		glm::vec3& bitangent
 	);
 
 
@@ -155,7 +173,7 @@ namespace pe {
 		cloth.
     */
 	faceData getSmoothMeshFaceData(
-		const ClothWithBungeeCord& mesh,
+		const Cloth& mesh,
 		int columnSize,
 		int rowSize,
 		order order

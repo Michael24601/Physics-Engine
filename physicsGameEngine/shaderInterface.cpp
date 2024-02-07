@@ -1,5 +1,6 @@
 
 #include "shaderInterface.h"
+#include "cloth.h"
 
 using namespace pe;
 
@@ -71,38 +72,70 @@ edgeData pe::getPolyhedronNormalsData(
 }
 
 
+// Function to calculate tangent and bitangent vectors for a triangle
+void pe::calculateTangentBitangent(
+	const std::vector<Vector3D>& triangle,
+	glm::vec3& tangent, 
+	glm::vec3& bitangent
+) {
+	// Calculate edge vectors
+	glm::vec3 edge1 = glm::vec3(
+		triangle[1].x - triangle[0].x, 
+		triangle[1].y - triangle[0].y, 
+		triangle[1].z - triangle[0].z
+	);
+	glm::vec3 edge2 = glm::vec3(
+		triangle[2].x - triangle[0].x, 
+		triangle[2].y - triangle[0].y, 
+		triangle[2].z - triangle[0].z
+	);
+
+	// Calculate delta UV vectors (assuming flat shading)
+	glm::vec2 deltaUV1 = glm::vec2(0.0f, 1.0f); // Flat shading, so assuming constant delta UV
+	glm::vec2 deltaUV2 = glm::vec2(1.0f, 0.0f); // Flat shading, so assuming constant delta UV
+
+	// Calculate tangent and bitangent vectors
+	glm::vec3 normal = glm::normalize(glm::cross(edge1, edge2));
+	tangent = glm::normalize(edge1);
+	bitangent = glm::normalize(glm::cross(normal, tangent));
+}
+
+
 faceData pe::getPolyhedronFaceData(const Polyhedron& polyhedron) {
 	std::vector<glm::vec3> flattenedPositions;
 	std::vector<glm::vec3> flattenedNormals;
+	std::vector<glm::vec3> flattenedTangents;
+	std::vector<glm::vec3> flattenedBitangents;
 
-	std::vector<Face> faces = polyhedron.faces;
+	std::vector<pe::Face> faces = polyhedron.faces;
 
-	// Flatten the cube data and triangulate the faces
+	// Flatten the polyhedron data and compute tangents, bitangents, and normals
 	for (const auto& face : faces) {
-
 		auto triangles = triangulateFace(face.vertices);
-		flattenedPositions.reserve(triangles.size() * 3);
-		flattenedNormals.reserve(triangles.size() * 3);
-
 		for (const auto& triangle : triangles) {
-			flattenedPositions.push_back(convertToGLM(triangle[0]));
-			flattenedPositions.push_back(convertToGLM(triangle[1]));
-			flattenedPositions.push_back(convertToGLM(triangle[2]));
 
-			/*
-				The normal of each vertex in the triangle is the same
-				as the normal of the face from which the triangle is
-				extracted (because this is a polyhedron, with no
-				curved surfaces.
-			*/
-			glm::vec3 faceNormal = convertToGLM(face.normal);
-			flattenedNormals.push_back(faceNormal);
-			flattenedNormals.push_back(faceNormal);
-			flattenedNormals.push_back(faceNormal);
+			// Calculate tangent, bitangent, and normal vectors for the triangle
+			glm::vec3 tangent, bitangent;
+			calculateTangentBitangent(triangle, tangent, bitangent);
+
+			glm::vec3 normal = convertToGLM(face.normal);
+			for (const auto& vertex : triangle) {
+				// Flatten positions, normals, tangents, and bitangents
+				flattenedPositions.push_back(convertToGLM(vertex));
+				flattenedNormals.push_back(normal);
+				flattenedTangents.push_back(tangent);
+				flattenedBitangents.push_back(bitangent);
+			}
 		}
 	}
 
-	faceData data{ flattenedPositions, flattenedNormals };
+	// Construct the FaceData struct and return
+	faceData data{
+		flattenedPositions,
+		flattenedNormals,
+		flattenedTangents,
+		flattenedBitangents
+	};
 	return data;
 }
 
@@ -318,7 +351,7 @@ glm::vec3 pe::calculateMeshVertexNormal(
 
 
 faceData pe::getSmoothMeshFaceData(
-	const ClothWithBungeeCord& mesh,
+	const Cloth& mesh,
 	int columnSize,
 	int rowSize,
 	order order

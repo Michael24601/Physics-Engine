@@ -200,7 +200,7 @@ namespace pe {
 			To check that two nodes overlap is to check that their bounding
 			volumes intersect.
 		*/
-		return boundingVolume->overlaps(other->volume);
+		return boundingVolume.overlaps(other->boundingVolume.getSize());
 	}
 
 
@@ -266,8 +266,8 @@ namespace pe {
 				This guarantees we always reach a point where we are comparing
 				two leaves.
 			*/
-			if (other->isLeaf() || (!isLeaf() && boundingVolume->getSize() >=
-				other->boundingVolume->getSize())) {
+			if (other->isLeaf() || (!isLeaf() && boundingVolume.getSize() >=
+				other->boundingVolume.getSize())) {
 
 				unsigned int  count = children[0]->getPotentialContactsWith(
 					other, contacts, limit

@@ -97,7 +97,7 @@ namespace pe {
 			totalRestingLength = distance * (particleNumber - 1);
 		}
 
-		void setEdges() {
+		virtual void setEdges() {
 			for (int i = 0; i < particleNumber - 1; i++) {
 				edges.push_back(MeshEdge(&particles[i],
 					&particles[i+1]));
@@ -105,7 +105,7 @@ namespace pe {
 		}
 
 
-		void setFaces() {
+		virtual void setFaces() {
 			// Since it's a cord, there are no faces.
 		}
 	};

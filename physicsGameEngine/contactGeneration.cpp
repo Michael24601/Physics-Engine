@@ -143,17 +143,7 @@ unsigned int pe::edgeToEdge(
 }
 
 
-/*
-    In this function we test all vertices in both polyhedra against the
-    other, as well as all combinations of edges. Trading accuracy for
-    performance, we then resolve only one of them. There are several
-    criteria to follow in choosing which contact to resolve for this
-    collision. For instance, we can think of the one with the most
-    penetration depth as being the most urgent.
-    In our case, we choose the one closest to the velocity (travel)
-    direction of the two objects.
-*/
-bool pe::returnMaxContact(const Polyhedron& p1, const Polyhedron& p2,
+int pe::returnContacts(const Polyhedron& p1, const Polyhedron& p2,
     std::vector<Contact>& contactsToBeResolved) {
 
     std::vector<Contact> contacts;
@@ -176,12 +166,12 @@ bool pe::returnMaxContact(const Polyhedron& p1, const Polyhedron& p2,
        */
     if (contacts.empty()) {
         // Handle the case where no contacts were found
-        return false;
+        return 0;
     }
 
     for (const Contact& contact : contacts) {
         contactsToBeResolved.push_back(contact);
     }
 
-    return true;
+    return contacts.size();
 }

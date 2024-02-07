@@ -69,21 +69,29 @@ namespace pe {
 			faces.resize(5);
 
 			// Base face
-			faces[0] = Face(std::vector<Vector3D>{ vertices[1], vertices[2],
-				vertices[3], vertices[4] });
+			faces[0] = Face(std::vector<Vector3D>{ 
+				vertices[1], vertices[2], vertices[3], vertices[4] 
+			});
 
 			// Side faces
-			faces[1] = Face(std::vector<Vector3D>{ vertices[0], vertices[1],
-				vertices[4] });
-			faces[2] = Face(std::vector<Vector3D>{ vertices[0], vertices[4],
-				vertices[3] });
-			faces[3] = Face(std::vector<Vector3D>{ vertices[0], vertices[3],
-				vertices[2] });
-			faces[4] = Face(std::vector<Vector3D>{ vertices[0], vertices[2],
-				vertices[1] });
+			faces[1] = Face(std::vector<Vector3D>{ 
+				vertices[0], vertices[1], vertices[4] 
+			});
+			faces[2] = Face(std::vector<Vector3D>{ 
+				vertices[0], vertices[4], vertices[3] 
+			});
+			faces[3] = Face(std::vector<Vector3D>{ 
+				vertices[0], vertices[3], vertices[2] 
+			});
+			faces[4] = Face(std::vector<Vector3D>{ 
+				vertices[0], vertices[2], vertices[1] 
+			});
 
 			return faces;
 		}
+
+
+		virtual void setTextureMap() override {}
 	};
 }
 

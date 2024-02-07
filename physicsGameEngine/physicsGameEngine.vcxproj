@@ -156,6 +156,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="anchoredSpringForce.cpp" />
+    <ClCompile Include="anisotropicShader.cpp" />
     <ClCompile Include="boundingSphere.cpp" />
     <ClCompile Include="collisionResolver.cpp" />
     <ClCompile Include="contact.cpp" />
@@ -192,23 +193,28 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="accuracy.h" />
+    <ClInclude Include="anisotropicShader.h" />
     <ClInclude Include="bodyCordAdapter.h" />
     <ClInclude Include="BVHNode.h" />
     <ClInclude Include="boundingSphere.h" />
     <ClInclude Include="boundingVolumeHierarchy.h" />
-    <ClInclude Include="clothWithBungeeCord.h" />
+    <ClInclude Include="cloth.h" />
     <ClInclude Include="collisionResolver.h" />
     <ClInclude Include="cone.h" />
     <ClInclude Include="contact.h" />
-    <ClInclude Include="contactData.h" />
     <ClInclude Include="contactGeneration.h" />
     <ClInclude Include="cookTorranceShader.h" />
     <ClInclude Include="cord.h" />
+    <ClInclude Include="curvedFace.h" />
     <ClInclude Include="cylinder.h" />
+    <ClInclude Include="cylindricalCloth.h" />
+    <ClInclude Include="face.h" />
     <ClInclude Include="particleAngleConstraint.h" />
     <ClInclude Include="particleDistanceConstraint.h" />
     <ClInclude Include="particleMesh.h" />
     <ClInclude Include="polyhedron.h" />
+    <ClInclude Include="Polyhedron2.h" />
+    <ClInclude Include="rectangularCloth.h" />
     <ClInclude Include="shaderInterface.h" />
     <ClInclude Include="rectangularPrism.h" />
     <ClInclude Include="diffuseLightingShader.h" />
