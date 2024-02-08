@@ -169,6 +169,9 @@ the faces are not recreated each frame, maybe by using pointers to
 the vertices and an update function. Just in general those areas needd
 refactoring.
 
-Delete the not equal operator.
+Delete the not equal operator. 
 
-Fix the angle constraint.
+Fix the angle constraint (done).
+
+Remove the different implementations of the polyhedron class, leave
+only the best one. 

@@ -12,11 +12,12 @@ namespace pe {
 
 	class CurvedFace : public Face {
 
-	public:
+	private:
 
 		std::vector<Vector3D> localVertexNormals;
 		std::vector<Vector3D> vertexNormals;
 
+	public:
 
 		CurvedFace(
 			std::vector<Vector3D>* localVertices,
@@ -48,6 +49,11 @@ namespace pe {
 					localVertexNormals[0]
 				);
 			}
+		}
+
+
+		Vector3D getVertexNormal(int index) const {
+			return vertexNormals[index];
 		}
 	};
 }

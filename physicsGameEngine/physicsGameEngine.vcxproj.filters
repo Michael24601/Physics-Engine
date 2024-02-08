@@ -58,6 +58,12 @@
     <Filter Include="Source Files\Interfaces">
       <UniqueIdentifier>{52cde102-5ed5-42d9-b616-32e02268d7fd}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Polyhedron">
+      <UniqueIdentifier>{2a74ca16-abb4-4250-9e03-ea60768e66eb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\polyhedron">
+      <UniqueIdentifier>{00fe52b2-e2e4-4505-a60a-724c3d563596}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="physicsGameEngine.cpp">
@@ -144,9 +150,6 @@
     <ClCompile Include="tesselationUtil.cpp">
       <Filter>Source Files\Primitive</Filter>
     </ClCompile>
-    <ClCompile Include="polyhedron.cpp">
-      <Filter>Source Files\Primitive</Filter>
-    </ClCompile>
     <ClCompile Include="shaderInterface.cpp">
       <Filter>Source Files\Interfaces</Filter>
     </ClCompile>
@@ -164,6 +167,9 @@
     </ClCompile>
     <ClCompile Include="anisotropicShader.cpp">
       <Filter>Source Files\OpenglGraphics</Filter>
+    </ClCompile>
+    <ClCompile Include="polyhedron_3.cpp">
+      <Filter>Source Files\polyhedron</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -272,9 +278,6 @@
     <ClInclude Include="diffuseSpecularLightingShader.h">
       <Filter>Header Files\OpenglGraphics</Filter>
     </ClInclude>
-    <ClInclude Include="polyhedron.h">
-      <Filter>Header Files\Primitive</Filter>
-    </ClInclude>
     <ClInclude Include="plane.h">
       <Filter>Header Files\Primitive</Filter>
     </ClInclude>
@@ -335,13 +338,7 @@
     <ClInclude Include="anisotropicShader.h">
       <Filter>Header Files\OpenglGraphics</Filter>
     </ClInclude>
-    <ClInclude Include="Polyhedron2.h">
-      <Filter>Header Files\Primitive</Filter>
-    </ClInclude>
-    <ClInclude Include="face.h">
-      <Filter>Header Files\Primitive</Filter>
-    </ClInclude>
-    <ClInclude Include="curvedFace.h">
+    <ClInclude Include="polyhedron.h">
       <Filter>Header Files\Primitive</Filter>
     </ClInclude>
     <ClInclude Include="rectangularCloth.h">
@@ -352,6 +349,24 @@
     </ClInclude>
     <ClInclude Include="cylindricalCloth.h">
       <Filter>Header Files\ParticleMesh</Filter>
+    </ClInclude>
+    <ClInclude Include="face.h">
+      <Filter>Header Files\Polyhedron</Filter>
+    </ClInclude>
+    <ClInclude Include="edge.h">
+      <Filter>Header Files\Polyhedron</Filter>
+    </ClInclude>
+    <ClInclude Include="polyhedron_2.h">
+      <Filter>Header Files\Polyhedron</Filter>
+    </ClInclude>
+    <ClInclude Include="curvedFace.h">
+      <Filter>Header Files\Polyhedron</Filter>
+    </ClInclude>
+    <ClInclude Include="polyhedron_3.h">
+      <Filter>Header Files\Polyhedron</Filter>
+    </ClInclude>
+    <ClInclude Include="curvedPolyhedron.h">
+      <Filter>Header Files\Polyhedron</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -1,12 +1,12 @@
 /*
-	
+
 */
 
 #ifndef FACE_H
 #define FACE_H
 
 #include "vector3D.h"
-#include "vector3D.h"
+#include "vector2D.h"
 #include "matrix3x4.h"
 #include <vector>
 
@@ -29,7 +29,7 @@ namespace pe {
 			requiring us to copy the vertices each frame (as the global
 			vertices change each frame). This also requires that the
 			Polyhedron class carry the information of which vertices belong
-			to which faces, which really should be Face information. 
+			to which faces, which really should be Face information.
 			We can direguard this function. The second method is to store
 			vectors of pointers to the (local and global) vertices
 			associated with a face in the Face class. This approach is fast,
@@ -41,7 +41,7 @@ namespace pe {
 			vertex vectors directly, which should be cheap, as well as a
 			vector of integers for the indexes of the vectors that are
 			associated with the face. This is memory efficient, as storing
-			integers is cheap, and is more robust, but it also requires 
+			integers is cheap, and is more robust, but it also requires
 			two layers of indirection, with (*vectorOfVertices)[indexes[i]]
 			being a vertex in the face. We go with the third method.
 
@@ -67,7 +67,7 @@ namespace pe {
 			once, and then use the transform matrix of the polyhedron to
 			get the global version each frame. The first method grows in
 			complexity the more vertices we have, and becomes slower, while
-			the second method has constant speed, and is faster when we 
+			the second method has constant speed, and is faster when we
 			have a lot of vertices. Note that the second function requires
 			normalization of the normal after transformation, though this
 			operation is also constant. Another advantage of the second
@@ -75,7 +75,7 @@ namespace pe {
 			the normal at each vertex in the face does not necessarily have
 			the normal of the face. Thus, we will need to tell the Face
 			class each time how to calculate the vertex normals, and having
-			the flexibility to calculate the global and local versions 
+			the flexibility to calculate the global and local versions
 			may be too complex in certain cases. One disadvantage of the
 			second method is that the localNormal and localCentroid now
 			have to be stored as well, which takes up a bit more space.
@@ -88,6 +88,14 @@ namespace pe {
 		std::vector<Vector3D>* localVertices;
 		std::vector<Vector3D>* globalVertices;
 		std::vector<int> indeces;
+
+		Vector3D normal;
+		Vector3D localNormal;
+		Vector3D centroid;
+		Vector3D localCentroid;
+
+		std::vector<Vector2D> textureCoordinates;
+
 
 		Vector3D calculateLocalNormal() {
 
@@ -127,13 +135,6 @@ namespace pe {
 
 	public:
 
-		Vector3D normal;
-		Vector3D localNormal;
-		Vector3D centroid;
-		Vector3D localCentroid;
-
-		std::vector<Vector2D> textureCoordinates;
-
 
 		Face() {}
 
@@ -158,7 +159,17 @@ namespace pe {
 		}
 
 
-		Vector3D& getVertex(int index) const {
+		Vector3D getNormal() const {
+			return normal;
+		}
+
+
+		Vector3D getCentroid() const {
+			return normal;
+		}
+
+
+		Vector3D getVertex(int index) const {
 			return (*globalVertices)[indeces[index]];
 		}
 

@@ -1,6 +1,6 @@
 
-#ifndef POLYHEDRON2_H
-#define POLYHEDRON2_H
+#ifndef POLYHEDRON3_H
+#define POLYHEDRON3_H
 
 #include "vector2D.h"
 #include "rigidBody.h"
@@ -8,31 +8,27 @@
 #include <vector>
 #include <algorithm>
 
-#include "face.h"
 
 namespace pe {
 
-	struct Edge {
-		std::pair<Vector3D, Vector3D> vertices;
-
-		Edge() {}
-
-		Edge(const Vector3D& first, const Vector3D& second) {
-			vertices = std::make_pair(first, second);
-		}
-	};
-
-
 	class Polyhedron {
+
+	private:
+
+		std::vector<std::vector<int>> faces;
+		std::vector<std::pair<int, int>> edges;
+
+		// The normal of each face
+		std::vector<Vector3D> normals;
+
+		// The centroid of each face
+		std::vector<Vector3D> centroids;
 
 	public:
 
 		std::vector<Vector3D> localVertices;
-		RigidBody* body;
-
-		std::vector<Face> faces;
-		std::vector<Edge> edges;
 		std::vector<Vector3D> globalVertices;
+		RigidBody* body;
 
 		BoundingSphere boundingSphere;
 
@@ -41,10 +37,13 @@ namespace pe {
 			real mass,
 			const Vector3D& position,
 			const Matrix3x3& inertiaTensor,
-			const std::vector<Vector3D>& localVertices
+			const std::vector<Vector3D>& localVertices,
+			std::vector<std::pair<int, int>> edges,
+			std::vector<std::vector<int>> faces
 		) : body{ body },
 			localVertices{ localVertices },
-
+			edges{ edges },
+			faces{faces},
 			boundingSphere(
 				body->position,
 				findFurthestPoint().magnitude()
@@ -60,17 +59,8 @@ namespace pe {
 			body->calculateDerivedData();
 		}
 
-		virtual std::vector<Edge> calculateEdges(
-			const std::vector<Vector3D>& vertices
-		) const = 0;
 
-
-		virtual std::vector<Face> calculateFaces(
-			const std::vector<Vector3D>& vertices
-		) const = 0;
-
-
-		void update() {
+		virtual void update() {
 			globalVertices.clear();
 			for (const Vector3D& vertex : localVertices) {
 				globalVertices.push_back(
@@ -78,8 +68,7 @@ namespace pe {
 				);
 			}
 
-			edges = calculateEdges(globalVertices);
-			faces = calculateFaces(globalVertices);
+			// Here we update information related to faces and edges
 		}
 
 
@@ -99,6 +88,12 @@ namespace pe {
 
 		virtual void setTextureMap() = 0;
 	};
+
+
+	Vector3D calculateFaceNormal(
+		std::vector<Vector3D>& vertices,
+		std::vector<int>& indeces
+	);
 }
 
 #endif
