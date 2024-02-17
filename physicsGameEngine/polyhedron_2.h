@@ -32,7 +32,9 @@ namespace pe {
 			real mass,
 			const Vector3D& position,
 			const Matrix3x3& inertiaTensor,
-			const std::vector<Vector3D>& localVertices
+			const std::vector<Vector3D>& localVertices,
+			const std::vector<std::vector<int>>& faceIndexes,
+			const std::vector<std::pair<int, int>>& edgeIndexes
 		) : body{ body },
 			localVertices{ localVertices },
 
@@ -44,18 +46,29 @@ namespace pe {
 			body->position = position;
 			body->setInertiaTensor(inertiaTensor);
 
-			globalVertices = localVertices;
+			this->globalVertices = localVertices;
 
 			body->angularDamping = 1;
 			body->linearDamping = 1;
 			body->calculateDerivedData();
+
+			// Creates the face and edge objects from the associations
+			for (int i = 0; i < faceIndexes.size(); i++) {
+				faces.push_back(Face(
+					(this->localVertices), 
+					&(this->globalVertices), 
+					faceIndexes[i]
+				));
+			}
+			for (int i = 0; i < edgeIndexes.size(); i++) {
+				edges.push_back(Edge(
+					&(this->localVertices),
+					&(this->globalVertices),
+					edgeIndexes[i].first,
+					edgeIndexes[i].second
+				));
+			}
 		}
-
-
-		virtual void setEdges() = 0;
-
-
-		virtual void setFaces() = 0;
 
 
 		void update() {

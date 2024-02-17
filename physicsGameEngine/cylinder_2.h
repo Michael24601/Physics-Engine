@@ -45,6 +45,77 @@ namespace pe {
 			return vertices;
 		}
 
+
+		static std::vector<std::vector<int>> generateFaceIndexes(
+			int segments
+		) {
+
+			std::vector<std::vector<int>> faceIndexes;
+
+			// Top face, in counter-clockwise order
+			std::vector<int> topFaceIndexes;
+			for (int i = segments - 1; i >= 0; i--) {
+				int v0 = 2 * i;
+				topFaceIndexes.push_back(v0);
+			}
+			faceIndexes.push_back(topFaceIndexes);
+
+			// Bottom face, in counter-clockwise order
+			std::vector<int> bottomFaceIndexes;
+			for (int i = 0; i < segments; i++) {
+				int v1 = 2 * i + 1;
+				bottomFaceIndexes.push_back(v1);
+			}
+			faceIndexes.push_back(bottomFaceIndexes);
+
+			// Side faces
+			for (int i = 0; i < segments; ++i) {
+				// Indices of the four vertices of the current rectangle
+				int v0 = 2 * i;
+				int v1 = v0 + 1;
+				int v2 = (v0 + 2) % (2 * segments);
+				int v3 = v2 + 1;
+
+				// Forms faces in counter-clockwise order
+				std::vector<int> sideFaceIndexes = { v0, v2, v3, v1 };
+				faceIndexes.push_back(sideFaceIndexes);
+			}
+
+			return faceIndexes;
+		}
+
+
+		static std::vector<std::pair<int, int>> generateEdgeIndexes(
+			int segments
+		) {
+
+			std::vector<std::pair<int, int>> edgeIndexes;
+
+			for (int i = 0; i < segments; ++i) {
+				/*
+					Indices of the four vertices of the cylinder's
+					rectangular side faces.
+				*/
+				int v0 = 2 * i;
+				int v1 = v0 + 1;
+				int v2 = (v0 + 2) % (2 * segments);
+				int v3 = v2 + 1;
+
+				/*
+					We can account for all edges in the cylinder if, for each
+					rectangular side face, we generate 3 edges: the top and
+					bottom ones (on the bases), and one of the side edges
+					(connecting the two bases).
+				*/
+				edgeIndexes.push_back(std::make_pair(v0, v1));
+				edgeIndexes.push_back(std::make_pair(v1, v3));
+				edgeIndexes.push_back(std::make_pair(v3, v2));
+			}
+
+			return edgeIndexes;
+		}
+
+
 	public:
 
 		real radius;
@@ -74,81 +145,11 @@ namespace pe {
 					radius,
 					length,
 					segments
-				)
+				),
+				generateFaceIndexes(segments),
+				generateEdgeIndexes(segments)
 			),
-			radius{ radius }, length{ length }, segments{ segments } {
-
-			setEdges();
-			setFaces();
-		}
-
-
-		virtual void setFaces() override {
-			// Top face, in counter-clockwise order
-			std::vector<int> topFaceIndexes;
-			for (int i = segments - 1; i >= 0; i--) {
-				int v0 = 2 * i;
-				topFaceIndexes.push_back(v0);
-			}
-			faces.push_back(
-				Face(&localVertices, &globalVertices, topFaceIndexes)
-			);
-
-			// Bottom face, in counter-clockwise order
-			std::vector<int> bottomFaceIndexes;
-			for (int i = 0; i < segments; i++) {
-				int v1 = 2 * i + 1;
-				bottomFaceIndexes.push_back(v1);
-			}
-			faces.push_back(
-				Face(&localVertices, &globalVertices, bottomFaceIndexes)
-			);
-
-			// Side faces
-			for (int i = 0; i < segments; ++i) {
-				// Indices of the four vertices of the current rectangle
-				int v0 = 2 * i;
-				int v1 = v0 + 1;
-				int v2 = (v0 + 2) % (2 * segments);
-				int v3 = v2 + 1;
-
-				// Forms faces in counter-clockwise order
-				std::vector<int> sideFaceIndexes = {v0, v2, v3, v1};
-				faces.push_back(
-					Face(&localVertices, &globalVertices, sideFaceIndexes)
-				);
-			}
-		}
-
-		virtual void setEdges() override {
-			for (int i = 0; i < segments; ++i) {
-				/*
-					Indices of the four vertices of the cylinder's
-					rectangular side faces.
-				*/
-				int v0 = 2 * i;
-				int v1 = v0 + 1;
-				int v2 = (v0 + 2) % (2 * segments);
-				int v3 = v2 + 1;
-
-				/*
-					We can account for all edges in the cylinder if, for each
-					rectangular side face, we generate 3 edges: the top and
-					bottom ones (on the bases), and one of the side edges 
-					(connecting the two bases).
-				*/
-
-				edges.push_back(
-					Edge(&localVertices, &globalVertices, v0, v1)
-				);
-				edges.push_back(
-					Edge(&localVertices, &globalVertices, v1, v3)
-				);
-				edges.push_back(
-					Edge(&localVertices, &globalVertices, v3, v2)
-				);
-			}
-		}
+			radius{ radius }, length{ length }, segments{ segments } {}
 
 	};
 }

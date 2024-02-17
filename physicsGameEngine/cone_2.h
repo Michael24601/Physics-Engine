@@ -46,6 +46,68 @@ namespace pe {
 			return vertices;
 		}
 
+
+		/*
+			Generates cone face associations based on the number of
+			tesselation segments.
+		*/
+		static std::vector<std::vector<int>> generateFaceIndexes(
+			int segments
+		) {
+
+			std::vector<std::vector<int>> faceIndexes;
+
+			// Base face
+			std::vector<int> baseFaceIndexes;
+			for (int i = 1; i <= segments; i++) {
+				baseFaceIndexes.push_back(i);
+			}
+			faceIndexes.push_back(baseFaceIndexes);
+
+			// Side faces
+			for (int i = 1; i <= segments; ++i) {
+				int v0 = i;
+				int v1 = (i % segments) + 1;
+
+				std::vector<int> sideFaceIndexes = {
+					0, // Apex
+					v1,
+					v0
+				};
+
+				faceIndexes.push_back(sideFaceIndexes);
+			}
+
+			return faceIndexes;
+		}
+
+
+		static std::vector<std::pair<int, int>> generateEdgeIndexes(
+			int segments
+		) {
+
+			std::vector<std::pair<int, int>> edgeIndexes;
+
+			// Base edges
+			for (int i = 1; i <= segments; ++i) {
+				// Indexes of the two vertices of the current edge
+				int v0 = i;
+				int v1 = (i % segments) + 1;
+
+				// Connects vertices to form edges based on the side faces
+				edgeIndexes.push_back(std::make_pair(v0, v1));
+			}
+
+			// Edges from the apex to the base vertices
+			for (int i = 1; i <= segments; ++i) {
+				int v0 = 0;
+				int v1 = i;
+				edgeIndexes.push_back(std::make_pair(v0, v1));
+			}
+
+			return edgeIndexes;
+		}
+
 	public:
 
 		real radius;
@@ -73,64 +135,11 @@ namespace pe {
 					radius,
 					length,
 					segments
-				)
+				),
+				generateFaceIndexes(segments),
+				generateEdgeIndexes(segments)
 			),
-			radius{ radius }, length{ length }, segments{ segments } {
-
-			setEdges();
-			setFaces();
-		}
-
-
-		virtual void setFaces() override {
-
-			// Base face
-			std::vector<int> baseFaceIndexes;
-			for (int i = 1; i <= segments; i++) {
-				baseFaceIndexes.push_back(i);
-			}
-			Face baseFace(&localVertices, &globalVertices, baseFaceIndexes);
-			faces.push_back(baseFace);
-
-			// Side faces
-			for (int i = 1; i <= segments; ++i) {
-				int v0 = i;
-				int v1 = (i % segments) + 1;
-
-				std::vector<int> sideFaceIndexes = {
-					0, // Apex
-					v1,
-					v0
-				};
-
-				Face sideFace(
-					&localVertices,
-					&globalVertices,
-					sideFaceIndexes
-				);
-				faces.push_back(sideFace);
-			}
-		}
-
-		virtual void setEdges() override {
-
-			// Base edges
-			for (int i = 1; i <= segments; ++i) {
-				// Indexes of the two vertices of the current edge
-				int v0 = i;
-				int v1 = (i % segments) + 1;
-
-				// Connects vertices to form edges based on the side faces
-				Edge edge(&localVertices, &globalVertices, v0, v1);
-				edges.push_back(edge);
-			}
-
-			// Edges from the apex to the base vertices
-			for (int i = 1; i <= segments; ++i) {
-				Edge edge(&localVertices, &globalVertices, 0, i);
-				edges.push_back(edge);
-			}
-		}
+			radius{ radius }, length{ length }, segments{ segments } {}
 
 	};
 }

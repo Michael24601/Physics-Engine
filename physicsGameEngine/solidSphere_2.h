@@ -45,6 +45,65 @@ namespace pe {
 			return vertices;
 		}
 
+
+		static std::vector<std::vector<int>> generateFaceIndexes(
+			int latitudeSegments,
+			int longitudeSegments
+		) {
+
+			std::vector<std::vector<int>> faceIndexes;
+
+			// Generates sphere faces based on how the vertices were
+			for (int lat = 0; lat < latitudeSegments; lat++) {
+				for (int lon = 0; lon < longitudeSegments; lon++) {
+					/*
+						Indices of the four vertices of the current triangle
+						in counterclockwise order.
+					*/
+					int v0 = lat * (longitudeSegments + 1) + lon;
+					int v1 = v0 + 1;
+					int v2 = (lat + 1) * (longitudeSegments + 1) + lon;
+					int v3 = v2 + 1;
+
+					// Forms face in counter-clockwise order
+					std::vector<int> indexes{ v0, v1, v3, v2 };
+					faceIndexes.push_back(indexes);
+				}
+			}
+
+			return faceIndexes;
+		}
+
+
+		static std::vector<std::pair<int, int>> generateEdgeIndexes(
+			int latitudeSegments,
+			int longitudeSegments
+		) {
+
+			std::vector<std::pair<int, int>> edgeIndexes;
+
+			// Generates sphere edges based on how the vertices were
+			for (int lat = 0; lat < latitudeSegments; lat++) {
+				for (int lon = 0; lon < longitudeSegments; lon++) {
+					/*
+						Indices of the four vertices of the current square
+						in counter clockwise order
+					*/
+					int v0 = lat * (longitudeSegments + 1) + lon;
+					int v1 = v0 + 1;
+					int v2 = (lat + 1) * (longitudeSegments + 1) + lon;
+					int v3 = v2 + 1;
+
+					edgeIndexes.push_back(std::make_pair(v0, v2));
+					edgeIndexes.push_back(std::make_pair(v2, v1));
+					edgeIndexes.push_back(std::make_pair(v2, v3));
+					edgeIndexes.push_back(std::make_pair(v1, v0));
+				}
+			}
+
+			return edgeIndexes;
+		}
+
 	public:
 
 		real radius;
@@ -72,63 +131,12 @@ namespace pe {
 					radius,
 					latitudeSegments,
 					longtitudeSegments
-				)
+				),
+				generateFaceIndexes(latitudeSegments, longitudeSegments),
+				generateEdgeIndexes(latitudeSegments, longitudeSegments)
 			),
 			radius{ radius }, latitudeSegments{ latitudeSegments },
 			longitudeSegments{ longtitudeSegments } {}
-
-
-		virtual void setFaces() override {
-			// Generates sphere faces based on how the vertices were
-			for (int lat = 0; lat < latitudeSegments; lat++) {
-				for (int lon = 0; lon < longitudeSegments; lon++) {
-					/* 
-						Indices of the four vertices of the current triangle
-						in counterclockwise order.
-					*/
-					int v0 = lat * (longitudeSegments + 1) + lon;
-					int v1 = v0 + 1;
-					int v2 = (lat + 1) * (longitudeSegments + 1) + lon;
-					int v3 = v2 + 1;
-
-					// Forms face in counter-clockwise order
-					std::vector<int> face{ v0, v1, v3, v2};
-					faces.push_back(
-						Face(&localVertices, &globalVertices, face)
-					);
-				}
-			}
-		}
-
-
-		virtual void setEdges() override {
-			// Generates sphere edges based on how the vertices were
-			for (int lat = 0; lat < latitudeSegments; lat++) {
-				for (int lon = 0; lon < longitudeSegments; lon++) {
-					/* 
-						Indices of the four vertices of the current square
-						in counter clockwise order
-					*/
-					int v0 = lat * (longitudeSegments + 1) + lon;
-					int v1 = v0 + 1;
-					int v2 = (lat + 1) * (longitudeSegments + 1) + lon;
-					int v3 = v2 + 1;
-
-					edges.push_back(
-						Edge(&localVertices, &globalVertices, v0, v2)
-					);
-					edges.push_back(
-						Edge(&localVertices, &globalVertices, v3, v1)
-					);
-					edges.push_back(
-						Edge(&localVertices, &globalVertices, v2, v3)
-					);
-					edges.push_back(
-						Edge(&localVertices, &globalVertices, v1, v0)
-					);
-				}
-			}
-		}
 
 	};
 }
