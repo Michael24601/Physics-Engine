@@ -171,6 +171,9 @@
     <ClCompile Include="polyhedron_3.cpp">
       <Filter>Source Files\polyhedron</Filter>
     </ClCompile>
+    <ClCompile Include="shaderInterface_2.cpp">
+      <Filter>Source Files\polyhedron</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="accuracy.h">
@@ -365,7 +368,22 @@
     <ClInclude Include="polyhedron_3.h">
       <Filter>Header Files\Polyhedron</Filter>
     </ClInclude>
-    <ClInclude Include="curvedPolyhedron.h">
+    <ClInclude Include="cone_2.h">
+      <Filter>Header Files\Polyhedron</Filter>
+    </ClInclude>
+    <ClInclude Include="rectangularPrism_2.h">
+      <Filter>Header Files\Polyhedron</Filter>
+    </ClInclude>
+    <ClInclude Include="shaderInterface_2.h">
+      <Filter>Header Files\Polyhedron</Filter>
+    </ClInclude>
+    <ClInclude Include="pyramid_2.h">
+      <Filter>Header Files\Polyhedron</Filter>
+    </ClInclude>
+    <ClInclude Include="solidSphere_2.h">
+      <Filter>Header Files\Polyhedron</Filter>
+    </ClInclude>
+    <ClInclude Include="cylinder_2.h">
       <Filter>Header Files\Polyhedron</Filter>
     </ClInclude>
   </ItemGroup>

@@ -91,27 +91,6 @@ namespace pe {
 			return furthestPoint;
 		}
 
-
-		virtual void setTextureMap() = 0;
-
-
-		/*
-			Returns the polyhedron data:
-			The vertices of each face in order (not each unique vertex).
-			The normal at each vertex of each face (in order), which
-			correspond to the normals of each face.
-		*/
-		virtual void getPolyhedronData(
-			std::vector<Vector3D>* vertices,
-			std::vector<Vector3D>* normals
-		) const {
-			for (const Face& face : faces) {
-				for (int i = 0; i < face.getVertexNumber(); i++) {
-					vertices->push_back(face.getVertex(i));
-					normals->push_back(face.getNormal());
-				}
-			}
-		}
 	};
 }
 

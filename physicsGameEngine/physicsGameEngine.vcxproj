@@ -187,6 +187,7 @@
     <ClCompile Include="rigidBodySpringForce.cpp" />
     <ClCompile Include="rigidBodyWorld.cpp" />
     <ClCompile Include="sat.cpp" />
+    <ClCompile Include="shaderInterface_2.cpp" />
     <ClCompile Include="solidColorShader.cpp" />
     <ClCompile Include="tesselationUtil.cpp" />
     <ClCompile Include="vector3D.cpp" />
@@ -201,12 +202,15 @@
     <ClInclude Include="cloth.h" />
     <ClInclude Include="collisionResolver.h" />
     <ClInclude Include="cone.h" />
+    <ClInclude Include="cone_2.h" />
     <ClInclude Include="contact.h" />
     <ClInclude Include="contactGeneration.h" />
     <ClInclude Include="cookTorranceShader.h" />
     <ClInclude Include="cord.h" />
     <ClInclude Include="curvedFace.h" />
-    <ClInclude Include="curvedPolyhedron.h" />
+    <ClInclude Include="cylinder_2.h" />
+    <ClInclude Include="pyramid_2.h" />
+    <ClInclude Include="rectangularPrism_2.h" />
     <ClInclude Include="cylinder.h" />
     <ClInclude Include="cylindricalCloth.h" />
     <ClInclude Include="edge.h" />
@@ -250,9 +254,11 @@
     <ClInclude Include="rigidBodySpringForce.h" />
     <ClInclude Include="rigidBodyWorld.h" />
     <ClInclude Include="sat.h" />
+    <ClInclude Include="shaderInterface_2.h" />
     <ClInclude Include="shaderProgram.h" />
     <ClInclude Include="solidColorShader.h" />
     <ClInclude Include="solidSphere.h" />
+    <ClInclude Include="solidSphere_2.h" />
     <ClInclude Include="tesselationUtil.h" />
     <ClInclude Include="vector2D.h" />
     <ClInclude Include="vector3D.h" />

@@ -1,5 +1,5 @@
 /*
-
+	Header file for class representing an edge in a Polyhedron.
 */
 
 #ifndef EDGE_H
@@ -27,10 +27,11 @@ namespace pe {
 		Edge(
 			std::vector<Vector3D>* localVertices,
 			std::vector<Vector3D>* globalVertices,
-			std::pair<int, int> indeces
+			int index1,
+			int index2
 		) : localVertices{ localVertices },
 			globalVertices{ globalVertices },
-			indeces{ indeces } {}
+			indeces{ std::make_pair(index1, index2) } {}
 
 
 		Vector3D& getVertex(int index) const {
@@ -42,7 +43,7 @@ namespace pe {
 			}
 			else {
 				throw new std::invalid_argument(
-					"An edge only has two edges"
+					"An edge only has two vertices"
 				);
 			}
 		}

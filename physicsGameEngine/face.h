@@ -87,6 +87,13 @@ namespace pe {
 
 		std::vector<Vector3D>* localVertices;
 		std::vector<Vector3D>* globalVertices;
+		
+		/*
+			Indexes of the vertices corresponding to the face. They have
+			to be given in either clockwise or counter-clockwise order, as
+			long as they are ordered. For this engine the order must always
+			be counter-clockwise.
+		*/
 		std::vector<int> indeces;
 
 		Vector3D normal;
@@ -179,10 +186,28 @@ namespace pe {
 		}
 
 
+		std::vector<Vector3D> getVertices() {
+			std::vector<Vector3D> vertices(getVertexNumber());
+			for (int i = 0; i < getVertexNumber(); i++) {
+				vertices[i] = (*globalVertices)[indeces[i]];
+			}
+		}
+
+
 		virtual void update(const Matrix3x4& transformMatrix) {
 			normal = transformMatrix.transform(localNormal);
 			normal.normalize();
 			centroid = transformMatrix.transform(localCentroid);
+		}
+
+
+		/*
+			Returns the normals of each vertex in the face. Since the
+			face is assumed to be flat, that turns out to be the same
+			for all vertices; the normal of the face.
+		*/
+		virtual std::vector<Vector3D> getVertexNormals() const {
+			return std::vector<Vector3D>(getVertexNumber(), normal);
 		}
 	};
 }

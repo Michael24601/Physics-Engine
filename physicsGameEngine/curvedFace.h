@@ -55,6 +55,15 @@ namespace pe {
 		Vector3D getVertexNormal(int index) const {
 			return vertexNormals[index];
 		}
+
+
+		/*
+			In a curved face, the normal vectors of the vertices aren't
+			all the same.
+		*/
+		virtual std::vector<Vector3D> getVertexNormals() const override {
+			return vertexNormals;
+		}
 	};
 }
 

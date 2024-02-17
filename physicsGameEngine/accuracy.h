@@ -20,10 +20,12 @@ namespace pe {
 	constexpr real PI = 3.141592f;
 
 	// Enum
-	enum class order {
+	enum class Order {
 		CLOCKWISE,
 		COUNTER_CLOCKWISE
 	};
+
+	Order defaultEngineOrder = Order::COUNTER_CLOCKWISE;
 }
 
 #endif

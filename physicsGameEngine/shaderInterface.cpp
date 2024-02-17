@@ -354,7 +354,7 @@ faceData pe::getSmoothMeshFaceData(
 	const Cloth& mesh,
 	int columnSize,
 	int rowSize,
-	order order
+	Order order
 ) {
 
 	std::vector<glm::vec3> particleNormals;
@@ -365,7 +365,7 @@ faceData pe::getSmoothMeshFaceData(
 			columnSize,
 			rowSize
 		);
-		if (order == order::COUNTER_CLOCKWISE) {
+		if (order == Order::COUNTER_CLOCKWISE) {
 			normal *= -1;
 		}
 		particleNormals.push_back(normal);
@@ -387,7 +387,7 @@ faceData pe::getSmoothMeshFaceData(
 
 			// We add two triangles for the square
 			// Note that for this shader, we must triangulate by hand
-			if (order == order::COUNTER_CLOCKWISE) {
+			if (order == Order::COUNTER_CLOCKWISE) {
 				flattenedPositions.push_back(convertToGLM(mesh.particles[topRight].position));
 				flattenedPositions.push_back(convertToGLM(mesh.particles[topLeft].position));
 				flattenedPositions.push_back(convertToGLM(mesh.particles[bottomLeft].position));
@@ -405,7 +405,7 @@ faceData pe::getSmoothMeshFaceData(
 				flattenedNormals.push_back(particleNormals[bottomLeft]);
 				flattenedNormals.push_back(particleNormals[bottomRight]);
 			}
-			else if (order == order::CLOCKWISE) {
+			else if (order == Order::CLOCKWISE) {
 				flattenedPositions.push_back(convertToGLM(mesh.particles[topLeft].position));
 				flattenedPositions.push_back(convertToGLM(mesh.particles[topRight].position));
 				flattenedPositions.push_back(convertToGLM(mesh.particles[bottomLeft].position));
@@ -434,7 +434,7 @@ faceData pe::getMeshFaceData(
 	const ParticleMesh& mesh,
 	int columnSize,
 	int rowSize,
-	order order
+	Order order
 ) {
 	std::vector<glm::vec3> flattenedPositions;
 	std:: vector<glm::vec3> flattenedNormals;

@@ -505,7 +505,12 @@ int main() {
 
     // Set to clockwise or counter-clockwise depending on face vertex order
     // (Counter Clockwise for us).
-    glFrontFace(GL_CCW);
+    if (defaultEngineOrder == Order::COUNTER_CLOCKWISE) {
+        glFrontFace(GL_CCW);
+    }
+    else {
+        glFrontFace(GL_CW);
+    }
     // This only displays faces from one side, depending on the order of
     // vertices, and what is considered front facce in the above option.
     // Disable to show both faces (but lose on performance).
@@ -693,9 +698,9 @@ int main() {
           //   projectionMatrix, colorWhite);
 
         faceData data = getSmoothMeshFaceData(mesh, size, size,
-            order::COUNTER_CLOCKWISE);
+            Order::COUNTER_CLOCKWISE);
         faceData backData = getSmoothMeshFaceData(mesh, size, size,
-            order::CLOCKWISE);
+            Order::CLOCKWISE);
 
         glm::vec3 lightPos[]{ glm::vec3(500, 0, 500), glm::vec3(-500, 0, -500) };
         glm::vec4 lightColor[]{ glm::vec4(1.0, 1.0, 1.0, 1.0),

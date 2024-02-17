@@ -157,7 +157,7 @@ namespace pe {
         const ParticleMesh& mesh,
         int columnSize,
         int rowSize,
-        order order
+        Order order
     );
 
 
@@ -176,7 +176,7 @@ namespace pe {
 		const Cloth& mesh,
 		int columnSize,
 		int rowSize,
-		order order
+		Order order
 	);
 }
 
