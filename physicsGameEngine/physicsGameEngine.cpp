@@ -61,7 +61,6 @@
 using namespace pe;
 using namespace std;
 
-#define SIM
 
 #ifdef SIM
 
@@ -679,14 +678,14 @@ int main() {
         glm::vec4 colorRed(1.0, 0.2, 0.2, 1);
         glm::vec4 colorBlue(0.2, 0.2, 1.0, 1);
 
-        edgeData edgeData = getMeshEdgeData(mesh);
+        EdgeData edgeData = getMeshEdgeData(mesh);
 
         //shader.drawEdges(edgeData.vertices, identity, viewMatrix, 
           //   projectionMatrix, colorWhite);
 
-        faceData data = getSmoothMeshFaceData(mesh, size, size,
+        FaceData data = getSmoothMeshFaceData(mesh, size, size,
             Order::COUNTER_CLOCKWISE);
-        faceData backData = getSmoothMeshFaceData(mesh, size, size,
+        FaceData backData = getSmoothMeshFaceData(mesh, size, size,
             Order::CLOCKWISE);
 
         glm::vec3 lightPos[]{ glm::vec3(500, 0, 500), glm::vec3(-500, 0, -500) };
