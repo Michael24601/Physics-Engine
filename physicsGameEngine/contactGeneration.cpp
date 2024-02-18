@@ -21,8 +21,8 @@ unsigned int pe::pointAndConvexPolyhedron(
     // Iterate through each face of the convex polyhedron
     for (size_t i = 0; i < polyhedron.faces.size(); i++) {
         // Get the face normal and any point on the face in local space
-        Vector3D faceNormal = polyhedron.faces[i].normal;
-        Vector3D pointOnFace = polyhedron.faces[i].vertices[0];
+        Vector3D faceNormal = polyhedron.faces[i]->getNormal();
+        Vector3D pointOnFace = polyhedron.faces[i]->getVertex(0);
 
         // Compute the vector from the point to the point on the face
         Vector3D toPointOnFace = pointOnFace - localPoint;
@@ -82,10 +82,10 @@ unsigned int pe::edgeToEdge(
     Contact contact;
 
     // Get the two vertices of the current edges
-    Vector3D a0 = edgeA.vertices.first;
-    Vector3D a1 = edgeA.vertices.second;
-    Vector3D b0 = edgeB.vertices.first;
-    Vector3D b1 = edgeB.vertices.second;
+    Vector3D a0 = edgeA.getVertex(0);
+    Vector3D a1 = edgeA.getVertex(1);
+    Vector3D b0 = edgeB.getVertex(0);
+    Vector3D b1 = edgeB.getVertex(1);
 
     // Calculate the direction vectors of the edges
     Vector3D dirA = a1 - a0;
@@ -143,8 +143,11 @@ unsigned int pe::edgeToEdge(
 }
 
 
-int pe::returnContacts(const Polyhedron& p1, const Polyhedron& p2,
-    std::vector<Contact>& contactsToBeResolved) {
+int pe::returnContacts(
+    const Polyhedron& p1, 
+    const Polyhedron& p2,
+    std::vector<Contact>& contactsToBeResolved
+) {
 
     std::vector<Contact> contacts;
     for (const Vector3D& vertex : p1.globalVertices) {
@@ -153,9 +156,9 @@ int pe::returnContacts(const Polyhedron& p1, const Polyhedron& p2,
     for (const Vector3D& vertex : p2.globalVertices) {
         pointAndConvexPolyhedron(p1, vertex, p2, contacts);
     }
-    for (const Edge& edge1 : p1.edges) {
-        for (const Edge& edge2 : p2.edges) {
-            edgeToEdge(edge1, edge2, p1, p2, contacts);
+    for (Edge* edge1 : p1.edges) {
+        for (Edge* edge2 : p2.edges) {
+            edgeToEdge(*edge1, *edge2, p1, p2, contacts);
         }
     }
 

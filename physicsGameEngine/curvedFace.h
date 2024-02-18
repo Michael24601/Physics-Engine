@@ -22,32 +22,32 @@ namespace pe {
 		CurvedFace(
 			std::vector<Vector3D>* localVertices,
 			std::vector<Vector3D>* globalVertices,
-			std::vector<int> indeces
-		) : Face(localVertices, globalVertices, indeces) {}
+			std::vector<int>& indeces,
+			std::vector<Vector3D>& localVertexNormals
+		) : Face(localVertices, globalVertices, indeces),
+			localVertexNormals{localVertexNormals} {
 
-
-		/*
-			Function that sets the local normal vector at each vertex.
-		*/
-		void setLocalVertexNormals(
-			const std::vector<Vector3D>& localVertexNormals
-		) {
-			this->localVertexNormals = localVertexNormals;
+			// Initially, the global vertex normals are the same as the local ones
+			vertexNormals = localVertexNormals;
 		}
 
 
 		/*
 			Overrides the update function to update the vertex normals.
 		*/
-		void update(const Matrix3x4& transformMatrix) override {
-			normal = transformMatrix.transform(localNormal);
+		virtual void update(
+			const Matrix3x4& transformMatrix,
+			const Vector3D& bodyPosition
+		) override {
+			Vector3D transformedNormal = transformMatrix.transform(localNormal);
+			normal = transformedNormal - bodyPosition;
 			normal.normalize();
 			centroid = transformMatrix.transform(localCentroid);
 
 			for (int i = 0; i < getVertexNumber(); i++) {
-				vertexNormals[0] = transformMatrix.transform(
-					localVertexNormals[0]
-				);
+				Vector3D transformedNormal = transformMatrix.transform(localVertexNormals[i]);
+				vertexNormals[i] = transformedNormal - bodyPosition;
+				vertexNormals[i].normalize();
 			}
 		}
 

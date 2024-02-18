@@ -179,3 +179,8 @@ only the best one.
 One possible improvement for performance is doing a conversion to GLM
 for the unique vertices without having to repeat it for each copy in
 faces and triangles.
+
+Fix up the default order thing with clockwise and counter clockwise.
+
+Fix the smooth face data function with triangulation and normals
+calculations. 

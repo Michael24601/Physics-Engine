@@ -149,7 +149,7 @@ namespace pe {
 		Face(
 			std::vector<Vector3D>* localVertices,
 			std::vector<Vector3D>* globalVertices,
-			std::vector<int> indeces
+			std::vector<int>& indeces
 		) : localVertices{ localVertices },
 			globalVertices{ globalVertices },
 			indeces{ indeces } {
@@ -172,7 +172,7 @@ namespace pe {
 
 
 		Vector3D getCentroid() const {
-			return normal;
+			return centroid;
 		}
 
 
@@ -194,8 +194,21 @@ namespace pe {
 		}
 
 
-		virtual void update(const Matrix3x4& transformMatrix) {
-			normal = transformMatrix.transform(localNormal);
+		virtual void update(
+			const Matrix3x4& transformMatrix, 
+			const Vector3D& bodyPosition
+		) {
+
+			/*
+				To transform a normal using a trasnform matrix, it's not
+				enough to just multiply it by the matrix; that just gives
+				us the point in space the normal will point to. To get the
+				normal direction, we need the vector pointing from
+				the body's center (origin in local coordinates) to the
+				afore mentioned point.
+			*/
+			Vector3D transformedNormal = transformMatrix.transform(localNormal);
+			normal = transformedNormal - bodyPosition;
 			normal.normalize();
 			centroid = transformMatrix.transform(localCentroid);
 		}

@@ -40,7 +40,6 @@
 #include "diffuseLightingShader.h"
 #include "diffuseSpecularLightingShader.h"
 #include "cookTorranceShader.h"
-#include "tesselationUtil.h"
 #include "shaderInterface.h"
 #include "anisotropicShader.h"
 #include "cord.h"
@@ -62,7 +61,7 @@
 using namespace pe;
 using namespace std;
 
-
+#define SIM
 
 #ifdef SIM
 
@@ -147,7 +146,7 @@ int main() {
     window.setView(view);
 
     sf::Clock clock;
-    real deltaT = 0.05;
+    real deltaT = 0.03;
 
     real side = 100;
     RectangularPrism c1(new RigidBody(), side, side, side,
@@ -318,29 +317,11 @@ int main() {
             std::vector<Contact> contacts;
             // Here we check for collision
 
-            /*
-                constexpr int LIMIT = 100;
-                PotentialContact contactArray[LIMIT];
-                int num = hierarchy.getRoot()->getPotentialContacts(contactArray, LIMIT);
-                for (int i = 0; i < num; i++) {
-                   if (testIntersection(
-                       *contactArray->polyhedron[0],
-                       *contactArray->polyhedron[1]
-                    )) {
-                        returnContacts(
-                            *contactArray->polyhedron[0], 
-                            *contactArray->polyhedron[1], 
-                            contacts
-                        );
-                    }
-                }
-            */
-
             if (testIntersection(c1, c3)) {
                 returnContacts(c1, c3, contacts);
             }
 
-            edgeData contactEdges;
+            EdgeData contactEdges;
             for (Contact& contact : contacts) {
                 // Stores drawing data
                 contactEdges.vertices.push_back(convertToGLM(contact.contactPoint));
@@ -424,7 +405,7 @@ int main() {
         glm::vec4 colorGreen(0.3, 0.9, 0.3, 1.0);
         glm::vec4 colorPurple = glm::vec4(0.4, 0.1, 0.8, 1.0);
 
-        edgeData cordData = getMeshEdgeData(cord1);
+        EdgeData cordData = getMeshEdgeData(cord1);
         shader.drawEdges(cordData.vertices, identity, viewMatrix, projectionMatrix,
             colorWhite);
         cordData = getMeshEdgeData(cord2);
@@ -448,22 +429,25 @@ int main() {
         };
 
         // Data
-        faceData data = getPolyhedronFaceData(c1);
+        FaceData data = getPolyhedronFaceData(c1);
         phongShader.drawFaces(data.vertices, data.normals, identity,
             viewMatrix, projectionMatrix, colorPurple, 1, lightPos,
             lightColors, cameraPosition, 40
         );
+
         // Second shape
-        data = getCylinderFaceData(c2);
+        data = getPolyhedronFaceData(c2);
         cookShader.drawFaces(data.vertices, data.normals, identity,
             viewMatrix, projectionMatrix, colorBlue, 1, lightPos,
             lightColors, cameraPosition, 0.05, 1
         );
-        data = getSphereFaceData(c3);
+
+        data = getPolyhedronFaceData(c3);
         cookShader.drawFaces(data.vertices, data.normals, identity,
             viewMatrix, projectionMatrix, colorRed, 1, lightPos,
             lightColors, cameraPosition, 0.05, 1
         );
+
         data = getPolyhedronFaceData(c4);
         phongShader.drawFaces(data.vertices, data.normals, identity,
             viewMatrix, projectionMatrix, colorGreen, 1, lightPos,
@@ -481,6 +465,9 @@ int main() {
 #ifndef SIM
 
 int main() {
+
+
+    Order defaultEngineOrder = Order::COUNTER_CLOCKWISE;
 
     // Needed for 3D rendering
     sf::ContextSettings settings;

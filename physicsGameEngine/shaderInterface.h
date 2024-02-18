@@ -1,31 +1,15 @@
-/*
-	This file provides functions that essentially prepare data gotten from
-	the polyhedron class for the graphic module.
-	This file uses the global positions to provide opengl with the vertex
-	data, since the global positions have to be calculated anyway in the
-	Polyhedron class for other physics related modules.
-	The shaders still usually expect the model (transform to world
-	coordinates), view (camera), and projection (perspective) matrices.
-	In our case, if the data came from this file, the first of the three
-	matrices should be the identity matrix, as the vertices are already
-	in world coordinates.
-*/
-
 
 #ifndef SHADER_INTERFACE_H
 #define SHADER_INTERFACE_H
 
 #include "polyhedron.h"
-#include "solidSphere.h"
-#include "cylinder.h"
-#include "cone.h"
 #include "cloth.h"
 #include <vector>
 
 namespace pe {
 
 	// Data needed in order to draw a face
-	struct faceData {
+	struct FaceData {
 		/*
 			The vertices of the faces, arranged by first extracting the
 			faces from the polyhedron, then triangulating the faces, then
@@ -44,17 +28,11 @@ namespace pe {
 			to be calculated differently and individually.
 		*/
 		std::vector<glm::vec3> normals;
-
-		/*
-			Then tangents and bitangents.
-		*/
-		std::vector<glm::vec3> tangents;
-		std::vector<glm::vec3> bitangents;
 	};
 
 
 	// Data needed to draw an edge
-	struct edgeData {
+	struct EdgeData {
 		/*
 			The vertices of the faces, arranged in such a way that every
 			two consecutive vector objects represent one edge in a
@@ -76,103 +54,81 @@ namespace pe {
 	glm::vec3 convertToGLM(const Vector3D& v);
 
 
-	std::vector<std::vector<Vector3D>> triangulateFace(
-		const std::vector<Vector3D>& vertices
-	);
-
-
-	/*
-		Calculates the tangents and bitangents of a triangulated face.
-		Assumes that we have a flat surface, so does not require uv, or
-		texture coordinates.
-	*/
-	void calculateTangentBitangent(
-		const std::vector<Vector3D>& triangle,
-		glm::vec3& tangent,
-		glm::vec3& bitangent
-	);
-
-
-	edgeData getPolyhedronEdgeData(const Polyhedron& polyhedron);
+	EdgeData getPolyhedronEdgeData(const Polyhedron& polyhedron);
 
 
 	/*
 		Returns each face's normal vector for drawing, from the face
 		centroid, with the specified length in the normal's direction.
 	*/
-	edgeData getPolyhedronNormalsData(
+	EdgeData getPolyhedronFaceNormalsData(
 		const Polyhedron& polyhedron,
 		real length
 	);
 
 
 	/*
-		Polyhedron with no curved surfaces.
+		Returns each vertex's normal. If the faces are straight, that
+		normal matches the faces', but if the faces are curved, the
+		normals differ from vertex to vertex on the same face.
 	*/
-	faceData getPolyhedronFaceData(const Polyhedron& polyhedron);
+	EdgeData getPolyhedronVertexNormalsData(
+		const Polyhedron& polyhedron,
+		real length
+	);
 
 
 	/*
-		Returns the face data for a sphere.
-		The difference is tha the normals of each vertex are calculated
-		individually, instead of relying on the normal of the faces.
+		Uses the individual vertex normals.
 	*/
-	faceData getSphereFaceData(const SolidSphere& sphere);
+	FaceData getPolyhedronFaceData(const Polyhedron& polyhedron);
 
 
 	/*
-		Returns the face data for a cylinder.
-		The vertices of the top and bottom circular faces have the afore-
-		mentioned faces' normals, just like a polyhedron.
-		On the other hand, the vertices of the tesselated strips making
-		up the curved surface will have a normal similar to that of the
-		normals of the vertices of a sphere. We can calculate it as the
-		vector from the centroid of the circular face to the vertex on
-		said circular face.
+		Uses the uniform face normals.
+		This won't differ for flat faced polyhedrons, but will return
+		a tessalated looking curved surface for curved polyhedra.
 	*/
-	faceData getCylinderFaceData(const Cylinder& cylinder);
+	FaceData getUniformPolyhedronFaceData(const Polyhedron& polyhedron);
 
 
-	faceData getConeFaceData(const Cone& cone);
+	/*
+		Returns individual vertex index in particle mesh.
+	*/
+	glm::vec3 calculateMeshVertexNormal(
+		const std::vector<Particle>& particles,
+		int targetIndex,
+		int columnSize,
+		int rowSize
+	);
 
 
-    /*
-        Returns individual vertex index in particle mesh.
-    */
-    glm::vec3 calculateMeshVertexNormal(
-        const std::vector<Particle>& particles,
-        int targetIndex,
-        int columnSize,
-        int rowSize
-    );
-
-
-    /*
-        Returns the face data for a mesh. Note that the normals used
-        for each vertex is the face normal, so it will look triangulated.
-        We can specify if we want the faces in clockwise or counter-clockwise
-        order.
-    */
-    faceData getMeshFaceData(
-        const ParticleMesh& mesh,
-        int columnSize,
-        int rowSize,
-        Order order
-    );
+	/*
+		Returns the face data for a mesh. Note that the normals used
+		for each vertex is the face normal, so it will look triangulated.
+		We can specify if we want the faces in clockwise or counter-clockwise
+		order.
+	*/
+	FaceData getMeshFaceData(
+		const ParticleMesh& mesh,
+		int columnSize,
+		int rowSize,
+		Order order
+	);
 
 
 	/*
 		Returns mesh edge data.
 	*/
-	edgeData getMeshEdgeData(const ParticleMesh& mesh);
+	EdgeData getMeshEdgeData(const ParticleMesh& mesh);
 
 
-    /*
-        Also returns the face data, but the vertices calculate their normals
-        individually, so it looks smooth. This function is specific to
+	/*
+		Also returns the face data, but the vertices calculate their normals
+		individually, so it looks smooth. This function is specific to
 		cloth.
-    */
-	faceData getSmoothMeshFaceData(
+	*/
+	FaceData getSmoothMeshFaceData(
 		const Cloth& mesh,
 		int columnSize,
 		int rowSize,
@@ -180,4 +136,4 @@ namespace pe {
 	);
 }
 
-#endif
+#endif SHADER_INTERFACE_H

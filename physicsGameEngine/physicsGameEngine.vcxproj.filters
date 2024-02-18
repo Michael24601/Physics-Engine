@@ -46,9 +46,6 @@
     <Filter Include="Header Files\Primitive">
       <UniqueIdentifier>{e5aad90b-164c-4750-bd25-a7f3e7990117}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Primitive">
-      <UniqueIdentifier>{7dd8a706-bc57-4ab6-a35b-dedc63bec38e}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\ParticleMesh">
       <UniqueIdentifier>{1aa70bbb-545d-4597-8b7f-bec87747f6db}</UniqueIdentifier>
     </Filter>
@@ -57,12 +54,6 @@
     </Filter>
     <Filter Include="Source Files\Interfaces">
       <UniqueIdentifier>{52cde102-5ed5-42d9-b616-32e02268d7fd}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Polyhedron">
-      <UniqueIdentifier>{2a74ca16-abb4-4250-9e03-ea60768e66eb}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\polyhedron">
-      <UniqueIdentifier>{00fe52b2-e2e4-4505-a60a-724c3d563596}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -147,9 +138,6 @@
     <ClCompile Include="diffuseSpecularLightingShader.cpp">
       <Filter>Source Files\OpenglGraphics</Filter>
     </ClCompile>
-    <ClCompile Include="tesselationUtil.cpp">
-      <Filter>Source Files\Primitive</Filter>
-    </ClCompile>
     <ClCompile Include="shaderInterface.cpp">
       <Filter>Source Files\Interfaces</Filter>
     </ClCompile>
@@ -167,12 +155,6 @@
     </ClCompile>
     <ClCompile Include="anisotropicShader.cpp">
       <Filter>Source Files\OpenglGraphics</Filter>
-    </ClCompile>
-    <ClCompile Include="polyhedron_3.cpp">
-      <Filter>Source Files\polyhedron</Filter>
-    </ClCompile>
-    <ClCompile Include="shaderInterface_2.cpp">
-      <Filter>Source Files\polyhedron</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -281,24 +263,6 @@
     <ClInclude Include="diffuseSpecularLightingShader.h">
       <Filter>Header Files\OpenglGraphics</Filter>
     </ClInclude>
-    <ClInclude Include="plane.h">
-      <Filter>Header Files\Primitive</Filter>
-    </ClInclude>
-    <ClInclude Include="solidSphere.h">
-      <Filter>Header Files\Primitive</Filter>
-    </ClInclude>
-    <ClInclude Include="tesselationUtil.h">
-      <Filter>Header Files\Primitive</Filter>
-    </ClInclude>
-    <ClInclude Include="rectangularPrism.h">
-      <Filter>Header Files\Primitive</Filter>
-    </ClInclude>
-    <ClInclude Include="pyramid.h">
-      <Filter>Header Files\Primitive</Filter>
-    </ClInclude>
-    <ClInclude Include="cylinder.h">
-      <Filter>Header Files\Primitive</Filter>
-    </ClInclude>
     <ClInclude Include="particleMesh.h">
       <Filter>Header Files\ParticleMesh</Filter>
     </ClInclude>
@@ -323,9 +287,6 @@
     <ClInclude Include="collisionResolver.h">
       <Filter>Header Files\Collision</Filter>
     </ClInclude>
-    <ClInclude Include="cone.h">
-      <Filter>Header Files\Primitive</Filter>
-    </ClInclude>
     <ClInclude Include="vector2D.h">
       <Filter>Header Files\Core</Filter>
     </ClInclude>
@@ -341,9 +302,6 @@
     <ClInclude Include="anisotropicShader.h">
       <Filter>Header Files\OpenglGraphics</Filter>
     </ClInclude>
-    <ClInclude Include="polyhedron.h">
-      <Filter>Header Files\Primitive</Filter>
-    </ClInclude>
     <ClInclude Include="rectangularCloth.h">
       <Filter>Header Files\ParticleMesh</Filter>
     </ClInclude>
@@ -353,38 +311,32 @@
     <ClInclude Include="cylindricalCloth.h">
       <Filter>Header Files\ParticleMesh</Filter>
     </ClInclude>
-    <ClInclude Include="face.h">
-      <Filter>Header Files\Polyhedron</Filter>
-    </ClInclude>
-    <ClInclude Include="edge.h">
-      <Filter>Header Files\Polyhedron</Filter>
-    </ClInclude>
-    <ClInclude Include="polyhedron_2.h">
-      <Filter>Header Files\Polyhedron</Filter>
+    <ClInclude Include="cone.h">
+      <Filter>Header Files\Primitive</Filter>
     </ClInclude>
     <ClInclude Include="curvedFace.h">
-      <Filter>Header Files\Polyhedron</Filter>
+      <Filter>Header Files\Primitive</Filter>
     </ClInclude>
-    <ClInclude Include="polyhedron_3.h">
-      <Filter>Header Files\Polyhedron</Filter>
+    <ClInclude Include="cylinder.h">
+      <Filter>Header Files\Primitive</Filter>
     </ClInclude>
-    <ClInclude Include="cone_2.h">
-      <Filter>Header Files\Polyhedron</Filter>
+    <ClInclude Include="edge.h">
+      <Filter>Header Files\Primitive</Filter>
     </ClInclude>
-    <ClInclude Include="rectangularPrism_2.h">
-      <Filter>Header Files\Polyhedron</Filter>
+    <ClInclude Include="face.h">
+      <Filter>Header Files\Primitive</Filter>
     </ClInclude>
-    <ClInclude Include="shaderInterface_2.h">
-      <Filter>Header Files\Polyhedron</Filter>
+    <ClInclude Include="polyhedron.h">
+      <Filter>Header Files\Primitive</Filter>
     </ClInclude>
-    <ClInclude Include="pyramid_2.h">
-      <Filter>Header Files\Polyhedron</Filter>
+    <ClInclude Include="pyramid.h">
+      <Filter>Header Files\Primitive</Filter>
     </ClInclude>
-    <ClInclude Include="solidSphere_2.h">
-      <Filter>Header Files\Polyhedron</Filter>
+    <ClInclude Include="rectangularPrism.h">
+      <Filter>Header Files\Primitive</Filter>
     </ClInclude>
-    <ClInclude Include="cylinder_2.h">
-      <Filter>Header Files\Polyhedron</Filter>
+    <ClInclude Include="solidSphere.h">
+      <Filter>Header Files\Primitive</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -27,15 +27,25 @@ namespace pe {
 			particles(particles) {}
 
 
+		int getParticleNumber() const {
+			return particles.size();
+		}
+
+
+		Particle getParticle(int index) const {
+			return *(particles[index]);
+		}
+
+
 		// Returns the positions in clockwise or counter-clockwise order
-		std::vector<Vector3D> getVertices(order order) const {
+		std::vector<Vector3D> getVertices(Order order) const {
 			std::vector<Vector3D> positions;
-			if (order == order::COUNTER_CLOCKWISE) {
+			if (order == Order::COUNTER_CLOCKWISE) {
 				for (const Particle* particle : particles) {
 					positions.push_back(particle->position);
 				}
 			}
-			else if (order == order::CLOCKWISE) {
+			else if (order == Order::CLOCKWISE) {
 				for (auto it = particles.rbegin(); it != particles.rend(); 
 					++it) {
 					positions.push_back((*it)->position);
@@ -46,7 +56,7 @@ namespace pe {
 
 
 		// This function assumes we have at least 3 vertices
-		Vector3D getNormal(order order) const {
+		Vector3D getNormal(Order order) const {
 			Vector3D firstVertex = particles[0]->position;
 			Vector3D secondVertex = particles[1]->position;
 			Vector3D thirdVertex = particles[2]->position;
@@ -56,7 +66,7 @@ namespace pe {
 			Vector3D normal = AB.vectorProduct(AC);
 			normal.normalize();
 			// If clockwise, we reverse it
-			if (order == order::CLOCKWISE) {
+			if (order == Order::CLOCKWISE) {
 				normal *= -1;
 			}
 			return normal;

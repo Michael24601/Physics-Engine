@@ -24,8 +24,6 @@ namespace pe {
 		CLOCKWISE,
 		COUNTER_CLOCKWISE
 	};
-
-	Order defaultEngineOrder = Order::COUNTER_CLOCKWISE;
 }
 
 #endif

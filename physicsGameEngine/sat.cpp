@@ -55,8 +55,8 @@ bool pe::testIntersection(const Polyhedron& C0, const Polyhedron& C1) {
 	}
 
 	for (int i = 0; i < C0.faces.size(); i++) {
-		pe::Vector3D P = C0.faces[i].vertices[0];
-		pe::Vector3D N = C0.faces[i].normal; // outward pointing
+		pe::Vector3D P = C0.faces[i]->getVertex(0);
+		pe::Vector3D N = C0.faces[i]->getNormal(); // outward pointing
 		if (whichSide(C1, P, N) > 0) {
 			// C1 is entirely on the positive side of the line P + t * N.
 			return false;
@@ -68,8 +68,8 @@ bool pe::testIntersection(const Polyhedron& C0, const Polyhedron& C1) {
 		Determine whether C0 is on the  positive side of the line.
 	*/
 	for (int i = 0; i < C1.faces.size(); ++i) {
-		pe::Vector3D P = C1.faces[i].vertices[0];
-		pe::Vector3D N = C1.faces[i].normal; // outward pointing
+		pe::Vector3D P = C1.faces[i]->getVertex(0);
+		pe::Vector3D N = C1.faces[i]->getNormal(); // outward pointing
 		if (whichSide(C0, P, N) > 0) {
 			// C1 is entirely on the positive side of the line P + t * N.
 			return false;
@@ -81,12 +81,12 @@ bool pe::testIntersection(const Polyhedron& C0, const Polyhedron& C1) {
 		direction from each polyhedron.
 	*/
 	for (int i0 = 0; i0 < C0.globalVertices.size(); ++i0) {
-		pe::Vector3D D0 = C0.edges[i0].vertices.second -
-			C0.edges[i0].vertices.first;
-		pe::Vector3D P = C0.edges[i0].vertices.first;
+		pe::Vector3D D0 = C0.edges[i0]->getVertex(1) -
+			C0.edges[i0]->getVertex(0);
+		pe::Vector3D P = C0.edges[i0]->getVertex(0);
 		for (int i1 = 0; i1 < C1.globalVertices.size(); ++i1) {
-			pe::Vector3D D1 = C1.edges[i1].vertices.second -
-				C1.edges[i1].vertices.first;
+			pe::Vector3D D1 = C1.edges[i1]->getVertex(1) -
+				C1.edges[i1]->getVertex(0);
 			pe::Vector3D N = D0.vectorProduct(D1);
 			if (N != pe::Vector3D(0, 0, 0)) {
 				int side0 = whichSide(C0, P, N);

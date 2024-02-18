@@ -1,4 +1,5 @@
 
+
 #ifndef PYRAMID_H
 #define PYRAMID_H
 
@@ -37,61 +38,48 @@ namespace pe {
 					Vector3D(-side / 2, -height / 4.0, side / 2),
 				}
 			),
-			side{ side }, height{ height } {}
+			side{ side }, height{ height } {
+			
+			setEdges();
+			setFaces();
+		}
 
 
-		virtual std::vector<Edge> calculateEdges(
-			const std::vector<Vector3D>& vertices
-		) const override {
-
-			std::vector<Edge> edges;
+		virtual void setEdges() override {
 			edges.resize(8);
 
 			// Define the edges of the pyramid
-			edges[0] = Edge(vertices[1], vertices[2]);
-			edges[1] = Edge(vertices[2], vertices[3]);
-			edges[2] = Edge(vertices[3], vertices[4]);
-			edges[3] = Edge(vertices[4], vertices[1]);
-			edges[4] = Edge(vertices[0], vertices[1]);
-			edges[5] = Edge(vertices[0], vertices[2]);
-			edges[6] = Edge(vertices[0], vertices[3]);
-			edges[7] = Edge(vertices[0], vertices[4]);
-
-			return edges;
+			edges[0] = new Edge(&localVertices, &globalVertices, 1, 2);
+			edges[1] = new Edge(&localVertices, &globalVertices, 2, 3);
+			edges[2] = new Edge(&localVertices, &globalVertices, 3, 4);
+			edges[3] = new Edge(&localVertices, &globalVertices, 4, 1);
+			edges[4] = new Edge(&localVertices, &globalVertices, 0, 1);
+			edges[5] = new Edge(&localVertices, &globalVertices, 0, 2);
+			edges[6] = new Edge(&localVertices, &globalVertices, 0, 3);
+			edges[7] = new Edge(&localVertices, &globalVertices, 0, 4);
 		}
 
 		// All vertices are in clockwise order
-		virtual std::vector<Face> calculateFaces(
-			const std::vector<Vector3D>& vertices
-		) const override {
-
-			std::vector<Face> faces;
+		virtual void setFaces() override {
 			faces.resize(5);
 
-			// Base face
-			faces[0] = Face(std::vector<Vector3D>{ 
-				vertices[1], vertices[2], vertices[3], vertices[4] 
-			});
+			std::vector<std::vector<int>> indexes{
+				std::vector<int>{ 1, 2, 3, 4 },
+				std::vector<int>{0, 1, 4},
+				std::vector<int>{0, 4, 3},
+				std::vector<int>{0, 3, 2},
+				std::vector<int>{0, 2, 1}
+			};
 
-			// Side faces
-			faces[1] = Face(std::vector<Vector3D>{ 
-				vertices[0], vertices[1], vertices[4] 
-			});
-			faces[2] = Face(std::vector<Vector3D>{ 
-				vertices[0], vertices[4], vertices[3] 
-			});
-			faces[3] = Face(std::vector<Vector3D>{ 
-				vertices[0], vertices[3], vertices[2] 
-			});
-			faces[4] = Face(std::vector<Vector3D>{ 
-				vertices[0], vertices[2], vertices[1] 
-			});
-
-			return faces;
+			for (int i = 0; i < indexes.size(); i++) {
+				faces[i] = new Face(
+					&localVertices, 
+					&globalVertices, 
+					indexes[i]
+				);
+			}
 		}
 
-
-		virtual void setTextureMap() override {}
 	};
 }
 
