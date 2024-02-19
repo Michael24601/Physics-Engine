@@ -1,5 +1,5 @@
 /*
-
+	Header file for a face class. Faces form a polyhedron.
 */
 
 #ifndef FACE_H
@@ -11,6 +11,13 @@
 #include <vector>
 
 namespace pe {
+
+
+	// Vertices, normals, etc... can be local or normal
+	enum class Basis {
+		LOCAL,
+		GLOBAL
+	};
 
 
 	/*
@@ -80,6 +87,11 @@ namespace pe {
 			second method is that the localNormal and localCentroid now
 			have to be stored as well, which takes up a bit more space.
 			The second method is still better however, so we go with it.
+			That being said, we still keep the first method as an
+			option (we can calculate values like tangents and normals 
+			locally or globally, because if say, this class was used 
+			instead by a deformable object like cloth, then we wouldn't
+			have a transform matrix anymore to use.
 	*/
 	class Face {
 
@@ -101,44 +113,189 @@ namespace pe {
 		Vector3D centroid;
 		Vector3D localCentroid;
 
+		Vector3D tangent;
+		Vector3D localTangent;
+		Vector3D bitangent;
+		Vector3D localBitangent;
+
+		/*
+			uv-coordinates: used to map a texture to the face. Each
+			Vector2D object represents the coordinate ofa face vertex
+			onto the texture, which is often an image with coordinates
+			(0, 0) at the bottom left and (1, 1) at the top right.
+		*/
 		std::vector<Vector2D> textureCoordinates;
 
 
-		Vector3D calculateLocalNormal() {
+		/*
+			Because tesselation may cause some vertices to be degenerate,
+			we need a function that returns distinct vertices.
+			This function returns the first distinct vertex indices to
+			either side of the given index's vertex.
+			We assume any face has at least 3-non degenerate indices.
+		*/
+		void findDistinctVertices(
+			int givenIndex, 
+			int& firstIndex, 
+			int& secondIndex
+		) const {
 
-			Vector3D firstVertex = (*localVertices)[indeces[0]];
-			Vector3D secondVertex;
-			Vector3D thirdVertex;
-			bool flag = false;
-			for (int i = 1; i < getVertexNumber(); i++) {
-				if (!flag && (*localVertices)[indeces[i]] != firstVertex) {
-					secondVertex = (*localVertices)[indeces[i]];
-					flag = true;
-				}
-				else if ((*localVertices)[indeces[i]] != firstVertex
-					&& (*localVertices)[indeces[i]] != secondVertex) {
-					thirdVertex = (*localVertices)[indeces[i]];
+			// Counter-clockwise side
+			for (
+				int i = (givenIndex + 1) % getVertexNumber();
+				i != givenIndex; 
+				i = (i + 1) % getVertexNumber()
+			) {
+				if (
+					getVertex(i, Basis::LOCAL) != 
+					getVertex(givenIndex, Basis::LOCAL)
+				) {
+					firstIndex = i;
 					break;
 				}
 			}
 
-			Vector3D AB = secondVertex - firstVertex;
-			Vector3D AC = thirdVertex - firstVertex;;
+			// Clockwise side
+			for (
+				int i = (givenIndex == 0 ? getVertexNumber() - 1 : givenIndex - 1);
+				i != givenIndex;
+				// Loops around
+				i = (i == 0 ? getVertexNumber() - 1 : (i - 1) % getVertexNumber())
+			) {
+				if (
+					getVertex(i, Basis::LOCAL) != 
+					getVertex(givenIndex, Basis::LOCAL)
+				) {
+					secondIndex = i;
+					break;
+				}
+			}
+		}
+
+
+		Vector3D calculateNormal(Basis basis) const {
+
+			/*
+				We need to find distinct vertices to either side of any
+				vertex (first one, 0 in our case), since the normal
+				is uniform across all the face (assuming it's flat).
+			*/
+			int firstIndex = 0, secondIndex, thirdIndex;
+			findDistinctVertices(
+				firstIndex, secondIndex, thirdIndex
+			);
+
+			Vector3D AB = getVertex(secondIndex, basis) - 
+				getVertex(firstIndex, basis);
+			Vector3D AC = getVertex(thirdIndex, basis) -
+				getVertex(firstIndex, basis);
+
 			Vector3D normal = AB.vectorProduct(AC);
 			normal.normalize();
 			return normal;
 		}
 
-		Vector3D calculateLocalCentroid() {
+		Vector3D calculateCentroid(Basis basis) const {
+
 			Vector3D sum;
 			for (int i = 0; i < getVertexNumber(); i++) {
-				sum += (*localVertices)[indeces[i]];
+				sum += getVertex(i, basis);
 			}
 			Vector3D centroid = sum * (
 				1.0f / static_cast<real>(getVertexNumber())
 				);
 			return centroid;
 		}
+
+
+		Vector3D calculateTangent(Basis basis) const {
+
+			/*
+				We need to find distinct vertices to either side of any
+				vertex (first one, 0 in our case), since the tangent
+				is uniform across all the face (assuming it's flat).
+			*/
+			int firstIndex = 0, secondIndex, thirdIndex;
+			findDistinctVertices(
+				firstIndex, secondIndex, thirdIndex
+			);
+
+			// Get two edges of the triangle
+			Vector3D edge1 = getVertex(secondIndex, basis) - 
+				getVertex(firstIndex, basis);
+			Vector3D edge2 = getVertex(thirdIndex, basis) -
+				getVertex(firstIndex, basis);
+
+			// Get the corresponding texture coordinate differences
+			Vector2D deltaUV1 = textureCoordinates[secondIndex] - 
+				textureCoordinates[firstIndex];
+			Vector2D deltaUV2 = textureCoordinates[thirdIndex] - 
+				textureCoordinates[firstIndex];
+
+			// Solve linear equation system to find tangent
+			float f = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
+			Vector3D tangent(
+				f * (deltaUV2.y * edge1.x - deltaUV1.y * edge2.x),
+				f * (deltaUV2.y * edge1.y - deltaUV1.y * edge2.y),
+				f * (deltaUV2.y * edge1.z - deltaUV1.y * edge2.z)
+			);
+			
+			/* 
+				Orthogonalize the tangent with respect to the face normal
+				(since this is flat face and all vertices have a uniform
+				normal.
+			*/
+			tangent = ( tangent - (
+				getNormal(basis) * (getNormal(basis).scalarProduct(tangent))
+			)).normalized();
+
+			return tangent;
+		}
+
+		Vector3D calculateBitangent(Basis basis) const {
+
+			/*
+				We need to find distinct vertices to either side of any
+				vertex (first one, 0 in our case), since the bitangent
+				is uniform across all the face (assuming it's flat).
+			*/
+			int firstIndex = 0, secondIndex, thirdIndex;
+			findDistinctVertices(
+				firstIndex, secondIndex, thirdIndex
+			);
+
+			// Get two edges of the triangle
+			Vector3D edge1 = getVertex(secondIndex, basis) -
+				getVertex(firstIndex, basis);
+			Vector3D edge2 = getVertex(thirdIndex, basis) -
+				getVertex(firstIndex, basis);
+
+			// Get the corresponding texture coordinate differences
+			Vector2D deltaUV1 = textureCoordinates[secondIndex] -
+				textureCoordinates[firstIndex];
+			Vector2D deltaUV2 = textureCoordinates[thirdIndex] -
+				textureCoordinates[firstIndex];
+
+			// Solve linear equation system to find bitangent
+			float f = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
+			Vector3D bitangent(
+				f * (-deltaUV2.x * edge1.x + deltaUV1.x * edge2.x),
+				f * (-deltaUV2.x * edge1.y + deltaUV1.x * edge2.y),
+				f * (-deltaUV2.x * edge1.z + deltaUV1.x * edge2.z)
+			);
+			
+			/*
+				Orthogonalize the bitangent with respect to the face normal
+				(since this is flat face and all vertices have a uniform
+				normal.
+			*/
+			bitangent = (bitangent - (
+				getNormal(basis) * (getNormal(basis).scalarProduct(bitangent))
+			)).normalized();
+
+			return bitangent;
+		}
+
 
 	public:
 
@@ -154,30 +311,129 @@ namespace pe {
 			globalVertices{ globalVertices },
 			indeces{ indeces } {
 
-			localNormal = calculateLocalNormal();
-			localCentroid = calculateLocalCentroid();
+			localNormal = calculateNormal(Basis::LOCAL);
+			localCentroid = calculateCentroid(Basis::LOCAL);
 
 			/*
-				Initially, the normaland centroid are the same as the local
+				Initially, the normal and centroid are the same as the local
 				ones.
 			*/
 			normal = localNormal;
 			centroid = localCentroid;
+
+			/* 
+				By default the texture coordinates are uniform for the face.
+				They are set in counter-clockwise order.
+			*/
+			textureCoordinates = {
+				Vector2D(0, 0),
+				Vector2D(1, 0),
+				Vector2D(1, 1),
+				Vector2D(0, 1)
+			};
+
+			localTangent = calculateTangent(Basis::LOCAL);
+			localBitangent = calculateBitangent(Basis::LOCAL);
+
+			tangent = localTangent; // Initially
+			bitangent = localBitangent; // Inititally
 		}
 
 
-		Vector3D getNormal() const {
-			return normal;
+		/*
+			Returns the local or global vertex at a certain index.
+			The basis is global by default.
+		*/
+		Vector3D getVertex(int index, Basis basis = Basis::GLOBAL) const {
+			if (basis == Basis::LOCAL) {
+				return (*localVertices)[indeces[index]];
+			}
+			else if (basis == Basis::GLOBAL) {
+				return (*globalVertices)[indeces[index]];
+			}
 		}
 
 
-		Vector3D getCentroid() const {
-			return centroid;
+		Vector3D getNormal(Basis basis = Basis::GLOBAL) const {
+			if (basis == Basis::LOCAL) {
+				return localNormal;
+			}
+			else if (basis == Basis::GLOBAL) {
+				return normal;
+			}
 		}
 
 
-		Vector3D getVertex(int index) const {
-			return (*globalVertices)[indeces[index]];
+		Vector3D getCentroid(Basis basis = Basis::GLOBAL) const {
+			if (basis == Basis::LOCAL) {
+				return localCentroid;
+			}
+			else if (basis == Basis::GLOBAL) {
+				return centroid;
+			}
+		}
+
+
+		Vector3D getTangent(Basis basis = Basis::GLOBAL) const {
+			if (basis == Basis::LOCAL) {
+				return localTangent;
+			}
+			else if (basis == Basis::GLOBAL) {
+				return tangent;
+			}
+		}
+
+
+		Vector3D getBitangent(Basis basis = Basis::GLOBAL) const {
+			if (basis == Basis::LOCAL) {
+				return localBitangent;
+			}
+			else if (basis == Basis::GLOBAL) {
+				return bitangent;
+			}
+		}
+
+
+		/*
+			Returns the normal of a vertex in the face. Since the
+			face is assumed to be flat, that turns out to be the same
+			as the face's normal. So the index won't change anything
+			in this face, but if the class were to be extended and
+			become curved, the normals wouldn't be uniform.
+		*/
+		virtual Vector3D getVertexNormal(
+			int index, Basis basis = Basis::GLOBAL
+		) const {
+			if (basis == Basis::LOCAL) {
+				return localNormal;
+			}
+			else if (basis == Basis::GLOBAL) {
+				return normal;
+			}
+		}
+
+
+		virtual Vector3D getVertexTangent(
+			int index, Basis basis = Basis::GLOBAL
+		) const {
+			if (basis == Basis::LOCAL) {
+				return localTangent;
+			}
+			else if (basis == Basis::GLOBAL) {
+				return tangent;
+			}
+		}
+
+
+		virtual Vector3D getVertexBitangent(
+			int index, Basis basis = Basis::GLOBAL
+		) const {
+			if (basis == Basis::LOCAL) {
+				return localTangent;
+			}
+			else if (basis == Basis::GLOBAL) {
+				return tangent;
+			}
 		}
 
 
@@ -191,12 +447,16 @@ namespace pe {
 			for (int i = 0; i < getVertexNumber(); i++) {
 				vertices[i] = (*globalVertices)[indeces[i]];
 			}
+			return vertices;
 		}
 
 
+		/*
+			Transforms values like the local normal and tangent using some
+			transform matrix.
+		*/
 		virtual void update(
-			const Matrix3x4& transformMatrix, 
-			const Vector3D& bodyPosition
+			const Matrix3x4& transformMatrix
 		) {
 
 			/*
@@ -204,24 +464,39 @@ namespace pe {
 				enough to just multiply it by the matrix; that just gives
 				us the point in space the normal will point to. To get the
 				normal direction, we need the vector pointing from
-				the body's center (origin in local coordinates) to the
-				afore mentioned point.
+				the transformed origin (center) to the afore mentioned point.
+
+				Same for the tangent and bitangent.
 			*/
+			Vector3D centre = transformMatrix.transform(Vector3D(0, 0, 0));
+
 			Vector3D transformedNormal = transformMatrix.transform(localNormal);
-			normal = transformedNormal - bodyPosition;
+			normal = transformedNormal - centre;
 			normal.normalize();
+
+			Vector3D transformedTangent = transformMatrix.transform(localTangent);
+			tangent = transformedTangent - centre;
+			tangent.normalize();
+
+			Vector3D transformedBitangent = transformMatrix.transform(localBitangent);
+			bitangent = transformedBitangent - centre;
+			bitangent.normalize();
+
 			centroid = transformMatrix.transform(localCentroid);
 		}
 
 
-		/*
-			Returns the normals of each vertex in the face. Since the
-			face is assumed to be flat, that turns out to be the same
-			for all vertices; the normal of the face.
-		*/
-		virtual std::vector<Vector3D> getVertexNormals() const {
-			return std::vector<Vector3D>(getVertexNumber(), normal);
+		void setTextureCoordinates(
+			std::vector<Vector2D>& textureCoordinates
+		) {
+			this->textureCoordinates = textureCoordinates;
 		}
+
+
+		Vector2D getTextureCoordinate(int index) const {
+			return textureCoordinates[index];
+		}
+
 	};
 }
 

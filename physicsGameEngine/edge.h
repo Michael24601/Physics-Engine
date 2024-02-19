@@ -18,7 +18,7 @@ namespace pe {
 
 		std::vector<Vector3D>* localVertices;
 		std::vector<Vector3D>* globalVertices;
-		std::pair<int, int> indeces;
+		std::pair<int, int> indices;
 
 	public:
 
@@ -31,15 +31,15 @@ namespace pe {
 			int index2
 		) : localVertices{ localVertices },
 			globalVertices{ globalVertices },
-			indeces{ std::make_pair(index1, index2) } {}
+			indices{ std::make_pair(index1, index2) } {}
 
 
 		Vector3D& getVertex(int index) const {
 			if (index == 0) {
-				return (*globalVertices)[indeces.first];
+				return (*globalVertices)[indices.first];
 			}
 			else if (index == 1) {
-				return (*globalVertices)[indeces.second];
+				return (*globalVertices)[indices.second];
 			}
 			else {
 				throw new std::invalid_argument(

@@ -61,6 +61,7 @@
 using namespace pe;
 using namespace std;
 
+#define SIM
 
 #ifdef SIM
 
@@ -402,6 +403,7 @@ int main() {
         glm::vec4 colorRed(0.8, 0.1, 0.1, 1.0);
         glm::vec4 colorBlue(0.5, 0.7, 1.0, 1.0);
         glm::vec4 colorGreen(0.3, 0.9, 0.3, 1.0);
+        glm::vec4 colorYellow(0.9, 0.9, 0.5, 1.0);
         glm::vec4 colorPurple = glm::vec4(0.4, 0.1, 0.8, 1.0);
 
         EdgeData cordData = getMeshEdgeData(cord1);
@@ -433,6 +435,17 @@ int main() {
             viewMatrix, projectionMatrix, colorPurple, 1, lightPos,
             lightColors, cameraPosition, 40
         );
+
+        EdgeData ddata = getPolyhedronEdgeData(c3);
+        shader.drawEdges(ddata.vertices, identity, viewMatrix,
+            projectionMatrix, colorWhite);
+        FrameVectors edata = getPolyhedronFrameVectors(c3, 20);
+        shader.drawEdges(edata.normals, identity, viewMatrix,
+            projectionMatrix,  colorWhite);
+        shader.drawEdges(edata.tangents, identity, viewMatrix,
+            projectionMatrix, colorPurple);
+        shader.drawEdges(edata.bitangents, identity, viewMatrix,
+            projectionMatrix, colorGreen);
 
         // Second shape
         data = getPolyhedronFaceData(c2);

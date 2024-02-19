@@ -28,6 +28,19 @@ namespace pe {
 			to be calculated differently and individually.
 		*/
 		std::vector<glm::vec3> normals;
+
+		/*
+			Likewise, these are the tangents and bitangents, which can also
+			be uniform on a face or unique to each vertex on the face.
+		*/
+		std::vector<glm::vec3> tangents;
+		std::vector<glm::vec3> bitangents;
+
+		/*
+			The uv-coordinates of each vertex in each face, used for
+			texture mapping.
+		*/
+		std::vector<glm::vec2> uvCoordinates;
 	};
 
 
@@ -42,6 +55,22 @@ namespace pe {
 	};
 
 
+	struct FrameVectors {
+		/*
+			The frame vectors are the normals, tangents, and bitangents,
+			which can either be uniform across a face (flat surface),
+			or vary from vertex to vertex (curved surface).
+
+			The follow vectors contain lines of a certain length representing
+			each value, all stemming from the centroid of each polyhedron's
+			face.
+		*/
+		std::vector<glm::vec3> normals;
+		std::vector<glm::vec3> tangents;
+		std::vector<glm::vec3> bitangents;
+	};
+
+
 	/*
 		Returns a homogeneous matrix in the glm format.
 	*/
@@ -53,26 +82,27 @@ namespace pe {
 	*/
 	glm::vec3 convertToGLM(const Vector3D& v);
 
+	glm::vec2 convertToGLM(const Vector2D& v);
+
 
 	EdgeData getPolyhedronEdgeData(const Polyhedron& polyhedron);
 
 
 	/*
-		Returns each face's normal vector for drawing, from the face
-		centroid, with the specified length in the normal's direction.
+		Returns the polyhedron's frame vectors: normals, tangents, and
+		bitangents, for each face.
 	*/
-	EdgeData getPolyhedronFaceNormalsData(
+	FrameVectors getPolyhedronUniformFrameVectors(
 		const Polyhedron& polyhedron,
 		real length
 	);
 
 
 	/*
-		Returns each vertex's normal. If the faces are straight, that
-		normal matches the faces', but if the faces are curved, the
-		normals differ from vertex to vertex on the same face.
+		Returns the polyhedron's frame vectors: normals, tangents, and
+		bitangents, for each vertex.
 	*/
-	EdgeData getPolyhedronVertexNormalsData(
+	FrameVectors getPolyhedronFrameVectors(
 		const Polyhedron& polyhedron,
 		real length
 	);

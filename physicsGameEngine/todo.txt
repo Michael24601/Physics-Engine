@@ -184,3 +184,14 @@ Fix up the default order thing with clockwise and counter clockwise.
 
 Fix the smooth face data function with triangulation and normals
 calculations. 
+
+Add distinct tangent and bitangent for a curved face. 
+
+Connect the particle mesh to the face class written so we don't
+have to rewrite most functionalities, and extend it (use something
+that isn't a face or curvedFace). We can do that by having a vector
+of positions that correspond to the particles to use.
+
+Include a new update function in the face class that updates the
+normals, centroid etc... by recalculating them using the
+global, not local vertices.

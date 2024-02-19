@@ -97,7 +97,7 @@ namespace pe {
 					v[3] = v[2] + 1;
 
 					// Forms face in counter-clockwise order
-					std::vector<int> faceIndexes{v[0], v[1], v[3], v[2]};
+					std::vector<int> faceIndexes{ v[0], v[1], v[3], v[2]};
 
 					/*
 						Note that all the sphere faces are curved.

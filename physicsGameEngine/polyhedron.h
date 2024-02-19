@@ -83,7 +83,7 @@ namespace pe {
 				centroids which need to be updated here.
 			*/
 			for (Face* face : faces) {
-				face->update(body->transformMatrix, body->position);
+				face->update(body->transformMatrix);
 			}
 		}
 
