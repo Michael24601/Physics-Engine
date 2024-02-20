@@ -192,22 +192,18 @@
   <ItemGroup>
     <ClInclude Include="accuracy.h" />
     <ClInclude Include="anisotropicShader.h" />
-    <ClInclude Include="bodyCordAdapter.h" />
     <ClInclude Include="BVHNode.h" />
     <ClInclude Include="boundingSphere.h" />
     <ClInclude Include="boundingVolumeHierarchy.h" />
-    <ClInclude Include="cloth.h" />
     <ClInclude Include="collisionResolver.h" />
     <ClInclude Include="cone.h" />
     <ClInclude Include="contact.h" />
     <ClInclude Include="contactGeneration.h" />
     <ClInclude Include="cookTorranceShader.h" />
-    <ClInclude Include="cord.h" />
     <ClInclude Include="curvedFace.h" />
     <ClInclude Include="cylinder.h" />
     <ClInclude Include="pyramid.h" />
     <ClInclude Include="rectangularPrism.h" />
-    <ClInclude Include="cylindricalCloth.h" />
     <ClInclude Include="edge.h" />
     <ClInclude Include="face.h" />
     <ClInclude Include="particleAngleConstraint.h" />

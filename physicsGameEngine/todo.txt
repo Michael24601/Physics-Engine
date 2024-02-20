@@ -195,3 +195,5 @@ of positions that correspond to the particles to use.
 Include a new update function in the face class that updates the
 normals, centroid etc... by recalculating them using the
 global, not local vertices.
+
+Merge particleMesh and cloth, get rid of cord.

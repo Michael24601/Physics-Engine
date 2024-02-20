@@ -296,9 +296,7 @@ namespace pe {
 			return bitangent;
 		}
 
-
 	public:
-
 
 		Face() {}
 
@@ -495,6 +493,11 @@ namespace pe {
 
 		Vector2D getTextureCoordinate(int index) const {
 			return textureCoordinates[index];
+		}
+
+
+		int getIndex(int index) {
+			return indeces[index];
 		}
 
 	};

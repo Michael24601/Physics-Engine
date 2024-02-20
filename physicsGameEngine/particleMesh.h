@@ -8,106 +8,207 @@
 #define PARTICLE_MESH_H
 
 #include "particle.h"
+#include "curvedFace.h"
+#include "particleBungeeForce.h"
+#include "particleDistanceConstraint.h"
+#include "particleAngleConstraint.h"
+#include "edge.h"
 #include <vector>
 
 namespace pe {
 
-	/*
-		A struct representing a face.
-		We use pointers to the real particles in the mesh to associate
-		particles in the face.
-		Note that the particles must be defined in counter-clockwise order.
-	*/
-	struct MeshFace {
-		std::vector<Particle*> particles;
-
-		MeshFace() {}
-
-		MeshFace(const std::vector<Particle*>& particles) : 
-			particles(particles) {}
-
-
-		int getParticleNumber() const {
-			return particles.size();
-		}
-
-
-		Particle getParticle(int index) const {
-			return *(particles[index]);
-		}
-
-
-		// Returns the positions in clockwise or counter-clockwise order
-		std::vector<Vector3D> getVertices(Order order) const {
-			std::vector<Vector3D> positions;
-			if (order == Order::COUNTER_CLOCKWISE) {
-				for (const Particle* particle : particles) {
-					positions.push_back(particle->position);
-				}
-			}
-			else if (order == Order::CLOCKWISE) {
-				for (auto it = particles.rbegin(); it != particles.rend(); 
-					++it) {
-					positions.push_back((*it)->position);
-				}
-			}
-			return positions;
-		}
-
-
-		// This function assumes we have at least 3 vertices
-		Vector3D getNormal(Order order) const {
-			Vector3D firstVertex = particles[0]->position;
-			Vector3D secondVertex = particles[1]->position;
-			Vector3D thirdVertex = particles[2]->position;
-
-			Vector3D AB = secondVertex - firstVertex;
-			Vector3D AC = thirdVertex - firstVertex;
-			Vector3D normal = AB.vectorProduct(AC);
-			normal.normalize();
-			// If clockwise, we reverse it
-			if (order == Order::CLOCKWISE) {
-				normal *= -1;
-			}
-			return normal;
-		}
-
-
-		Vector3D getCentroid() const {
-			Vector3D sum;
-			// Calculates the sum of vertex positions
-			for (const Particle* particle : particles) {
-				sum += particle->position;
-			}
-			// Calculates the centroid as the average of vertex positions
-			return sum * (1.0f / static_cast<real>(particles.size()));
-		}
-	};
-
-
-	/*
-		A struct representing the edge of a polyhedron.
-	*/
-	struct MeshEdge {
-		std::pair<Particle*, Particle*> particles;
-
-		MeshEdge() {}
-
-		MeshEdge(Particle* first, Particle* second) {
-			particles = std::make_pair(first, second);
-		}
-	};
-
-
 	class ParticleMesh {
+
+	protected:
+
+		/*
+			Vertices corresponding to the location of the particles.
+			The local ones correspond to the position of the particles
+			at the creation of the cloth.
+		*/
+		std::vector<Vector3D> localVertices;
+		std::vector<Vector3D> globalVertices;
+
+		// Distance constraints to maintain resting lengths
+		std::vector<ParticleDistanceConstraint> distanceConstraints;
+
+		// Angle constraints to maintain bending behavior
+		std::vector<ParticleAngleConstraint> angleConstraints;
+
+		/*
+			The egdes store the assoications between edges in a certain
+			way that can be useful if we want unique assoications.
+			But sometimes we need to have access to all particles
+			connected to another. 
+			For that we have this, where edgeAssociations[i] contains
+			all associated particle indexes to particle[i].
+		*/
+		std::vector<std::vector<int>> edgeAssociations;
+
+
+		std::vector<std::vector<int>> getEdgeAssociations() const {
+			std::vector<std::vector<int>> associations(particles.size());
+			for (Edge* edge : edges) {
+				associations[edge->getIndex(0)].push_back(edge->getIndex(1));
+				associations[edge->getIndex(1)].push_back(edge->getIndex(0));
+			}
+			return associations;
+		}
+
+
+	public:
+
+		/*
+			Bungee force, where each force applies from one particle onto
+			the other (two sided).
+		*/
+		struct BungeeForce {
+			ParticleBungeeForce force1;
+			ParticleBungeeForce force2;
+		};
+
+		std::vector<BungeeForce> forces;
+		real ropeStrength;
+
+		/*
+			Creates the forces and constraints.
+			Called in the subclass when the edges and faces have been set.
+		*/
+		void setForces() {
+
+			for (Edge* edge: edges) {
+				Vector3D distanceVector = localVertices[edge->getIndex(0)] - 
+					localVertices[edge->getIndex(1)];
+				real distance = distanceVector.magnitude();
+
+				// Adds the bungee force for each edge twice (one from each particle)
+				BungeeForce force{
+					ParticleBungeeForce(
+						&particles[edge->getIndex(1)],
+						ropeStrength,
+						distance
+					),
+					ParticleBungeeForce(
+						&particles[edge->getIndex(0)],
+						ropeStrength,
+						distance
+					),
+				};
+				forces.push_back(force);
+			}
+		}
+
+
+		void setConstraints() {
+
+			for (Edge* edge : edges) {
+				Vector3D distanceVector = localVertices[edge->getIndex(0)] -
+					localVertices[edge->getIndex(1)];
+				real restLength = distanceVector.magnitude();
+
+				// Adds the distance constraint for each edge as well
+				Particle* particle1 = &particles[edge->getIndex(0)];
+				Particle* particle2 = &particles[edge->getIndex(1)];
+
+				ParticleDistanceConstraint distanceConstraint(
+					particle1,
+					particle2,
+					restLength
+				);
+				distanceConstraints.push_back(distanceConstraint);
+			}
+
+			// Adding angle constraints for each particle triplet in a face
+			for (CurvedFace* face : faces) {
+				/*
+					Each triplet in the facem means each angle formed by 3
+					consecutive particles.
+				*/
+				for (int i = 0; i < 4; i++) {
+
+					Particle* particle1 = &particles[face->getIndex(i)];
+					Particle* particle2 = &particles[face->getIndex((i + 1) % 4)];
+					Particle* particle3 = &particles[face->getIndex((i + 2) % 4)];
+
+					// Rest angle is 90 degrees as the particles are in a grid
+					real restAngle = PI;
+
+					ParticleAngleConstraint angleConstraint(
+						particle1,
+						particle2,
+						particle3,
+						restAngle,
+						(real)0.1
+					);
+
+					angleConstraints.push_back(angleConstraint);
+				}
+			}
+		}
+
+
+		Vector3D calculateMeshVertexNormal(
+			const std::vector<Particle>& particles,
+			const std::vector<std::vector<int>>& connections,
+			int particleIndex
+		) const {
+
+			Vector3D particlePosition = particles[particleIndex].position;
+			Vector3D normal;
+
+			// For each beighboring vector
+			for (int i = 0; i < connections[particleIndex].size(); i++) {
+
+				// Ffirst we retrieve the position of the neighbor
+				int neighborIndex = connections[particleIndex][i];
+				Vector3D neighborPosition = particles[neighborIndex].position;
+
+				/*
+					Then, we retrieve this vector, which is the position of
+					the neighbor in comparison to this particle's position.
+					Since particles move, we use the original local 
+					coordinates, which tell us where teh neighbor is supposed
+					to be.
+					We then rotate it by 90 degrees and normalize it.
+				*/
+				Vector3D neighborVector = localVertices[neighborIndex] - 
+					localVertices[particleIndex];
+				neighborVector.rotate90Degrees();
+				neighborVector.normalize();
+
+				// We then add to the normal this cross product
+				normal += (neighborPosition - particlePosition).vectorProduct(
+					neighborVector
+				);
+			}
+
+			// Normalize the average vector to get the normal
+			return normal.normalized();
+		}
+
+
+		std::vector<Vector3D> calculateMeshNormals() const {
+			std::vector<Vector3D> normals;
+			for (int i = 0; i < particles.size(); i++) {
+				normals.push_back(
+					calculateMeshVertexNormal(
+						particles,
+						edgeAssociations,
+						i
+					)
+				);
+			}
+			return normals;
+		}
+
 
 	public:
 		
 		std::vector<Particle> particles;
 
 		// The faces and edges needs to draw the particle mesh
-		std::vector<MeshFace> faces;
-		std::vector<MeshEdge> edges;
+		std::vector<CurvedFace*> faces;
+		std::vector<Edge*> edges;
 
 		/*
 			If the mesh needs to be connected with forces like spring
@@ -117,8 +218,17 @@ namespace pe {
 		ParticleMesh(
 			std::vector<Vector3D> particlePositions,
 			std::vector<real> mass,
-			std::vector<real> damping
-		) {
+			std::vector<real> damping,
+			real ropeStrength
+		) : ropeStrength{ ropeStrength } {
+
+			localVertices = particlePositions;
+			/*
+				Initially, the global vertices were the same as the
+				original local ones.
+			*/
+			globalVertices = particlePositions;
+
 			/*
 				Positions(in global coordinates, as we are working with
 				particles, and there are no transformations.
@@ -157,6 +267,58 @@ namespace pe {
 			Everything said about the edges applies here.
 		*/
 		virtual void setFaces() = 0;
+
+
+		/*
+			Applies angle and distance constraints on the particles of the
+			mesh in order to add stability to the structure by preventing
+			the cloth from being too deformed.
+		*/
+		void applyConstraints() {
+			// Apply distance constraints
+			for (ParticleDistanceConstraint& constraint : distanceConstraints) {
+				constraint.applyConstraint();
+			}
+
+			// Apply angle constraints
+			for (ParticleAngleConstraint& constraint : angleConstraints) {
+				constraint.applyConstraint();
+			}
+		}
+
+
+		/*
+			Updates the mesh (after integration), updating the face data
+		*/
+		void update() {
+
+			/*
+				First the global vertices need to be updated to be the same
+				as the particle's as there is not transform matrix.
+			*/
+			for (int i = 0; i < particles.size(); i++) {
+				globalVertices[i] = particles[i].position;
+			}
+
+			/*
+				The normals can be calculated as such.
+			*/
+			std::vector<Vector3D> normals = calculateMeshNormals();
+
+			for (CurvedFace* face : faces) {
+
+				/*
+					Since we don't have a transform matrix, we recalculate the
+					values using the formulas. The normals have to be set from
+					the outside, and the rest the face can calculate.
+				*/
+				for (int i = 0; i < face->getVertexNumber(); i++) {
+					face->setNormal(i, normals[face->getIndex(i)]);
+				}
+
+				face->update();
+			}
+		}
 	};
 }
 

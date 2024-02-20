@@ -266,16 +266,10 @@
     <ClInclude Include="particleMesh.h">
       <Filter>Header Files\ParticleMesh</Filter>
     </ClInclude>
-    <ClInclude Include="cord.h">
-      <Filter>Header Files\ParticleMesh</Filter>
-    </ClInclude>
     <ClInclude Include="vector3DAdapter.h">
       <Filter>Header Files\ParticlePhysics</Filter>
     </ClInclude>
     <ClInclude Include="shaderInterface.h">
-      <Filter>Header Files\Interfaces</Filter>
-    </ClInclude>
-    <ClInclude Include="bodyCordAdapter.h">
       <Filter>Header Files\Interfaces</Filter>
     </ClInclude>
     <ClInclude Include="contact.h">
@@ -303,12 +297,6 @@
       <Filter>Header Files\OpenglGraphics</Filter>
     </ClInclude>
     <ClInclude Include="rectangularCloth.h">
-      <Filter>Header Files\ParticleMesh</Filter>
-    </ClInclude>
-    <ClInclude Include="cloth.h">
-      <Filter>Header Files\ParticleMesh</Filter>
-    </ClInclude>
-    <ClInclude Include="cylindricalCloth.h">
       <Filter>Header Files\ParticleMesh</Filter>
     </ClInclude>
     <ClInclude Include="cone.h">

@@ -3,7 +3,7 @@
 #define SHADER_INTERFACE_H
 
 #include "polyhedron.h"
-#include "cloth.h"
+#include "particleMesh.h"
 #include <vector>
 
 namespace pe {
@@ -112,7 +112,7 @@ namespace pe {
 		Uses the individual vertex normals.
 	*/
 	FaceData getPolyhedronFaceData(const Polyhedron& polyhedron);
-
+	
 
 	/*
 		Uses the uniform face normals.
@@ -122,48 +122,26 @@ namespace pe {
 	FaceData getUniformPolyhedronFaceData(const Polyhedron& polyhedron);
 
 
-	/*
-		Returns individual vertex index in particle mesh.
-	*/
-	glm::vec3 calculateMeshVertexNormal(
-		const std::vector<Particle>& particles,
-		int targetIndex,
-		int columnSize,
-		int rowSize
-	);
-
-
-	/*
-		Returns the face data for a mesh. Note that the normals used
-		for each vertex is the face normal, so it will look triangulated.
-		We can specify if we want the faces in clockwise or counter-clockwise
-		order.
-	*/
-	FaceData getMeshFaceData(
-		const ParticleMesh& mesh,
-		int columnSize,
-		int rowSize,
-		Order order
-	);
-
-
-	/*
-		Returns mesh edge data.
-	*/
 	EdgeData getMeshEdgeData(const ParticleMesh& mesh);
 
 
-	/*
-		Also returns the face data, but the vertices calculate their normals
-		individually, so it looks smooth. This function is specific to
-		cloth.
-	*/
-	FaceData getSmoothMeshFaceData(
-		const Cloth& mesh,
-		int columnSize,
-		int rowSize,
-		Order order
+	FrameVectors getMeshUniformFrameVectors(
+		const ParticleMesh& mesh,
+		real length
 	);
+
+
+	FrameVectors getMeshFrameVectors(
+		const ParticleMesh& mesh,
+		real length
+	);
+
+
+	FaceData getUniformMeshFaceData(const ParticleMesh& mesh);
+
+
+	FaceData getMeshFaceData(const ParticleMesh& mesh);
+
 }
 
 #endif SHADER_INTERFACE_H

@@ -8,6 +8,7 @@
 #include "vector3D.h"
 #include "vector2D.h"
 #include "matrix3x4.h"
+#include "face.h"
 #include <vector>
 
 namespace pe {
@@ -34,12 +35,39 @@ namespace pe {
 			indices{ std::make_pair(index1, index2) } {}
 
 
-		Vector3D& getVertex(int index) const {
+		Vector3D getVertex(int index, Basis basis = Basis::GLOBAL) const {
+
+			std::vector<Vector3D>* vertices;
+			if (basis == Basis::GLOBAL) {
+				vertices = globalVertices;
+			}
+			else if (basis == Basis::LOCAL) {
+				vertices = localVertices;
+			}
+			else {
+				return Vector3D();
+			}
+
 			if (index == 0) {
-				return (*globalVertices)[indices.first];
+				return (*vertices)[indices.first];
 			}
 			else if (index == 1) {
-				return (*globalVertices)[indices.second];
+				return (*vertices)[indices.second];
+			}
+			else {
+				throw new std::invalid_argument(
+					"An edge only has two vertices"
+				);
+			}
+		}
+
+
+		int getIndex(int index) {
+			if (index == 0) {
+				return indices.first;
+			}
+			else if (index == 1) {
+				return indices.second;
 			}
 			else {
 				throw new std::invalid_argument(

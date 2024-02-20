@@ -23,6 +23,7 @@ namespace pe {
 		std::vector<Vector3D> localVertexBitangents;
 		std::vector<Vector3D> vertexBitangents;
 
+
 		/*
 			Like the flat face, the tangent of any vertex in a curved face
 			is calculated using the vertices to either side of it.
@@ -30,7 +31,7 @@ namespace pe {
 			index for each tangent (can't just use 0 each time) and we have
 			to use each vertex's unique normal, not the face normal.
 		*/
-		Vector3D calculateLocalTangent(int index, Basis basis) const {
+		Vector3D calculateTangent(int index, Basis basis) const {
 
 			/*
 				We need to find distinct vertices to either side of any
@@ -78,7 +79,7 @@ namespace pe {
 			difference is that we have to specify the given vertex index
 			for each bitangent.
 		*/
-		Vector3D calculateLocalBitangent(int index, Basis basis) const {
+		Vector3D calculateBitangent(int index, Basis basis) const {
 
 			/*
 				We need to find distinct vertices to either side of any
@@ -148,8 +149,8 @@ namespace pe {
 			localVertexTangents.resize(getVertexNumber());
 			localVertexBitangents.resize(getVertexNumber());
 			for (int i = 0; i < getVertexNumber(); i++) {
-				localVertexTangents[i] = calculateLocalTangent(i, Basis::LOCAL);
-				localVertexBitangents[i] = calculateLocalBitangent(i, Basis::LOCAL);
+				localVertexTangents[i] = calculateTangent(i, Basis::LOCAL);
+				localVertexBitangents[i] = calculateBitangent(i, Basis::LOCAL);
 			}
 
 			vertexTangents = localVertexTangents;
@@ -200,6 +201,39 @@ namespace pe {
 				vertexBitangents[i] = transformedBitangent - centre;
 				vertexBitangents[i].normalize();
 			}
+		}
+
+		/*
+			Updates all the values without using the transform matrix.
+			All values but the vertex normals can be updated, so the
+			normals are not updated.
+			The algorithms that calculated the local frame vectors are
+			reused this time with global coordinates.
+		*/
+		void update() {
+			centroid = Face::calculateCentroid(Basis::GLOBAL);
+			normal = Face::calculateNormal(Basis::GLOBAL);
+			tangent = Face::calculateTangent(Basis::GLOBAL);
+			bitangent = Face::calculateBitangent(Basis::GLOBAL);
+			for (int i = 0; i < getVertexNumber(); i++) {
+				vertexTangents[i] = calculateTangent(i, Basis::GLOBAL);
+				vertexBitangents[i] = calculateBitangent(i, Basis::GLOBAL);
+			}
+		}
+
+
+		/*
+			Because not all objects using the face are rigid, there must be
+			a way to update all of its contents without using a transform
+			matrix.
+			For the tangents, centroid etc... we can just recalculate them
+			using the formulas but with the global coordinates/basis.
+			This isn't possible for the normals of a curved face, as the
+			curvature is unknown and set from the outside. So only from the
+			outside can they be updated.
+		*/
+		void setNormal(int index, const Vector3D& normal) {
+			vertexNormals[index] = normal;
 		}
 
 

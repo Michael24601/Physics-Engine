@@ -20,6 +20,7 @@
 #include "particle.h"
 #include "particleSpringForce.h"
 #include "particleBungeeForce.h"
+#include "anchoredSpringForce.h"
 #include "particleGravity.h"
 #include "particleRod.h"
 #include "particleCable.h"
@@ -42,9 +43,6 @@
 #include "cookTorranceShader.h"
 #include "shaderInterface.h"
 #include "anisotropicShader.h"
-#include "cord.h"
-
-#include "bodyCordAdapter.h"
 
 #include "sat.h"
 #include "contact.h"
@@ -60,8 +58,6 @@
 
 using namespace pe;
 using namespace std;
-
-#define SIM
 
 #ifdef SIM
 
@@ -181,10 +177,19 @@ int main() {
 
     int particleNum = 2;
 
-    Cord cord1(0.2, 0.9, 5, particleNum, Vector3D(200, 200, -200), Vector3D(100, 200, -100));
-    Cord cord2(0.2, 0.9, 5, particleNum, Vector3D(200, 200, 200), Vector3D(100, 200, 100));
-    Cord cord3(0.2, 0.9, 5, particleNum, Vector3D(-200, 200, -200), Vector3D(-100, 200, -100));
-    Cord cord4(0.2, 0.9, 5, particleNum, Vector3D(-200, 200, 200), Vector3D(-100, 200, 100));
+    RigidBody fixed1;
+    fixed1.position = Vector3D(200, 200, -200);
+    RigidBody fixed2;
+    fixed2.position = Vector3D(200, 200, 200);
+    RigidBody fixed3;
+    fixed3.position = Vector3D(-200, 200, -200);
+    RigidBody fixed4;
+    fixed4.position = Vector3D(-200, 200, 200);
+
+    RigidBodySpringForce force1(c1.localVertices[0], &fixed1, Vector3D(), 10, 100);
+    RigidBodySpringForce force2(c2.localVertices[0], &fixed2, Vector3D(), 10, 100);
+    RigidBodySpringForce force3(c3.localVertices[0], &fixed3, Vector3D(), 10, 100);
+    RigidBodySpringForce force4(c4.localVertices[0], &fixed4, Vector3D(), 10, 100);
 
     ParticleGravity pg(Vector3D(0, -10, 0));
 
@@ -197,41 +202,6 @@ int main() {
         false
     };
 
-    BodyCordAdapter adapter1(
-        c1.body,
-        &cord1,
-        c1.localVertices[0],
-        100,
-        10,
-        Vector3D(100, 200, -200)
-    );
-
-    BodyCordAdapter adapter2(
-        c2.body,
-        &cord2,
-        c2.localVertices[0],
-        100,
-        10,
-        Vector3D(200, 200, 200)
-    );
-
-    BodyCordAdapter adapter3(
-        c3.body,
-        &cord3,
-        c3.localVertices[0],
-        100,
-        10,
-        Vector3D(-200, 200, -200)
-    );
-
-    BodyCordAdapter adapter4(
-        c4.body,
-        &cord4,
-        c4.localVertices[0],
-        100,
-        10,
-        Vector3D(-200, 200, 200)
-    );
 
     // Bounding volume hierarchy, used for coarse collision detection
     BoundingVolumeHierarchy<BoundingSphere> hierarchy;
@@ -286,33 +256,26 @@ int main() {
         c3.body->calculateDerivedData();
         c4.body->calculateDerivedData();
 
+        fixed1.calculateDerivedData();
+        fixed2.calculateDerivedData();
+        fixed3.calculateDerivedData();
+        fixed4.calculateDerivedData();
+
         int numSteps = 5;
         real substep = deltaT / numSteps;
 
         while (numSteps--) {
 
-            g.updateForce((c1.body), substep);
-            g.updateForce((c2.body), substep);
-            g.updateForce((c3.body), substep);
-            g.updateForce((c4.body), substep);
+            g.updateForce(c1.body, substep);
+            g.updateForce(c2.body, substep);
+            g.updateForce(c3.body, substep);
+            g.updateForce(c4.body, substep);
 
-            adapter1.updateForce(substep);
-            adapter2.updateForce(substep);
-            adapter3.updateForce(substep);
-            adapter4.updateForce(substep);
+            force1.updateForce(c1.body, substep);
+            force2.updateForce(c2.body, substep);
+            force3.updateForce(c3.body, substep);
+            force4.updateForce(c4.body, substep);
 
-            for (Particle& p : cord1.particles) {
-                pg.updateForce(&p, substep);
-            }
-            for (Particle& p : cord2.particles) {
-                pg.updateForce(&p, substep);
-            }
-            for (Particle& p : cord3.particles) {
-                pg.updateForce(&p, substep);
-            }
-            for (Particle& p : cord4.particles) {
-                pg.updateForce(&p, substep);
-            }
 
             std::vector<Contact> contacts;
             // Here we check for collision
@@ -367,24 +330,6 @@ int main() {
             c3.body->integrate(substep);
             c4.body->integrate(substep);
 
-            for (Particle& p : cord1.particles) {
-                p.verletIntegrate(substep);
-            }
-            for (Particle& p : cord2.particles) {
-                p.verletIntegrate(substep);
-            }
-            for (Particle& p : cord3.particles) {
-                p.verletIntegrate(substep);
-            }
-            for (Particle& p : cord4.particles) {
-                p.verletIntegrate(substep);
-            }
-
-            adapter1.reposition();
-            adapter2.reposition();
-            adapter3.reposition();
-            adapter4.reposition();
-
             c1.update();
             c2.update();
             c3.update();
@@ -406,20 +351,17 @@ int main() {
         glm::vec4 colorYellow(0.9, 0.9, 0.5, 1.0);
         glm::vec4 colorPurple = glm::vec4(0.4, 0.1, 0.8, 1.0);
 
-        EdgeData cordData = getMeshEdgeData(cord1);
+        EdgeData cordData;
+        cordData.vertices.push_back(convertToGLM(fixed1.position));
+        cordData.vertices.push_back(convertToGLM(c1.globalVertices[0]));
+        cordData.vertices.push_back(convertToGLM(fixed2.position));
+        cordData.vertices.push_back(convertToGLM(c2.globalVertices[0]));
+        cordData.vertices.push_back(convertToGLM(fixed3.position));
+        cordData.vertices.push_back(convertToGLM(c3.globalVertices[0]));
+        cordData.vertices.push_back(convertToGLM(fixed4.position));
+        cordData.vertices.push_back(convertToGLM(c4.globalVertices[0]));
         shader.drawEdges(cordData.vertices, identity, viewMatrix, projectionMatrix,
             colorWhite);
-        cordData = getMeshEdgeData(cord2);
-        shader.drawEdges(cordData.vertices, identity, viewMatrix, projectionMatrix,
-            colorWhite);
-        cordData = getMeshEdgeData(cord3);
-        shader.drawEdges(cordData.vertices, identity, viewMatrix, projectionMatrix,
-            colorWhite);
-        cordData = getMeshEdgeData(cord4);
-        shader.drawEdges(cordData.vertices, identity, viewMatrix, projectionMatrix,
-            colorWhite);
-        //shader.drawEdges(contactEdges.vertices, identity, viewMatrix, projectionMatrix,
-          //  colorWhite);
 
         // Shape
         glm::vec3 lightPos[]{
@@ -437,15 +379,9 @@ int main() {
         );
 
         EdgeData ddata = getPolyhedronEdgeData(c3);
-        shader.drawEdges(ddata.vertices, identity, viewMatrix,
-            projectionMatrix, colorWhite);
-        FrameVectors edata = getPolyhedronFrameVectors(c3, 20);
-        shader.drawEdges(edata.normals, identity, viewMatrix,
-            projectionMatrix,  colorWhite);
-        shader.drawEdges(edata.tangents, identity, viewMatrix,
-            projectionMatrix, colorPurple);
-        shader.drawEdges(edata.bitangents, identity, viewMatrix,
-            projectionMatrix, colorGreen);
+
+        FrameVectors edata = getPolyhedronUniformFrameVectors(c3, 20);
+      
 
         // Second shape
         data = getPolyhedronFaceData(c2);
@@ -457,7 +393,7 @@ int main() {
         data = getPolyhedronFaceData(c3);
         cookShader.drawFaces(data.vertices, data.normals, identity,
             viewMatrix, projectionMatrix, colorRed, 1, lightPos,
-            lightColors, cameraPosition, 0.05, 1
+            lightColors, cameraPosition, 0.1, 1
         );
 
         data = getPolyhedronFaceData(c4);
@@ -534,7 +470,7 @@ int main() {
     // View matrix, used for positioning and angling the camera
     // Camera's position in world coordinates
     real cameraDistance = 600.0f;
-    glm::vec3 cameraPosition = glm::vec3(cameraDistance, 0.0f, 0.0f);
+    glm::vec3 cameraPosition = glm::vec3(0.0f, 0.0f, cameraDistance);
     // Point the camera is looking at
     glm::vec3 cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);
     // Up vector
@@ -568,7 +504,7 @@ int main() {
     int size = 30;
     real strength = 0.5;
     real mass = 0.5;
-    real damping = 0.80;
+    real damping = 0.50;
 
     RectangularCloth mesh(mass, damping, strength, size, size,
         Vector3D(-200, 200, 0), Vector3D(200, -200, 0));
@@ -677,6 +613,8 @@ int main() {
                     mesh.particles[i].verletIntegrate(deltaT);
                 }
             }
+
+            mesh.update();
         }
 
         window.clear(sf::Color::Black);
@@ -690,37 +628,31 @@ int main() {
         glm::vec4 colorWhite(1.0, 1.0, 1.0, 1.0);
         glm::vec4 colorRed(1.0, 0.2, 0.2, 1);
         glm::vec4 colorBlue(0.2, 0.2, 1.0, 1);
-
-        EdgeData edgeData = getMeshEdgeData(mesh);
+        glm::vec4 colorGreen(0.2, 1.0, 0.2, 1);
 
         //shader.drawEdges(edgeData.vertices, identity, viewMatrix, 
           //   projectionMatrix, colorWhite);
 
-        FaceData data = getSmoothMeshFaceData(mesh, size, size,
-            Order::COUNTER_CLOCKWISE);
-        FaceData backData = getSmoothMeshFaceData(mesh, size, size,
-            Order::CLOCKWISE);
+        FaceData data = getMeshFaceData(mesh);
+        EdgeData edata = getMeshEdgeData(mesh);
+        FrameVectors fdata = getMeshFrameVectors(mesh, 30);
 
         glm::vec3 lightPos[]{ glm::vec3(500, 0, 500), glm::vec3(-500, 0, -500) };
         glm::vec4 lightColor[]{ glm::vec4(1.0, 1.0, 1.0, 1.0),
             glm::vec4(1.0, 1.0, 1.0, 1.0) };
         
+        shader.drawEdges(
+            fdata.normals,
+            identity,
+            viewMatrix,
+            projectionMatrix,
+            colorWhite
+        );
+      
         
         lightShader.drawFaces(
             data.vertices,
             data.normals,
-            identity,
-            viewMatrix,
-            projectionMatrix,
-            colorRed,
-            2,
-            lightPos,
-            lightColor
-        );
-        
-        lightShader.drawFaces(
-            backData.vertices,
-            backData.normals,
             identity,
             viewMatrix,
             projectionMatrix,

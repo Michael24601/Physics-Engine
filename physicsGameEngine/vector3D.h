@@ -164,6 +164,12 @@ namespace pe {
 			x = y = z = 0;
 		}
 
+		void rotate90Degrees() {
+			int temp = x;
+			x = -y;
+			y = temp;
+		}
+
 		void display() const {
 			std::cout << "x: " << x << ", y: " << y << ", z: " << z << "\n";
 		}
