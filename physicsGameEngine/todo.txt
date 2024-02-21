@@ -171,10 +171,10 @@ refactoring.
 
 Delete the not equal operator. 
 
-Fix the angle constraint (done).
+Fix the angle constraint (DONE).
 
 Remove the different implementations of the polyhedron class, leave
-only the best one. 
+only the best one (DONE). 
 
 One possible improvement for performance is doing a conversion to GLM
 for the unique vertices without having to repeat it for each copy in
@@ -183,17 +183,23 @@ faces and triangles.
 Fix up the default order thing with clockwise and counter clockwise.
 
 Fix the smooth face data function with triangulation and normals
-calculations. 
+calculations (DONE).
 
-Add distinct tangent and bitangent for a curved face. 
+Add distinct tangent and bitangent for a curved face (DONE).
 
 Connect the particle mesh to the face class written so we don't
 have to rewrite most functionalities, and extend it (use something
 that isn't a face or curvedFace). We can do that by having a vector
-of positions that correspond to the particles to use.
+of positions that correspond to the particles to use (DONE).
 
 Include a new update function in the face class that updates the
 normals, centroid etc... by recalculating them using the
-global, not local vertices.
+global, not local vertices (DONE).
 
-Merge particleMesh and cloth, get rid of cord.
+Merge particleMesh and cloth, get rid of cord (DONE).
+
+Fix anisotropic shading.
+
+Fix vec2 issue in texture shading.
+
+Merge the lighting and texture shaders: don't repeat them.

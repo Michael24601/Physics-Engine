@@ -154,11 +154,6 @@ namespace pe {
 			z = x * vector.y - y * vector.x;
 		}
 
-		// Overriden operator !=
-		bool operator!=(const Vector3D& vector) const {
-			return !(x == vector.x && y == vector.y && z == vector.z);
-		}
-
 		// Returns each of the coordinates to 0
 		void clear() {
 			x = y = z = 0;

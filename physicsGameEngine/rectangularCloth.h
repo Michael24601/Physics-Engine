@@ -147,14 +147,32 @@ namespace pe {
 						faceNormals.push_back(normals[index]);
 					}
 
-					faces.push_back(
-						new CurvedFace(
-							&localVertices, 
-							&globalVertices,
-							faceIndexes,
-							faceNormals
-						)
+					CurvedFace* face = new CurvedFace(
+						&localVertices,
+						&globalVertices,
+						faceIndexes,
+						faceNormals
 					);
+
+					std::vector<Vector2D> uv{
+						Vector2D(i * (1.0 / rowSize), j * (1.0 / columnSize)),
+						Vector2D((i + 1) * (1.0 / rowSize), j * (1.0 / columnSize)),
+						Vector2D((i + 1) * (1.0 / rowSize), (j + 1) * (1.0  /columnSize)),
+						Vector2D(i * (1.0 / rowSize), (j + 1) * (1.0 / columnSize)),
+					};
+
+					// Modify UV coordinates to repeat the texture four times
+					for (auto& coord : uv) {
+						coord.x *= 0.5;
+						coord.y *= 0.5;
+					}
+
+					face->setTextureCoordinates(uv);
+
+					faces.push_back(
+						face
+					);
+
 				}
 
 			}

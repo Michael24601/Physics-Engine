@@ -12,7 +12,6 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include <GL/gl.h>
 
 #include <iostream>
 #include <vector>
@@ -43,6 +42,8 @@
 #include "cookTorranceShader.h"
 #include "shaderInterface.h"
 #include "anisotropicShader.h"
+#include "textureShader.h"
+#include "cookTorranceTextureShader.h"
 
 #include "sat.h"
 #include "contact.h"
@@ -55,9 +56,14 @@
 
 #include "rectangularCloth.h"
 
+#include "openglUtility.h"
+
+
 
 using namespace pe;
 using namespace std;
+
+#define SIM
 
 #ifdef SIM
 
@@ -109,6 +115,8 @@ int main() {
     DiffuseSpecularLightingShader phongShader;
     CookTorranceShader cookShader;
     AnisotropicShader aniShader;
+    TextureShader texShader;
+    CookTorranceTextureShader cookTexShader;
 
     // View matrix, used for positioning and angling the camera
     // Camera's position in world coordinates
@@ -209,6 +217,9 @@ int main() {
     hierarchy.insert(&c2, c2.boundingSphere);
     hierarchy.insert(&c3, c3.boundingSphere);
     hierarchy.insert(&c4, c4.boundingSphere);
+
+
+    GLuint texture = loadTexture("C:\\Users\\msaba\\OneDrive\\Desktop\\textureMaps\\dirty-metal.jpg");
 
 
     while (window.isOpen()) {
@@ -373,14 +384,10 @@ int main() {
 
         // Data
         FaceData data = getPolyhedronFaceData(c1);
-        phongShader.drawFaces(data.vertices, data.normals, identity,
-            viewMatrix, projectionMatrix, colorPurple, 1, lightPos,
-            lightColors, cameraPosition, 40
+        cookTexShader.drawFaces(data.vertices, data.normals, data.uvCoordinates,
+            identity, viewMatrix, projectionMatrix, texture, 1, lightPos,
+            lightColors, cameraPosition, 0.1, 0.5
         );
-
-        EdgeData ddata = getPolyhedronEdgeData(c3);
-
-        FrameVectors edata = getPolyhedronUniformFrameVectors(c3, 20);
       
 
         // Second shape
@@ -466,6 +473,10 @@ int main() {
     DiffuseLightingShader lightShader;
     DiffuseSpecularLightingShader phongShader;
     CookTorranceShader cookShader;
+    TextureShader texShader;
+
+
+    GLuint texture = loadTexture("C:\\Users\\msaba\\OneDrive\\Desktop\\textureMaps\\blue.jpg");
 
     // View matrix, used for positioning and angling the camera
     // Camera's position in world coordinates
@@ -501,10 +512,10 @@ int main() {
     sf::Clock clock;
     real deltaT = 0.05;
 
-    int size = 30;
+    int size = 25;
     real strength = 0.5;
     real mass = 0.5;
-    real damping = 0.50;
+    real damping = 0.5;
 
     RectangularCloth mesh(mass, damping, strength, size, size,
         Vector3D(-200, 200, 0), Vector3D(200, -200, 0));
@@ -557,7 +568,7 @@ int main() {
             }
         }
 
-        int numSteps = 20;
+        int numSteps = 25;
         real substep = deltaT / numSteps;
 
         while (numSteps--) {
@@ -641,22 +652,16 @@ int main() {
         glm::vec4 lightColor[]{ glm::vec4(1.0, 1.0, 1.0, 1.0),
             glm::vec4(1.0, 1.0, 1.0, 1.0) };
         
-        shader.drawEdges(
-            fdata.normals,
-            identity,
-            viewMatrix,
-            projectionMatrix,
-            colorWhite
-        );
       
         
-        lightShader.drawFaces(
+        texShader.drawFaces(
             data.vertices,
             data.normals,
+            data.uvCoordinates,
             identity,
             viewMatrix,
             projectionMatrix,
-            colorRed,
+            texture,
             2,
             lightPos,
             lightColor
