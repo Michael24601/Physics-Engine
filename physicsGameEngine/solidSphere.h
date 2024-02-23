@@ -45,6 +45,43 @@ namespace pe {
 			return vertices;
 		}
 
+
+		/*
+			Sets the UV coordinates in such a way as to stretch a single
+			texture over the whole sphere.
+		*/
+		void setUVCoordinates() {
+			for (int i = 0; i < faces.size(); i++) {
+
+				std::vector<Vector2D> textureCoordinates;
+				for (int j = 0; j < faces[i]->getVertexNumber(); j++) {
+
+					int index = faces[i]->getIndex(j);
+					/*
+						The vector from the centre of the sphere to the
+						vertex, with the sphere's poles along the y-axis
+						(initially, in local coordinates).
+						We then normalize d or divide d.y by the radius
+						in the phi calculation.
+
+					*/
+					Vector3D d = localVertices[index];
+					d.normalize();
+
+					real theta = std::atan2(d.z, d.x);
+					real phi = std::asin(d.y);
+
+					real u = -0.5 - theta / (2 * PI);
+					real v = 0.5 + phi / PI;
+					textureCoordinates.push_back(Vector2D(u, v));
+				}
+
+				faces[i]->setTextureCoordinates(textureCoordinates);
+			}
+		}
+
+
+
 	public:
 
 		real radius;
@@ -79,6 +116,8 @@ namespace pe {
 
 			setEdges();
 			setFaces();
+
+			setUVCoordinates();
 		}
 
 

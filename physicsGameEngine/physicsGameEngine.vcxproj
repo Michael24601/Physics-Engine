@@ -157,6 +157,7 @@
   <ItemGroup>
     <ClCompile Include="anchoredSpringForce.cpp" />
     <ClCompile Include="anisotropicShader.cpp" />
+    <ClCompile Include="anisotropicTextureShader.cpp" />
     <ClCompile Include="boundingSphere.cpp" />
     <ClCompile Include="collisionResolver.cpp" />
     <ClCompile Include="contact.cpp" />
@@ -195,6 +196,7 @@
   <ItemGroup>
     <ClInclude Include="accuracy.h" />
     <ClInclude Include="anisotropicShader.h" />
+    <ClInclude Include="anisotropicTextureShader.h" />
     <ClInclude Include="BVHNode.h" />
     <ClInclude Include="boundingSphere.h" />
     <ClInclude Include="boundingVolumeHierarchy.h" />

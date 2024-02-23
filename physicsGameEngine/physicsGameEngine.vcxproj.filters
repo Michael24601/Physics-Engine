@@ -171,6 +171,9 @@
     <ClCompile Include="cookTorranceTextureShader.cpp">
       <Filter>Source Files\OpenglGraphics</Filter>
     </ClCompile>
+    <ClCompile Include="anisotropicTextureShader.cpp">
+      <Filter>Source Files\OpenglGraphics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="accuracy.h">
@@ -357,6 +360,9 @@
       <Filter>Header Files\Glad</Filter>
     </ClInclude>
     <ClInclude Include="cookTorranceTextureShader.h">
+      <Filter>Header Files\OpenglGraphics</Filter>
+    </ClInclude>
+    <ClInclude Include="anisotropicTextureShader.h">
       <Filter>Header Files\OpenglGraphics</Filter>
     </ClInclude>
   </ItemGroup>

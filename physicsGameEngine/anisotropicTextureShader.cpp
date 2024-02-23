@@ -1,17 +1,20 @@
 
-#include "anisotropicShader.h"
+
+#include "anisotropicTextureShader.h"
 
 using namespace pe;
 
-void AnisotropicShader::drawFaces(
+
+void AnisotropicTextureShader::drawFaces(
     const std::vector<glm::vec3>& faces,
     const std::vector<glm::vec3>& normals,
     const std::vector<glm::vec3>& tangents,
     const std::vector<glm::vec3>& bitangents,
+    const std::vector<glm::vec2>& texCoords,
     const glm::mat4& model,
     const glm::mat4& view,
     const glm::mat4& projection,
-    const glm::vec4& objectColor,
+    GLuint textureID,
     int activeLightSources,
     glm::vec3* lightSourcesPosition,
     glm::vec4* lightSourcesColor,
@@ -37,15 +40,20 @@ void AnisotropicShader::drawFaces(
     size_t totalSize = faces.size() * sizeof(glm::vec3)
         + normals.size() * sizeof(glm::vec3)
         + tangents.size() * sizeof(glm::vec3)
-        + bitangents.size() * sizeof(glm::vec3);
+        + bitangents.size() * sizeof(glm::vec3)
+        + texCoords.size() * sizeof(glm::vec3);
 
-    // Create a buffer to hold position, normal, tangent, and bitangent data
+    // Create a buffer to hold position, normal, and texture coordinate data
     std::vector<glm::vec3> combinedData;
-    combinedData.reserve(faces.size() + normals.size() + tangents.size() + bitangents.size());
+    combinedData.reserve(faces.size() + normals.size() + tangents.size() + bitangents.size()  + texCoords.size());
     combinedData.insert(combinedData.end(), faces.begin(), faces.end());
     combinedData.insert(combinedData.end(), normals.begin(), normals.end());
     combinedData.insert(combinedData.end(), tangents.begin(), tangents.end());
     combinedData.insert(combinedData.end(), bitangents.begin(), bitangents.end());
+    // Add texture coordinates to the combined data
+    for (const auto& texCoord : texCoords) {
+        combinedData.push_back(glm::vec3(texCoord, 0.0f));
+    }
 
     // Upload combined data to VBO
     glBufferData(
@@ -63,7 +71,6 @@ void AnisotropicShader::drawFaces(
         sizeof(glm::vec3),
         (void*)0
     );
-
     glEnableVertexAttribArray(0);
 
     // Specify vertex attribute pointers for normal
@@ -72,11 +79,11 @@ void AnisotropicShader::drawFaces(
         GL_FLOAT,
         GL_FALSE,
         sizeof(glm::vec3),
-        (void*)((faces.size()) * sizeof(glm::vec3))
+        (void*)(faces.size() * sizeof(glm::vec3))
     );
     glEnableVertexAttribArray(1);
 
-    // Specify vertex attribute pointers for tangent
+    // Specify vertex attribute pointers for texture coordinates
     glVertexAttribPointer(
         2, 3,
         GL_FLOAT,
@@ -86,7 +93,7 @@ void AnisotropicShader::drawFaces(
     );
     glEnableVertexAttribArray(2);
 
-    // Specify vertex attribute pointers for bitangent
+    // Specify vertex attribute pointers for normal
     glVertexAttribPointer(
         3, 3,
         GL_FLOAT,
@@ -96,20 +103,37 @@ void AnisotropicShader::drawFaces(
     );
     glEnableVertexAttribArray(3);
 
-    // Unbinds VAO
+    // Specify vertex attribute pointers for texture coordinates
+    glVertexAttribPointer(
+        4, 2,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(glm::vec3),
+        (void*)((faces.size() + normals.size() + tangents.size() + bitangents.size()) * sizeof(glm::vec3))
+    );
+    glEnableVertexAttribArray(4);
+
+    // Unbind VAO
     glBindVertexArray(0);
 
-    // Cleans up the VBO (it is still bound to VAO after unbinding VAO)
+    // Clean up VBO (it is still bound to VAO after unbinding VAO)
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     GLuint shaderProgram = shaderProgramObject.getShaderProgram();
     glUseProgram(shaderProgram);
 
+    // Bind texture
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, textureID);
+
+    // Set texture sampler uniform
+    GLint textureSamplerLoc = glGetUniformLocation(shaderProgram, "textureSampler");
+    glUniform1i(textureSamplerLoc, 0); // 0 is the texture unit index
+
     // Sets uniforms
     GLint viewLoc = glGetUniformLocation(shaderProgram, "view");
     GLint modelLoc = glGetUniformLocation(shaderProgram, "model");
     GLint projectionLoc = glGetUniformLocation(shaderProgram, "projection");
-    GLint objectColorLoc = glGetUniformLocation(shaderProgram, "objectColor");
     GLuint lightPosLoc = glGetUniformLocation(shaderProgram, "lightPos");
     GLuint lightColorsLoc = glGetUniformLocation(shaderProgram, "lightColors");
     GLuint numActiveLightsLoc = glGetUniformLocation(shaderProgram, "numActiveLights");
@@ -120,7 +144,6 @@ void AnisotropicShader::drawFaces(
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
     glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
-    glUniform4fv(objectColorLoc, 1, &objectColor[0]);
     glUniform3fv(lightPosLoc, activeLightSources, &lightSourcesPosition[0][0]);
     glUniform4fv(lightColorsLoc, activeLightSources, &lightSourcesColor[0][0]);
     glUniform1i(numActiveLightsLoc, activeLightSources);
@@ -128,11 +151,12 @@ void AnisotropicShader::drawFaces(
     glUniform1f(roughnessLoc, roughness);
     glUniform1f(fresnelLoc, fresnel);
 
+    // Bind VAO and draw
     glBindVertexArray(vao);
-
     glDrawArrays(GL_TRIANGLES, 0, faces.size());
     glBindVertexArray(0);
 
+    // Cleanup
     glDeleteVertexArrays(1, &vao);
     glDeleteBuffers(1, &vbo);
     glUseProgram(0);

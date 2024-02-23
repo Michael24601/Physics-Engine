@@ -44,6 +44,7 @@
 #include "anisotropicShader.h"
 #include "textureShader.h"
 #include "cookTorranceTextureShader.h"
+#include "anisotropicTextureShader.h"
 
 #include "sat.h"
 #include "contact.h"
@@ -77,7 +78,7 @@ int main() {
         sf::Style::Default, settings);
     window.setActive();
 
-    GLenum err = glewInit();
+    GLenum err = glewInit(); 
     if (GLEW_OK != err) {
         // GLEW initialization failed
         std::cerr << "Error: GLEW initialization failed: "
@@ -117,6 +118,7 @@ int main() {
     AnisotropicShader aniShader;
     TextureShader texShader;
     CookTorranceTextureShader cookTexShader;
+    AnisotropicTextureShader aniTexShader;
 
     // View matrix, used for positioning and angling the camera
     // Camera's position in world coordinates
@@ -220,6 +222,8 @@ int main() {
 
 
     GLuint texture = loadTexture("C:\\Users\\msaba\\OneDrive\\Desktop\\textureMaps\\dirty-metal.jpg");
+    GLuint texture2 = loadTexture("C:\\Users\\msaba\\OneDrive\\Desktop\\textureMaps\\world.jpg");
+    GLuint texture3 = loadTexture("C:\\Users\\msaba\\OneDrive\\Desktop\\textureMaps\\wood.jpg");
 
 
     while (window.isOpen()) {
@@ -384,11 +388,11 @@ int main() {
 
         // Data
         FaceData data = getPolyhedronFaceData(c1);
-        cookTexShader.drawFaces(data.vertices, data.normals, data.uvCoordinates,
-            identity, viewMatrix, projectionMatrix, texture, 1, lightPos,
-            lightColors, cameraPosition, 0.1, 0.5
+        cookTexShader.drawFaces(data.vertices, data.normals, 
+            data.uvCoordinates,
+            identity, viewMatrix, projectionMatrix, texture3, 1, lightPos,
+            lightColors, cameraPosition, 0.05, 0.1
         );
-      
 
         // Second shape
         data = getPolyhedronFaceData(c2);
@@ -398,8 +402,9 @@ int main() {
         );
 
         data = getPolyhedronFaceData(c3);
-        cookShader.drawFaces(data.vertices, data.normals, identity,
-            viewMatrix, projectionMatrix, colorRed, 1, lightPos,
+        cookTexShader.drawFaces(data.vertices, data.normals,
+            data.uvCoordinates, identity,
+            viewMatrix, projectionMatrix, texture2, 1, lightPos,
             lightColors, cameraPosition, 0.1, 1
         );
 
@@ -510,9 +515,9 @@ int main() {
     window.setView(view);
 
     sf::Clock clock;
-    real deltaT = 0.05;
+    real deltaT = 0.06;
 
-    int size = 25;
+    int size = 22;
     real strength = 0.5;
     real mass = 0.5;
     real damping = 0.5;
@@ -530,6 +535,7 @@ int main() {
     real rotationSpeed = 0.10;
     real angle = PI / 2;
     bool isButtonPressed[2] { false , false};
+
 
     while (window.isOpen()) {
 
@@ -568,7 +574,7 @@ int main() {
             }
         }
 
-        int numSteps = 25;
+        int numSteps = 20;
         real substep = deltaT / numSteps;
 
         while (numSteps--) {

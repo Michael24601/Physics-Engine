@@ -1,7 +1,6 @@
 
-
-#ifndef ANISOTROPIC_SHADER_H
-#define ANISOTROPIC_SHADER_H
+#ifndef ANISOTROPIC_TEXTURE_SHADER_H
+#define ANISOTROPIC_TEXTURE_SHADER_H
 
 #include "shaderProgram.h"
 #include "vector3D.h"
@@ -9,18 +8,20 @@
 #include "shaderInterface.h"
 
 
-const std::string anisotropicVertexShader = R"(
+const std::string anisotropicTextureVertexShader = R"(
     #version 330 core   
 
     layout(location = 0) in vec3 aPos;
     layout(location = 1) in vec3 aNormal;
     layout(location = 2) in vec3 aTangent;
     layout(location = 3) in vec3 aBitangent;
+    layout(location = 4) in vec2 aTexCoord;
 
     out vec3 FragPos;
     out vec3 Normal;
     out vec3 Tangent;
     out vec3 Bitangent;
+    out vec2 TexCoord;
 
     uniform mat4 model;
     uniform mat4 view;
@@ -31,19 +32,22 @@ const std::string anisotropicVertexShader = R"(
         Normal = mat3(transpose(inverse(model))) * aNormal;
         Tangent = mat3(transpose(inverse(model))) * aTangent;
         Bitangent = mat3(transpose(inverse(model))) * aBitangent;
+        TexCoord = aTexCoord;
         gl_Position = projection * view * vec4(FragPos, 1.0);
     }
 )";
 
-const std::string anisotropicFragmentShader = R"(
+
+const std::string anisotropicTextureFragmentShader = R"(
     #version 330 core
 
     in vec3 FragPos;
     in vec3 Normal;
     in vec3 Tangent;
     in vec3 Bitangent;
+    in vec2 TexCoord;
 
-    uniform vec4 objectColor;
+    uniform sampler2D textureSampler;
 
     #define MAX_LIGHTS 10
 
@@ -63,11 +67,13 @@ const std::string anisotropicFragmentShader = R"(
         vec3 finalDiffuse = vec3(0.0);
         vec3 finalSpecular = vec3(0.0);
 
+        vec3 texColor = texture(textureSampler, TexCoord).rgb;
+
         for (int i = 0; i < numActiveLights; ++i) {
             // Diffuse calculation
             vec3 lightDir = normalize(lightPos[i] - FragPos);
             float diff = max(dot(Normal, lightDir), 0.0);
-            vec3 diffuse = objectColor.rgb * diff;
+            vec3 diffuse = texColor * diff;
             finalDiffuse += diffuse;
 
             // Anisotropic specular calculation
@@ -87,16 +93,17 @@ const std::string anisotropicFragmentShader = R"(
 
         // Combines diffuse and specular with some ambient lighting (0.1 looks best)
         // Adjusts the ambient factor as needed
-        vec3 ambientColor = 0.1 * objectColor.rgb;
+        vec3 ambientColor = 0.1 * texColor;
         vec3 resultColor = finalDiffuse + finalSpecular + ambientColor;
 
-        FragColor = vec4(resultColor, objectColor.a);
+        FragColor = vec4(resultColor, 1.0);
     }
 )";
 
+
 namespace pe {
 
-    class AnisotropicShader {
+    class AnisotropicTextureShader {
 
     private:
 
@@ -107,9 +114,9 @@ namespace pe {
 
     public:
 
-        AnisotropicShader() : shaderProgramObject(
-            anisotropicVertexShader,
-            anisotropicFragmentShader
+        AnisotropicTextureShader() : shaderProgramObject(
+            anisotropicTextureVertexShader,
+            anisotropicTextureFragmentShader
         ) {}
 
         /*
@@ -124,10 +131,11 @@ namespace pe {
             const std::vector<glm::vec3>& normals,
             const std::vector<glm::vec3>& tangents,
             const std::vector<glm::vec3>& bitangents,
+            const std::vector<glm::vec2>& texCoords,
             const glm::mat4& model,
             const glm::mat4& view,
             const glm::mat4& projection,
-            const glm::vec4& objectColor,
+            GLuint textureID,
             int activeLightSources,
             glm::vec3* lightSourcesPosition,
             glm::vec4* lightSourcesColor,
