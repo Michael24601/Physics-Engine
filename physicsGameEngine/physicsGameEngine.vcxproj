@@ -167,7 +167,6 @@
     <ClCompile Include="diffuseLightingShader.cpp" />
     <ClCompile Include="diffuseSpecularLightingShader.cpp" />
     <ClCompile Include="drawingUtil.cpp" />
-    <ClCompile Include="glad.c" />
     <ClCompile Include="particle.cpp" />
     <ClCompile Include="particleBungeeForce.cpp" />
     <ClCompile Include="particleBuoyancy.cpp" />
@@ -208,8 +207,6 @@
     <ClInclude Include="cookTorranceTextureShader.h" />
     <ClInclude Include="curvedFace.h" />
     <ClInclude Include="cylinder.h" />
-    <ClInclude Include="glad.h" />
-    <ClInclude Include="khrplatform.h" />
     <ClInclude Include="openglUtility.h" />
     <ClInclude Include="pyramid.h" />
     <ClInclude Include="rectangularPrism.h" />
@@ -252,7 +249,6 @@
     <ClInclude Include="shaderProgram.h" />
     <ClInclude Include="solidColorShader.h" />
     <ClInclude Include="solidSphere.h" />
-    <ClInclude Include="stb_image.h" />
     <ClInclude Include="textureShader.h" />
     <ClInclude Include="vector2D.h" />
     <ClInclude Include="vector3D.h" />
