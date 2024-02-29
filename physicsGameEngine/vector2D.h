@@ -45,8 +45,14 @@ namespace pe {
 			x -= vector.x;
 			y -= vector.y;
 		}
+
+
+		void display() const {
+			std::cout << "x: " << x << ", y: " << y << "\n";
+		}
 	};
 }
+
 
 #endif
 

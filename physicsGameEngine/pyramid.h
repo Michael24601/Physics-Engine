@@ -80,6 +80,17 @@ namespace pe {
 			}
 		}
 
+
+		
+		Face* getFace(int index) const {
+			return faces[index];
+		}
+
+
+		Edge* getEdge(int index) const {
+			return edges[index];
+		}
+
 	};
 }
 

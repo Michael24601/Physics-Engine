@@ -81,7 +81,6 @@ namespace pe {
 		}
 
 
-
 	public:
 
 		real radius;

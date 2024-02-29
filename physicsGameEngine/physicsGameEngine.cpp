@@ -60,7 +60,6 @@
 #include "openglUtility.h"
 
 
-
 using namespace pe;
 using namespace std;
 
@@ -224,6 +223,7 @@ int main() {
     GLuint texture = loadTexture("C:\\Users\\msaba\\OneDrive\\Desktop\\textureMaps\\dirty-metal.jpg");
     GLuint texture2 = loadTexture("C:\\Users\\msaba\\OneDrive\\Desktop\\textureMaps\\world.jpg");
     GLuint texture3 = loadTexture("C:\\Users\\msaba\\OneDrive\\Desktop\\textureMaps\\wood.jpg");
+    GLuint texture4 = loadTexture("C:\\Users\\msaba\\OneDrive\\Desktop\\textureMaps\\coke.jpg");
 
 
     while (window.isOpen()) {
@@ -364,7 +364,8 @@ int main() {
         glm::vec4 colorBlue(0.5, 0.7, 1.0, 1.0);
         glm::vec4 colorGreen(0.3, 0.9, 0.3, 1.0);
         glm::vec4 colorYellow(0.9, 0.9, 0.5, 1.0);
-        glm::vec4 colorPurple = glm::vec4(0.4, 0.1, 0.8, 1.0);
+        glm::vec4 colorPurple(0.4, 0.1, 0.8, 1.0);
+        glm::vec4 colorGrey(0.7, 0.7, 0.7, 1.0);
 
         EdgeData cordData;
         cordData.vertices.push_back(convertToGLM(fixed1.position));
@@ -387,32 +388,44 @@ int main() {
         };
 
         // Data
-        FaceData data = getPolyhedronFaceData(c1);
+        FaceData data = getFaceData(c1);
         cookTexShader.drawFaces(data.vertices, data.normals, 
             data.uvCoordinates,
             identity, viewMatrix, projectionMatrix, texture3, 1, lightPos,
             lightColors, cameraPosition, 0.05, 0.1
         );
 
-        // Second shape
-        data = getPolyhedronFaceData(c2);
-        cookShader.drawFaces(data.vertices, data.normals, identity,
-            viewMatrix, projectionMatrix, colorBlue, 1, lightPos,
-            lightColors, cameraPosition, 0.05, 1
-        );
-
-        data = getPolyhedronFaceData(c3);
+        data = getFaceData(c3);
         cookTexShader.drawFaces(data.vertices, data.normals,
             data.uvCoordinates, identity,
             viewMatrix, projectionMatrix, texture2, 1, lightPos,
             lightColors, cameraPosition, 0.1, 1
         );
 
-        data = getPolyhedronFaceData(c4);
+        data = getFaceData(c4);
         phongShader.drawFaces(data.vertices, data.normals, identity,
             viewMatrix, projectionMatrix, colorGreen, 1, lightPos,
             lightColors, cameraPosition, 40
         );
+
+        FaceData d;
+        getFaceData(c2.faces[0], &d);
+        getFaceData(c2.faces[1], &d);
+        cookShader.drawFaces(d.vertices, d.normals, identity,
+            viewMatrix, projectionMatrix, colorGrey, 1, lightPos,
+            lightColors, cameraPosition, 0.05, 1
+        );
+
+        FaceData d2;
+        for (int i = 2; i < c2.faces.size(); i++) {
+            getFaceData(c2.faces[i], &d2);
+        }
+        cookTexShader.drawFaces(d2.vertices, d2.normals,
+            d2.uvCoordinates, identity,
+            viewMatrix, projectionMatrix, texture4, 1, lightPos,
+            lightColors, cameraPosition, 0.1, 1
+        );
+        
 
         window.display();
     }
@@ -425,7 +438,7 @@ int main() {
 #ifndef SIM
 
 int main() {
-
+    
 
     Order defaultEngineOrder = Order::COUNTER_CLOCKWISE;
 
@@ -650,9 +663,9 @@ int main() {
         //shader.drawEdges(edgeData.vertices, identity, viewMatrix, 
           //   projectionMatrix, colorWhite);
 
-        FaceData data = getMeshFaceData(mesh);
-        EdgeData edata = getMeshEdgeData(mesh);
-        FrameVectors fdata = getMeshFrameVectors(mesh, 30);
+        FaceData data = getFaceData(mesh);
+        EdgeData edata = getEdgeData(mesh);
+        FrameVectors fdata = getFrameVectors(mesh, 30);
 
         glm::vec3 lightPos[]{ glm::vec3(500, 0, 500), glm::vec3(-500, 0, -500) };
         glm::vec4 lightColor[]{ glm::vec4(1.0, 1.0, 1.0, 1.0),

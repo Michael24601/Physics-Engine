@@ -25,354 +25,222 @@ glm::vec2 pe::convertToGLM(const Vector2D& v) {
 }
 
 
-EdgeData pe::getPolyhedronEdgeData(const Polyhedron& polyhedron) {
-	std::vector<glm::vec3> flattenedPositions;
 
-	for (Edge* edge : polyhedron.edges) {
-		flattenedPositions.push_back(convertToGLM(edge->getVertex(0)));
-		flattenedPositions.push_back(convertToGLM(edge->getVertex(1)));
-	}
-	EdgeData data{ flattenedPositions };
-	return data;
+void pe::getEdgeData(Edge* edge, EdgeData* data) {
+	data->vertices.push_back(convertToGLM(edge->getVertex(0)));
+	data->vertices.push_back(convertToGLM(edge->getVertex(1)));
 }
 
 
-FrameVectors pe::getPolyhedronUniformFrameVectors(
+void pe::getUniformFrameVectors(
+	Face* face,
+	real length,
+	FrameVectors* data
+) {
+
+	data->normals.push_back(convertToGLM(face->getCentroid()));
+	Vector3D secondPoint = (face->getCentroid()
+		+ face->getNormal() * length);
+	data->normals.push_back(convertToGLM(secondPoint));
+
+	data->tangents.push_back(convertToGLM(face->getCentroid()));
+	secondPoint = (face->getCentroid()
+		+ face->getTangent() * length);
+	data->tangents.push_back(convertToGLM(secondPoint));
+
+	data->bitangents.push_back(convertToGLM(face->getCentroid()));
+	secondPoint = (face->getCentroid()
+		+ face->getBitangent() * length);
+	data->bitangents.push_back(convertToGLM(secondPoint));
+}
+
+
+void pe::getFrameVectors(
+	Face* face,
+	real length,
+	FrameVectors* data
+) {
+
+	for (int i = 0; i < face->getVertexNumber(); i++) {
+
+		data->normals.push_back(convertToGLM(face->getVertex(i)));
+		Vector3D secondPoint = face->getVertex(i)
+			+ face->getVertexNormal(i) * length;
+		data->normals.push_back(convertToGLM(secondPoint));
+
+		data->tangents.push_back(convertToGLM(face->getVertex(i)));
+		secondPoint = face->getVertex(i)
+			+ face->getVertexTangent(i) * length;
+		data->tangents.push_back(convertToGLM(secondPoint));
+
+		data->bitangents.push_back(convertToGLM(face->getVertex(i)));
+		secondPoint = face->getVertex(i)
+			+ face->getVertexBitangent(i) * length;
+		data->bitangents.push_back(convertToGLM(secondPoint));
+	}
+}
+
+
+void pe::getFaceData(Face* face, FaceData* data) {
+
+	/*
+		We need to triangulate the face, while keeping the vertices of
+		each triangle in the same order. Since the faces of polyhedra
+		are ordered (clockwise or counter-clockwise), we can achieve
+		this by anchoring the triangulation at the first vertex 0,
+		then connecting it to consecutive vertices: 0-1-2, 0-2-3...
+	*/
+	for (int i = 1; i < face->getVertexNumber() - 1; i++) {
+
+		int indexes[3]{ 0, i, i + 1 };
+		for (int j = 0; j < 3; j++) {
+			data->vertices.push_back(
+				convertToGLM(face->getVertex(indexes[j]))
+			);
+			data->normals.push_back(
+				convertToGLM(face->getVertexNormal(indexes[j]))
+			);
+
+			data->tangents.push_back(
+				convertToGLM(face->getVertexTangent(indexes[j]))
+			);
+			data->bitangents.push_back(
+				convertToGLM(face->getVertexBitangent(indexes[j]))
+			);
+
+			data->uvCoordinates.push_back(
+				convertToGLM(face->getTextureCoordinate(indexes[j]))
+			);
+		}
+	}
+}
+
+
+void pe::getUniformFaceData(Face* face, FaceData* data) {
+
+	/*
+		The normals of all vertices in the face are the same as
+		the face's.
+		Saeme for tangents, biTangents... etc. So we can convert
+		them here and save some time.
+	*/
+	glm::vec3 faceNormal = convertToGLM(face->getNormal());
+	glm::vec3 faceTangent = convertToGLM(face->getTangent());
+	glm::vec3 faceBitangent = convertToGLM(face->getBitangent());
+
+	/*
+		We need to triangulate the face, while keeping the vertices of
+		each triangle in the same order. Since the faces of polyhedra
+		are ordered (clockwise or counter-clockwise), we can achieve
+		this by anchoring the triangulation at the first vertex 0,
+		then connecting it to consecutive vertices: 0-1-2, 0-2-3...
+	*/
+	for (int i = 1; i < face->getVertexNumber() - 1; i++) {
+		int indexes[3]{ 0, i, i + 1 };
+		for (int j = 0; j < 3; j++) {
+			data->vertices.push_back(
+				convertToGLM(face->getVertex(indexes[j]))
+			);
+			data->normals.push_back(faceNormal);
+			data->tangents.push_back(faceTangent);
+			data->bitangents.push_back(faceBitangent);
+			data->uvCoordinates.push_back(
+				convertToGLM(face->getTextureCoordinate(indexes[j]))
+			);
+		}
+	}
+}
+
+
+EdgeData pe::getEdgeData(const Polyhedron& polyhedron) {
+	EdgeData data;
+	for (Edge* edge: polyhedron.edges) {
+		getEdgeData(edge, &data);
+	}
+	return data;
+}
+
+FrameVectors pe::getUniformFrameVectors(
 	const Polyhedron& polyhedron,
 	real length
 ) {
-
-	std::vector<glm::vec3> normals;
-	std::vector<glm::vec3> tangents;
-	std::vector<glm::vec3> bitangents;
-
+	FrameVectors data;
 	for (Face* face : polyhedron.faces) {
-
-		normals.push_back(convertToGLM(face->getCentroid()));
-		Vector3D secondPoint = (face->getCentroid()
-			+ face->getNormal() * length);
-		normals.push_back(convertToGLM(secondPoint));
-
-		tangents.push_back(convertToGLM(face->getCentroid()));
-		secondPoint = (face->getCentroid()
-			+ face->getTangent() * length);
-		tangents.push_back(convertToGLM(secondPoint));
-
-		bitangents.push_back(convertToGLM(face->getCentroid()));
-		secondPoint = (face->getCentroid()
-			+ face->getBitangent() * length);
-		bitangents.push_back(convertToGLM(secondPoint));
-
+		getUniformFrameVectors(face, length, &data);
 	}
-
-	FrameVectors data{ normals, tangents, bitangents };
 	return data;
 }
 
-
-FrameVectors pe::getPolyhedronFrameVectors(
+FrameVectors pe::getFrameVectors(
 	const Polyhedron& polyhedron,
 	real length
 ) {
-
-	std::vector<glm::vec3> normals;
-	std::vector<glm::vec3> tangents;
-	std::vector<glm::vec3> bitangents;
-
+	FrameVectors data;
 	for (Face* face : polyhedron.faces) {
-
-		for (int i = 0; i < face->getVertexNumber(); i++) {
-
-			normals.push_back(convertToGLM(face->getVertex(i)));
-			Vector3D secondPoint = face->getVertex(i)
-				+ face->getVertexNormal(i) * length;
-			normals.push_back(convertToGLM(secondPoint));
-
-			tangents.push_back(convertToGLM(face->getVertex(i)));
-			secondPoint = face->getVertex(i)
-				+ face->getVertexTangent(i) * length;
-			tangents.push_back(convertToGLM(secondPoint));
-
-			bitangents.push_back(convertToGLM(face->getVertex(i)));
-			secondPoint = face->getVertex(i)
-				+ face->getVertexBitangent(i) * length;
-			bitangents.push_back(convertToGLM(secondPoint));
-
-		}
+		getFrameVectors(face, length, &data);
 	}
-
-	FrameVectors data{ normals, tangents, bitangents };
 	return data;
 }
 
-
-FaceData pe::getPolyhedronFaceData(const Polyhedron& polyhedron) {
-
-	std::vector<glm::vec3> flattenedPositions;
-	std::vector<glm::vec3> flattenedNormals;
-	std::vector<glm::vec3> flattenedTangents;
-	std::vector<glm::vec3> flattenedBitangents;
-	std::vector<glm::vec2> flattenedUvCoordinates;
-
-	// Flattens the polyhedron data and compute the normals
+FaceData pe::getFaceData(const Polyhedron& polyhedron) {
+	FaceData data;
 	for (Face* face : polyhedron.faces) {
-
-		/*
-			We need to triangulate the face, while keeping the vertices of
-			each triangle in the same order. Since the faces of polyhedra
-			are ordered (clockwise or counter-clockwise), we can achieve
-			this by anchoring the triangulation at the first vertex 0,
-			then connecting it to consecutive vertices: 0-1-2, 0-2-3...
-		*/
-		for (int i = 1; i < face->getVertexNumber() - 1; i++) {
-			int indexes[3]{ 0, i, i + 1 };
-			for (int j = 0; j < 3; j++) {
-				flattenedPositions.push_back(
-					convertToGLM(face->getVertex(indexes[j]))
-				);
-				flattenedNormals.push_back(
-					convertToGLM(face->getVertexNormal(indexes[j]))
-				);
-
-				flattenedTangents.push_back(
-					convertToGLM(face->getVertexTangent(indexes[j]))
-				);
-				flattenedBitangents.push_back(
-					convertToGLM(face->getVertexBitangent(indexes[j]))
-				);
-
-				flattenedUvCoordinates.push_back(
-					convertToGLM(face->getTextureCoordinate(indexes[j]))
-				);
-			}
-		}
+		getFaceData(face, &data);
 	}
-
-	// Constructs the FaceData struct and return
-	FaceData data{
-		flattenedPositions,
-		flattenedNormals,
-		flattenedTangents,
-		flattenedBitangents,
-		flattenedUvCoordinates
-	};
 	return data;
 }
 
-
-FaceData pe::getUniformPolyhedronFaceData(const Polyhedron& polyhedron) {
-	std::vector<glm::vec3> flattenedPositions;
-	std::vector<glm::vec3> flattenedNormals;
-
-	// Flattens the polyhedron data
+FaceData pe::getUniformFaceData(const Polyhedron& polyhedron) {
+	FaceData data;
 	for (Face* face : polyhedron.faces) {
-
-		/*
-			The normals of all vertices in the face are the same as
-			the face's.
-		*/
-		glm::vec3 faceNormal = convertToGLM(face->getNormal());
-
-		/*
-			We need to triangulate the face, while keeping the vertices of
-			each triangle in the same order. Since the faces of polyhedra
-			are ordered (clockwise or counter-clockwise), we can achieve
-			this by anchoring the triangulation at the first vertex 0,
-			then connecting it to consecutive vertices: 0-1-2, 0-2-3...
-		*/
-		for (int i = 1; i < face->getVertexNumber() - 1; i++) {
-			int indexes[3]{ 0, i, i + 1 };
-			for (int j = 0; j < 3; j++) {
-				flattenedPositions.push_back(
-					convertToGLM(face->getVertex(indexes[j]))
-				);
-				flattenedNormals.push_back(faceNormal);
-			}
-		}
+		getUniformFaceData(face, &data);
 	}
-
-	// Construct the FaceData struct and return
-	FaceData data{
-		flattenedPositions,
-		flattenedNormals
-	};
 	return data;
 }
 
 
-
-FaceData pe::getMeshFaceData(const ParticleMesh& mesh) {
-
-	std::vector<glm::vec3> flattenedPositions;
-	std::vector<glm::vec3> flattenedNormals;
-	std::vector<glm::vec3> flattenedTangents;
-	std::vector<glm::vec3> flattenedBitangents;
-	std::vector<glm::vec2> flattenedUvCoordinates;
-
-	// Flattens the polyhedron data and compute the normals
-	for (CurvedFace* face : mesh.faces) {
-
-		/*
-			We need to triangulate the face, while keeping the vertices of
-			each triangle in the same order. Since the faces of polyhedra
-			are ordered (clockwise or counter-clockwise), we can achieve
-			this by anchoring the triangulation at the first vertex 0,
-			then connecting it to consecutive vertices: 0-1-2, 0-2-3...
-		*/
-		for (int i = 1; i < face->getVertexNumber() - 1; i++) {
-			int indexes[3]{ 0, i, i + 1 };
-			for (int j = 0; j < 3; j++) {
-				flattenedPositions.push_back(
-					convertToGLM(face->getVertex(indexes[j]))
-				);
-				flattenedNormals.push_back(
-					convertToGLM(face->getVertexNormal(indexes[j]))
-				);
-
-				flattenedTangents.push_back(
-					convertToGLM(face->getVertexTangent(indexes[j]))
-				);
-				flattenedBitangents.push_back(
-					convertToGLM(face->getVertexBitangent(indexes[j]))
-				);
-
-				flattenedUvCoordinates.push_back(
-					convertToGLM(face->getTextureCoordinate(indexes[j]))
-				);
-			}
-		}
-	}
-
-	// Constructs the FaceData struct and return
-	FaceData data{
-		flattenedPositions,
-		flattenedNormals,
-		flattenedTangents,
-		flattenedBitangents,
-		flattenedUvCoordinates
-	};
-	return data;
-}
-
-
-EdgeData pe::getMeshEdgeData(const ParticleMesh& mesh) {
-
-	std::vector<glm::vec3> flattenedPositions;
-
-	// Flattens the polyhedron data and compute the normals
+EdgeData pe::getEdgeData(const ParticleMesh& mesh) {
+	EdgeData data;
 	for (Edge* edge : mesh.edges) {
-		flattenedPositions.push_back(convertToGLM(edge->getVertex(0)));
-		flattenedPositions.push_back(convertToGLM(edge->getVertex(1)));
+		getEdgeData(edge, &data);
 	}
-	EdgeData data{ flattenedPositions };
 	return data;
 }
 
-
-FrameVectors pe::getMeshUniformFrameVectors(
+FrameVectors pe::getUniformFrameVectors(
 	const ParticleMesh& mesh,
 	real length
 ) {
-
-	std::vector<glm::vec3> normals;
-	std::vector<glm::vec3> tangents;
-	std::vector<glm::vec3> bitangents;
-
+	FrameVectors data;
 	for (Face* face : mesh.faces) {
-
-		normals.push_back(convertToGLM(face->getCentroid()));
-		Vector3D secondPoint = (face->getCentroid()
-			+ face->getNormal() * length);
-		normals.push_back(convertToGLM(secondPoint));
-
-		tangents.push_back(convertToGLM(face->getCentroid()));
-		secondPoint = (face->getCentroid()
-			+ face->getTangent() * length);
-		tangents.push_back(convertToGLM(secondPoint));
-
-		bitangents.push_back(convertToGLM(face->getCentroid()));
-		secondPoint = (face->getCentroid()
-			+ face->getBitangent() * length);
-		bitangents.push_back(convertToGLM(secondPoint));
-
+		getUniformFrameVectors(face, length, &data);
 	}
-
-	FrameVectors data{ normals, tangents, bitangents };
 	return data;
 }
 
-
-FrameVectors pe::getMeshFrameVectors(
+FrameVectors pe::getFrameVectors(
 	const ParticleMesh& mesh,
 	real length
 ) {
-
-	std::vector<glm::vec3> normals;
-	std::vector<glm::vec3> tangents;
-	std::vector<glm::vec3> bitangents;
-
+	FrameVectors data;
 	for (Face* face : mesh.faces) {
-
-		for (int i = 0; i < face->getVertexNumber(); i++) {
-
-			normals.push_back(convertToGLM(face->getVertex(i)));
-			Vector3D secondPoint = face->getVertex(i)
-				+ face->getVertexNormal(i) * length;
-			normals.push_back(convertToGLM(secondPoint));
-
-			tangents.push_back(convertToGLM(face->getVertex(i)));
-			secondPoint = face->getVertex(i)
-				+ face->getVertexTangent(i) * length;
-			tangents.push_back(convertToGLM(secondPoint));
-
-			bitangents.push_back(convertToGLM(face->getVertex(i)));
-			secondPoint = face->getVertex(i)
-				+ face->getVertexBitangent(i) * length;
-			bitangents.push_back(convertToGLM(secondPoint));
-
-		}
+		getFrameVectors(face, length, &data);
 	}
-
-	FrameVectors data{ normals, tangents, bitangents };
 	return data;
 }
 
-
-FaceData pe::getUniformMeshFaceData(const ParticleMesh& mesh) {
-	std::vector<glm::vec3> flattenedPositions;
-	std::vector<glm::vec3> flattenedNormals;
-
-	// Flattens the polyhedron data
+FaceData pe::getFaceData(const ParticleMesh& mesh) {
+	FaceData data;
 	for (Face* face : mesh.faces) {
-
-		/*
-			The normals of all vertices in the face are the same as
-			the face's.
-		*/
-		glm::vec3 faceNormal = convertToGLM(face->getNormal());
-
-		/*
-			We need to triangulate the face, while keeping the vertices of
-			each triangle in the same order. Since the faces of polyhedra
-			are ordered (clockwise or counter-clockwise), we can achieve
-			this by anchoring the triangulation at the first vertex 0,
-			then connecting it to consecutive vertices: 0-1-2, 0-2-3...
-		*/
-		for (int i = 1; i < face->getVertexNumber() - 1; i++) {
-			int indexes[3]{ 0, i, i + 1 };
-			for (int j = 0; j < 3; j++) {
-				flattenedPositions.push_back(
-					convertToGLM(face->getVertex(indexes[j]))
-				);
-				flattenedNormals.push_back(faceNormal);
-			}
-		}
+		getFaceData(face, &data);
 	}
+	return data;
+}
 
-	// Construct the FaceData struct and return
-	FaceData data{
-		flattenedPositions,
-		flattenedNormals
-	};
+FaceData pe::getUniformFaceData(const ParticleMesh& mesh) {
+	FaceData data;
+	for (Face* face : mesh.faces) {
+		getUniformFaceData(face, &data);
+	}
 	return data;
 }

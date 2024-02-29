@@ -167,6 +167,7 @@
     <ClCompile Include="diffuseLightingShader.cpp" />
     <ClCompile Include="diffuseSpecularLightingShader.cpp" />
     <ClCompile Include="drawingUtil.cpp" />
+    <ClCompile Include="face.cpp" />
     <ClCompile Include="particle.cpp" />
     <ClCompile Include="particleBungeeForce.cpp" />
     <ClCompile Include="particleBuoyancy.cpp" />

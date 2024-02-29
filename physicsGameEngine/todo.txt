@@ -203,3 +203,9 @@ Fix anisotropic shading.
 Fix vec2 issue in texture shading.
 
 Merge the lighting and texture shaders: don't repeat them.
+
+Add a destructor to the polyhedron.
+
+See how to map to uv coordinates from a segment in 3D space.
+(DONE, FIGRED IT OUT BY USING TANGENTS, BITANGENT, AND NORMALS
+AS BASIS VECTORS).

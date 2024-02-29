@@ -43,9 +43,6 @@
     <Filter Include="Source Files\OpenglGraphics">
       <UniqueIdentifier>{528a04ee-a99a-4fac-9ff7-2720c586fe4d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Primitive">
-      <UniqueIdentifier>{e5aad90b-164c-4750-bd25-a7f3e7990117}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\ParticleMesh">
       <UniqueIdentifier>{1aa70bbb-545d-4597-8b7f-bec87747f6db}</UniqueIdentifier>
     </Filter>
@@ -54,6 +51,15 @@
     </Filter>
     <Filter Include="Source Files\Interfaces">
       <UniqueIdentifier>{52cde102-5ed5-42d9-b616-32e02268d7fd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Polyhedron">
+      <UniqueIdentifier>{e5aad90b-164c-4750-bd25-a7f3e7990117}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Primitive">
+      <UniqueIdentifier>{49246ebe-a3d8-4983-ab6f-2430c2a94f09}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Primitive">
+      <UniqueIdentifier>{b34efdf8-9ae0-469b-8b55-b69dce2bc33d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -164,6 +170,9 @@
     </ClCompile>
     <ClCompile Include="anisotropicTextureShader.cpp">
       <Filter>Source Files\OpenglGraphics</Filter>
+    </ClCompile>
+    <ClCompile Include="face.cpp">
+      <Filter>Source Files\Primitive</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -309,31 +318,22 @@
       <Filter>Header Files\ParticleMesh</Filter>
     </ClInclude>
     <ClInclude Include="cone.h">
-      <Filter>Header Files\Primitive</Filter>
-    </ClInclude>
-    <ClInclude Include="curvedFace.h">
-      <Filter>Header Files\Primitive</Filter>
+      <Filter>Header Files\Polyhedron</Filter>
     </ClInclude>
     <ClInclude Include="cylinder.h">
-      <Filter>Header Files\Primitive</Filter>
-    </ClInclude>
-    <ClInclude Include="edge.h">
-      <Filter>Header Files\Primitive</Filter>
-    </ClInclude>
-    <ClInclude Include="face.h">
-      <Filter>Header Files\Primitive</Filter>
+      <Filter>Header Files\Polyhedron</Filter>
     </ClInclude>
     <ClInclude Include="polyhedron.h">
-      <Filter>Header Files\Primitive</Filter>
+      <Filter>Header Files\Polyhedron</Filter>
     </ClInclude>
     <ClInclude Include="pyramid.h">
-      <Filter>Header Files\Primitive</Filter>
+      <Filter>Header Files\Polyhedron</Filter>
     </ClInclude>
     <ClInclude Include="rectangularPrism.h">
-      <Filter>Header Files\Primitive</Filter>
+      <Filter>Header Files\Polyhedron</Filter>
     </ClInclude>
     <ClInclude Include="solidSphere.h">
-      <Filter>Header Files\Primitive</Filter>
+      <Filter>Header Files\Polyhedron</Filter>
     </ClInclude>
     <ClInclude Include="textureShader.h">
       <Filter>Header Files\OpenglGraphics</Filter>
@@ -346,6 +346,15 @@
     </ClInclude>
     <ClInclude Include="anisotropicTextureShader.h">
       <Filter>Header Files\OpenglGraphics</Filter>
+    </ClInclude>
+    <ClInclude Include="curvedFace.h">
+      <Filter>Header Files\Primitive</Filter>
+    </ClInclude>
+    <ClInclude Include="edge.h">
+      <Filter>Header Files\Primitive</Filter>
+    </ClInclude>
+    <ClInclude Include="face.h">
+      <Filter>Header Files\Primitive</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

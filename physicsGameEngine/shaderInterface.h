@@ -64,6 +64,9 @@ namespace pe {
 			The follow vectors contain lines of a certain length representing
 			each value, all stemming from the centroid of each polyhedron's
 			face.
+
+			The vectors alternate between the centroid (base of the vector)
+			and a point somewhere along its length.
 		*/
 		std::vector<glm::vec3> normals;
 		std::vector<glm::vec3> tangents;
@@ -85,16 +88,18 @@ namespace pe {
 	glm::vec2 convertToGLM(const Vector2D& v);
 
 
-	EdgeData getPolyhedronEdgeData(const Polyhedron& polyhedron);
+	// Appends the data to it
+	void getEdgeData(Edge* edge, EdgeData* data);
 
 
 	/*
 		Returns the polyhedron's frame vectors: normals, tangents, and
 		bitangents, for each face.
 	*/
-	FrameVectors getPolyhedronUniformFrameVectors(
-		const Polyhedron& polyhedron,
-		real length
+	void getUniformFrameVectors(
+		Face* face,
+		real length,
+		FrameVectors* data
 	);
 
 
@@ -102,46 +107,66 @@ namespace pe {
 		Returns the polyhedron's frame vectors: normals, tangents, and
 		bitangents, for each vertex.
 	*/
-	FrameVectors getPolyhedronFrameVectors(
-		const Polyhedron& polyhedron,
-		real length
+	void getFrameVectors(
+		Face* face,
+		real length,
+		FrameVectors* data
 	);
 
 
 	/*
 		Uses the individual vertex normals.
 	*/
-	FaceData getPolyhedronFaceData(const Polyhedron& polyhedron);
-	
+	void getFaceData(Face* face, FaceData* data);
+
 
 	/*
 		Uses the uniform face normals.
 		This won't differ for flat faced polyhedrons, but will return
 		a tessalated looking curved surface for curved polyhedra.
 	*/
-	FaceData getUniformPolyhedronFaceData(const Polyhedron& polyhedron);
+	void getUniformFaceData(Face* face, FaceData* data);
 
+	/*
+		Functions that can draw the whole Polyhedron.
+	*/
 
-	EdgeData getMeshEdgeData(const ParticleMesh& mesh);
+	EdgeData getEdgeData(const Polyhedron& polyhedron);
 
+	FrameVectors getUniformFrameVectors(
+		const Polyhedron& polyhedron,
+		real length
+	);
 
-	FrameVectors getMeshUniformFrameVectors(
+	FrameVectors getFrameVectors(
+		const Polyhedron& polyhedron,
+		real length
+	);
+
+	FaceData getFaceData(const Polyhedron& polyhedron);
+
+	FaceData getUniformFaceData(const Polyhedron& polyhedron);
+
+	/*
+		Functions that can draw the whole Mesh.
+	*/
+
+	EdgeData getEdgeData(const ParticleMesh& mesh);
+
+	FrameVectors getUniformFrameVectors(
 		const ParticleMesh& mesh,
 		real length
 	);
 
-
-	FrameVectors getMeshFrameVectors(
+	FrameVectors getFrameVectors(
 		const ParticleMesh& mesh,
 		real length
 	);
 
+	FaceData getFaceData(const ParticleMesh& mesh);
 
-	FaceData getUniformMeshFaceData(const ParticleMesh& mesh);
-
-
-	FaceData getMeshFaceData(const ParticleMesh& mesh);
+	FaceData getUniformFaceData(const ParticleMesh& mesh);
 
 }
 
-#endif SHADER_INTERFACE_H
+#endif

@@ -8,6 +8,24 @@ namespace pe {
 
 	class RectangularPrism : public Polyhedron {
 
+	private:
+
+		/*
+			Since we know how a rectangular prism looks, and the kinds of
+			faces it has, we can set each face's uv coordinates this way.
+		*/
+		void setUVCoordinates() {
+			std::vector<Vector2D> textureCoordinates{
+				Vector2D(0, 0),
+				Vector2D(0, 1),
+				Vector2D(1, 1),
+				Vector2D(1, 0)
+			};
+			for (Face* face: faces) {
+				face->setTextureCoordinates(textureCoordinates);
+			}
+		}
+
 	public:
 
 		real width;
@@ -45,6 +63,8 @@ namespace pe {
 
 			setEdges();
 			setFaces();
+
+			setUVCoordinates();
 		}
 
 
