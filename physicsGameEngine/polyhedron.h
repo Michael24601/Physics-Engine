@@ -29,12 +29,11 @@ namespace pe {
 		BoundingSphere boundingSphere;
 
 		Polyhedron(
-			RigidBody* body,
 			real mass,
 			const Vector3D& position,
 			const Matrix3x3& inertiaTensor,
 			const std::vector<Vector3D>& localVertices
-		) : body{ body },
+		) : body{ new RigidBody() },
 			localVertices{ localVertices },
 
 			boundingSphere(
@@ -99,6 +98,17 @@ namespace pe {
 				}
 			);
 			return furthestPoint;
+		}
+
+
+		~Polyhedron() {
+			delete body;
+			for (int i = 0; i < faces.size(); i++) {
+				delete faces[i];
+			}
+			for (int i = 0; i < edges.size(); i++) {
+				delete edges[i];
+			}
 		}
 
 	};

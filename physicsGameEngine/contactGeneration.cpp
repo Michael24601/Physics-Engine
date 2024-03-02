@@ -10,8 +10,16 @@ unsigned int pe::pointAndConvexPolyhedron(
     const Polyhedron& secondPolyhedron,
     std::vector<Contact>& data) {
 
-    // Transform the point into the local space of the polyhedron
-    Vector3D localPoint = polyhedron.body->transformMatrix.inverseTransform(point);
+    /*
+        We can either transform the point into the local basis of the
+        polyhedron using its inverse transform matrix, or we can keep
+        it as is, but use the normal vectors and vertices of the
+        polyhedron in global coordinates.
+
+        Here, we choose to keep it in global coordinates, as that is
+        the faster way.
+    */
+    Vector3D localPoint = point;
 
     // Initialize variables to track the closest face
     Vector3D closestFaceNormal;
@@ -20,7 +28,11 @@ unsigned int pe::pointAndConvexPolyhedron(
 
     // Iterate through each face of the convex polyhedron
     for (size_t i = 0; i < polyhedron.faces.size(); i++) {
-        // Get the face normal and any point on the face in local space
+
+        /*
+            In accordance with our decision, we get the face normal and
+            any point on the face in global space.
+        */
         Vector3D faceNormal = polyhedron.faces[i]->getNormal();
         Vector3D pointOnFace = polyhedron.faces[i]->getVertex(0);
 
@@ -50,8 +62,13 @@ unsigned int pe::pointAndConvexPolyhedron(
     }
 
     Contact contact;
-    // We transform the normal back to world space
-    contact.contactNormal = polyhedron.body->transformMatrix.transform(closestFaceNormal);
+    /*
+        The contact normal is the face normal in world coordinates.
+        So if we did our calculations in local coordinates (which we
+        didn't for efficiency) we'd have to use th inverse transform
+        matrix here.
+    */
+    contact.contactNormal = closestFaceNormal;
     contact.contactPoint = point;
     // Negative depth since the point is inside the polyhedron
     contact.penetration = -minDepth;
@@ -68,6 +85,7 @@ unsigned int pe::pointAndConvexPolyhedron(
 
     return 1;
 }
+
 
 unsigned int pe::edgeToEdge(
     const Edge& edgeA,

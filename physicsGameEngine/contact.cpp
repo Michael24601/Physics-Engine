@@ -184,13 +184,11 @@ void Contact::applyPositionChange(
 		// We have the linear amount of movement required by turning
 		// the rigid body (in angularMove[i]). We now need to
 		// calculate the desired rotation to achieve that.
-		if (angularMove[i] == 0)
-		{
+		if (angularMove[i] == 0){
 			// Easy case - no angular movement means no rotation.
 			angularChange[i].clear();
 		}
-		else
-		{
+		else{
 			// Work out the direction we'd like to rotate in.
 			Vector3D targetAngularDirection =
 				relativeContactPosition[i].vectorProduct(contactNormal);
@@ -207,19 +205,22 @@ void Contact::applyPositionChange(
 		// along the contact normal.
 		linearChange[i] = contactNormal * linearMove[i];
 
-		// Now we can start to apply the values we've calculated.
-		// Apply the linear movement
-		Vector3D pos = body[i]->position;
-		pos.linearCombination(contactNormal, linearMove[i]);
-		body[i]->position = pos;
-
-		// And the change in orientation
-		Quaternion q = body[i]->orientation;
-		q.addScaledVector(angularChange[i], ((real)1.0));
-		body[i]->orientation = q;
-
 		// Recalculates the derived data
-		body[i]->calculateDerivedData();
+		if (body[i]->isAwake) {
+
+			// Now we can start to apply the values we've calculated.
+			// Apply the linear movement
+			Vector3D pos = body[i]->position;
+			pos.linearCombination(contactNormal, linearMove[i]);
+			body[i]->position = pos;
+
+			// And the change in orientation
+			Quaternion q = body[i]->orientation;
+			q.addScaledVector(angularChange[i], ((real)1.0));
+			body[i]->orientation = q;
+
+			body[i]->calculateDerivedData();
+		}
 	}
 }
 
@@ -403,8 +404,10 @@ void Contact::applyVelocityChange(
 	velocityChange[0].linearCombination(impulse, body[0]->inverseMass);
 
 	// Apply the changes
-	body[0]->linearVelocity += velocityChange[0];
-	body[0]->angularVelocity += rotationChange[0];
+	if (body[0]->isAwake) {
+		body[0]->linearVelocity += velocityChange[0];
+		body[0]->angularVelocity += rotationChange[0];
+	}
 
 	if (body[1]){
 
@@ -415,8 +418,10 @@ void Contact::applyVelocityChange(
 		velocityChange[1].linearCombination(impulse, -body[1]->inverseMass);
 
 		// And apply them.
-		body[1]->linearVelocity += velocityChange[1];
-		body[1]->angularVelocity += rotationChange[1];
+		if (body[1]->isAwake) {
+			body[1]->linearVelocity += velocityChange[1];
+			body[1]->angularVelocity += rotationChange[1];
+		}
 	}
 }
 
@@ -427,11 +432,13 @@ void Contact::calculateDesiredDeltaVelocity(real duration) {
 
 	// Calculate the acceleration induced velocity accumulated this frame
 	real velocityFromAcc = 0;
+	
+	if (body[0]->isAwake) {
+		velocityFromAcc +=
+			(body[0]->lastFrameAcceleration.scalarProduct(contactNormal)) * duration;
+	}
 
-	velocityFromAcc +=
-		(body[0]->lastFrameAcceleration.scalarProduct(contactNormal)) * duration;
-
-	if (body[1]){
+	if (body[1] && body[1]->isAwake){
 		velocityFromAcc -=
 			(body[1]->lastFrameAcceleration.scalarProduct(contactNormal)) * duration;
 	}

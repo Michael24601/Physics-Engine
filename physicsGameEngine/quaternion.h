@@ -81,6 +81,14 @@ namespace pe {
 			}
 		}
 
+
+		Quaternion normalized() const {
+			Quaternion normalizedQuaternion = *this;
+			normalizedQuaternion.normalize();
+			return normalizedQuaternion;
+		}
+
+
 		// Multiplies two quaternions following the well known formula
 		void operator*=(const Quaternion& right) {
 			r = r * right.r - i * right.i - j * right.j - k * right.k;

@@ -135,14 +135,12 @@ namespace pe {
 		int segments;
 
 		Cylinder(
-			RigidBody* body,
 			real radius,
 			real length,
 			real mass,
 			int segments,
 			Vector3D position) :
 			Polyhedron(
-				body,
 				mass,
 				position,
 				Matrix3x3(

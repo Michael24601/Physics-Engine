@@ -69,9 +69,6 @@
     <ClCompile Include="vector3D.cpp">
       <Filter>Source Files\Core</Filter>
     </ClCompile>
-    <ClCompile Include="particleContactResolver.h">
-      <Filter>Header Files\ParticlePhysics</Filter>
-    </ClCompile>
     <ClCompile Include="anchoredSpringForce.cpp">
       <Filter>Source Files\ParticlePhysics</Filter>
     </ClCompile>
@@ -174,6 +171,9 @@
     <ClCompile Include="face.cpp">
       <Filter>Source Files\Primitive</Filter>
     </ClCompile>
+    <ClCompile Include="particleContactResolver.h">
+      <Filter>Header Files\ParticlePhysics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="accuracy.h">
@@ -213,12 +213,6 @@
       <Filter>Header Files\ParticlePhysics</Filter>
     </ClInclude>
     <ClInclude Include="particleCable.h">
-      <Filter>Header Files\ParticlePhysics</Filter>
-    </ClInclude>
-    <ClInclude Include="particleContact.h">
-      <Filter>Header Files\ParticlePhysics</Filter>
-    </ClInclude>
-    <ClInclude Include="particleContactGenerator.h">
       <Filter>Header Files\ParticlePhysics</Filter>
     </ClInclude>
     <ClInclude Include="particleWorld.h">
@@ -355,6 +349,12 @@
     </ClInclude>
     <ClInclude Include="face.h">
       <Filter>Header Files\Primitive</Filter>
+    </ClInclude>
+    <ClInclude Include="particleContactGenerator.h">
+      <Filter>Header Files\ParticlePhysics</Filter>
+    </ClInclude>
+    <ClInclude Include="particleContact.h">
+      <Filter>Header Files\ParticlePhysics</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

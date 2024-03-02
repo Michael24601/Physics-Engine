@@ -63,9 +63,11 @@
 using namespace pe;
 using namespace std;
 
-#define SIM
 
-#ifdef SIM
+#define SIM_3
+
+
+#ifdef SIM_1
 
 int main() {
 
@@ -154,22 +156,18 @@ int main() {
     real deltaT = 0.03;
 
     real side = 100;
-    RectangularPrism c1(new RigidBody(), side, side, side,
-        150, Vector3D(250, 0, -150));
+    RectangularPrism c1(side, side, side, 150, Vector3D(250, 0, -150));
 
     real height = 150;
     real radius = 50;
-    Cylinder c2(new RigidBody(), radius, height, 150, 20,
-        Vector3D(200, 0, 200));
+    Cylinder c2(radius, height, 150, 20, Vector3D(200, 0, 200));
 
     radius = 100;
-    SolidSphere c3(new RigidBody(), radius, 150, 20, 20,
-        Vector3D(-200, 0, -200));
+    SolidSphere c3(radius, 150, 20, 20, Vector3D(-200, 0, -200));
 
     height = 150;
     side = 100;
-    Pyramid c4(new RigidBody(), side, height, 150,
-        Vector3D(-200, 0, 200));
+    Pyramid c4(side, height, 150, Vector3D(-200, 0, 200));
 
 
     c1.body->angularDamping = 0.75;
@@ -264,6 +262,20 @@ int main() {
                 viewMatrix =
                     glm::lookAt(cameraPosition, cameraTarget, upVector);
             }
+            // Moves camera
+             // Rotates camera
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
+                cameraDistance *= 0.98;
+                cameraPosition *= 0.98;
+                viewMatrix =
+                    glm::lookAt(cameraPosition, cameraTarget, upVector);
+            }
+            else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
+                cameraDistance *= 1.02;
+                cameraPosition *= 1.02;
+                viewMatrix =
+                    glm::lookAt(cameraPosition, cameraTarget, upVector);
+            }
         }
 
         c1.body->calculateDerivedData();
@@ -318,26 +330,26 @@ int main() {
             if (isButtonPressed[0]) {
                 sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
                 sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);
-                c1.body->position.x = worldPos.x;
-                c1.body->position.y = worldPos.y;
+                c1.body->position.x = worldPos.x * 2;
+                c1.body->position.y = worldPos.y * 2;
             }
             else if (isButtonPressed[1]) {
                 sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
                 sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);
-                c2.body->position.x = worldPos.x;
-                c2.body->position.y = worldPos.y;
+                c2.body->position.x = worldPos.x * 2;
+                c2.body->position.y = worldPos.y * 2;
             }
             else if (isButtonPressed[2]) {
                 sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
                 sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);
-                c3.body->position.x = worldPos.x;
-                c3.body->position.y = worldPos.y;
+                c3.body->position.x = worldPos.x * 2;
+                c3.body->position.y = worldPos.y * 2;
             }
             else if (isButtonPressed[3]) {
                 sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
                 sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);
-                c4.body->position.x = worldPos.x;
-                c4.body->position.y = worldPos.y;
+                c4.body->position.x = worldPos.x * 2;
+                c4.body->position.y = worldPos.y * 2;
             }
 
             c1.body->integrate(substep);
@@ -435,7 +447,8 @@ int main() {
 
 #endif
 
-#ifndef SIM
+
+#ifdef SIM_2
 
 int main() {
     
@@ -686,6 +699,255 @@ int main() {
             lightColor
         );
         
+
+        window.display();
+    }
+
+    return 0;
+}
+
+#endif
+
+
+#ifdef SIM_3
+
+int main() {
+
+    // Needed for 3D rendering
+    sf::ContextSettings settings;
+    settings.depthBits = 24;
+    settings.antialiasingLevel = 8;
+    sf::RenderWindow window(sf::VideoMode(1200, 800), "Physics Simulation",
+        sf::Style::Default, settings);
+    window.setActive();
+
+    GLenum err = glewInit();
+    if (GLEW_OK != err) {
+        // GLEW initialization failed
+        std::cerr << "Error: GLEW initialization failed: "
+            << glewGetErrorString(err) << std::endl;
+        return -1;
+    }
+
+    // Sets up OpenGL states (for 3D)
+    // Makes objects in front of others cover them
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
+
+    // Set to clockwise or counter-clockwise depending on face vertex order
+    // (Counter Clockwise for us).
+    glFrontFace(GL_CCW);
+    // This only displays faces from one side, depending on the order of
+    // vertices, and what is considered front facce in the above option.
+    // Disable to show both faces (but lose on performance).
+    // Set to off in case our faces are both clockwise and counter clockwise
+    // (mixed), so we can't consisently render only one.
+    // Note that if we have opacity of face under 1 (opaque), it is
+    // definitely best not to render both sides (enable culling) so it
+    // appears correct.
+    glEnable(GL_CULL_FACE);
+
+    // Enables blending for transparency
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    glDepthFunc(GL_LEQUAL);
+
+    // Shaders
+    SolidColorShader shader;
+    DiffuseLightingShader lightShader;
+    DiffuseSpecularLightingShader phongShader;
+    CookTorranceShader cookShader;
+    AnisotropicShader aniShader;
+    TextureShader texShader;
+    CookTorranceTextureShader cookTexShader;
+    AnisotropicTextureShader aniTexShader;
+
+    // View matrix, used for positioning and angling the camera
+    // Camera's position in world coordinates
+    real cameraDistance = 600.0f;
+    glm::vec3 cameraPosition = glm::vec3(cameraDistance, 0.0f, 0.0f);
+    // Point the camera is looking at
+    glm::vec3 cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);
+    // Up vector
+    glm::vec3 upVector = glm::vec3(0.0f, 1.0f, 0.0f);
+    glm::mat4 viewMatrix = glm::lookAt(cameraPosition,
+        cameraTarget, upVector);
+
+    // Projection matrix, used for perspective
+    // Field of View (FOV) in degrees
+    real fov = 90.0f;
+    // Aspect ratio
+    real aspectRatio = window.getSize().x
+        / static_cast<real>(window.getSize().y);
+    // Near and far clipping planes
+    real nearPlane = 0.1f;
+    real farPlane = 10000.0f;
+
+    // Create a perspective projection matrix
+    glm::mat4 projectionMatrix = glm::perspective(glm::radians(fov),
+        aspectRatio, nearPlane, farPlane);
+
+    // Just in order to flip y axis
+    sf::View view = window.getDefaultView();
+    view.setSize(1200, -800);
+    view.setCenter(0, 0);
+    window.setView(view);
+
+    sf::Clock clock;
+    real deltaT = 0.03;
+
+    real side = 100;
+    RectangularPrism c1(side, side, side, 150, Vector3D(0, 0, 0));
+
+    RectangularPrism c2(1000, 50, 1000, 150, Vector3D(0, -400, -0));
+
+    c2.body->setAwake(false);
+
+    c1.body->angularDamping = 0.75;
+    c1.body->linearDamping = 0.90;
+
+    c1.body->orientation = Quaternion(1, 0.5, 0.7, 0.3).normalized();
+
+    RigidBodyGravity g(Vector3D(0, -10, 0));
+    Vector3D origin;
+
+    real rotationSpeed = 0.1;
+    real angle = PI / 2;
+    bool isButtonPressed[]{
+        false
+    };
+
+    while (window.isOpen()) {
+
+        sf::Event event;
+        while (window.pollEvent(event))
+        {
+            if (event.type == sf::Event::Closed)
+                window.close();
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::R)) {
+                isButtonPressed[0] = true;
+            }
+            else if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
+                isButtonPressed[0] = isButtonPressed[1] =
+                    isButtonPressed[2] = isButtonPressed[3] = false;
+            }
+            // Rotates camera
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
+                angle += rotationSpeed;
+                cameraPosition.x = sin(angle) * cameraDistance;
+                cameraPosition.z = cos(angle) * cameraDistance;
+                viewMatrix =
+                    glm::lookAt(cameraPosition, cameraTarget, upVector);
+            }
+            else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
+                angle -= rotationSpeed;
+                cameraPosition.x = sin(angle) * cameraDistance;
+                cameraPosition.z = cos(angle) * cameraDistance;
+                viewMatrix =
+                    glm::lookAt(cameraPosition, cameraTarget, upVector);
+            }
+            // Moves camera
+             // Rotates camera
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
+                cameraDistance *= 0.98;
+                cameraPosition *= 0.98;
+                viewMatrix =
+                    glm::lookAt(cameraPosition, cameraTarget, upVector);
+            }
+            else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
+                cameraDistance *= 1.02;
+                cameraPosition *= 1.02;
+                viewMatrix =
+                    glm::lookAt(cameraPosition, cameraTarget, upVector);
+            }
+        }
+
+        c1.body->calculateDerivedData();
+        c2.body->calculateDerivedData();
+
+        int numSteps = 5;
+        real substep = deltaT / numSteps;
+
+        while (numSteps--) {
+
+            g.updateForce(c1.body, substep);
+
+            std::vector<Contact> contacts;
+            // Here we check for collision
+
+            
+            if (testIntersection(c1, c2)) {
+                returnContacts(c1, c2, contacts);
+            }
+
+            EdgeData contactEdges;
+            for (Contact& contact : contacts) {
+                // Stores drawing data
+                contactEdges.vertices.push_back(convertToGLM(contact.contactPoint));
+                real length = 100;
+                Vector3D otherPoint = contact.contactPoint +
+                    contact.contactNormal * length;
+                contactEdges.vertices.push_back(convertToGLM(otherPoint));
+
+                contact.friction = 0.5;
+                contact.restitution = 0.4;
+            }
+
+            CollisionResolver resolver(5, 5);
+            resolver.resolveContacts(contacts.data(), contacts.size(), substep);
+
+
+            if (isButtonPressed[0]) {
+                sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
+                sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);
+                c1.body->position.x = worldPos.x * 2;
+                c1.body->position.y = worldPos.y * 2;
+                c1.body->position.z = worldPos.x * 2;
+            }
+
+            c1.body->integrate(substep);
+
+            c1.update();
+            c2.update();
+        }
+
+        window.clear(sf::Color::Black);
+        // Clears the depth buffer (for 3D)
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        // Spring/Cable
+        // Note that the model is the identity since the cable is in world
+        // coordinates
+        glm::mat4 identity = glm::mat4(1.0);
+        glm::vec4 colorWhite(1.0, 1.0, 1.0, 1.0);
+        glm::vec4 colorRed(0.8, 0.1, 0.1, 1.0);
+        glm::vec4 colorBlue(0.5, 0.7, 1.0, 1.0);
+        glm::vec4 colorGreen(0.3, 0.9, 0.3, 1.0);
+        glm::vec4 colorYellow(0.9, 0.9, 0.5, 1.0);
+        glm::vec4 colorPurple(0.4, 0.1, 0.8, 1.0);
+        glm::vec4 colorGrey(0.7, 0.7, 0.7, 1.0);
+
+        // Shape
+        glm::vec3 lightPos[]{
+            glm::vec3(0.0f, 100.0f, 0.0f),
+        };
+        glm::vec4 lightColors[]{
+            glm::vec4(1.0f, 1.0f, 1.0f, 0.6f),
+        };
+
+        // Data
+        FaceData data = getFaceData(c1);
+        cookShader.drawFaces(data.vertices, data.normals,
+            identity, viewMatrix, projectionMatrix, colorPurple, 1, lightPos,
+            lightColors, cameraPosition, 0.05, 0.1
+        );
+        data = getFaceData(c2);
+        cookShader.drawFaces(data.vertices, data.normals,
+            identity, viewMatrix, projectionMatrix, colorGreen, 1, lightPos,
+            lightColors, cameraPosition, 0.05, 0.1
+        );
+
 
         window.display();
     }

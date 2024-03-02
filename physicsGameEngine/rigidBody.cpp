@@ -232,3 +232,7 @@ Vector3D RigidBody::getPointInLocalCoordinates(const Vector3D& point) const {
 	return transformMatrix.inverseTransform(point);
 }
 
+
+void RigidBody::setAwake(bool isAwake){
+	this->isAwake = isAwake;
+}

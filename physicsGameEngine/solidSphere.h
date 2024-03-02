@@ -88,14 +88,12 @@ namespace pe {
 		int longitudeSegments;
 
 		SolidSphere(
-			RigidBody* body,
 			real radius,
 			real mass,
 			int latitudeSegments,
 			int longtitudeSegments,
 			Vector3D position) :
 			Polyhedron(
-				body,
 				mass,
 				position,
 				Matrix3x3(

@@ -147,7 +147,11 @@ namespace pe {
 
 	public:
 
-		RigidBody() {};
+
+		bool isAwake;
+
+
+		RigidBody() : isAwake{true} {};
 
 		/*
 			Calculates internal data of the object based on its state.
@@ -226,6 +230,10 @@ namespace pe {
 			in local coordinates using the transform matrix.
 		*/
 		Vector3D getPointInLocalCoordinates(const Vector3D& point) const;
+
+
+		// Sets the wake status
+		void setAwake(bool isAwake);
 
 	};
 }

@@ -16,13 +16,11 @@ namespace pe {
 		real height;
 
 		Pyramid(
-			RigidBody* body, 
 			real side, 
 			real height, 
 			real mass,
 			Vector3D position) : 
 			Polyhedron(
-				body,
 				mass,
 				position,
 				Matrix3x3(
