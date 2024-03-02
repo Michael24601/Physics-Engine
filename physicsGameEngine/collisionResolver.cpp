@@ -130,8 +130,8 @@ void CollisionResolver::adjustVelocities(
 	{
 		// Find contact with maximum magnitude of probable velocity change.
 		real max = velocityEpsilon;
-		unsigned index = numContacts;
-		for (unsigned i = 0; i < numContacts; i++)
+		unsigned int index = numContacts;
+		for (unsigned int i = 0; i < numContacts; i++)
 		{
 			if (c[i].desiredDeltaVelocity > max)
 			{
@@ -148,14 +148,14 @@ void CollisionResolver::adjustVelocities(
 		// With the change in velocity of the two bodies, the update of
 		// contact velocities means that some of the relative closing
 		// velocities need recomputing.
-		for (unsigned i = 0; i < numContacts; i++)
+		for (unsigned int i = 0; i < numContacts; i++)
 		{
 			// Check each body in the contact
-			for (unsigned b = 0; b < 2; b++) if (c[i].body[b])
+			for (unsigned int b = 0; b < 2; b++) if (c[i].body[b])
 			{
 				// Check for a match with each body in the newly
 				// resolved contact
-				for (unsigned d = 0; d < 2; d++)
+				for (unsigned int d = 0; d < 2; d++)
 				{
 					if (c[i].body[b] == c[index].body[d])
 					{

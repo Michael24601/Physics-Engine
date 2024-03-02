@@ -49,11 +49,8 @@ namespace pe {
     /*
         In this function we test all vertices in both polyhedra against the
         other, as well as all combinations of edges. We dont have to
-        resolve each found contact in a single collision, but resolving more
-        of them is more accurate, and the function returns the number of
-        contacts to let the caller know how many contacts were generated,
-        so the caller can decide how many to resolve based on the accuracy
-        and performance tradeoff.
+        resolve each found contact in a single collision, and we should
+        instead choose the best one.
     */
     int returnContacts(const Polyhedron& p1, const Polyhedron& p2,
         std::vector<Contact>& contactsToBeResolved);

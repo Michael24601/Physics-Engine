@@ -94,7 +94,7 @@ unsigned int pe::edgeToEdge(
     const Polyhedron& p2,
     std::vector<Contact>& data) {
 
-    // We initialize variables to track the shallowest penetration
+    // Initialize variables to track the shallowest penetration
     real minPenetration = std::numeric_limits<real>::max();
     // And corresponding edge pair
     Contact contact;
@@ -122,7 +122,7 @@ unsigned int pe::edgeToEdge(
     real t = dirB.vectorProduct(offset).magnitude() / det;
 
     // Check if edges intersect within their segments
-    if (s >= 0 && s <= 1 && t >= 0 && t <= 1) {
+    if (s >= 0 && s <= 1 && t >= 0 && t <= 1 && det > std::numeric_limits<real>::epsilon()) {
         // Calculate penetration depth (negative if edges overlap)
         real penetration = std::min(s, t);
 
@@ -132,19 +132,11 @@ unsigned int pe::edgeToEdge(
 
             // Calculate contact normal (perpendicular to the edges)
             contact.contactNormal = dirA.vectorProduct(dirB);
-            // Check if the magnitude of the normal is not close to zero before normalization
-            if (contact.contactNormal.magnitudeSquared() > std::numeric_limits<real>::epsilon()) {
-                contact.contactNormal.normalize();
-            }
+            contact.contactNormal.normalize();
 
             // Calculate contact point on edgeA
             contact.contactPoint = a0 + dirA * s;
 
-            /*
-                body[0] is the one in respect to whom the contact
-                normal is pointing. The contact normal of body[1] is
-                the opposite of that which is saved in the contact.
-            */
             contact.body[0] = p1.body;
             contact.body[1] = p2.body;
         }
@@ -174,9 +166,18 @@ int pe::returnContacts(
     for (const Vector3D& vertex : p2.globalVertices) {
         pointAndConvexPolyhedron(p1, vertex, p2, contacts);
     }
-    for (Edge* edge1 : p1.edges) {
-        for (Edge* edge2 : p2.edges) {
-            edgeToEdge(*edge1, *edge2, p1, p2, contacts);
+
+    /*
+        Is it best not to have both point to face and edge to edge
+        contacts in the same frame, as it can lead to unexpected
+        behavior, so we only check for edge to edge contact when
+        there aren't any point to face contacts.
+    */
+    if (contacts.empty()) {
+        for (Edge* edge1 : p1.edges) {
+            for (Edge* edge2 : p2.edges) {
+                edgeToEdge(*edge1, *edge2, p1, p2, contacts);
+            }
         }
     }
 

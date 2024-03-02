@@ -428,25 +428,36 @@ void Contact::applyVelocityChange(
 
 
 void Contact::calculateDesiredDeltaVelocity(real duration) {
+
 	const static real velocityLimit = (real)0.25f;
 
 	// Calculate the acceleration induced velocity accumulated this frame
 	real velocityFromAcc = 0;
 	
+	/*
+		This part here in this function is done so that the velocity
+		built up from last frame's acceleration does not cause instability
+		when we have resting contacts (object at rest, not moving).
+		The instability occurs if the velocity built up each frame when the
+		object slightly clips into another causes a larger than expected
+		impulse, so we get rid of it.
+	*/
 	if (body[0]->isAwake) {
 		velocityFromAcc +=
 			(body[0]->lastFrameAcceleration.scalarProduct(contactNormal)) * duration;
 	}
-
 	if (body[1] && body[1]->isAwake){
 		velocityFromAcc -=
 			(body[1]->lastFrameAcceleration.scalarProduct(contactNormal)) * duration;
 	}
 
-	// If the velocity is very slow, limit the restitution
+	/*
+		In the same vein, when the velocity is very slow, indicating that
+		the object is at rest, we limit the restitutuion so that the resting
+		contact impulse does not cause bouncing.
+	*/
 	real thisRestitution = restitution;
-	if (realAbs(contactVelocity.x) < velocityLimit)
-	{
+	if (realAbs(contactVelocity.x) < velocityLimit){
 		thisRestitution = (real)0.0f;
 	}
 

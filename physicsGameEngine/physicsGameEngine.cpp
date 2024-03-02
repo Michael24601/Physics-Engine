@@ -765,7 +765,7 @@ int main() {
 
     // View matrix, used for positioning and angling the camera
     // Camera's position in world coordinates
-    real cameraDistance = 600.0f;
+    real cameraDistance = 1000.0f;
     glm::vec3 cameraPosition = glm::vec3(cameraDistance, 0.0f, 0.0f);
     // Point the camera is looking at
     glm::vec3 cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -795,19 +795,19 @@ int main() {
     window.setView(view);
 
     sf::Clock clock;
-    real deltaT = 0.03;
+    real deltaT = 0.035;
 
-    real side = 100;
+    real side = 150;
     RectangularPrism c1(side, side, side, 150, Vector3D(0, 0, 0));
 
     RectangularPrism c2(1000, 50, 1000, 150, Vector3D(0, -400, -0));
 
     c2.body->setAwake(false);
 
-    c1.body->angularDamping = 0.75;
-    c1.body->linearDamping = 0.90;
+    c1.body->angularDamping = 0.95;
+    c1.body->linearDamping = 0.95;
 
-    c1.body->orientation = Quaternion(1, 0.5, 0.7, 0.3).normalized();
+    c1.body->orientation = Quaternion(1, 0.2, 1, 0.3).normalized();
 
     RigidBodyGravity g(Vector3D(0, -10, 0));
     Vector3D origin;
@@ -881,17 +881,9 @@ int main() {
                 returnContacts(c1, c2, contacts);
             }
 
-            EdgeData contactEdges;
             for (Contact& contact : contacts) {
-                // Stores drawing data
-                contactEdges.vertices.push_back(convertToGLM(contact.contactPoint));
-                real length = 100;
-                Vector3D otherPoint = contact.contactPoint +
-                    contact.contactNormal * length;
-                contactEdges.vertices.push_back(convertToGLM(otherPoint));
-
-                contact.friction = 0.5;
-                contact.restitution = 0.4;
+                contact.friction = 0.0;
+                contact.restitution = 1;
             }
 
             CollisionResolver resolver(5, 5);
@@ -940,12 +932,12 @@ int main() {
         FaceData data = getFaceData(c1);
         cookShader.drawFaces(data.vertices, data.normals,
             identity, viewMatrix, projectionMatrix, colorPurple, 1, lightPos,
-            lightColors, cameraPosition, 0.05, 0.1
+            lightColors, cameraPosition, 0.1, 0.05
         );
         data = getFaceData(c2);
         cookShader.drawFaces(data.vertices, data.normals,
             identity, viewMatrix, projectionMatrix, colorGreen, 1, lightPos,
-            lightColors, cameraPosition, 0.05, 0.1
+            lightColors, cameraPosition, 0.1, 0.05
         );
 
 
