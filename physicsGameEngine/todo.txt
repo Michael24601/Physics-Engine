@@ -68,38 +68,39 @@ first value is being set. Maybe use a counter.
 
 Figure out what offset should be when we don't want to rotate,
 and add it by default in transform. Make sure its updated every
-frame.
+frame (DONE).
 
 Make sure that the change in the collision of a box and plane
-works.
+works (DONE, FIXED THE POINT AND FACE FUNCTION).
 
 Should the normal in the face class be just a fucntion, which
 means the values are recalculated each time it's called, wasting
 time, or shouldi it be a variable updated each frame, saving time,
-but forcing us to update it? Solve this.
+but forcing us to update it? Solve this (DONE, RESOLVED).
 
 Ensure whether SAT expects the normal to be calculated clockwise
-from the vertices, or if it doesn't matter.
+from the vertices, or if it doesn't matter (DONE, IT'S ALWAYS
+COUNTER CLOCKWISE).
 
 Is it better practice to recalculate the normal vector from the
 vertices each time? or transform the normal vector each frame using
-the transform of the body?
+the transform of the body? (DONE, RESOLVED)
 
 Remove the specific collision detection / contact generation and use
-SAT and a general contact generation function.
+SAT and a general contact generation function (DONE).
 
 Make sure BHV is optimized and remains balanced after additions and
 removals.
 
-Place your code in folders so it's more organized.
+Place your code in folders so it's more organized (DONE, USING FILTERS).
 
 Detail and resolve the tradeoff between recalcuting normals, bouding
 volume spheres each frame (accuracy) vs once, and then transforming
-them (speed).
+them (speed) (DONE).
 
 Test bounding volume hierarchy visually.
 
-Test collision contact generation (not resoltuion).
+Test collision contact generation (not resoltuion) (DONE).
 
 Instead of multiplying directily by the transform matrix, use
 the transform matrice's built in transform function.
@@ -127,25 +128,25 @@ the same as the face's, while in a sphere, the vertex normals are
 can be calculated individually for the best effect). This will help,
 as it ensures the same shaders can be used for any type of primitive,
 and special shaders no longer need to be employed. It also removes
-some of the calculations from the shader programs.
+some of the calculations from the shader programs (DONE).
 
 Add checking in primitive for counter clockwise order.
 
 Add a comment to setSkewSymmetric function in the matrix class (DONE).
 
-One of the two contact generation types isn't working well.
+One of the two contact generation types isn't working well (DONE).
 
 Also, the total number of iterations in the collision resolution 
-causes the objects to fly to infinity when it's set to more than 1.
+causes the objects to fly to infinity when it's set to more than 1 (DONE).
 
-Add comments explaining the tessalation ouptut format for each shape.
+Add comments explaining the tessalation ouptut format for each shape (DONE).
 
 Add an isAwake state for the rigidBody class. This should be checked
-inside the contact functions before we integrate them or move them.
+inside the contact functions before we integrate them or move them (DONE).
 
 Add for each shape a function that initially calculates the furthest
 point in the polyhedron from the center. Which we can then use for the
-coarse collision detection.
+coarse collision detection (DONE).
 
 Implement the bounding volume as inheritance instead of templates,
 with an overriden function that checks if two bounding volumes overlap
@@ -158,18 +159,18 @@ on rigid bodies, not polyhedrons, which is fine, but also means that
 when we do get an array of potential contacts, we have to then map
 them back to their polyhedrons. One way to do that would be to send
 the entire polyhedron to the hierarchy, not just the, body, or have
-a way of mapping the body to the polyhedron in a quick way.
+a way of mapping the body to the polyhedron in a quick way (DONE).
 
 Prevent the cloth mesh from passing through itself.
 
-Implement substeppig in a more reusable way.
+Implement substeppig in a more reusable way (DONE).
 
 Redesign the way the polyhedrons are partitioned into faces so that
 the faces are not recreated each frame, maybe by using pointers to
 the vertices and an update function. Just in general those areas needd
-refactoring.
+refactoring (DONE).
 
-Delete the not equal operator. 
+Delete the not equal operator (DONE). 
 
 Fix the angle constraint (DONE).
 
@@ -198,14 +199,26 @@ global, not local vertices (DONE).
 
 Merge particleMesh and cloth, get rid of cord (DONE).
 
-Fix anisotropic shading.
+Fix anisotropic shading (DONE).
 
-Fix vec2 issue in texture shading.
+Fix vec2 issue in texture shading (DONE).
 
 Merge the lighting and texture shaders: don't repeat them.
 
-Add a destructor to the polyhedron.
+Add a destructor to the polyhedron (DONE).
 
 See how to map to uv coordinates from a segment in 3D space.
 (DONE, FIGRED IT OUT BY USING TANGENTS, BITANGENT, AND NORMALS
 AS BASIS VECTORS).
+
+Fix the resting contacts issue where after a few minutes the
+objects fall through each other.
+
+The hinge forces work, but because they are applied at the centre
+of the bodies, the second body does not dangle off teh first as there
+is no rotation. Moreover, adding the force at the connection point
+makes it unstable as hell. We need a better hinge.
+
+The other kind of joint, done using contacts, is incredibly unstable.
+
+Spring joints are too weak as stiff springs are an issue.

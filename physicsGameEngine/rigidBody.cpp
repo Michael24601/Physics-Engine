@@ -137,6 +137,11 @@ void RigidBody::clearAccumulators() {
 
 void RigidBody::integrate(real duration) {
 
+	// If the body is not awake, we don't integrate it
+	if (!isAwake) {
+		return;
+	}
+
 	/*
 		Clears the last frame acceleration valueand simply places the
 		constant non-changing acceleration in it. Then adds the

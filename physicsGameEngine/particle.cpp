@@ -19,6 +19,12 @@ real Particle::getMass() const {
 }
 
 void Particle::integrate(real duration) {
+
+	// If the body is not awake, we don't integrate it
+	if (!isAwake) {
+		return;
+	}
+
 	if (inverseMass > 0) {
 		assert(duration > 0.0);
 		/*
@@ -51,8 +57,13 @@ void Particle::integrate(real duration) {
 
 
 void Particle::verletIntegrate(real duration) {
-	if (inverseMass > 0) {
 
+	// If the body is not awake, we don't integrate it
+	if (!isAwake) {
+		return;
+	}
+
+	if (inverseMass > 0) {
 		// Converts the time so it is calibrated to be the same as Euler
 		duration *= 5;
 

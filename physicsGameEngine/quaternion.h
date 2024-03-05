@@ -89,6 +89,17 @@ namespace pe {
 		}
 
 
+		Quaternion operator*(const Quaternion& right) {
+			Quaternion q(
+				r * right.r - i * right.i - j * right.j - k * right.k,
+				r * right.i + i * right.r + j * right.k - k * right.j,
+				r * right.j + j * right.r + k * right.i - i * right.k,
+				r * right.k + k * right.r + i * right.j - j * right.i
+			);
+			return q;
+		}
+
+
 		// Multiplies two quaternions following the well known formula
 		void operator*=(const Quaternion& right) {
 			r = r * right.r - i * right.i - j * right.j - k * right.k;
@@ -127,6 +138,36 @@ namespace pe {
 		void rotateByVector(const Vector3D& vector) {
 			Quaternion q(0, vector.x, vector.y, vector.z);
 			(*this) *= q;
+		}
+
+
+		real toAxisAngle(Vector3D& axis) const {
+			// Ensure the quaternion is normalized
+			Quaternion q = normalized();
+
+			// Calculate the angle
+			real angle = real(2.0) * acos(q.r);
+
+			// Calculate the axis
+			// Assuming quaternion is normalized, otherwise, calculate the square root of (1 - r^2)
+			real s = realSqrt(real(1.0) - q.r * q.r);
+			if (s < real(0.001)) {
+				// If the angle is very close to 0, the axis can be anything
+				axis.x = real(1.0);
+				axis.y = axis.z = real(0.0);
+			}
+			else {
+				axis.x = q.i / s;
+				axis.y = q.j / s;
+				axis.z = q.k / s;
+			}
+
+			return angle;
+		}
+
+
+		Quaternion conjugated() const {
+			return Quaternion(r, -i, -j, -k);
 		}
 	};
 }

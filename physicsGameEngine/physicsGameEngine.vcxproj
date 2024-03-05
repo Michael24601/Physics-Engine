@@ -197,6 +197,7 @@
     <ClInclude Include="accuracy.h" />
     <ClInclude Include="anisotropicShader.h" />
     <ClInclude Include="anisotropicTextureShader.h" />
+    <ClInclude Include="ballJoint.h" />
     <ClInclude Include="BVHNode.h" />
     <ClInclude Include="boundingSphere.h" />
     <ClInclude Include="boundingVolumeHierarchy.h" />
@@ -208,6 +209,8 @@
     <ClInclude Include="cookTorranceTextureShader.h" />
     <ClInclude Include="curvedFace.h" />
     <ClInclude Include="cylinder.h" />
+    <ClInclude Include="fixedJoint.h" />
+    <ClInclude Include="joint.h" />
     <ClInclude Include="openglUtility.h" />
     <ClInclude Include="pyramid.h" />
     <ClInclude Include="rectangularPrism.h" />
@@ -250,6 +253,8 @@
     <ClInclude Include="shaderProgram.h" />
     <ClInclude Include="solidColorShader.h" />
     <ClInclude Include="solidSphere.h" />
+    <ClInclude Include="sphericalJoint.h" />
+    <ClInclude Include="springJoint.h" />
     <ClInclude Include="textureShader.h" />
     <ClInclude Include="vector2D.h" />
     <ClInclude Include="vector3D.h" />

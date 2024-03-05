@@ -33,7 +33,7 @@ namespace pe {
 
 		/*
 			Struct that represents a node in the linked list holding all of
-			the particles of the world.
+			the bodies of the world.
 		*/
 		struct RigidBodyRegistration {
 			// Particle in the node
