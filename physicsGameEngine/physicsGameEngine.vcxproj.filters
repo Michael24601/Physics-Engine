@@ -177,6 +177,9 @@
     <ClCompile Include="particleContactResolver.h">
       <Filter>Header Files\ParticlePhysics</Filter>
     </ClCompile>
+    <ClCompile Include="rigidBodyBungeeForce.cpp">
+      <Filter>Source Files\RigidBodyPhysics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="accuracy.h">
@@ -373,6 +376,9 @@
     </ClInclude>
     <ClInclude Include="sphericalJoint.h">
       <Filter>Header Files\Joint</Filter>
+    </ClInclude>
+    <ClInclude Include="rigidBodyBungeeForce.h">
+      <Filter>Header Files\RigidBodyPhysics</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

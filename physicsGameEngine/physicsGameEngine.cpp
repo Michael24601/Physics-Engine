@@ -802,7 +802,7 @@ int main() {
     c1.body->angularDamping = 0.95;
     c1.body->linearDamping = 0.95;
 
-    c1.body->orientation = Quaternion(1, 0.2, 1, 0.3).normalized();
+    c2.body->orientation = Quaternion(1, 0.2, 1, 0.3).normalized();
 
     RigidBodyGravity g(Vector3D(0, -10, 0));
     Vector3D origin;
@@ -877,7 +877,7 @@ int main() {
             }
 
             for (Contact& contact : contacts) {
-                contact.friction = 0.0;
+                contact.friction = 0;
                 contact.restitution = 1;
             }
 
@@ -1041,12 +1041,12 @@ int main() {
     Pyramid c4(side, height, 150, Vector3D(-200, 0, 200));
 
 
-    FixedJoint joint(
+    Joint joint(
         c1.body, 
         c4.body,
         c1.localVertices[4],
         c4.localVertices[3],
-        0
+        5
     );
 
 
@@ -1157,12 +1157,13 @@ int main() {
 
             force1.updateForce(c1.body, substep);
 
-            joint.update(substep);
+            // joint.update(substep);
 
             std::vector<Contact> contacts;
+            joint.addContact(contacts);
 
-            //CollisionResolver resolver(5, 5);
-            //resolver.resolveContacts(contacts.data(), contacts.size(), substep);
+            CollisionResolver resolver(5, 5);
+            resolver.resolveContacts(contacts.data(), contacts.size(), substep);
 
             if (isButtonPressed[0]) {
                 sf::Vector2i pixelPos = sf::Mouse::getPosition(window);

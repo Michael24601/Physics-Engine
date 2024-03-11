@@ -4,10 +4,11 @@
 
 #include "rigidBody.h"
 #include "rigidBodySpringForce.h"
+#include "rigidBodyBungeeForce.h"
 
 namespace pe {
 
-    static int stiffness = 5;
+    static int stiffness = 50;
 
     class SpringJoint {
 

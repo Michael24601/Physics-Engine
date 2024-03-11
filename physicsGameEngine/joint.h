@@ -67,8 +67,7 @@ namespace pe {
 
 			// Calculate the length of the joint
 			Vector3D a_to_b = b_pos_world - a_pos_world;
-			Vector3D normal = a_to_b;
-			normal.normalize();
+			Vector3D normal = a_to_b.normalized();
 			real length = a_to_b.magnitude();
 
 			// Check if it is violated
@@ -79,8 +78,8 @@ namespace pe {
 				contact.body[1] = body[1];
 				contact.contactNormal = normal;
 				contact.contactPoint = (a_pos_world + b_pos_world) * 0.5f;
-				contact.penetration = length - error;
-				contact.friction = 1.0f;
+				contact.penetration = realAbs(length) - error;
+				contact.friction = 0.0f;
 				contact.restitution = 0;
 
 				contacts.push_back(contact);

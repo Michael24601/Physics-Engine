@@ -182,6 +182,7 @@
     <ClCompile Include="particleWorld.cpp" />
     <ClCompile Include="physicsGameEngine.cpp" />
     <ClCompile Include="particleContact.cpp" />
+    <ClCompile Include="rigidBodyBungeeForce.cpp" />
     <ClCompile Include="shaderInterface.cpp" />
     <ClCompile Include="rigidBody.cpp" />
     <ClCompile Include="rigidBodyCableForce.cpp" />
@@ -221,6 +222,7 @@
     <ClInclude Include="particleMesh.h" />
     <ClInclude Include="polyhedron.h" />
     <ClInclude Include="rectangularCloth.h" />
+    <ClInclude Include="rigidBodyBungeeForce.h" />
     <ClInclude Include="shaderInterface.h" />
     <ClInclude Include="diffuseLightingShader.h" />
     <ClInclude Include="diffuseSpecularLightingShader.h" />
