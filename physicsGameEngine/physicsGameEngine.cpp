@@ -70,7 +70,7 @@ using namespace pe;
 using namespace std;
 
 
-#define SIM_4
+#define SIM_1
 
 #ifdef SIM_1
 
@@ -396,16 +396,14 @@ int main() {
 
         // Data
         FaceData data = getFaceData(c1);
-        cookTexShader.drawFaces(data.vertices, data.normals, 
-            data.uvCoordinates,
-            identity, viewMatrix, projectionMatrix, texture3, 1, lightPos,
+        cookShader.drawFaces(data.vertices, data.normals,
+            identity, viewMatrix, projectionMatrix, colorBlue, 1, lightPos,
             lightColors, cameraPosition, 0.05, 0.1
         );
 
         data = getFaceData(c3);
-        cookTexShader.drawFaces(data.vertices, data.normals,
-            data.uvCoordinates, identity,
-            viewMatrix, projectionMatrix, texture2, 1, lightPos,
+        cookShader.drawFaces(data.vertices, data.normals, identity,
+            viewMatrix, projectionMatrix, colorRed, 1, lightPos,
             lightColors, cameraPosition, 0.1, 1
         );
 
@@ -427,9 +425,8 @@ int main() {
         for (int i = 2; i < c2.faces.size(); i++) {
             getFaceData(c2.faces[i], &d2);
         }
-        cookTexShader.drawFaces(d2.vertices, d2.normals,
-            d2.uvCoordinates, identity,
-            viewMatrix, projectionMatrix, texture4, 1, lightPos,
+        cookShader.drawFaces(d2.vertices, d2.normals, identity,
+            viewMatrix, projectionMatrix, colorYellow, 1, lightPos,
             lightColors, cameraPosition, 0.1, 1
         );
         
