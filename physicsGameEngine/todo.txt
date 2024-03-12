@@ -222,3 +222,8 @@ makes it unstable as hell. We need a better hinge.
 The other kind of joint, done using contacts, is incredibly unstable.
 
 Spring joints are too weak as stiff springs are an issue.
+
+Fix the the sleep state, which is currently not correct.
+
+The contact joint now only works if the last object in a series
+has negligible weight.

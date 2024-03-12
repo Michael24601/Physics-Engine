@@ -9,8 +9,8 @@ CollisionResolver::CollisionResolver(
 	unsigned int positionIterations,
 	real velocityEpsilon,
 	real positionEpsilon
-) : velocityIterations{velocityIterations},
-positionIterations{ positionIterations }, 
+) : velocityIterations{ velocityIterations },
+positionIterations{ positionIterations },
 velocityEpsilon{ velocityEpsilon },
 positionEpsilon{ positionEpsilon },
 positionIterationsUsed{},
@@ -33,7 +33,7 @@ void CollisionResolver::adjustPositions(
 	Contact* c,
 	unsigned numContacts,
 	real duration
-){
+) {
 	unsigned int i, index;
 	Vector3D velocityChange[2], rotationChange[2];
 	real rotationAmount[2];
@@ -42,7 +42,7 @@ void CollisionResolver::adjustPositions(
 
 	// Iteratively resolve interpenetration in order of severity.
 	positionIterationsUsed = 0;
-	while (positionIterationsUsed < positionIterations){
+	while (positionIterationsUsed < positionIterations) {
 
 		// Find biggest penetration.
 		max = positionEpsilon;
@@ -55,22 +55,24 @@ void CollisionResolver::adjustPositions(
 			}
 		}
 		if (index == numContacts) break;
+
 		// Match the awake state at the contact.
-		//c[index].matchAwakeState();
+		c[index].matchAwakeState();
+
 		// Resolve the penetration.
 		c[index].applyPositionChange(
-            velocityChange,
+			velocityChange,
 			rotationChange,
 			max
 		);
-        //-positionEpsilon);
+		//-positionEpsilon);
 		// Again this action may have changed the penetration of other
 		// bodies, so we update contacts.
-		for (i = 0; i < numContacts; i++){
+		for (i = 0; i < numContacts; i++) {
 
-			if (c[i].body[0]){
+			if (c[i].body[0]) {
 
-				if (c[i].body[0] == c[index].body[0]){
+				if (c[i].body[0] == c[index].body[0]) {
 
 					cp = rotationChange[0].vectorProduct(c[i].
 						relativeContactPosition[0]);
@@ -79,7 +81,7 @@ void CollisionResolver::adjustPositions(
 						rotationAmount[0] * cp.scalarProduct(c[i].
 							contactNormal);
 				}
-				else if (c[i].body[0] == c[index].body[1]){
+				else if (c[i].body[0] == c[index].body[1]) {
 
 					cp = rotationChange[1].vectorProduct(c[i].
 						relativeContactPosition[0]);
@@ -89,9 +91,9 @@ void CollisionResolver::adjustPositions(
 							contactNormal);
 				}
 			}
-			if (c[i].body[1]){
+			if (c[i].body[1]) {
 
-				if (c[i].body[1] == c[index].body[0]){
+				if (c[i].body[1] == c[index].body[0]) {
 
 					cp = rotationChange[0].vectorProduct(c[i].
 						relativeContactPosition[1]);
@@ -100,7 +102,7 @@ void CollisionResolver::adjustPositions(
 						rotationAmount[0] * cp.scalarProduct(c[i].
 							contactNormal);
 				}
-				else if (c[i].body[1] == c[index].body[1]){
+				else if (c[i].body[1] == c[index].body[1]) {
 
 					cp = rotationChange[1].vectorProduct(c[i].
 						relativeContactPosition[1]);
@@ -120,7 +122,7 @@ void CollisionResolver::adjustVelocities(
 	Contact* c,
 	unsigned numContacts,
 	real duration
-){
+) {
 	Vector3D velocityChange[2], rotationChange[2];
 	Vector3D deltaVel;
 
@@ -140,6 +142,9 @@ void CollisionResolver::adjustVelocities(
 			}
 		}
 		if (index == numContacts) break;
+
+		// Match the awake state at the contact
+		c[index].matchAwakeState();
 
 
 		// Do the resolution on the contact that came out top.

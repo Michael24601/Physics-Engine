@@ -7,90 +7,43 @@
 namespace pe {
 
     class BallJoint {
-
     private:
-
-        RigidBody* body1;  // Pointer to the first rigid body
-        RigidBody* body2;  // Pointer to the second rigid body
-        Vector3D localPoint1;  // Local point on body1
-        Vector3D localPoint2;  // Local point on body2
-        real distance;  // Desired distance between local points
+        RigidBody* body1;
+        RigidBody* body2;
+        Vector3D anchor1;
+        Vector3D anchor2;
 
     public:
+        BallJoint(RigidBody* rb1, RigidBody* rb2, const Vector3D& localAnchor1, const Vector3D& localAnchor2)
+            : body1(rb1), anchor1(localAnchor1), body2(rb2), anchor2(localAnchor2) {}
 
-        BallJoint(
-            RigidBody* b1,
-            RigidBody* b2,
-            const Vector3D& lp1,
-            const Vector3D& lp2,
-            real dist
-        )
-            : body1(b1),
-            body2(b2),
-            localPoint1(lp1),
-            localPoint2(lp2),
-            distance(dist) {
+        // Apply constraint at each time step
+        void update(real duration) {
+            // Convert anchor points from local to world space
+            Vector3D worldAnchor1 = body1->getPointInWorldCoordinates(anchor1);
+            Vector3D worldAnchor2 = body2->getPointInWorldCoordinates(anchor2);
 
-            // Calculates the world positions of the local points
-            Vector3D worldPoint1 = body1->getPointInWorldCoordinates(localPoint1);
-            Vector3D worldPoint2 = body2->getPointInWorldCoordinates(localPoint2);
+            // Calculate relative position of anchor points
+            Vector3D relativePosition = worldAnchor2 - worldAnchor1;
 
-            /*
-                We initially move the bodies so that they are connected at
-                the desired distance. This avoids the initial jerk that may
-                caused instability.
-            */
-            Vector3D direction = (worldPoint2 - worldPoint1);
-            real currentDistance = direction.magnitude();
-            direction.normalize();
-            real displacement = currentDistance - distance;
-            Vector3D correction = direction * displacement;
+            // Calculate relative velocity of anchor points
+            Vector3D relativeVelocity = body2->linearVelocity + body2->angularVelocity.vectorProduct(anchor2)
+                - body1->linearVelocity - body1->angularVelocity.vectorProduct(anchor1);
 
-            // Moves the bodies in opposite directions by half the correction distance
-            body1->position += correction * 0.5;
-            body2->position -= correction * 0.5;
-        }
+            // Calculate damping impulse to stabilize motion
+            Vector3D dampingImpulse = relativeVelocity * 0.1;
 
-        // Update the joint constraints
-        void update(real deltaT) {
+            // Calculate desired relative position (zero relative displacement)
+            Vector3D correctiveImpulse = (relativePosition * (1 / duration)) + dampingImpulse;
 
-            static const real stiffness = 1000;
 
-            // Calculate the world positions of the local points
-            Vector3D worldPoint1 = body1->getPointInWorldCoordinates(localPoint1);
-            Vector3D worldPoint2 = body2->getPointInWorldCoordinates(localPoint2);
-
-            // Calculates the relative position of the two points
-            Vector3D relativePosition = worldPoint2 - worldPoint1;
-
-            // Calculates the current distance between the points
-            real currentDistance = relativePosition.magnitude();
-
-            // Calculates the error in distance
-            real error = currentDistance - distance;
-
-            // Calculates the force to correct the error (Hooke's Law)
-            Vector3D force = relativePosition * (error * stiffness);
-
-            // Applies equal and opposite forces to maintain the connection
-            // body1->addForce(force);
-            // body2->addForce(force * -1);
-
-            /*
-                One issue with this approach is that the force is always
-                applied to the centre of the bodies. So if one body is
-                dangling from another, and the second body only has gravity
-                (also applies to the centre) acting on it, it won't rotate
-                at all, and will keep its original orientation, instead of
-                dangling.
-            */
-
-            body1->angularDamping = 0.05;
-            body1->addForceAtLocalPoint(force * body1->inverseMass, localPoint1);
-            body2->addForceAtLocalPoint(force * -1 * body1->inverseMass, localPoint2);
-
+            // Apply corrective impulse to each body
+            body1->addForceAtLocalPoint(correctiveImpulse, anchor1);
+            body2->addForceAtLocalPoint(correctiveImpulse*-1, anchor2);
         }
     };
+
 }
+
 
 #endif

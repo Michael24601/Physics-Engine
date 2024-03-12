@@ -34,6 +34,7 @@
 namespace pe {
 	typedef float real;
 	constexpr real PI = 3.141592f;
+	constexpr real sleepEpsilon = 0.5f;
 
 	// Enum
 	enum class Order {

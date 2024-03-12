@@ -6,11 +6,11 @@ using namespace pe;
 void Contact::calculateContactBasis() {
 
 	Vector3D contactTangent[2];
-	
+
 	// First we check if the z axis is closer to the x axis or y axis
 	if (realAbs(contactNormal.x) > realAbs(contactNormal.y))
 	{
-		/* 
+		/*
 			Instead of normalizing the vectors later, we can apply a
 			scaling factor, which ensures the vectors end up normalized
 			in a more performant way.
@@ -59,7 +59,7 @@ void Contact::calculateContactBasis() {
 
 void Contact::calculateInternals(real duration) {
 
-	/* 
+	/*
 		If one of the bodies is null (the contact is happening with an
 		immovable object like a wall or floor), then we need the second
 		body object to be the one that's null.
@@ -94,7 +94,7 @@ void Contact::calculateInternals(real duration) {
 }
 
 
-void Contact::swapBodies(){
+void Contact::swapBodies() {
 	contactNormal *= -1;
 	RigidBody* temp = body[0];
 	body[0] = body[1];
@@ -184,11 +184,11 @@ void Contact::applyPositionChange(
 		// We have the linear amount of movement required by turning
 		// the rigid body (in angularMove[i]). We now need to
 		// calculate the desired rotation to achieve that.
-		if (angularMove[i] == 0){
+		if (angularMove[i] == 0) {
 			// Easy case - no angular movement means no rotation.
 			angularChange[i].clear();
 		}
-		else{
+		else {
 			// Work out the direction we'd like to rotate in.
 			Vector3D targetAngularDirection =
 				relativeContactPosition[i].vectorProduct(contactNormal);
@@ -205,20 +205,18 @@ void Contact::applyPositionChange(
 		// along the contact normal.
 		linearChange[i] = contactNormal * linearMove[i];
 
-		// Recalculates the derived data
-		if (body[i]->isAwake) {
+		// Now we can start to apply the values we've calculated.
+		// Apply the linear movement
+		Vector3D pos = body[i]->position;
+		pos.linearCombination(contactNormal, linearMove[i]);
+		body[i]->position = pos;
 
-			// Now we can start to apply the values we've calculated.
-			// Apply the linear movement
-			Vector3D pos = body[i]->position;
-			pos.linearCombination(contactNormal, linearMove[i]);
-			body[i]->position = pos;
+		// And the change in orientation
+		Quaternion q = body[i]->orientation;
+		q.addScaledVector(angularChange[i], ((real)1.0));
+		body[i]->orientation = q;
 
-			// And the change in orientation
-			Quaternion q = body[i]->orientation;
-			q.addScaledVector(angularChange[i], ((real)1.0));
-			body[i]->orientation = q;
-
+		if (!body[i]->isAwake) {
 			body[i]->calculateDerivedData();
 		}
 	}
@@ -228,7 +226,7 @@ void Contact::applyPositionChange(
 Vector3D Contact::calculateLocalVelocity(
 	unsigned int bodyIndex,
 	real duration
-){
+) {
 	RigidBody* thisBody = body[bodyIndex];
 	// Work out the velocity of the contact point.
 	Vector3D velocity = thisBody->angularVelocity.vectorProduct(
@@ -237,7 +235,7 @@ Vector3D Contact::calculateLocalVelocity(
 	velocity += thisBody->linearVelocity;
 
 	// We then turn the velocity into contact coordinates
-	
+
 	// Because contactToWorld is a rotation, its inverse is the transpose 
 	Matrix3x3 inverse = contactToWorld.transpose();
 	Vector3D contactVelocity = inverse.transform(velocity);
@@ -248,7 +246,7 @@ Vector3D Contact::calculateLocalVelocity(
 
 inline Vector3D Contact::calculateFrictionlessImpulse(
 	Matrix3x3* inverseInertiaTensor
-){
+) {
 	Vector3D impulseContact;
 
 	// Build a vector that shows the change in velocity in
@@ -289,7 +287,7 @@ inline Vector3D Contact::calculateFrictionlessImpulse(
 
 inline Vector3D Contact::calculateFrictionImpulse(
 	Matrix3x3* inverseInertiaTensor
-){
+) {
 	Vector3D impulseContact;
 	real inverseMass = body[0]->inverseMass;
 
@@ -352,7 +350,7 @@ inline Vector3D Contact::calculateFrictionImpulse(
 		impulseContact.z * impulseContact.z
 	);
 
-	if (planarImpulse > impulseContact.x * friction){
+	if (planarImpulse > impulseContact.x * friction) {
 		// We need to use dynamic friction
 		impulseContact.y /= planarImpulse;
 		impulseContact.z /= planarImpulse;
@@ -371,7 +369,7 @@ inline Vector3D Contact::calculateFrictionImpulse(
 void Contact::applyVelocityChange(
 	Vector3D velocityChange[2],
 	Vector3D rotationChange[2]
-){
+) {
 	// Get hold of the inverse mass and inverse inertia tensor, both in
 	// world coordinates.
 	Matrix3x3 inverseInertiaTensor[2];
@@ -403,13 +401,10 @@ void Contact::applyVelocityChange(
 	velocityChange[0].clear();
 	velocityChange[0].linearCombination(impulse, body[0]->inverseMass);
 
-	// Apply the changes
-	if (body[0]->isAwake) {
-		body[0]->linearVelocity += velocityChange[0];
-		body[0]->angularVelocity += rotationChange[0];
-	}
+	body[0]->linearVelocity += velocityChange[0];
+	body[0]->angularVelocity += rotationChange[0];
 
-	if (body[1]){
+	if (body[1]) {
 
 		// Work out body one's linear and angular changes
 		Vector3D impulsiveTorque = impulse.vectorProduct(relativeContactPosition[1]);
@@ -417,11 +412,8 @@ void Contact::applyVelocityChange(
 		velocityChange[1].clear();
 		velocityChange[1].linearCombination(impulse, -body[1]->inverseMass);
 
-		// And apply them.
-		if (body[1]->isAwake) {
-			body[1]->linearVelocity += velocityChange[1];
-			body[1]->angularVelocity += rotationChange[1];
-		}
+		body[1]->linearVelocity += velocityChange[1];
+		body[1]->angularVelocity += rotationChange[1];
 	}
 }
 
@@ -429,11 +421,11 @@ void Contact::applyVelocityChange(
 
 void Contact::calculateDesiredDeltaVelocity(real duration) {
 
-	const static real velocityLimit = (real)0.25f;
+	const static real velocityLimit = (real)1.0f;
 
 	// Calculate the acceleration induced velocity accumulated this frame
 	real velocityFromAcc = 0;
-	
+
 	/*
 		This part here in this function is done so that the velocity
 		built up from last frame's acceleration does not cause instability
@@ -446,7 +438,7 @@ void Contact::calculateDesiredDeltaVelocity(real duration) {
 		velocityFromAcc +=
 			(body[0]->lastFrameAcceleration.scalarProduct(contactNormal)) * duration;
 	}
-	if (body[1] && body[1]->isAwake){
+	if (body[1] && body[1]->isAwake) {
 		velocityFromAcc -=
 			(body[1]->lastFrameAcceleration.scalarProduct(contactNormal)) * duration;
 	}
@@ -457,7 +449,7 @@ void Contact::calculateDesiredDeltaVelocity(real duration) {
 		contact impulse does not cause bouncing.
 	*/
 	real thisRestitution = restitution;
-	if (realAbs(contactVelocity.x) < velocityLimit){
+	if (realAbs(contactVelocity.x) < velocityLimit) {
 		thisRestitution = (real)0.0f;
 	}
 
@@ -468,3 +460,17 @@ void Contact::calculateDesiredDeltaVelocity(real duration) {
 		- thisRestitution * (contactVelocity.x - velocityFromAcc);
 }
 
+
+void Contact::matchAwakeState(){
+	// Collisions with the world never cause a body to wake up.
+	if (!body[1]) return;
+
+	bool body0awake = body[0]->isAwake;
+	bool body1awake = body[1]->isAwake;
+
+	// Wake up only the sleeping one
+	if (body0awake ^ body1awake) {
+		if (body0awake) body[1]->setAwake(true);
+		else body[0]->setAwake(true);
+	}
+}

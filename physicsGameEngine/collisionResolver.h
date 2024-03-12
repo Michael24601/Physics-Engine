@@ -4,7 +4,7 @@
 
 #include "contact.h"
 
-namespace pe{
+namespace pe {
 
 	class CollisionResolver {
 
@@ -15,7 +15,7 @@ namespace pe{
 			are all calculated.
 		*/
 		void prepareContacts(
-			Contact* contactArray, 
+			Contact* contactArray,
 			unsigned int contactNumber,
 			real duration
 		);
@@ -69,7 +69,7 @@ namespace pe{
 		real velocityEpsilon;
 
 		/*
-			To avoid instability, any penetration smaller than this value 
+			To avoid instability, any penetration smaller than this value
 			is too small to consider, and is considered to be 0. By default
 			it should be about 0.01.
 		*/

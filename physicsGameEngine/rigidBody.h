@@ -147,9 +147,25 @@ namespace pe {
 
 	public:
 
-
+		/*
+			A body is allowed to go to sleep when it has no motion,
+			or a low amount of motion, to alleviate having to integrate it
+			and check that it has collision. 
+		*/
 		bool isAwake;
 
+		/**
+		* Holds the amount of motion of the body. This is a recency-
+		* weighted mean that can be used to put a body to sleep.
+		*/
+		real motion;
+
+		/*
+			This is used to check how long the object was stationary.
+			It solves the issue of an object being put to sleep
+			after low motion in one frame while still moving.
+		*/
+		real consecutiveLowMotionTime = 0;
 
 		RigidBody() : isAwake{true} {};
 

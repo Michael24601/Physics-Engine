@@ -141,6 +141,19 @@ namespace pe {
 		}
 
 
+		Quaternion operator*(real scalar) const {
+			return Quaternion(r * scalar, i * scalar, j * scalar, k * scalar);
+		}
+
+
+		void operator+=(const Quaternion& q2) {
+			r += q2.r;
+			i += q2.i;
+			j += q2.j;
+			k += q2.k;
+		}
+
+
 		real toAxisAngle(Vector3D& axis) const {
 			// Ensure the quaternion is normalized
 			Quaternion q = normalized();

@@ -72,6 +72,7 @@ static inline void transformInertiaTensor(
 	real t62 = rotationMatrix.data[8] * inverseInertiaTensor.data[2] +
 		rotationMatrix.data[9] * inverseInertiaTensor.data[5] +
 		rotationMatrix.data[10] * inverseInertiaTensor.data[8];
+
 	inverseInertiaTensorWorld.data[0] = t4 * rotationMatrix.data[0] +
 		t9 * rotationMatrix.data[1] +
 		t14 * rotationMatrix.data[2];
@@ -139,6 +140,9 @@ void RigidBody::integrate(real duration) {
 
 	// If the body is not awake, we don't integrate it
 	if (!isAwake) {
+
+		clearAccumulators();
+
 		return;
 	}
 
@@ -175,6 +179,25 @@ void RigidBody::integrate(real duration) {
 
 	// Accumulators cleared each frame
 	clearAccumulators();
+
+	// Calculation of motion, so 
+	real currentMotion = linearVelocity.scalarProduct(linearVelocity) +
+		angularVelocity.scalarProduct(angularVelocity);
+
+	real bias = realPow(0.5, duration);
+	motion = bias * motion + (1 - bias) * currentMotion;
+
+	if (motion < sleepEpsilon) {
+		 consecutiveLowMotionTime += duration;
+		// Check if motion has been low for a certain consecutive duration
+		if (consecutiveLowMotionTime >= 1.0) {
+			setAwake(false);
+		}
+	}
+	 else {
+	 // Reset consecutive low motion frames when motion is not low
+	 consecutiveLowMotionTime = 0;
+	}
 }
 
 
@@ -239,5 +262,11 @@ Vector3D RigidBody::getPointInLocalCoordinates(const Vector3D& point) const {
 
 
 void RigidBody::setAwake(bool isAwake){
-	this->isAwake = isAwake;
+	if(isAwake){
+		this->isAwake = true;
+
+	}
+	 else {
+		 this->isAwake = false;
+	}
 }

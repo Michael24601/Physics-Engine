@@ -70,7 +70,7 @@ using namespace pe;
 using namespace std;
 
 
-#define SIM_1
+#define SIM_3
 
 #ifdef SIM_1
 
@@ -315,11 +315,11 @@ int main() {
                 returnContacts(c1, c3, contacts);
             }
             for (Contact& contact : contacts) {
-                contact.friction = 0.5;
+                contact.friction = 0.0;
                 contact.restitution = 0.5;
             }
 
-            CollisionResolver resolver(5, 5);
+            CollisionResolver resolver(5, 5, 0.01, 0.01);
             resolver.resolveContacts(contacts.data(), contacts.size(), substep);
 
             if (isButtonPressed[0]) {
@@ -792,17 +792,20 @@ int main() {
     real side = 150;
     RectangularPrism c1(side, side, side, 150, Vector3D(0, 0, 0));
 
-    RectangularPrism c2(1000, 50, 1000, 150, Vector3D(0, -400, -0));
+    RectangularPrism c3(300, 300, 300, 150, Vector3D(200, 200, 200));
+    c3.body->orientation = Quaternion(0, 0, 0, 0);
 
-    c2.body->setAwake(false);
+    RectangularPrism c2(10000, 100, 10000, 0, Vector3D(0, -400, -0));
+    c2.body->inverseMass = 0;
 
     c1.body->angularDamping = 0.95;
     c1.body->linearDamping = 0.95;
+    c3.body->angularDamping = 0.95;
+    c3.body->linearDamping = 0.95;
 
-    c2.body->orientation = Quaternion(1, 0.2, 1, 0.3).normalized();
+    c1.body->orientation = Quaternion(1, 0.2, 1, 0.3).normalized();
 
     RigidBodyGravity g(Vector3D(0, -10, 0));
-    Vector3D origin;
 
     real rotationSpeed = 0.1;
     real angle = PI / 2;
@@ -856,14 +859,16 @@ int main() {
         }
 
         c1.body->calculateDerivedData();
+        c3.body->calculateDerivedData();
         c2.body->calculateDerivedData();
 
-        int numSteps = 5;
+        int numSteps = 10;
         real substep = deltaT / numSteps;
 
         while (numSteps--) {
 
             g.updateForce(c1.body, substep);
+            g.updateForce(c3.body, substep);
 
             std::vector<Contact> contacts;
             // Here we check for collision
@@ -872,29 +877,38 @@ int main() {
             if (testIntersection(c1, c2)) {
                 returnContacts(c1, c2, contacts);
             }
+            if (testIntersection(c2, c3)) {
+                returnContacts(c2, c3, contacts);
+            }
+            if (testIntersection(c1, c3)) {
+                returnContacts(c1, c3, contacts);
+            }
 
             for (Contact& contact : contacts) {
                 contact.friction = 0;
-                contact.restitution = 1;
+                contact.restitution = 0.3;
             }
 
-            CollisionResolver resolver(5, 5);
+            CollisionResolver resolver(20, 5);
             resolver.resolveContacts(contacts.data(), contacts.size(), substep);
 
-
-            if (isButtonPressed[0]) {
-                sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
-                sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);
-                c1.body->position.x = worldPos.x * 2;
-                c1.body->position.y = worldPos.y * 2;
-                c1.body->position.z = worldPos.x * 2;
-            }
-
             c1.body->integrate(substep);
-
-            c1.update();
-            c2.update();
+            c2.body->integrate(substep);
+            c3.body->integrate(substep);
         }
+
+        if (isButtonPressed[0]) {
+            sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
+            sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);
+            c1.body->position.x = worldPos.x * 2;
+            c1.body->position.y = worldPos.y * 2;
+            c1.body->position.z = worldPos.x * 2;
+            c1.body->setAwake(true);
+        }
+
+        c1.update();
+        c2.update();
+        c3.update();
 
         window.clear(sf::Color::Black);
         // Clears the depth buffer (for 3D)
@@ -931,6 +945,11 @@ int main() {
             identity, viewMatrix, projectionMatrix, colorGreen, 1, lightPos,
             lightColors, cameraPosition, 0.1, 0.05
         );
+        data = getFaceData(c3);
+        cookShader.drawFaces(data.vertices, data.normals,
+            identity, viewMatrix, projectionMatrix, colorYellow, 1, lightPos,
+            lightColors, cameraPosition, 0.1, 0.05
+        );
 
 
         window.display();
@@ -940,7 +959,6 @@ int main() {
 }
 
 #endif
-
 
 #ifdef SIM_4
 
@@ -1028,61 +1046,63 @@ int main() {
     window.setView(view);
 
     sf::Clock clock;
-    real deltaT = 0.03;
+    real deltaT = 0.025;
 
     real side = 100;
-    RectangularPrism c1(side, side, side, 150, Vector3D(250, 0, -150));
+    RectangularPrism c1(side, side, side, 100, Vector3D(250, 0, -150));
 
     real height = 150;
     side = 100;
-    Pyramid c4(side, height, 150, Vector3D(-200, 0, 200));
+    Pyramid c4(side, height, 50, Vector3D(-200, 0, 200));
 
+    RectangularPrism c3(side, side, side, 0.5, Vector3D(-200, 0, 200));
+    RectangularPrism c2(side, side, side, 0.005, Vector3D(-200, 0, 200));
 
     Joint joint(
         c1.body, 
         c4.body,
         c1.localVertices[4],
         c4.localVertices[3],
-        5
+        10
+    );
+
+    Joint joint2(
+        c4.body,
+        c3.body,
+        c4.localVertices[1],
+        c3.localVertices[1],
+        10
+    );
+
+    Joint joint3(
+        c3.body,
+        c2.body,
+        c3.localVertices[7],
+        c2.localVertices[1],
+        10
     );
 
 
     c1.body->angularDamping = 0.5;
     c1.body->linearDamping = 0.90;
-    c4.body->angularDamping = 0.5   ;
+    c4.body->angularDamping = 0.5;
     c4.body->linearDamping = 0.90;
+    c3.body->angularDamping = 0.4;
+    c3.body->linearDamping = 0.80;
+    c2.body->angularDamping = 0.3;
+    c2.body->linearDamping = 0.70;
 
     RigidBodyGravity g(Vector3D(0, -10, 0));
-    Vector3D origin;
-
-    int particleNum = 2;
 
     RigidBody fixed1;
     fixed1.position = Vector3D(200, 200, -200);
-    RigidBody fixed4;
-    fixed4.position = Vector3D(-200, 200, 200);
 
-    RigidBodySpringForce force1(c1.localVertices[0], &fixed1, Vector3D(), 10, 100);
+    RigidBodySpringForce force1(c1.localVertices[0], &fixed1, Vector3D(), 6, 100);
 
     ParticleGravity pg(Vector3D(0, -10, 0));
 
     real rotationSpeed = 0.1;
     real angle = PI / 2;
-    bool isButtonPressed[]{
-        false,
-        false,
-        false,
-        false
-    };
-
-
-    // Bounding volume hierarchy, used for coarse collision detection
-    BoundingVolumeHierarchy<BoundingSphere> hierarchy;
-    hierarchy.insert(&c1, c1.boundingSphere);
-
-    hierarchy.insert(&c4, c4.boundingSphere);
-
-    GLuint texture3 = loadTexture("C:\\Users\\msaba\\OneDrive\\Desktop\\textureMaps\\wood.jpg");
 
     while (window.isOpen()) {
 
@@ -1091,22 +1111,7 @@ int main() {
         {
             if (event.type == sf::Event::Closed)
                 window.close();
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::R)) {
-                isButtonPressed[0] = true;
-            }
-            else if (sf::Keyboard::isKeyPressed(sf::Keyboard::C)) {
-                isButtonPressed[1] = true;
-            }
-            else if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {
-                isButtonPressed[2] = true;
-            }
-            else if (sf::Keyboard::isKeyPressed(sf::Keyboard::P)) {
-                isButtonPressed[3] = true;
-            }
-            else if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
-                isButtonPressed[0] = isButtonPressed[1] =
-                    isButtonPressed[2] = isButtonPressed[3] = false;
-            }
+           
             // Rotates camera
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
                 angle += rotationSpeed;
@@ -1139,10 +1144,11 @@ int main() {
         }
 
         c1.body->calculateDerivedData();
+        c3.body->calculateDerivedData();
         c4.body->calculateDerivedData();
+        c2.body->calculateDerivedData();
 
         fixed1.calculateDerivedData();
-        fixed4.calculateDerivedData();
 
         int numSteps = 5;
         real substep = deltaT / numSteps;
@@ -1151,36 +1157,41 @@ int main() {
 
             g.updateForce(c1.body, substep);
             g.updateForce(c4.body, substep);
+            g.updateForce(c3.body, substep);
+            g.updateForce(c2.body, substep);
 
-            force1.updateForce(c1.body, substep);
+            //force1.updateForce(c1.body, substep);
 
             // joint.update(substep);
 
             std::vector<Contact> contacts;
             joint.addContact(contacts);
+            joint2.addContact(contacts);
+            joint3.addContact(contacts);
 
-            CollisionResolver resolver(5, 5);
+            CollisionResolver resolver(10, 1, 0.01, 0.01);
             resolver.resolveContacts(contacts.data(), contacts.size(), substep);
-
-            if (isButtonPressed[0]) {
-                sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
-                sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);
-                c1.body->position.x = worldPos.x * 2;
-                c1.body->position.y = worldPos.y * 2;
-            }
-            else if (isButtonPressed[3]) {
-                sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
-                sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);
-                c4.body->position.x = worldPos.x * 2;
-                c4.body->position.y = worldPos.y * 2;
-            }
 
             c1.body->integrate(substep);
             c4.body->integrate(substep);
-
-            c1.update();
-            c4.update();
+            c3.body->integrate(substep);
+            c2.body->integrate(substep);
         }
+
+        sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
+        sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);
+        Vector3D vec(
+            worldPos.x - c1.body->position.x,
+            worldPos.y - c1.body->position.y,
+            worldPos.x - c1.body->position.z
+        );
+        c1.body->position += vec;
+     
+
+        c1.update();
+        c4.update();
+        c3.update();
+        c2.update();
 
         window.clear(sf::Color::Black);
         // Clears the depth buffer (for 3D)
@@ -1198,12 +1209,6 @@ int main() {
         glm::vec4 colorPurple(0.4, 0.1, 0.8, 1.0);
         glm::vec4 colorGrey(0.7, 0.7, 0.7, 1.0);
 
-        EdgeData cordData;
-        cordData.vertices.push_back(convertToGLM(fixed1.position));
-        cordData.vertices.push_back(convertToGLM(c1.globalVertices[0]));
-        shader.drawEdges(cordData.vertices, identity, viewMatrix, projectionMatrix,
-            colorWhite);
-
         // Shape
         glm::vec3 lightPos[]{
             glm::vec3(0.0f, 100.0f, 0.0f),
@@ -1214,15 +1219,26 @@ int main() {
 
         // Data
         FaceData data = getFaceData(c1);
-        cookTexShader.drawFaces(data.vertices, data.normals,
-            data.uvCoordinates,
-            identity, viewMatrix, projectionMatrix, texture3, 1, lightPos,
+        cookShader.drawFaces(data.vertices, data.normals,
+            identity, viewMatrix, projectionMatrix, colorPurple, 1, lightPos,
             lightColors, cameraPosition, 0.05, 0.1
         );
 
         data = getFaceData(c4);
         phongShader.drawFaces(data.vertices, data.normals, identity,
             viewMatrix, projectionMatrix, colorGreen, 1, lightPos,
+            lightColors, cameraPosition, 40
+        );
+
+        data = getFaceData(c3);
+        phongShader.drawFaces(data.vertices, data.normals, identity,
+            viewMatrix, projectionMatrix, colorRed, 1, lightPos,
+            lightColors, cameraPosition, 40
+        );
+
+        data = getFaceData(c2);
+        phongShader.drawFaces(data.vertices, data.normals, identity,
+            viewMatrix, projectionMatrix, colorBlue, 1, lightPos,
             lightColors, cameraPosition, 40
         );
 

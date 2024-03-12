@@ -35,22 +35,12 @@ namespace pe {
 			const Vector3D& connectionPoint1,
 			const Vector3D& connectionPoint2, 
 			real err
-		)
+		) : error(err) {		
 
-			: error(err) {
 			body[0] = body1;
 			body[1] = body2;
 			position[0] = connectionPoint1;
 			position[1] = connectionPoint2;
-
-			// Calculate the world positions of the local points
-			Vector3D worldPoint1 = body1->getPointInWorldCoordinates(connectionPoint1);
-			Vector3D worldPoint2 = body2->getPointInWorldCoordinates(connectionPoint2);
-
-			// We initially move the bodies so that they are connected
-			Vector3D direction = worldPoint2 - worldPoint1;
-			body1->position += direction * 0.5;
-			body2->position += direction * -0.5;
 		}
 
 		/**
@@ -76,6 +66,7 @@ namespace pe {
 				Contact contact;
 				contact.body[0] = body[0];
 				contact.body[1] = body[1];
+
 				contact.contactNormal = normal;
 				contact.contactPoint = (a_pos_world + b_pos_world) * 0.5f;
 				contact.penetration = realAbs(length) - error;
