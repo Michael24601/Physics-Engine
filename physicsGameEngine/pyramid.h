@@ -19,7 +19,9 @@ namespace pe {
 			real side, 
 			real height, 
 			real mass,
-			Vector3D position) : 
+			Vector3D position,
+			RigidBody* body
+		) : 
 			Polyhedron(
 				mass,
 				position,
@@ -34,7 +36,8 @@ namespace pe {
 					Vector3D(side / 2, -height / 4.0, -side / 2),
 					Vector3D(side / 2, -height / 4.0, side / 2),
 					Vector3D(-side / 2, -height / 4.0, side / 2),
-				}
+				},
+				body
 			),
 			side{ side }, height{ height } {
 			

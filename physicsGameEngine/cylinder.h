@@ -139,7 +139,9 @@ namespace pe {
 			real length,
 			real mass,
 			int segments,
-			Vector3D position) :
+			Vector3D position,
+			RigidBody* body
+		) :
 			Polyhedron(
 				mass,
 				position,
@@ -155,7 +157,8 @@ namespace pe {
 					radius,
 					length,
 					segments
-				)
+				),
+				body
 			),
 			radius{ radius }, length{ length }, segments{ segments } {
 

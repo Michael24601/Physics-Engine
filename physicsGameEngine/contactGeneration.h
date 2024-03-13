@@ -20,6 +20,7 @@
 */
 
 #include "polyhedron.h"
+#include "rectangularPrism.h"
 #include "contact.h"
 #include <algorithm>
 #include <limits.h>
@@ -54,4 +55,11 @@ namespace pe {
     */
     int returnContacts(const Polyhedron& p1, const Polyhedron& p2,
         std::vector<Contact>& contactsToBeResolved);
+
+
+    int returnContactsBox(
+        const RectangularPrism& p1,
+        const RectangularPrism& p2,
+        std::vector<Contact>& contactsToBeResolved
+    );
 }

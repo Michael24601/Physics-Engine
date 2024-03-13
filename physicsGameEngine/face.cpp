@@ -451,3 +451,28 @@ Vector2D Face::getTextureCoordinate(int index) const {
 int Face::getIndex(int index) {
 	return indeces[index];
 }
+
+
+bool Face::containsPoint(const Vector3D& point) const{
+
+	int windingNumber = 0;
+	size_t numVertices = getVertexNumber();
+
+	for (size_t i = 0; i < numVertices; ++i) {
+		const Vector3D& currentVertex = getVertex(i);
+		const Vector3D& nextVertex = getVertex((i + 1) % numVertices);
+
+		if ((currentVertex.y <= point.y && nextVertex.y > point.y) ||
+			(currentVertex.y > point.y && nextVertex.y <= point.y)) {
+
+			double intersectionX = (point.y - currentVertex.y) *
+				(nextVertex.x - currentVertex.x) /
+				(nextVertex.y - currentVertex.y) + currentVertex.x;
+
+			if (point.x < intersectionX) {
+				++windingNumber;
+			}
+		}
+	}
+	return windingNumber % 2 != 0;
+}

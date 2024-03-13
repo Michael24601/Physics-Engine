@@ -26,19 +26,19 @@
 
 namespace pe {
 
-	/* 
-		Function that is used to check whether a line(defined by Pand D)
-		separates the vertices of a polygon or not.
-	*/
-	int whichSide(
-		const Polyhedron& C,
-		const pe::Vector3D& P,
-		const pe::Vector3D& D
-	);
+    /*
+        Function that is used to check whether a line(defined by Pand D)
+        separates the vertices of a polygon or not.
+    */
+    int whichSide(
+        const Polyhedron& C,
+        const pe::Vector3D& P,
+        const pe::Vector3D& D
+    );
 
 
-	// Function that returns true if the two primitives intersect
-	bool testIntersection(const Polyhedron& C0, const Polyhedron& C1);
+    // Function that returns true if the two primitives intersect
+    bool testIntersection(const Polyhedron& C0, const Polyhedron& C1);
 }
 
 #endif

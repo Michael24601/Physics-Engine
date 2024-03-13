@@ -64,13 +64,14 @@
 #include "sphericalJoint.h"
 
 #include "openglUtility.h"
-
+#include "fineCollisionDetection.h"
+#include "fineCollisionDetection2.h"
 
 using namespace pe;
 using namespace std;
 
 
-#define SIM_3
+#define SIM_5
 
 #ifdef SIM_1
 
@@ -161,18 +162,18 @@ int main() {
     real deltaT = 0.03;
 
     real side = 100;
-    RectangularPrism c1(side, side, side, 150, Vector3D(250, 0, -150));
+    RectangularPrism c1(side, side, side, 150, Vector3D(250, 0, -150), new RigidBody);
 
     real height = 150;
     real radius = 50;
-    Cylinder c2(radius, height, 150, 20, Vector3D(200, 0, 200));
+    Cylinder c2(radius, height, 150, 20, Vector3D(200, 0, 200), new RigidBody);
 
     radius = 100;
-    SolidSphere c3(radius, 150, 20, 20, Vector3D(-200, 0, -200));
+    SolidSphere c3(radius, 150, 20, 20, Vector3D(-200, 0, -200), new RigidBody);
 
     height = 150;
     side = 100;
-    Pyramid c4(side, height, 150, Vector3D(-200, 0, 200));
+    Pyramid c4(side, height, 150, Vector3D(-200, 0, 200), new RigidBody);
 
 
     c1.body->angularDamping = 0.75;
@@ -314,8 +315,9 @@ int main() {
             if (testIntersection(c1, c3)) {
                 returnContacts(c1, c3, contacts);
             }
+            //generateCollision(c1, c3, contacts);
             for (Contact& contact : contacts) {
-                contact.friction = 0.0;
+                contact.friction = 1.0;
                 contact.restitution = 0.5;
             }
 
@@ -438,7 +440,6 @@ int main() {
 }
 
 #endif
-
 
 #ifdef SIM_2
 
@@ -700,7 +701,6 @@ int main() {
 
 #endif
 
-
 #ifdef SIM_3
 
 int main() {
@@ -790,17 +790,16 @@ int main() {
     real deltaT = 0.035;
 
     real side = 150;
-    RectangularPrism c1(side, side, side, 150, Vector3D(0, 0, 0));
+    RectangularPrism c1(side, side, side, 1.5, Vector3D(0, 600, 0), new RigidBody);
 
-    RectangularPrism c3(300, 300, 300, 150, Vector3D(200, 200, 200));
-    c3.body->orientation = Quaternion(0, 0, 0, 0);
+    RectangularPrism c3(400, 200, 400, 15, Vector3D(0, 200, 0), new RigidBody);
 
-    RectangularPrism c2(10000, 100, 10000, 0, Vector3D(0, -400, -0));
+    RectangularPrism c2(10000, 100, 10000, 0, Vector3D(0, -400, -0), new RigidBody);
     c2.body->inverseMass = 0;
 
-    c1.body->angularDamping = 0.95;
+    c1.body->angularDamping = 0.9;
     c1.body->linearDamping = 0.95;
-    c3.body->angularDamping = 0.95;
+    c3.body->angularDamping = 0.9;
     c3.body->linearDamping = 0.95;
 
     c1.body->orientation = Quaternion(1, 0.2, 1, 0.3).normalized();
@@ -859,8 +858,8 @@ int main() {
         }
 
         c1.body->calculateDerivedData();
-        c3.body->calculateDerivedData();
         c2.body->calculateDerivedData();
+        c3.body->calculateDerivedData();
 
         int numSteps = 10;
         real substep = deltaT / numSteps;
@@ -873,23 +872,12 @@ int main() {
             std::vector<Contact> contacts;
             // Here we check for collision
 
-            
-            if (testIntersection(c1, c2)) {
-                returnContacts(c1, c2, contacts);
-            }
-            if (testIntersection(c2, c3)) {
-                returnContacts(c2, c3, contacts);
-            }
-            if (testIntersection(c1, c3)) {
-                returnContacts(c1, c3, contacts);
-            }
+           
+            generateContactBoxAndBox(c1, c3, contacts, 0.25, 0.0);
+            generateContactBoxAndBox(c1, c2, contacts, 0.25, 0.0);
+            generateContactBoxAndBox(c2, c3, contacts, 0.25, 0.0);
 
-            for (Contact& contact : contacts) {
-                contact.friction = 0;
-                contact.restitution = 0.3;
-            }
-
-            CollisionResolver resolver(20, 5);
+            CollisionResolver resolver(10, 1);
             resolver.resolveContacts(contacts.data(), contacts.size(), substep);
 
             c1.body->integrate(substep);
@@ -1046,17 +1034,17 @@ int main() {
     window.setView(view);
 
     sf::Clock clock;
-    real deltaT = 0.025;
+    real deltaT = 0.02;
 
     real side = 100;
-    RectangularPrism c1(side, side, side, 100, Vector3D(250, 0, -150));
+    RectangularPrism c1(side, side, side, 100, Vector3D(250, 0, -150), new RigidBody);
 
     real height = 150;
     side = 100;
-    Pyramid c4(side, height, 50, Vector3D(-200, 0, 200));
+    Pyramid c4(side, height, 50, Vector3D(-200, 0, 200), new RigidBody);
 
-    RectangularPrism c3(side, side, side, 0.5, Vector3D(-200, 0, 200));
-    RectangularPrism c2(side, side, side, 0.005, Vector3D(-200, 0, 200));
+    RectangularPrism c3(side, side, side, 0.5, Vector3D(-200, 0, 200), new RigidBody);
+    RectangularPrism c2(side, side, side, 0.005, Vector3D(-200, 0, 200), new RigidBody);
 
     Joint joint(
         c1.body, 
@@ -1241,6 +1229,274 @@ int main() {
             viewMatrix, projectionMatrix, colorBlue, 1, lightPos,
             lightColors, cameraPosition, 40
         );
+
+        window.display();
+    }
+
+    return 0;
+}
+
+#endif
+
+#ifdef SIM_5
+
+int main() {
+
+    // Needed for 3D rendering
+    sf::ContextSettings settings;
+    settings.depthBits = 24;
+    settings.antialiasingLevel = 8;
+    sf::RenderWindow window(sf::VideoMode(1200, 800), "Physics Simulation",
+        sf::Style::Default, settings);
+    window.setActive();
+
+    GLenum err = glewInit();
+    if (GLEW_OK != err) {
+        // GLEW initialization failed
+        std::cerr << "Error: GLEW initialization failed: "
+            << glewGetErrorString(err) << std::endl;
+        return -1;
+    }
+
+    // Sets up OpenGL states (for 3D)
+    // Makes objects in front of others cover them
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
+
+    // Set to clockwise or counter-clockwise depending on face vertex order
+    // (Counter Clockwise for us).
+    glFrontFace(GL_CCW);
+    // This only displays faces from one side, depending on the order of
+    // vertices, and what is considered front facce in the above option.
+    // Disable to show both faces (but lose on performance).
+    // Set to off in case our faces are both clockwise and counter clockwise
+    // (mixed), so we can't consisently render only one.
+    // Note that if we have opacity of face under 1 (opaque), it is
+    // definitely best not to render both sides (enable culling) so it
+    // appears correct.
+    glEnable(GL_CULL_FACE);
+
+    // Enables blending for transparency
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    glDepthFunc(GL_LEQUAL);
+
+    // Shaders
+    SolidColorShader shader;
+    DiffuseLightingShader lightShader;
+    DiffuseSpecularLightingShader phongShader;
+    CookTorranceShader cookShader;
+    AnisotropicShader aniShader;
+    TextureShader texShader;
+    CookTorranceTextureShader cookTexShader;
+    AnisotropicTextureShader aniTexShader;
+
+    GLuint texture = loadTexture("C:\\Users\\msaba\\OneDrive\\Desktop\\textureMaps\\squares.jpg");
+
+    // View matrix, used for positioning and angling the camera
+    // Camera's position in world coordinates
+    real cameraDistance = 1000.0f;
+    glm::vec3 cameraPosition = glm::vec3(cameraDistance, 0.0f, 0.0f);
+    // Point the camera is looking at
+    glm::vec3 cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);
+    // Up vector
+    glm::vec3 upVector = glm::vec3(0.0f, 1.0f, 0.0f);
+    glm::mat4 viewMatrix = glm::lookAt(cameraPosition,
+        cameraTarget, upVector);
+
+    // Projection matrix, used for perspective
+    // Field of View (FOV) in degrees
+    real fov = 90.0f;
+    // Aspect ratio
+    real aspectRatio = window.getSize().x
+        / static_cast<real>(window.getSize().y);
+    // Near and far clipping planes
+    real nearPlane = 0.1f;
+    real farPlane = 10000.0f;
+
+    // Create a perspective projection matrix
+    glm::mat4 projectionMatrix = glm::perspective(glm::radians(fov),
+        aspectRatio, nearPlane, farPlane);
+
+    // Just in order to flip y axis
+    sf::View view = window.getDefaultView();
+    view.setSize(1200, -800);
+    view.setCenter(0, 0);
+    window.setView(view);
+
+    sf::Clock clock;
+    real deltaT = 0.035;
+
+    RectangularPrism c1(50, 300, 200, 6, Vector3D(0, -200, 0), new RigidBody());
+    RectangularPrism c3(50, 300, 200, 4, Vector3D(-200, -200, 0), new RigidBody());
+    RectangularPrism c4(50, 300, 200, 2, Vector3D(-400, -200, 0), new RigidBody());
+
+    c1.body->canSleep = true;
+    c1.body->angularDamping = 0.7;
+    c1.body->linearDamping = 0.75;
+
+    c3.body->canSleep = true;
+    c3.body->angularDamping = 0.7;
+    c3.body->linearDamping = 0.75;
+
+    c4.body->canSleep = true;
+    c4.body->angularDamping = 0.7;
+    c4.body->linearDamping = 0.75;
+
+
+    RectangularPrism s(10000, 100, 10000, 0, Vector3D(0, -400, -0), new RigidBody());
+    s.setUVCoordinates(20, 20);
+    s.body->inverseMass = 0;
+    s.body->canSleep = true;
+
+    //c1.body->orientation = Quaternion(1, 0.2, 1, 0.3).normalized();
+
+    RigidBodyGravity g(Vector3D(0, -10, 0));
+
+    real rotationSpeed = 0.1;
+    real angle = PI / 2;
+    bool isButtonPressed[]{
+        false
+    };
+
+    while (window.isOpen()) {
+
+        sf::Event event;
+        while (window.pollEvent(event))
+        {
+            if (event.type == sf::Event::Closed)
+                window.close();
+            else if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
+                c1.body->addForceAtLocalPoint(Vector3D(-50000, 0, 0), Vector3D(40, 100, 0));
+            }
+            // Rotates camera
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
+                angle += rotationSpeed;
+                cameraPosition.x = sin(angle) * cameraDistance;
+                cameraPosition.z = cos(angle) * cameraDistance;
+                viewMatrix =
+                    glm::lookAt(cameraPosition, cameraTarget, upVector);
+            }
+            else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
+                angle -= rotationSpeed;
+                cameraPosition.x = sin(angle) * cameraDistance;
+                cameraPosition.z = cos(angle) * cameraDistance;
+                viewMatrix =
+                    glm::lookAt(cameraPosition, cameraTarget, upVector);
+            }
+            // Moves camera
+             // Rotates camera
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
+                cameraDistance *= 0.98;
+                cameraPosition *= 0.98;
+                viewMatrix =
+                    glm::lookAt(cameraPosition, cameraTarget, upVector);
+            }
+            else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
+                cameraDistance *= 1.02;
+                cameraPosition *= 1.02;
+                viewMatrix =
+                    glm::lookAt(cameraPosition, cameraTarget, upVector);
+            }
+        }
+
+        int numSteps = 10;
+        real substep = deltaT / numSteps;
+
+        while (numSteps--) {
+
+            c1.body->calculateDerivedData();
+            c3.body->calculateDerivedData();
+            c4.body->calculateDerivedData();
+
+            s.body->calculateDerivedData();
+
+            g.updateForce(c1.body, substep);
+            g.updateForce(c3.body, substep);
+            g.updateForce(c4.body, substep);
+
+            std::vector<Contact> contacts;
+
+            
+            generateContactBoxAndBox(c1, c3, contacts, 0.45, 0.0);
+            generateContactBoxAndBox(c3, c4, contacts, 0.45, 0.0);
+            
+            generateContactBoxAndBox(s, c1, contacts, 0.25, 0.0);
+            generateContactBoxAndBox(s, c3, contacts, 0.25, 0.0);
+            generateContactBoxAndBox(s, c4, contacts, 0.25, 0.0);
+
+            CollisionResolver resolver(1, 1);
+            resolver.resolveContacts(contacts.data(), contacts.size(), substep);
+
+            c1.body->integrate(substep);
+            c3.body->integrate(substep);
+            c4.body->integrate(substep);
+            s.body->integrate(substep);
+
+            c1.update();
+            c3.update();
+            c4.update();
+            s.update();
+        }
+
+        window.clear(sf::Color::Black);
+        // Clears the depth buffer (for 3D)
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        // Spring/Cable
+        // Note that the model is the identity since the cable is in world
+        // coordinates
+        glm::mat4 identity = glm::mat4(1.0);
+        glm::vec4 colorWhite(1.0, 1.0, 1.0, 1.0);
+        glm::vec4 colorRed(0.8, 0.1, 0.1, 1.0);
+        glm::vec4 colorBlue(0.5, 0.7, 1.0, 1.0);
+        glm::vec4 colorGreen(0.3, 0.9, 0.3, 1.0);
+        glm::vec4 colorYellow(0.9, 0.9, 0.5, 1.0);
+        glm::vec4 colorPurple(0.4, 0.1, 0.8, 1.0);
+        glm::vec4 colorGrey(0.7, 0.7, 0.7, 1.0);
+
+        // Shape
+        glm::vec3 lightPos[]{
+            glm::vec3(0.0f, 100.0f, 0.0f),
+        };
+        glm::vec4 lightColors[]{
+            glm::vec4(1.0f, 1.0f, 1.0f, 0.6f),
+        };
+
+        // Data
+        FaceData data;
+
+        data = getFaceData(c1);
+        cookShader.drawFaces(data.vertices, data.normals,
+            identity, viewMatrix, projectionMatrix, colorPurple, 1, lightPos,
+            lightColors, cameraPosition, 0.1, 0.05
+        );
+
+        data = getFaceData(c1);
+        cookShader.drawFaces(data.vertices, data.normals,
+            identity, viewMatrix, projectionMatrix, colorPurple, 1, lightPos,
+            lightColors, cameraPosition, 0.1, 0.05
+        );
+
+        data = getFaceData(c3);
+        cookShader.drawFaces(data.vertices, data.normals,
+            identity, viewMatrix, projectionMatrix, colorRed, 1, lightPos,
+            lightColors, cameraPosition, 0.1, 0.05
+        );
+
+        data = getFaceData(c4);
+        cookShader.drawFaces(data.vertices, data.normals,
+            identity, viewMatrix, projectionMatrix, colorBlue, 1, lightPos,
+            lightColors, cameraPosition, 0.1, 0.05
+        );
+
+        data = getFaceData(s);
+        cookShader.drawFaces(data.vertices, data.normals,
+            identity, viewMatrix, projectionMatrix, colorWhite, 1, lightPos,
+            lightColors, cameraPosition, 0.1, 0.05
+        );
+
 
         window.display();
     }

@@ -32,8 +32,9 @@ namespace pe {
 			real mass,
 			const Vector3D& position,
 			const Matrix3x3& inertiaTensor,
-			const std::vector<Vector3D>& localVertices
-		) : body{ new RigidBody() },
+			const std::vector<Vector3D>& localVertices,
+			RigidBody* body
+		) : body{ body },
 			localVertices{ localVertices },
 
 			boundingSphere(
@@ -100,7 +101,7 @@ namespace pe {
 			return furthestPoint;
 		}
 
-
+		/*
 		~Polyhedron() {
 			delete body;
 			for (int i = 0; i < faces.size(); i++) {
@@ -109,6 +110,12 @@ namespace pe {
 			for (int i = 0; i < edges.size(); i++) {
 				delete edges[i];
 			}
+		}
+		*/
+
+
+		Vector3D getAxis(int index) const {
+			return body->transformMatrix.getColumnVector(index);
 		}
 
 	};

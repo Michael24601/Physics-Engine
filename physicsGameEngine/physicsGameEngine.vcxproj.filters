@@ -380,6 +380,12 @@
     <ClInclude Include="rigidBodyBungeeForce.h">
       <Filter>Header Files\RigidBodyPhysics</Filter>
     </ClInclude>
+    <ClInclude Include="fineCollisionDetection.h">
+      <Filter>Header Files\Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="fineCollisionDetection2.h">
+      <Filter>Header Files\Collision</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="todo.txt" />

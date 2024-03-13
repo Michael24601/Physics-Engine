@@ -152,9 +152,8 @@ unsigned int pe::edgeToEdge(
     return 0; // No collision detected
 }
 
-
 int pe::returnContacts(
-    const Polyhedron& p1, 
+    const Polyhedron& p1,
     const Polyhedron& p2,
     std::vector<Contact>& contactsToBeResolved
 ) {

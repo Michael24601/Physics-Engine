@@ -262,6 +262,16 @@ namespace pe {
 
 		int getIndex(int index);
 
+
+		/*
+			Check if the point is inside the boundaries of the face using a
+			winding number algorithm.
+			The winding number algorithm counts how many times a ray starting
+			from the point intersects with the edges of the face.
+			If the number is odd, the point is inside the face; if it's even,
+			the point is outside.
+		*/
+		bool containsPoint(const Vector3D& point) const;
 	};
 }
 

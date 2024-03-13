@@ -92,7 +92,9 @@ namespace pe {
 			real mass,
 			int latitudeSegments,
 			int longtitudeSegments,
-			Vector3D position) :
+			Vector3D position,
+			RigidBody* body
+		) :
 			Polyhedron(
 				mass,
 				position,
@@ -106,7 +108,8 @@ namespace pe {
 					radius,
 					latitudeSegments,
 					longtitudeSegments
-				)
+				),
+				body
 			),
 			radius{ radius }, latitudeSegments{ latitudeSegments },
 			longitudeSegments{ longtitudeSegments } {

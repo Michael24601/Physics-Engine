@@ -127,6 +127,8 @@ void RigidBody::setInertiaTensor(const Matrix3x3& inertiaTensor) {
 
 void RigidBody::addForce(const Vector3D& force) {
 	forceAccumulator += force;
+
+	setAwake(true);
 }
 
 
@@ -188,7 +190,7 @@ void RigidBody::integrate(real duration) {
 	motion = bias * motion + (1 - bias) * currentMotion;
 
 	if (motion < sleepEpsilon) {
-		 consecutiveLowMotionTime += duration;
+		consecutiveLowMotionTime += duration;
 		// Check if motion has been low for a certain consecutive duration
 		if (consecutiveLowMotionTime >= 1.0) {
 			setAwake(false);
@@ -213,11 +215,14 @@ void RigidBody::addForce(const Vector3D& force, const Vector3D& point) {
 	forceAccumulator += force;
 	// For the torque accumulator, we use the vector product on the force
 	torqueAccumulator += d.vectorProduct(force);
+
+	setAwake(true);
 }
 
 
 void RigidBody::addTorque(const Vector3D& torque) {
 	torqueAccumulator += torque;
+	setAwake(true);
 }
 
 
@@ -226,7 +231,6 @@ void RigidBody::addForceAtLocalPoint(const Vector3D& force,
 	// We first convert to world coordinates then use the addForce function
 	Vector3D worldPoint = getPointInWorldCoordinates(point);
 	addForce(force, worldPoint);
-
 }
 
 
@@ -262,11 +266,10 @@ Vector3D RigidBody::getPointInLocalCoordinates(const Vector3D& point) const {
 
 
 void RigidBody::setAwake(bool isAwake){
-	if(isAwake){
-		this->isAwake = true;
-
+	if (canSleep && !isAwake) {
+		this->isAwake = false;
 	}
-	 else {
-		 this->isAwake = false;
+	else {
+		this->isAwake = true;
 	}
 }

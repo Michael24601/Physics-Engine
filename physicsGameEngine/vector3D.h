@@ -148,6 +148,17 @@ namespace pe {
 				z * vector.x - x * vector.z, x * vector.y - y * vector.x);
 		}
 
+
+		Vector3D operator%(const Vector3D& vector) const {
+			return vectorProduct(vector);
+		}
+
+
+		real operator*(const Vector3D& vector) const {
+			return scalarProduct(vector);
+		}
+
+
 		void vectorProductUpdate(const Vector3D& vector) {
 			x = y * vector.z - z * vector.y;
 			y = z * vector.x - x * vector.z;
@@ -163,6 +174,18 @@ namespace pe {
 			int temp = x;
 			x = -y;
 			y = temp;
+		}
+
+		real operator[](unsigned int i) const {
+			if (i == 0) return x;
+			if (i == 1) return y;
+			return z;
+		}
+
+		real& operator[](unsigned int i){
+			if (i == 0) return x;
+			if (i == 1) return y;
+			return z;
 		}
 
 		void display() const {

@@ -167,7 +167,9 @@ namespace pe {
 		*/
 		real consecutiveLowMotionTime = 0;
 
-		RigidBody() : isAwake{true} {};
+		bool canSleep;
+
+		RigidBody() : isAwake{ true }, canSleep{false} {};
 
 		/*
 			Calculates internal data of the object based on its state.

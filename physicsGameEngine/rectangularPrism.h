@@ -8,36 +8,21 @@ namespace pe {
 
 	class RectangularPrism : public Polyhedron {
 
-	private:
-
-		/*
-			Since we know how a rectangular prism looks, and the kinds of
-			faces it has, we can set each face's uv coordinates this way.
-		*/
-		void setUVCoordinates() {
-			std::vector<Vector2D> textureCoordinates{
-				Vector2D(0, 0),
-				Vector2D(0, 1),
-				Vector2D(1, 1),
-				Vector2D(1, 0)
-			};
-			for (Face* face: faces) {
-				face->setTextureCoordinates(textureCoordinates);
-			}
-		}
-
 	public:
 
 		real width;
 		real height;
 		real depth;
 
+		Vector3D halfSize;
+
 		RectangularPrism(
 			real width,
 			real height,
 			real depth,
 			real mass,
-			Vector3D position) :
+			Vector3D position,
+			RigidBody* body) :
 			Polyhedron(
 				mass,
 				position,
@@ -55,9 +40,11 @@ namespace pe {
 				Vector3D(width / 2, height / 2, -depth / 2),
 				Vector3D(width / 2, height / 2, depth / 2),
 				Vector3D(-width / 2, height / 2, depth / 2)
-		}
+			},
+			body
 		),
-			width{ width }, height{ height }, depth{ depth } {
+			width{ width }, height{ height }, depth{ depth },
+			halfSize{Vector3D(width/2.0, height/2.0, depth/2.0)} {
 
 			setEdges();
 			setFaces();
@@ -104,6 +91,23 @@ namespace pe {
 					&globalVertices, 
 					indexes[i]
 				);
+			}
+		}
+
+
+		/*
+			Since we know how a rectangular prism looks, and the kinds of
+			faces it has, we can set each face's uv coordinates this way.
+		*/
+		void setUVCoordinates(real cornerX = 1, real cornerY = 1) {
+			std::vector<Vector2D> textureCoordinates{
+				Vector2D(0, 0),
+				Vector2D(0, cornerY),
+				Vector2D(cornerX, cornerY),
+				Vector2D(cornerX, 0)
+			};
+			for (Face* face : faces) {
+				face->setTextureCoordinates(textureCoordinates);
 			}
 		}
 	};
