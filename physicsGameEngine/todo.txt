@@ -227,3 +227,9 @@ Fix the the sleep state, which is currently not correct.
 
 The contact joint now only works if the last object in a series
 has negligible weight.
+
+Add an edge to edge in the second collision generation method.
+
+Change the named of functions in the third collision generation method.
+
+Comment and explain all three collision generation methods.

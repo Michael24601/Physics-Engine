@@ -192,9 +192,9 @@ void RigidBody::integrate(real duration) {
 	if (motion < sleepEpsilon) {
 		consecutiveLowMotionTime += duration;
 		// Check if motion has been low for a certain consecutive duration
-		if (consecutiveLowMotionTime >= 1.0) {
+		//if (consecutiveLowMotionTime >= 1.0) {
 			setAwake(false);
-		}
+		// }
 	}
 	 else {
 	 // Reset consecutive low motion frames when motion is not low
