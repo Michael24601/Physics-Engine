@@ -75,6 +75,10 @@ namespace pe {
 				);
 			}
 		}
+
+		Vector3D getMidpoint(Basis basis = Basis::GLOBAL) const {
+			return (getVertex(0, basis) + getVertex(1, basis)) * 0.5;
+		}
 	};
 }
 

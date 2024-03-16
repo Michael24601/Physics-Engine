@@ -138,7 +138,7 @@ namespace pe {
 						particle2,
 						particle3,
 						restAngle,
-						(real)0.1
+						(real)1.0
 					);
 
 					angleConstraints.push_back(angleConstraint);
@@ -159,7 +159,7 @@ namespace pe {
 			// For each beighboring vector
 			for (int i = 0; i < connections[particleIndex].size(); i++) {
 
-				// Ffirst we retrieve the position of the neighbor
+				// First we retrieve the position of the neighbor
 				int neighborIndex = connections[particleIndex][i];
 				Vector3D neighborPosition = particles[neighborIndex].position;
 
@@ -319,6 +319,8 @@ namespace pe {
 				face->update();
 			}
 		}
+
+
 	};
 }
 

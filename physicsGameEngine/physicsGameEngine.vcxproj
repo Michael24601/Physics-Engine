@@ -210,9 +210,11 @@
     <ClInclude Include="cookTorranceTextureShader.h" />
     <ClInclude Include="curvedFace.h" />
     <ClInclude Include="cylinder.h" />
+    <ClInclude Include="gjk.h" />
+    <ClInclude Include="oldCollisionDetection.h" />
     <ClInclude Include="fineCollisionDetection.h" />
-    <ClInclude Include="fineCollisionDetection2.h" />
     <ClInclude Include="fixedJoint.h" />
+    <ClInclude Include="breakable.h" />
     <ClInclude Include="joint.h" />
     <ClInclude Include="openglUtility.h" />
     <ClInclude Include="pyramid.h" />

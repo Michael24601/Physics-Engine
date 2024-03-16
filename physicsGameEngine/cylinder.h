@@ -128,48 +128,14 @@ namespace pe {
 		}
 
 
-	public:
+		static std::vector<Face*> generateFaces(
+			std::vector<Vector3D>& localVertices,
+			std::vector<Vector3D>& globalVertices,
+			int segments
+		) {
 
-		real radius;
-		real length;
-		int segments;
+			std::vector<Face*> faces;
 
-		Cylinder(
-			real radius,
-			real length,
-			real mass,
-			int segments,
-			Vector3D position,
-			RigidBody* body
-		) :
-			Polyhedron(
-				mass,
-				position,
-				Matrix3x3(
-					(1.0 / 12.0)* mass*
-					(3.0 * radius * radius + length * length), 0, 0,
-					0, (1.0 / 12.0)* mass*
-					(3.0 * radius * radius + length * length), 0,
-					0, 0, (1.0 / 12.0)* mass* (3.0 * radius * radius)
-				),
-				generateCylinderVertices(
-					Vector3D(0, 0, 0),
-					radius,
-					length,
-					segments
-				),
-				body
-			),
-			radius{ radius }, length{ length }, segments{ segments } {
-
-			setEdges();
-			setFaces();
-
-			setUVCoordinates();
-		}
-
-
-		virtual void setFaces() override {
 			// Top face, in counter-clockwise order
 			std::vector<int> topFaceIndexes;
 			for (int i = segments - 1; i >= 0; i--) {
@@ -177,8 +143,8 @@ namespace pe {
 				topFaceIndexes.push_back(v0);
 			}
 			Face* topFace = new Face(
-				&localVertices, 
-				&globalVertices, 
+				&localVertices,
+				&globalVertices,
 				topFaceIndexes
 			);
 			faces.push_back(topFace);
@@ -190,8 +156,8 @@ namespace pe {
 				bottomFaceIndexes.push_back(v1);
 			}
 			Face* bottomFace = new Face(
-				&localVertices, 
-				&globalVertices, 
+				&localVertices,
+				&globalVertices,
 				bottomFaceIndexes
 			);
 			faces.push_back(bottomFace);
@@ -206,7 +172,7 @@ namespace pe {
 				v[3] = v[0] + 1;
 
 				// Forms faces in counter-clockwise order
-				std::vector<int> sideFaceIndexes = {v[0], v[1], v[2], v[3]};
+				std::vector<int> sideFaceIndexes = { v[0], v[1], v[2], v[3] };
 
 				/*
 					Note that all the side faces are curved, unlike the
@@ -227,9 +193,9 @@ namespace pe {
 						we can calculate the vector from each centroid,
 						and use the smaller (e.g. closer) one.
 					*/
-					Vector3D normal0 = localVertices[v[i]] - 
+					Vector3D normal0 = localVertices[v[i]] -
 						bottomFace->getCentroid();
-					Vector3D normal1 = localVertices[v[i]] - 
+					Vector3D normal1 = localVertices[v[i]] -
 						topFace->getCentroid();
 					if (normal0.magnitude() < normal1.magnitude()) {
 						normals[i] = normal0.normalized();
@@ -247,9 +213,17 @@ namespace pe {
 				);
 				faces.push_back(sideFace);
 			}
+
+			return faces;
 		}
 
-		virtual void setEdges() override {
+		std::vector<Edge*> generateEdges(
+			std::vector<Vector3D>& localVertices,
+			std::vector<Vector3D>& globalVertices,
+			int segments
+		) {
+			std::vector<Edge*> edges;
+
 			for (int i = 0; i < segments; ++i) {
 				/*
 					Indices of the four vertices of the cylinder's
@@ -263,7 +237,7 @@ namespace pe {
 				/*
 					We can account for all edges in the cylinder if, for each
 					rectangular side face, we generate 3 edges: the top and
-					bottom ones (on the bases), and one of the side edges 
+					bottom ones (on the bases), and one of the side edges
 					(connecting the two bases). The 4th side of the rectangle
 					will repeat on the next rectangle.
 				*/
@@ -278,8 +252,50 @@ namespace pe {
 					new Edge(&localVertices, &globalVertices, v2, v0)
 				);
 			}
+
+			return edges;
 		}
 
+
+	public:
+
+		real radius;
+		real length;
+		int segments;
+
+		Cylinder(
+			real radius,
+			real length,
+			real mass,
+			int segments,
+			Vector3D position,
+			RigidBody* body
+		) :
+			Polyhedron(
+				mass,
+				position,
+				Matrix3x3(
+					(1.0 / 12.0)* mass*
+					(3.0 * radius * radius + length * length), 0, 0,
+					0, (1.0 / 12.0)* mass *
+					(3.0 * radius * radius + length * length), 0,
+					0, 0, (1.0 / 12.0)* mass* (3.0 * radius * radius)
+				),
+				generateCylinderVertices(
+					Vector3D(0, 0, 0),
+					radius,
+					length,
+					segments
+				),
+				body
+			),
+			radius{ radius }, length{ length }, segments{ segments } {
+
+			setFaces(generateFaces(localVertices, globalVertices, segments));
+			setEdges(generateEdges(localVertices, globalVertices, segments));
+
+			setUVCoordinates();
+		}
 	};
 }
 

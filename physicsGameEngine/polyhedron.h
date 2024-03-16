@@ -1,4 +1,6 @@
-
+/*
+	Header file for the general polyhedron class.
+*/
 
 #ifndef POLYHEDRON2_H
 #define POLYHEDRON2_H
@@ -36,36 +38,24 @@ namespace pe {
 			RigidBody* body
 		) : body{ body },
 			localVertices{ localVertices },
-
 			boundingSphere(
 				body->position,
 				findFurthestPoint().magnitude()
-			) {
+			)
+		{
 			body->setMass(mass);
 			body->position = position;
 			body->setInertiaTensor(inertiaTensor);
 
 			globalVertices = localVertices;
 
+			faces = faces;
+			edges = edges;
+
 			body->angularDamping = 1;
 			body->linearDamping = 1;
 			body->calculateDerivedData();
 		}
-
-
-		/*
-			One reason why we have the child classes override the setEdges
-			and setFaces functions, instead of just sending the vertex
-			associations of the faces and edges to this parent class,
-			is that we can't know if the faces are curved or straight, and
-			if curved, what their normal vectors are (how curved they are).
-			So it's required that the child classes create the Faces,
-			and it follows that the edges be created in the same way.
-		*/
-		virtual void setEdges() = 0;
-
-
-		virtual void setFaces() = 0;
 
 
 		void update() {
@@ -114,10 +104,61 @@ namespace pe {
 		*/
 
 
+		/*
+			One design issue is wether we create setters for the face
+			and edge associations, or we create pure virtual functions
+			that need to be implemented in subclasses which force the
+			edges and faces to be set.
+			We go with the former approach as it provides the flexibility
+			of instantiating a polyhedron object without having to have
+			a suitable subclass.
+		*/
+		void setFaces(std::vector<Face*> faces) {
+			this->faces = faces;
+		}
+
+
+		void setEdges(std::vector<Edge*> edges) {
+			this->edges = edges;
+		}
+
+
 		Vector3D getAxis(int index) const {
 			return body->transformMatrix.getColumnVector(index);
 		}
 
+
+		Vector3D getCentre() const {
+			return body->position;
+		}
+
+
+		Vector3D getFaceNormal(int index) const {
+			return faces[index]->getNormal();
+		}
+
+
+		/*
+			Function used in the GJK collision detection and generation
+			algorithm; it finds the furthest point from a given direction
+			in the Polyhedron.
+		*/
+		Vector3D support(const Vector3D& direction) const {
+			// Initialize with the first vertex
+			Vector3D furthestVertex = globalVertices[0];
+			real maxDot = furthestVertex.scalarProduct(direction);
+
+			// Iterate through all vertices to find the one farthest in the given direction
+			for (size_t i = 1; i < globalVertices.size(); ++i) {
+				real dotProduct = globalVertices[i].scalarProduct(direction);
+				if (dotProduct > maxDot) {
+					maxDot = dotProduct;
+					furthestVertex = globalVertices[i];
+				}
+			}
+
+			return furthestVertex;
+		}
 	};
 }
 

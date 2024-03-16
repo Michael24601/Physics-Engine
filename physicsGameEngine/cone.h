@@ -16,7 +16,7 @@ namespace pe {
 			height, and a number of segments (the more segments the more
 			it will look like a cone). 
 		*/
-		static std::vector<Vector3D> generateConeVertices(
+		static std::vector<Vector3D> generateVertices(
 			const Vector3D& center,
 			real radius, 
 			real height, 
@@ -46,44 +46,16 @@ namespace pe {
 			return vertices;
 		}
 
-	public:
 
-		real radius;
-		real length;
-		int segments;
-
-		Cone(
-			real radius,
-			real length,
-			real mass,
-			int segments,
-			Vector3D position,
-			RigidBody* body
-		) :
-			Polyhedron(
-				mass,
-				position,
-				Matrix3x3(
-					(3.0 / 80.0)* mass* (radius* radius + 4.0 * length * length), 0, 0,
-					0, (3.0 / 80.0)* mass* (radius* radius + 4.0 * length * length), 0,
-					0, 0, (3.0 / 40.0)* mass* radius* radius
-				),
-				generateConeVertices(
-					Vector3D(0, 0, 0),
-					radius,
-					length,
-					segments
-				),
-				body
-			),
-			radius{ radius }, length{ length }, segments{ segments } {
-
-			setEdges();
-			setFaces();
-		}
-
-
-		virtual void setFaces() override {
+		/*
+			Assumes the vertices and segment length have been set.
+		*/
+		static std::vector<Face*> generateFaces(
+			std::vector<Vector3D>& localVertices,
+			std::vector<Vector3D>& globalVertices,
+			int segments
+		) {
+			std::vector<Face*> faces;
 
 			// Base face
 			std::vector<int> baseFaceIndexes;
@@ -91,8 +63,8 @@ namespace pe {
 				baseFaceIndexes.push_back(i);
 			}
 			Face* baseFace = new Face(
-				&localVertices, 
-				&globalVertices, 
+				&localVertices,
+				&globalVertices,
 				baseFaceIndexes
 			);
 			faces.push_back(baseFace);
@@ -136,9 +108,17 @@ namespace pe {
 				);
 				faces.push_back(sideFace);
 			}
+
+			return faces;
 		}
 
-		virtual void setEdges() override {
+
+		static std::vector<Edge*> generateEdges(
+			std::vector<Vector3D>& localVertices,
+			std::vector<Vector3D>& globalVertices,
+			int segments
+		) {
+			std::vector<Edge*> edges;
 
 			// Base edges
 			for (int i = 1; i <= segments; ++i) {
@@ -156,6 +136,43 @@ namespace pe {
 				Edge* edge = new Edge(&localVertices, &globalVertices, 0, i);
 				edges.push_back(edge);
 			}
+
+			return edges;
+		}
+
+	public:
+
+		real radius;
+		real length;
+		int segments;
+
+		Cone(
+			real radius,
+			real length,
+			real mass,
+			int segments,
+			Vector3D position,
+			RigidBody* body
+		) :
+			Polyhedron(
+				mass,
+				position,
+				Matrix3x3(
+					(3.0 / 80.0)* mass* (radius* radius + 4.0 * length * length), 0, 0,
+					0, (3.0 / 80.0)* mass* (radius* radius + 4.0 * length * length), 0,
+					0, 0, (3.0 / 40.0)* mass* radius* radius
+				),
+				generateVertices(
+					Vector3D(0, 0, 0),
+					radius,
+					length,
+					segments
+				),
+				body
+			),
+			radius{ radius }, length{ length }, segments{ segments } {
+			setFaces(generateFaces(localVertices, globalVertices, segments));
+			setEdges(generateEdges(localVertices, globalVertices, segments));
 		}
 
 	};

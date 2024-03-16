@@ -33,6 +33,17 @@ namespace pe {
 			z = -z;
 		}
 
+
+		inline Vector3D inverse() const {
+			return Vector3D(-x, -y, -z);
+		}
+
+
+		inline Vector3D operator-() const {
+			return inverse();
+		}
+
+
 		// Length of vector
 		real magnitude() const {
 			return realSqrt(x * x + y * y + z * z);

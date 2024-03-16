@@ -65,13 +65,13 @@
 
 #include "openglUtility.h"
 #include "fineCollisionDetection.h"
-#include "fineCollisionDetection2.h"
+#include "gjk.h"
 
 using namespace pe;
 using namespace std;
 
 
-#define SIM_5
+#define SIM_6
 
 #ifdef SIM_1
 
@@ -536,7 +536,7 @@ int main() {
     sf::Clock clock;
     real deltaT = 0.06;
 
-    int size = 22;
+    int size = 20;
     real strength = 0.5;
     real mass = 0.5;
     real damping = 0.5;
@@ -590,6 +590,20 @@ int main() {
                 cameraPosition.x = sin(angle) * cameraDistance;
                 cameraPosition.z = cos(angle) * cameraDistance;
                 viewMatrix = glm::lookAt(cameraPosition, cameraTarget, upVector);
+            }
+            // Moves camera
+            // Rotates camera
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
+                cameraDistance *= 0.98;
+                cameraPosition *= 0.98;
+                viewMatrix =
+                    glm::lookAt(cameraPosition, cameraTarget, upVector);
+            }
+            else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
+                cameraDistance *= 1.02;
+                cameraPosition *= 1.02;
+                viewMatrix =
+                    glm::lookAt(cameraPosition, cameraTarget, upVector);
             }
         }
 
@@ -677,8 +691,7 @@ int main() {
         glm::vec4 lightColor[]{ glm::vec4(1.0, 1.0, 1.0, 1.0),
             glm::vec4(1.0, 1.0, 1.0, 1.0) };
         
-      
-        
+        /*
         texShader.drawFaces(
             data.vertices,
             data.normals,
@@ -690,6 +703,16 @@ int main() {
             2,
             lightPos,
             lightColor
+        );
+        */
+
+
+        shader.drawEdges(
+            edata.vertices,
+            identity,
+            viewMatrix,
+            projectionMatrix,
+            colorWhite
         );
         
 
@@ -789,8 +812,7 @@ int main() {
     sf::Clock clock;
     real deltaT = 0.035;
 
-    real side = 150;
-    RectangularPrism c1(side, side, side, 1.5, Vector3D(0, 600, 0), new RigidBody);
+    RectangularPrism c1(200, 200, 200, 1.5, Vector3D(0, 600, 0), new RigidBody);
 
     RectangularPrism c3(400, 200, 400, 15, Vector3D(0, 200, 0), new RigidBody);
 
@@ -802,7 +824,7 @@ int main() {
     c3.body->angularDamping = 0.9;
     c3.body->linearDamping = 0.95;
 
-    c1.body->orientation = Quaternion(1, 0.2, 1, 0.3).normalized();
+    //c1.body->orientation = Quaternion(1, 0.2, 1, 0.3).normalized();
 
     RigidBodyGravity g(Vector3D(0, -10, 0));
 
@@ -870,11 +892,9 @@ int main() {
             g.updateForce(c3.body, substep);
 
             std::vector<Contact> contacts;
-            // Here we check for collision
-
            
-            generateContactBoxAndBox(c1, c3, contacts, 0.25, 0.0);
-            generateContactBoxAndBox(c1, c2, contacts, 0.25, 0.0);
+            generateContactBoxAndBox(c3, c1, contacts, 0.25, 0.0);
+            generateContactBoxAndBox(c2, c1, contacts, 0.25, 0.0);
             generateContactBoxAndBox(c2, c3, contacts, 0.25, 0.0);
 
             CollisionResolver resolver(10, 1);
@@ -1602,6 +1622,333 @@ int main() {
         cookShader.drawFaces(data.vertices, data.normals,
             identity, viewMatrix, projectionMatrix, colorWhite, 1, lightPos,
             lightColors, cameraPosition, 0.1, 0.05
+        );
+
+        window.display();
+    }
+
+    return 0;
+}
+
+#endif
+
+
+#ifdef SIM_6
+
+int main() {
+
+    // Needed for 3D rendering
+    sf::ContextSettings settings;
+    settings.depthBits = 24;
+    settings.antialiasingLevel = 8;
+    sf::RenderWindow window(sf::VideoMode(1200, 800), "Physics Simulation",
+        sf::Style::Default, settings);
+    window.setActive();
+
+    GLenum err = glewInit();
+    if (GLEW_OK != err) {
+        // GLEW initialization failed
+        std::cerr << "Error: GLEW initialization failed: "
+            << glewGetErrorString(err) << std::endl;
+        return -1;
+    }
+
+    // Sets up OpenGL states (for 3D)
+    // Makes objects in front of others cover them
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
+
+    // Set to clockwise or counter-clockwise depending on face vertex order
+    // (Counter Clockwise for us).
+    glFrontFace(GL_CCW);
+    // This only displays faces from one side, depending on the order of
+    // vertices, and what is considered front facce in the above option.
+    // Disable to show both faces (but lose on performance).
+    // Set to off in case our faces are both clockwise and counter clockwise
+    // (mixed), so we can't consisently render only one.
+    // Note that if we have opacity of face under 1 (opaque), it is
+    // definitely best not to render both sides (enable culling) so it
+    // appears correct.
+    glEnable(GL_CULL_FACE);
+
+    // Enables blending for transparency
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    glDepthFunc(GL_LEQUAL);
+
+    // Shaders
+    SolidColorShader shader;
+    DiffuseLightingShader lightShader;
+    DiffuseSpecularLightingShader phongShader;
+    CookTorranceShader cookShader;
+    AnisotropicShader aniShader;
+    TextureShader texShader;
+    CookTorranceTextureShader cookTexShader;
+    AnisotropicTextureShader aniTexShader;
+
+    // View matrix, used for positioning and angling the camera
+    // Camera's position in world coordinates
+    real cameraDistance = 1000.0f;
+    glm::vec3 cameraPosition = glm::vec3(cameraDistance, 0.0f, 0.0f);
+    // Point the camera is looking at
+    glm::vec3 cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);
+    // Up vector
+    glm::vec3 upVector = glm::vec3(0.0f, 1.0f, 0.0f);
+    glm::mat4 viewMatrix = glm::lookAt(cameraPosition,
+        cameraTarget, upVector);
+
+    // Projection matrix, used for perspective
+    // Field of View (FOV) in degrees
+    real fov = 90.0f;
+    // Aspect ratio
+    real aspectRatio = window.getSize().x
+        / static_cast<real>(window.getSize().y);
+    // Near and far clipping planes
+    real nearPlane = 0.1f;
+    real farPlane = 10000.0f;
+
+    // Create a perspective projection matrix
+    glm::mat4 projectionMatrix = glm::perspective(glm::radians(fov),
+        aspectRatio, nearPlane, farPlane);
+
+    // Just in order to flip y axis
+    sf::View view = window.getDefaultView();
+    view.setSize(1200, -800);
+    view.setCenter(0, 0);
+    window.setView(view);
+
+    sf::Clock clock;
+    real deltaT = 0.07;
+
+    std::vector<RectangularPrism*> prisms{
+        new RectangularPrism(200, 200, 200, 1.5, Vector3D(0, -200, 0), new RigidBody),
+        new RectangularPrism(200, 200, 200, 1.5, Vector3D(0, 0, 0), new RigidBody),
+        new RectangularPrism(200, 200, 200, 1.5, Vector3D(0, 200, 0), new RigidBody),
+        new RectangularPrism(200, 200, 200, 1.5, Vector3D(0, -200, 205), new RigidBody),
+        new RectangularPrism(200, 200, 200, 1.5, Vector3D(0, 0, 205), new RigidBody),
+        new RectangularPrism(200, 200, 200, 1.5, Vector3D(0, 200, 205), new RigidBody),
+        new RectangularPrism(200, 200, 200, 1.5, Vector3D(0, 200, -205), new RigidBody),
+        new RectangularPrism(200, 200, 200, 1.5, Vector3D(0, 0, -205), new RigidBody),
+        new RectangularPrism(200, 200, 200, 1.5, Vector3D(0, -200, -205), new RigidBody),
+
+        new RectangularPrism(200, 200, 200, 1.5, Vector3D(-205, -200, 0), new RigidBody),
+        new RectangularPrism(200, 200, 200, 1.5, Vector3D(-205, 0, 0), new RigidBody),
+        new RectangularPrism(200, 200, 200, 1.5, Vector3D(-205, 200, 0), new RigidBody),
+        new RectangularPrism(200, 200, 200, 1.5, Vector3D(-205, -200, 205), new RigidBody),
+        new RectangularPrism(200, 200, 200, 1.5, Vector3D(-205, 0, 205), new RigidBody),
+        new RectangularPrism(200, 200, 200, 1.5, Vector3D(-205, 200, 205), new RigidBody),
+        new RectangularPrism(200, 200, 200, 1.5, Vector3D(-205, 200, -205), new RigidBody),
+        new RectangularPrism(200, 200, 200, 1.5, Vector3D(-205, 0, -205), new RigidBody),
+        new RectangularPrism(200, 200, 200, 1.5, Vector3D(-205, -200, -205), new RigidBody),
+
+        new RectangularPrism(200, 200, 200, 1.5, Vector3D(-405, -200, 0), new RigidBody),
+        new RectangularPrism(200, 200, 200, 1.5, Vector3D(-405, 0, 0), new RigidBody),
+        new RectangularPrism(200, 200, 200, 1.5, Vector3D(-405, 200, 0), new RigidBody),
+        new RectangularPrism(200, 200, 200, 1.5, Vector3D(-405, -200, 205), new RigidBody),
+        new RectangularPrism(200, 200, 200, 1.5, Vector3D(-405, 0, 205), new RigidBody),
+        new RectangularPrism(200, 200, 200, 1.5, Vector3D(-405, 200, 205), new RigidBody),
+        new RectangularPrism(200, 200, 200, 1.5, Vector3D(-405, 200, -205), new RigidBody),
+        new RectangularPrism(200, 200, 200, 1.5, Vector3D(-405, 0, -205), new RigidBody),
+        new RectangularPrism(200, 200, 200, 1.5, Vector3D(-405, -200, -205), new RigidBody)
+    };
+
+    RectangularPrism ground(10000, 100, 10000, 0, Vector3D(0, -350, -0), new RigidBody);
+    ground.body->inverseMass = 0;
+
+    SolidSphere s(200, 5, 20, 20, Vector3D(800, 400, 0), new RigidBody);
+    s.body->canSleep = false;
+
+    for (RectangularPrism* prism : prisms) {
+        prism->body->angularDamping = 0.9;
+        prism->body->linearDamping = 0.95;
+        prism->body->canSleep = true;
+    }
+    s.body->angularDamping = 0.8;
+    s.body->linearDamping = 0.95;
+
+    // ground.body->orientation = Quaternion(1, 0.2, 1, 0.3).normalized();
+
+    RigidBodyGravity g(Vector3D(0, -10, 0));
+
+    RigidBody b;
+    b.position = Vector3D(800, 700, 0);
+    RigidBodySpringForce f(s.localVertices[0], &b, Vector3D(), 0.24, 300);
+
+    real rotationSpeed = 0.1;
+    real angle = PI / 2;
+    bool isButtonPressed[]{
+        false
+    };
+
+    while (window.isOpen()) {
+
+        sf::Event event;
+        while (window.pollEvent(event))
+        {
+            if (event.type == sf::Event::Closed)
+                window.close();
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::R)) {
+                isButtonPressed[0] = true;
+            }
+            else if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
+                isButtonPressed[0] = isButtonPressed[1] =
+                    isButtonPressed[2] = isButtonPressed[3] = false;
+            }
+            // Rotates camera
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
+                angle += rotationSpeed;
+                cameraPosition.x = sin(angle) * cameraDistance;
+                cameraPosition.z = cos(angle) * cameraDistance;
+                viewMatrix =
+                    glm::lookAt(cameraPosition, cameraTarget, upVector);
+            }
+            else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
+                angle -= rotationSpeed;
+                cameraPosition.x = sin(angle) * cameraDistance;
+                cameraPosition.z = cos(angle) * cameraDistance;
+                viewMatrix =
+                    glm::lookAt(cameraPosition, cameraTarget, upVector);
+            }
+            // Moves camera
+             // Rotates camera
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
+                cameraDistance *= 0.98;
+                cameraPosition *= 0.98;
+                viewMatrix =
+                    glm::lookAt(cameraPosition, cameraTarget, upVector);
+            }
+            else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
+                cameraDistance *= 1.02;
+                cameraPosition *= 1.02;
+                viewMatrix =
+                    glm::lookAt(cameraPosition, cameraTarget, upVector);
+            }
+        }
+
+        int numSteps = 20;
+        real substep = deltaT / numSteps;
+
+        while (numSteps--) {
+
+            for (RectangularPrism* prism : prisms) {
+                prism->body->calculateDerivedData();
+            }
+            ground.body->calculateDerivedData();
+            s.body->calculateDerivedData();
+            b.calculateDerivedData();
+
+            for (RectangularPrism* prism : prisms) {
+                g.updateForce(prism->body, substep);
+            }
+            g.updateForce(s.body, substep);
+            f.updateForce(s.body, substep);
+
+            std::vector<Contact> contacts;
+
+            for (int i = 0; i < prisms.size(); i++) {
+                generateContactBoxAndBox(*(prisms[i]), ground, contacts, 0.25, 0.0);
+                generateContactBoxAndSphere(*(prisms[i]), s, contacts, 0.25, 0.0);
+                for (int j = 0; j < prisms.size(); j++) {
+                    if (i != j) {
+                        generateContactBoxAndBox(*(prisms[i]), *(prisms[j]), contacts, 0.25, 0.0);
+                    }
+                }
+            }
+            generateContactBoxAndSphere(ground, s, contacts, 0.25, 0.0);
+
+            CollisionResolver resolver(10, 1);
+            resolver.resolveContacts(contacts.data(), contacts.size(), substep);
+
+            for (RectangularPrism* prism : prisms) {
+                prism->body->integrate(substep);
+                prism->update();
+            }
+            ground.body->integrate(substep);
+            ground.update();
+            s.body->integrate(substep);
+            s.update();
+        }
+
+        if (isButtonPressed[0]) {
+            sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
+            sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);
+            s.body->position.x = worldPos.x * 4;
+            s.body->position.y = worldPos.y * 4;
+            //s.body->position.z = worldPos.x;
+            s.body->setAwake(true);
+        }
+
+        window.clear(sf::Color::Color(50, 50, 50));
+        // Clears the depth buffer (for 3D)
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        // Spring/Cable
+        // Note that the model is the identity since the cable is in world
+        // coordinates
+        glm::mat4 identity = glm::mat4(1.0);
+        glm::vec4 colorWhite(1.0, 1.0, 1.0, 1.0);
+        glm::vec4 colorRed(0.8, 0.1, 0.1, 1.0);
+        glm::vec4 colorBlue(0.5, 0.7, 1.0, 1.0);
+        glm::vec4 colorGreen(0.3, 0.9, 0.3, 1.0);
+        glm::vec4 colorYellow(0.9, 0.9, 0.5, 1.0);
+        glm::vec4 colorPurple(0.4, 0.1, 0.8, 1.0);
+        glm::vec4 colorMagenta(0.9, 0.3, 0.6, 1.0);
+        glm::vec4 colorOrange(0.9, 0.6, 0.2, 1.0);
+        glm::vec4 colorDarkBlue(0.1, 0.1, 0.4, 1.0);
+        glm::vec4 colorGrey(0.4, 0.4, 0.4, 1.0);
+        glm::vec4 colorBlack(0.05, 0.05, 0.05, 1.0);
+
+        // Shape
+        glm::vec3 lightPos[]{
+            glm::vec3(200.0f, 300.0f, 0.0f),
+            glm::vec3(200.0f, 900.0f, 0.0f),
+        };
+        glm::vec4 lightColors[]{
+            glm::vec4(1.0f, 1.0f, 1.0f, 0.6f),
+            glm::vec4(1.0f, 1.0f, 1.0f, 0.6f),
+        };
+
+        glm::vec4 colors[9]{
+            colorRed,
+            colorBlue,
+            colorPurple,
+            colorGreen,
+            colorMagenta,
+            colorYellow,
+            colorOrange,
+            colorDarkBlue,
+            colorGrey
+        };
+
+        // Data
+        FaceData data;
+
+        for (int i = 0; i < prisms.size(); i++) {
+            data = getFaceData(*prisms[i]);
+            cookShader.drawFaces(data.vertices, data.normals,
+                identity, viewMatrix, projectionMatrix, colors[i%9], 2, lightPos,
+                lightColors, cameraPosition, 0.1, 0.05
+            );
+        }
+        
+        data = getFaceData(ground);
+        cookShader.drawFaces(data.vertices, data.normals,
+            identity, viewMatrix, projectionMatrix, colorWhite, 2, lightPos,
+            lightColors, cameraPosition, 0.1, 0.05
+        );
+
+        data = getFaceData(s);
+        cookShader.drawFaces(data.vertices, data.normals,
+            identity, viewMatrix, projectionMatrix, colorBlack, 2, lightPos,
+            lightColors, cameraPosition, 0.1, 0.05
+        );
+
+        EdgeData ed;
+        ed.vertices.push_back(convertToGLM(b.position));
+        ed.vertices.push_back(convertToGLM(s.globalVertices[0]));
+        shader.drawEdges(ed.vertices, identity, viewMatrix, projectionMatrix,
+            colorWhite
         );
 
         window.display();

@@ -64,6 +64,9 @@
     <Filter Include="Header Files\Joint">
       <UniqueIdentifier>{9dd99029-89c0-4de7-809e-06ff8b7b4ae9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Fracture">
+      <UniqueIdentifier>{713972cc-8650-433c-a957-7f4373e592ed}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="physicsGameEngine.cpp">
@@ -380,10 +383,16 @@
     <ClInclude Include="rigidBodyBungeeForce.h">
       <Filter>Header Files\RigidBodyPhysics</Filter>
     </ClInclude>
+    <ClInclude Include="oldCollisionDetection.h">
+      <Filter>Header Files\Collision</Filter>
+    </ClInclude>
     <ClInclude Include="fineCollisionDetection.h">
       <Filter>Header Files\Collision</Filter>
     </ClInclude>
-    <ClInclude Include="fineCollisionDetection2.h">
+    <ClInclude Include="breakable.h">
+      <Filter>Header Files\Fracture</Filter>
+    </ClInclude>
+    <ClInclude Include="gjk.h">
       <Filter>Header Files\Collision</Filter>
     </ClInclude>
   </ItemGroup>
