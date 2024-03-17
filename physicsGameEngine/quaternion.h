@@ -154,6 +154,28 @@ namespace pe {
 		}
 
 
+		static Quaternion rotatedByAxisAngle(const Vector3D& axis, real angle) {
+			// Calculate half angle
+			real halfAngle = angle * real(0.5);
+
+			// Calculate sine and cosine of half angle
+			real sinHalfAngle = sin(halfAngle);
+			real cosHalfAngle = cos(halfAngle);
+
+			// Normalize axis
+			Vector3D normalizedAxis = axis.normalized();
+
+			// Construct quaternion representing the rotation
+			Quaternion rotationQuaternion(
+				normalizedAxis.x * sinHalfAngle,
+				normalizedAxis.y * sinHalfAngle,
+				normalizedAxis.z * sinHalfAngle,
+				cosHalfAngle
+			);
+			return rotationQuaternion.normalized();
+		}
+
+
 		real toAxisAngle(Vector3D& axis) const {
 			// Ensure the quaternion is normalized
 			Quaternion q = normalized();

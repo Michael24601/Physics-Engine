@@ -189,7 +189,7 @@ void RigidBody::integrate(real duration) {
 	real bias = realPow(0.5, duration);
 	motion = bias * motion + (1 - bias) * currentMotion;
 
-	if (motion < sleepEpsilon) {
+	if (motion < 5000.0) {
 		consecutiveLowMotionTime += duration;
 		// Check if motion has been low for a certain consecutive duration
 		//if (consecutiveLowMotionTime >= 1.0) {

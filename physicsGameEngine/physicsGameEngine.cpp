@@ -632,7 +632,7 @@ int main() {
                     move.y = worldPos.y - mesh.particles[size * size / 2].position.y;
                     move.z = worldPos.x - mesh.particles[size * size / 2].position.z;
 
-                    move *= 1.5;
+                    move *= mass;
                     ParticleGravity f(move);
 
                     for (int i = 0; i < size; i++) {
@@ -647,7 +647,7 @@ int main() {
                     move.y = worldPos.y - mesh.particles[size * size / 2].position.y;
                     move.z = -(worldPos.x + mesh.particles[size * size / 2].position.z);
 
-                    move *= 1.5;
+                    move *= mass;
                     ParticleGravity f(move);
 
                     for (int i = 0; i < size; i++) {
@@ -778,6 +778,8 @@ int main() {
     CookTorranceTextureShader cookTexShader;
     AnisotropicTextureShader aniTexShader;
 
+    GLuint texture = loadTexture("C:\\Users\\msaba\\OneDrive\\Desktop\\textureMaps\\world.jpg");
+
     // View matrix, used for positioning and angling the camera
     // Camera's position in world coordinates
     real cameraDistance = 1000.0f;
@@ -812,9 +814,9 @@ int main() {
     sf::Clock clock;
     real deltaT = 0.035;
 
-    RectangularPrism c1(200, 200, 200, 1.5, Vector3D(0, 600, 0), new RigidBody);
+    SolidSphere c1(200, mass, 10, 10, Vector3D(0, 600, 0), new RigidBody);
 
-    RectangularPrism c3(400, 200, 400, 15, Vector3D(0, 200, 0), new RigidBody);
+    SolidSphere c3(150, 1, 10, 10, Vector3D(0, 200, 0), new RigidBody);
 
     RectangularPrism c2(10000, 100, 10000, 0, Vector3D(0, -400, -0), new RigidBody);
     c2.body->inverseMass = 0;
@@ -824,7 +826,7 @@ int main() {
     c3.body->angularDamping = 0.9;
     c3.body->linearDamping = 0.95;
 
-    //c1.body->orientation = Quaternion(1, 0.2, 1, 0.3).normalized();
+    //c2.body->orientation = Quaternion::rotatedByAxisAngle(Vector3D(1, 0, 0), 0.2);
 
     RigidBodyGravity g(Vector3D(0, -10, 0));
 
@@ -893,9 +895,9 @@ int main() {
 
             std::vector<Contact> contacts;
            
-            generateContactBoxAndBox(c3, c1, contacts, 0.25, 0.0);
-            generateContactBoxAndBox(c2, c1, contacts, 0.25, 0.0);
-            generateContactBoxAndBox(c2, c3, contacts, 0.25, 0.0);
+            generateContactSphereAndSphere(c3, c1, contacts, 0.45, 1.0);
+            generateContactBoxAndSphere(c2, c1, contacts, 0.45, 1.0);
+            generateContactBoxAndSphere(c2, c3, contacts, 0.45, 0.0);
 
             CollisionResolver resolver(10, 1);
             resolver.resolveContacts(contacts.data(), contacts.size(), substep);
@@ -944,8 +946,9 @@ int main() {
 
         // Data
         FaceData data = getFaceData(c1);
-        cookShader.drawFaces(data.vertices, data.normals,
-            identity, viewMatrix, projectionMatrix, colorPurple, 1, lightPos,
+        cookTexShader.drawFaces(data.vertices, data.normals,
+            data.uvCoordinates,
+            identity, viewMatrix, projectionMatrix, texture, 1, lightPos,
             lightColors, cameraPosition, 0.1, 0.05
         );
         data = getFaceData(c2);
@@ -1312,8 +1315,6 @@ int main() {
     CookTorranceTextureShader cookTexShader;
     AnisotropicTextureShader aniTexShader;
 
-    GLuint texture = loadTexture("C:\\Users\\msaba\\OneDrive\\Desktop\\textureMaps\\squares.jpg");
-
     // View matrix, used for positioning and angling the camera
     // Camera's position in world coordinates
     real cameraDistance = 1000.0f;
@@ -1346,51 +1347,49 @@ int main() {
     window.setView(view);
 
     sf::Clock clock;
-    real deltaT = 0.035;
+    real deltaT = 0.07;
 
-    RectangularPrism c1(20, 600, 200, 6, Vector3D(400, -200, 0), new RigidBody());
-    RectangularPrism c3(20, 550, 200, 4, Vector3D(200, -200, 0), new RigidBody());
-    RectangularPrism c4(20, 500, 200, 2, Vector3D(0, -200, 0), new RigidBody());
-    RectangularPrism c2(20, 450, 200, 2, Vector3D(-200, -200, 0), new RigidBody());
-    RectangularPrism c5(20, 400, 200, 2, Vector3D(-400, -200, 0), new RigidBody());
-    RectangularPrism c6(20, 350, 200, 2, Vector3D(-600, -200, 0), new RigidBody());
+    std::vector<RectangularPrism*> prisms;
+    
+    real radius = 800;
 
-    c1.body->canSleep = true;
-    c1.body->angularDamping = 0.8;
-    c1.body->linearDamping = 0.85;
+    for (int i = 0; i < 15; i++) {
 
-    c3.body->canSleep = true;
-    c3.body->angularDamping = 0.8;
-    c3.body->linearDamping = 0.85;
+        real angle = (2 * PI * i) / 20;
+        Vector3D position(
+            cos(angle) * radius, 0, sin(angle) * radius
+        );
 
-    c4.body->canSleep = true;
-    c4.body->angularDamping = 0.8;
-    c4.body->linearDamping = 0.85;
+        Quaternion r = Quaternion::rotatedByAxisAngle(Vector3D(0, 1, 0), -angle);
 
-    c2.body->canSleep = true;
-    c2.body->angularDamping = 0.8;
-    c2.body->linearDamping = 0.85;
+        RectangularPrism* prism = new RectangularPrism(
+            200, 600, 10, 10,
+            position,
+            new RigidBody
+        );
+        prism->body->orientation = r;
+        prisms.push_back(prism);
+    }
 
-    c5.body->canSleep = true;
-    c5.body->angularDamping = 0.8;
-    c5.body->linearDamping = 0.85;
+    RectangularPrism ground(10000, 100, 10000, 0, Vector3D(0, -350, -0), new RigidBody);
+    ground.body->inverseMass = 0;
 
-    c6.body->canSleep = true;
-    c6.body->angularDamping = 0.8;
-    c6.body->linearDamping = 0.85;
+    for (RectangularPrism* prism : prisms) {
+        prism->body->angularDamping = 0.9;
+        prism->body->linearDamping = 0.95;
+        prism->body->canSleep = true;
+    }
 
-    RectangularPrism s(10000, 100, 10000, 0, Vector3D(0, -400, -0), new RigidBody());
-    s.body->inverseMass = 0;
-    s.body->canSleep = true;
-
-    RectangularPrism s1(20, 800, 200, 0, Vector3D(-650, -300, 0), new RigidBody());
-    RectangularPrism s2(20, 800, 200, 0, Vector3D(450, -300, -0), new RigidBody());
-    s1.body->inverseMass = 0;
-    s1.body->canSleep = true;
-    s2.body->inverseMass = 0;
-    s2.body->canSleep = true;
+    SolidSphere s(100, 5, 20, 20, Vector3D(800, 400, -400), new RigidBody);
+    s.body->canSleep = false;
+    s.body->angularDamping = 0.8;
+    s.body->linearDamping = 0.95;
 
     RigidBodyGravity g(Vector3D(0, -10, 0));
+
+    RigidBody b;
+    b.position = Vector3D(800, 800, -400);
+    RigidBodySpringForce f(s.localVertices[0], &b, Vector3D(), 0.24, 300);
 
     real rotationSpeed = 0.1;
     real angle = PI / 2;
@@ -1405,8 +1404,12 @@ int main() {
         {
             if (event.type == sf::Event::Closed)
                 window.close();
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::R)) {
+                isButtonPressed[0] = true;
+            }
             else if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
-                c1.body->addForceAtLocalPoint(Vector3D(-50000, 0, 0), Vector3D(40, 100, 0));
+                isButtonPressed[0] = isButtonPressed[1] =
+                    isButtonPressed[2] = isButtonPressed[3] = false;
             }
             // Rotates camera
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
@@ -1444,107 +1447,56 @@ int main() {
 
         while (numSteps--) {
 
-            c1.body->calculateDerivedData();
-            c3.body->calculateDerivedData();
-            c4.body->calculateDerivedData();
-            c2.body->calculateDerivedData();
-            c5.body->calculateDerivedData();
-            c6.body->calculateDerivedData();
-
+            for (RectangularPrism* prism : prisms) {
+                prism->body->calculateDerivedData();
+            }
+            ground.body->calculateDerivedData();
             s.body->calculateDerivedData();
-            s1.body->calculateDerivedData();
-            s2.body->calculateDerivedData();
+            b.calculateDerivedData();
 
-            g.updateForce(c1.body, substep);
-            g.updateForce(c3.body, substep);
-            g.updateForce(c4.body, substep);
-            g.updateForce(c2.body, substep);
-            g.updateForce(c5.body, substep);
-            g.updateForce(c6.body, substep);
+            for (RectangularPrism* prism : prisms) {
+                g.updateForce(prism->body, substep);
+            }
+            g.updateForce(s.body, substep);
+            f.updateForce(s.body, substep);
 
             std::vector<Contact> contacts;
 
-            
-            generateContactBoxAndBox(c1, c3, contacts, 0.25, 0.0);
-            generateContactBoxAndBox(c1, c4, contacts, 0.25, 0.0);
-            generateContactBoxAndBox(c1, c2, contacts, 0.25, 0.0);
-            generateContactBoxAndBox(c1, c5, contacts, 0.25, 0.0);
-            generateContactBoxAndBox(c1, c6, contacts, 0.25, 0.0);
+            for (int i = 0; i < prisms.size(); i++) {
+                generateContactBoxAndBox(*(prisms[i]), ground, contacts, 0.2, 0.0);
+                generateContactBoxAndSphere(*(prisms[i]), s, contacts, 0.2, 0.0);
+                for (int j = 0; j < prisms.size(); j++) {
+                    if (i != j) {
+                        generateContactBoxAndBox(*(prisms[i]), *(prisms[j]), contacts, 0.2, 0.0);
+                    }
+                }
+            }
 
-            generateContactBoxAndBox(c2, c3, contacts, 0.25, 0.0);
-            generateContactBoxAndBox(c2, c4, contacts, 0.25, 0.0);
-            generateContactBoxAndBox(c2, c1, contacts, 0.25, 0.0);
-            generateContactBoxAndBox(c2, c5, contacts, 0.25, 0.0);
-            generateContactBoxAndBox(c2, c6, contacts, 0.25, 0.0);
-
-            generateContactBoxAndBox(c3, c1, contacts, 0.25, 0.0);
-            generateContactBoxAndBox(c3, c4, contacts, 0.25, 0.0);
-            generateContactBoxAndBox(c3, c2, contacts, 0.25, 0.0);
-            generateContactBoxAndBox(c3, c5, contacts, 0.25, 0.0);
-            generateContactBoxAndBox(c3, c6, contacts, 0.25, 0.0);
-
-            generateContactBoxAndBox(c4, c3, contacts, 0.25, 0.0);
-            generateContactBoxAndBox(c4, c1, contacts, 0.25, 0.0);
-            generateContactBoxAndBox(c4, c2, contacts, 0.25, 0.0);
-            generateContactBoxAndBox(c4, c5, contacts, 0.25, 0.0);
-            generateContactBoxAndBox(c4, c6, contacts, 0.25, 0.0);
-
-            generateContactBoxAndBox(c5, c3, contacts, 0.25, 0.0);
-            generateContactBoxAndBox(c5, c4, contacts, 0.25, 0.0);
-            generateContactBoxAndBox(c5, c2, contacts, 0.25, 0.0);
-            generateContactBoxAndBox(c5, c1, contacts, 0.25, 0.0);
-            generateContactBoxAndBox(c5, c6, contacts, 0.25, 0.0);
-
-            generateContactBoxAndBox(c6, c3, contacts, 0.25, 0.0);
-            generateContactBoxAndBox(c6, c4, contacts, 0.25, 0.0);
-            generateContactBoxAndBox(c6, c2, contacts, 0.25, 0.0);
-            generateContactBoxAndBox(c6, c5, contacts, 0.25, 0.0);
-            generateContactBoxAndBox(c6, c1, contacts, 0.25, 0.0);
-
-            generateContactBoxAndBox(s, c1, contacts, 0.25, 0.0);
-            generateContactBoxAndBox(s, c3, contacts, 0.25, 0.0);
-            generateContactBoxAndBox(s, c4, contacts, 0.25, 0.0);
-            generateContactBoxAndBox(s, c2, contacts, 0.25, 0.0);
-            generateContactBoxAndBox(s, c5, contacts, 0.25, 0.0);
-            generateContactBoxAndBox(s, c6, contacts, 0.25, 0.0);
-
-            generateContactBoxAndBox(s2, c1, contacts, 0.25, 0.0);
-            generateContactBoxAndBox(s2, c3, contacts, 0.25, 0.0);
-            generateContactBoxAndBox(s2, c4, contacts, 0.25, 0.0);
-            generateContactBoxAndBox(s2, c2, contacts, 0.25, 0.0);
-            generateContactBoxAndBox(s2, c5, contacts, 0.25, 0.0);
-            generateContactBoxAndBox(s2, c6, contacts, 0.25, 0.0);
-
-            generateContactBoxAndBox(s1, c1, contacts, 0.25, 0.0);
-            generateContactBoxAndBox(s1, c3, contacts, 0.25, 0.0);
-            generateContactBoxAndBox(s1, c4, contacts, 0.25, 0.0);
-            generateContactBoxAndBox(s1, c2, contacts, 0.25, 0.0);
-            generateContactBoxAndBox(s1, c5, contacts, 0.25, 0.0);
-            generateContactBoxAndBox(s1, c6, contacts, 0.25, 0.0);
-
-            CollisionResolver resolver(2, 1);
+            CollisionResolver resolver(10, 1);
             resolver.resolveContacts(contacts.data(), contacts.size(), substep);
 
-            c1.body->integrate(substep);
-            c3.body->integrate(substep);
-            c4.body->integrate(substep);
-            c2.body->integrate(substep);
-            c5.body->integrate(substep);
-            c6.body->integrate(substep);
+            for (RectangularPrism* prism : prisms) {
+                prism->body->integrate(substep);
+                prism->update();
+            }
+            ground.body->integrate(substep);
+            ground.update();
             s.body->integrate(substep);
-
-            c1.update();
-            c3.update();
-            c4.update();
-            c2.update();
-            c5.update();
-            c6.update();
             s.update();
-            s1.update();
-            s2.update();
         }
 
-        window.clear(sf::Color::Black);
+
+        if (isButtonPressed[0]) {
+            sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
+            sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);
+            //s.body->position.x = worldPos.x * 4;
+            s.body->position.y = worldPos.y * 2;
+            s.body->position.z = worldPos.x * 2;
+            s.body->setAwake(true);
+        }
+
+
+        window.clear(sf::Color::Color(50, 50, 50));
         // Clears the depth buffer (for 3D)
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -1558,70 +1510,62 @@ int main() {
         glm::vec4 colorGreen(0.3, 0.9, 0.3, 1.0);
         glm::vec4 colorYellow(0.9, 0.9, 0.5, 1.0);
         glm::vec4 colorPurple(0.4, 0.1, 0.8, 1.0);
-        glm::vec4 colorGrey(0.7, 0.7, 0.7, 1.0);
-        glm::vec4 colorMagenta(0.9, 0.2, 0.5, 1.0);
+        glm::vec4 colorMagenta(0.9, 0.3, 0.6, 1.0);
+        glm::vec4 colorOrange(0.9, 0.6, 0.2, 1.0);
+        glm::vec4 colorDarkBlue(0.1, 0.1, 0.4, 1.0);
+        glm::vec4 colorGrey(0.4, 0.4, 0.4, 1.0);
+        glm::vec4 colorBlack(0.05, 0.05, 0.05, 1.0);
 
         // Shape
         glm::vec3 lightPos[]{
-            glm::vec3(0.0f, 100.0f, 0.0f),
+            glm::vec3(200.0f, 300.0f, 0.0f),
+            glm::vec3(200.0f, 900.0f, 0.0f),
         };
         glm::vec4 lightColors[]{
             glm::vec4(1.0f, 1.0f, 1.0f, 0.6f),
+            glm::vec4(1.0f, 1.0f, 1.0f, 0.6f),
+        };
+
+        glm::vec4 colors[9]{
+            colorRed,
+            colorBlue,
+            colorPurple,
+            colorGreen,
+            colorMagenta,
+            colorYellow,
+            colorOrange,
+            colorDarkBlue,
+            colorGrey
         };
 
         // Data
         FaceData data;
 
-        data = getFaceData(c1);
-        cookShader.drawFaces(data.vertices, data.normals,
-            identity, viewMatrix, projectionMatrix, colorPurple, 1, lightPos,
-            lightColors, cameraPosition, 0.1, 0.05
-        );
+        for (int i = 0; i < prisms.size(); i++) {
+            data = getFaceData(*prisms[i]);
+            cookShader.drawFaces(data.vertices, data.normals,
+                identity, viewMatrix, projectionMatrix, colors[i % 9], 2, lightPos,
+                lightColors, cameraPosition, 0.1, 0.05
+            );
+        }
 
-        data = getFaceData(c3);
+        data = getFaceData(ground);
         cookShader.drawFaces(data.vertices, data.normals,
-            identity, viewMatrix, projectionMatrix, colorRed, 1, lightPos,
-            lightColors, cameraPosition, 0.1, 0.05
-        );
-
-        data = getFaceData(c4);
-        cookShader.drawFaces(data.vertices, data.normals,
-            identity, viewMatrix, projectionMatrix, colorBlue, 1, lightPos,
-            lightColors, cameraPosition, 0.1, 0.05
-        );
-
-        data = getFaceData(c2);
-        cookShader.drawFaces(data.vertices, data.normals,
-            identity, viewMatrix, projectionMatrix, colorGreen, 1, lightPos,
-            lightColors, cameraPosition, 0.1, 0.05
-        );
-
-        data = getFaceData(c5);
-        cookShader.drawFaces(data.vertices, data.normals,
-            identity, viewMatrix, projectionMatrix, colorYellow, 1, lightPos,
-            lightColors, cameraPosition, 0.1, 0.05
-        );
-
-        data = getFaceData(c6);
-        cookShader.drawFaces(data.vertices, data.normals,
-            identity, viewMatrix, projectionMatrix, colorMagenta, 1, lightPos,
+            identity, viewMatrix, projectionMatrix, colorWhite, 2, lightPos,
             lightColors, cameraPosition, 0.1, 0.05
         );
 
         data = getFaceData(s);
         cookShader.drawFaces(data.vertices, data.normals,
-            identity, viewMatrix, projectionMatrix, colorWhite, 1, lightPos,
+            identity, viewMatrix, projectionMatrix, colorBlack, 2, lightPos,
             lightColors, cameraPosition, 0.1, 0.05
         );
-        data = getFaceData(s1);
-        cookShader.drawFaces(data.vertices, data.normals,
-            identity, viewMatrix, projectionMatrix, colorWhite, 1, lightPos,
-            lightColors, cameraPosition, 0.1, 0.05
-        );
-        data = getFaceData(s2);
-        cookShader.drawFaces(data.vertices, data.normals,
-            identity, viewMatrix, projectionMatrix, colorWhite, 1, lightPos,
-            lightColors, cameraPosition, 0.1, 0.05
+
+        EdgeData ed;
+        ed.vertices.push_back(convertToGLM(b.position));
+        ed.vertices.push_back(convertToGLM(s.globalVertices[0]));
+        shader.drawEdges(ed.vertices, identity, viewMatrix, projectionMatrix,
+            colorWhite
         );
 
         window.display();
@@ -1631,7 +1575,6 @@ int main() {
 }
 
 #endif
-
 
 #ifdef SIM_6
 
@@ -1690,7 +1633,7 @@ int main() {
     // View matrix, used for positioning and angling the camera
     // Camera's position in world coordinates
     real cameraDistance = 1000.0f;
-    glm::vec3 cameraPosition = glm::vec3(cameraDistance, 0.0f, 0.0f);
+    glm::vec3 cameraPosition = glm::vec3(cameraDistance, 200.0f, 0.0f);
     // Point the camera is looking at
     glm::vec3 cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);
     // Up vector
@@ -1719,38 +1662,40 @@ int main() {
     window.setView(view);
 
     sf::Clock clock;
-    real deltaT = 0.07;
+    real deltaT = 0.1;
+
+    real mass = 5;
 
     std::vector<RectangularPrism*> prisms{
-        new RectangularPrism(200, 200, 200, 1.5, Vector3D(0, -200, 0), new RigidBody),
-        new RectangularPrism(200, 200, 200, 1.5, Vector3D(0, 0, 0), new RigidBody),
-        new RectangularPrism(200, 200, 200, 1.5, Vector3D(0, 200, 0), new RigidBody),
-        new RectangularPrism(200, 200, 200, 1.5, Vector3D(0, -200, 205), new RigidBody),
-        new RectangularPrism(200, 200, 200, 1.5, Vector3D(0, 0, 205), new RigidBody),
-        new RectangularPrism(200, 200, 200, 1.5, Vector3D(0, 200, 205), new RigidBody),
-        new RectangularPrism(200, 200, 200, 1.5, Vector3D(0, 200, -205), new RigidBody),
-        new RectangularPrism(200, 200, 200, 1.5, Vector3D(0, 0, -205), new RigidBody),
-        new RectangularPrism(200, 200, 200, 1.5, Vector3D(0, -200, -205), new RigidBody),
+        new RectangularPrism(200, 200, 200, mass, Vector3D(0, -200, 0), new RigidBody),
+        new RectangularPrism(200, 200, 200, mass, Vector3D(0, 0, 0), new RigidBody),
+        new RectangularPrism(200, 200, 200, mass, Vector3D(0, 200, 0), new RigidBody),
+        new RectangularPrism(200, 200, 200, mass, Vector3D(0, -200, 205), new RigidBody),
+        new RectangularPrism(200, 200, 200, mass, Vector3D(0, 0, 205), new RigidBody),
+        new RectangularPrism(200, 200, 200, mass, Vector3D(0, 200, 205), new RigidBody),
+        new RectangularPrism(200, 200, 200, mass, Vector3D(0, 200, -205), new RigidBody),
+        new RectangularPrism(200, 200, 200, mass, Vector3D(0, 0, -205), new RigidBody),
+        new RectangularPrism(200, 200, 200, mass, Vector3D(0, -200, -205), new RigidBody),
 
-        new RectangularPrism(200, 200, 200, 1.5, Vector3D(-205, -200, 0), new RigidBody),
-        new RectangularPrism(200, 200, 200, 1.5, Vector3D(-205, 0, 0), new RigidBody),
-        new RectangularPrism(200, 200, 200, 1.5, Vector3D(-205, 200, 0), new RigidBody),
-        new RectangularPrism(200, 200, 200, 1.5, Vector3D(-205, -200, 205), new RigidBody),
-        new RectangularPrism(200, 200, 200, 1.5, Vector3D(-205, 0, 205), new RigidBody),
-        new RectangularPrism(200, 200, 200, 1.5, Vector3D(-205, 200, 205), new RigidBody),
-        new RectangularPrism(200, 200, 200, 1.5, Vector3D(-205, 200, -205), new RigidBody),
-        new RectangularPrism(200, 200, 200, 1.5, Vector3D(-205, 0, -205), new RigidBody),
-        new RectangularPrism(200, 200, 200, 1.5, Vector3D(-205, -200, -205), new RigidBody),
+        new RectangularPrism(200, 200, 200, mass, Vector3D(-205, -200, 0), new RigidBody),
+        new RectangularPrism(200, 200, 200, mass, Vector3D(-205, 0, 0), new RigidBody),
+        new RectangularPrism(200, 200, 200, mass, Vector3D(-205, 200, 0), new RigidBody),
+        new RectangularPrism(200, 200, 200, mass, Vector3D(-205, -200, 205), new RigidBody),
+        new RectangularPrism(200, 200, 200, mass, Vector3D(-205, 0, 205), new RigidBody),
+        new RectangularPrism(200, 200, 200, mass, Vector3D(-205, 200, 205), new RigidBody),
+        new RectangularPrism(200, 200, 200, mass, Vector3D(-205, 200, -205), new RigidBody),
+        new RectangularPrism(200, 200, 200, mass, Vector3D(-205, 0, -205), new RigidBody),
+        new RectangularPrism(200, 200, 200, mass, Vector3D(-205, -200, -205), new RigidBody),
 
-        new RectangularPrism(200, 200, 200, 1.5, Vector3D(-405, -200, 0), new RigidBody),
-        new RectangularPrism(200, 200, 200, 1.5, Vector3D(-405, 0, 0), new RigidBody),
-        new RectangularPrism(200, 200, 200, 1.5, Vector3D(-405, 200, 0), new RigidBody),
-        new RectangularPrism(200, 200, 200, 1.5, Vector3D(-405, -200, 205), new RigidBody),
-        new RectangularPrism(200, 200, 200, 1.5, Vector3D(-405, 0, 205), new RigidBody),
-        new RectangularPrism(200, 200, 200, 1.5, Vector3D(-405, 200, 205), new RigidBody),
-        new RectangularPrism(200, 200, 200, 1.5, Vector3D(-405, 200, -205), new RigidBody),
-        new RectangularPrism(200, 200, 200, 1.5, Vector3D(-405, 0, -205), new RigidBody),
-        new RectangularPrism(200, 200, 200, 1.5, Vector3D(-405, -200, -205), new RigidBody)
+        new RectangularPrism(200, 200, 200, mass, Vector3D(-405, -200, 0), new RigidBody),
+        new RectangularPrism(200, 200, 200, mass, Vector3D(-405, 0, 0), new RigidBody),
+        new RectangularPrism(200, 200, 200, mass, Vector3D(-405, 200, 0), new RigidBody),
+        new RectangularPrism(200, 200, 200, mass, Vector3D(-405, -200, 205), new RigidBody),
+        new RectangularPrism(200, 200, 200, mass, Vector3D(-405, 0, 205), new RigidBody),
+        new RectangularPrism(200, 200, 200, mass, Vector3D(-405, 200, 205), new RigidBody),
+        new RectangularPrism(200, 200, 200, mass, Vector3D(-405, 200, -205), new RigidBody),
+        new RectangularPrism(200, 200, 200, mass, Vector3D(-405, 0, -205), new RigidBody),
+        new RectangularPrism(200, 200, 200, mass, Vector3D(-405, -200, -205), new RigidBody)
     };
 
     RectangularPrism ground(10000, 100, 10000, 0, Vector3D(0, -350, -0), new RigidBody);
