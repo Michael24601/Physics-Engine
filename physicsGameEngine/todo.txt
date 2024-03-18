@@ -240,3 +240,5 @@ shapes to the shaders; it could mean saving memory and time
 by using the same VBOs and VAOs as the vertices remain the same,
 but it also means we are using an extra matrix transformation for
 each vertex to get it to world coordinates.
+
+Add an intertia tensor approximator for custom primitives.

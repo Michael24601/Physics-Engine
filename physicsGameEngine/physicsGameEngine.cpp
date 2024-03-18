@@ -68,12 +68,13 @@
 #include "gjk.h"
 
 #include "cookTorranceReflectionShader.h"
+#include "customPrimitive.h"
 
 using namespace pe;
 using namespace std;
 
 
-#define SIM_6
+#define SIM_7
 
 #ifdef SIM_1
 
@@ -1578,7 +1579,6 @@ int main() {
 
 #ifdef SIM_6
 
-
 int main() {
 
     real width = 1200, height = 800;
@@ -1670,8 +1670,6 @@ int main() {
     real deltaT = 0.1;
 
     real mass = 1.5;
-
-    RectangularPrism c(500, 500, 50, mass, Vector3D(400, 400, 600), new RigidBody);
 
     std::vector<RectangularPrism*> prisms{
         new RectangularPrism(200, 200, 200, mass, Vector3D(0, -200, 0), new RigidBody),
@@ -1789,7 +1787,6 @@ int main() {
             ground.body->calculateDerivedData();
             s.body->calculateDerivedData();
             b.calculateDerivedData();
-            c.body->calculateDerivedData();
 
             for (RectangularPrism* prism : prisms) {
                 g.updateForce(prism->body, substep);
@@ -1821,7 +1818,6 @@ int main() {
             ground.update();
             s.body->integrate(substep);
             s.update();
-            c.update();
         }
 
         if (isButtonPressed[0]) {
@@ -1899,102 +1895,231 @@ int main() {
 
         };
 
+        window.clear(sf::Color::Color(50, 50, 50));
+        // Clears the depth buffer (for 3D)
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // Assuming center is the center of the cube
-        glm::vec3 center = cameraPosition;
-        glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
-        // View matrix for the front face (positive z-axis)
-        glm::mat4 viewMatrices[6] = {
-            glm::lookAt(center, center + glm::vec3(0.0f, 0.0f, 1.0f), up),
-            glm::lookAt(center, center - glm::vec3(0.0f, 0.0f, 1.0f), up),
-            glm::lookAt(center, center - glm::vec3(1.0f, 0.0f, 0.0f), up),
-            glm::lookAt(center, center + glm::vec3(1.0f, 0.0f, 0.0f), up),
-            glm::lookAt(center, center + glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f)),
-            glm::lookAt(center, center - glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f))
-        };
+        renderScene(cameraPosition, viewMatrix, projectionMatrix);
 
-        // Create and bind a framebuffer object (FBO)
-        GLuint fbo;
-        glGenFramebuffers(1, &fbo);
-        glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+        window.display();
+    }
 
-        // Create a cubemap texture
-        GLuint environmentMap;
-        glGenTextures(1, &environmentMap);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, environmentMap);
+    return 0;
+}
 
-        // Set texture parameters (e.g., filtering, wrapping)
-        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+#endif
 
-        // Allocate storage for the cubemap texture
-        for (GLuint i = 0; i < 6; ++i) {
-            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA, 1000, 1000, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+#ifdef SIM_7
+
+int main() {
+
+    // Needed for 3D rendering
+    sf::ContextSettings settings;
+    settings.depthBits = 24;
+    settings.antialiasingLevel = 8;
+    sf::RenderWindow window(sf::VideoMode(1200, 800), "Physics Simulation",
+        sf::Style::Default, settings);
+    window.setActive();
+
+    GLenum err = glewInit();
+    if (GLEW_OK != err) {
+        // GLEW initialization failed
+        std::cerr << "Error: GLEW initialization failed: "
+            << glewGetErrorString(err) << std::endl;
+        return -1;
+    }
+
+    // Sets up OpenGL states (for 3D)
+    // Makes objects in front of others cover them
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
+
+    // Set to clockwise or counter-clockwise depending on face vertex order
+    // (Counter Clockwise for us).
+    glFrontFace(GL_CCW);
+    // This only displays faces from one side, depending on the order of
+    // vertices, and what is considered front facce in the above option.
+    // Disable to show both faces (but lose on performance).
+    // Set to off in case our faces are both clockwise and counter clockwise
+    // (mixed), so we can't consisently render only one.
+    // Note that if we have opacity of face under 1 (opaque), it is
+    // definitely best not to render both sides (enable culling) so it
+    // appears correct.
+    glEnable(GL_CULL_FACE);
+
+    // Enables blending for transparency
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    glDepthFunc(GL_LEQUAL);
+
+    glm::mat4 identity = glm::mat4(1.0);
+    glm::vec4 colorWhite(1.0, 1.0, 1.0, 1.0);
+    glm::vec4 colorRed(0.8, 0.1, 0.1, 1.0);
+    glm::vec4 colorBlue(0.5, 0.7, 1.0, 1.0);
+    glm::vec4 colorGreen(0.3, 0.9, 0.3, 1.0);
+    glm::vec4 colorYellow(0.9, 0.9, 0.5, 1.0);
+    glm::vec4 colorPurple(0.4, 0.1, 0.8, 1.0);
+    glm::vec4 colorMagenta(0.9, 0.3, 0.6, 1.0);
+    glm::vec4 colorOrange(0.9, 0.6, 0.2, 1.0);
+    glm::vec4 colorDarkBlue(0.1, 0.1, 0.4, 1.0);
+    glm::vec4 colorGrey(0.4, 0.4, 0.4, 1.0);
+    glm::vec4 colorBlack(0.05, 0.05, 0.05, 1.0);
+
+    // Shape
+    glm::vec3 lightPos[]{
+        glm::vec3(200.0f, 300.0f, 0.0f),
+        glm::vec3(200.0f, 900.0f, 0.0f),
+    };
+    glm::vec4 lightColors[]{
+        glm::vec4(1.0f, 1.0f, 1.0f, 0.6f),
+        glm::vec4(1.0f, 1.0f, 1.0f, 0.6f),
+    };
+
+    glm::vec4 colors[9]{
+        colorRed,
+        colorBlue,
+        colorPurple,
+        colorGreen,
+        colorMagenta,
+        colorYellow,
+        colorOrange,
+        colorDarkBlue,
+        colorGrey
+    };
+
+    // Shaders
+    SolidColorShader shader;
+    DiffuseLightingShader lightShader;
+    DiffuseSpecularLightingShader phongShader;
+    CookTorranceShader cookShader;
+    AnisotropicShader aniShader;
+    TextureShader texShader;
+    CookTorranceTextureShader cookTexShader;
+    AnisotropicTextureShader aniTexShader;
+
+    // View matrix, used for positioning and angling the camera
+    // Camera's position in world coordinates
+    real cameraDistance = 1000.0f;
+    glm::vec3 cameraPosition = glm::vec3(cameraDistance, 0.0f, 0.0f);
+    // Point the camera is looking at
+    glm::vec3 cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);
+    // Up vector
+    glm::vec3 upVector = glm::vec3(0.0f, 1.0f, 0.0f);
+    glm::mat4 viewMatrix = glm::lookAt(cameraPosition,
+        cameraTarget, upVector);
+
+    // Projection matrix, used for perspective
+    // Field of View (FOV) in degrees
+    real fov = 90.0f;
+    // Aspect ratio
+    real aspectRatio = window.getSize().x
+        / static_cast<real>(window.getSize().y);
+    // Near and far clipping planes
+    real nearPlane = 0.1f;
+    real farPlane = 10000.0f;
+
+    // Create a perspective projection matrix
+    glm::mat4 projectionMatrix = glm::perspective(glm::radians(fov),
+        aspectRatio, nearPlane, farPlane);
+
+    // Just in order to flip y axis
+    sf::View view = window.getDefaultView();
+    view.setSize(1200, -800);
+    view.setCenter(0, 0);
+    window.setView(view);
+
+    sf::Clock clock;
+    real deltaT = 0.07;
+
+    std::string filename = "C:\\Users\\msaba\\OneDrive\\Desktop\\textureMaps\\heart.obj";
+    Polyhedron p = ReturnPrimitive(filename, 10, Vector3D(0, 0, 0), new RigidBody, 80);     
+
+    real rotationSpeed = 0.1;
+    real angle = PI / 2;
+    bool isButtonPressed[]{
+        false
+    };
+
+    while (window.isOpen()) {
+
+        sf::Event event;
+        while (window.pollEvent(event))
+        {
+            if (event.type == sf::Event::Closed)
+                window.close();
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::R)) {
+                isButtonPressed[0] = true;
+            }
+            else if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
+                isButtonPressed[0] = isButtonPressed[1] =
+                    isButtonPressed[2] = isButtonPressed[3] = false;
+            }
+            // Rotates camera
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
+                angle += rotationSpeed;
+                cameraPosition.x = sin(angle) * cameraDistance;
+                cameraPosition.z = cos(angle) * cameraDistance;
+                viewMatrix =
+                    glm::lookAt(cameraPosition, cameraTarget, upVector);
+            }
+            else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
+                angle -= rotationSpeed;
+                cameraPosition.x = sin(angle) * cameraDistance;
+                cameraPosition.z = cos(angle) * cameraDistance;
+                viewMatrix =
+                    glm::lookAt(cameraPosition, cameraTarget, upVector);
+            }
+            // Moves camera
+             // Rotates camera
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
+                cameraDistance *= 0.98;
+                cameraPosition *= 0.98;
+                viewMatrix =
+                    glm::lookAt(cameraPosition, cameraTarget, upVector);
+            }
+            else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
+                cameraDistance *= 1.02;
+                cameraPosition *= 1.02;
+                viewMatrix =
+                    glm::lookAt(cameraPosition, cameraTarget, upVector);
+            }
         }
 
-        // Attach the cubemap texture to the framebuffer's color attachment
-        glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, environmentMap, 0);
+        int numSteps = 1;
+        real substep = deltaT / numSteps;
 
-        // Check if the framebuffer is complete
-        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-            // Handle framebuffer completeness failure
-            std::cerr << "Framebuffer is not complete!" << std::endl;
-            return 1;
+        while (numSteps--) {
+
+            p.body->calculateDerivedData();
+
+            std::vector<Contact> contacts;
+
+            CollisionResolver resolver(2, 1);
+            resolver.resolveContacts(contacts.data(), contacts.size(), substep);
+
+            p.update();
+
         }
-
-        // Unbind the framebuffer
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-        // Loop over cubemap faces
-        for (GLuint i = 0; i < 6; ++i) {
-            // Bind the framebuffer for rendering to the current face
-            glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-
-            // Set the viewport size to match the cubemap face 
-            glViewport(0, 0, 1000, 1000);
-
-            // Clear the framebuffer
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-            // Render the scene from the perspective of the current face
-            renderScene(cameraPosition, viewMatrices[i], projectionMatrix);
-
-            // Unbind the framebuffer
-            glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        }
-
-        // Cleanup: Delete framebuffer and texture objects
-        glDeleteFramebuffers(1, &fbo);
-        glDeleteTextures(1, &environmentMap);
-
-
-        glm::mat4 identity = glm::mat4(1.0);
-        glm::vec4 colorOrange(0.9, 0.6, 0.2, 1.0);
-
-        // Shape
-        glm::vec3 lightPos[]{
-            glm::vec3(200.0f, 300.0f, 0.0f),
-        };
-        glm::vec4 lightColors[]{
-            glm::vec4(1.0f, 1.0f, 1.0f, 0.6f),
-        };
 
 
         window.clear(sf::Color::Color(50, 50, 50));
         // Clears the depth buffer (for 3D)
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glViewport(0, 0, width, height);
 
-        renderScene(cameraPosition, viewMatrix, projectionMatrix);
-
-        FaceData data = getFaceData(c);
-        refShader.drawFaces(data.vertices, data.normals,
-            identity, viewMatrix, projectionMatrix,
-            environmentMap, colorOrange, 1, lightPos,
+        /*
+        FaceData data;
+        data = getUniformFaceData(p);
+        cookShader.drawFaces(data.vertices, data.normals,
+            identity, viewMatrix, projectionMatrix, colorBlue, 2, lightPos,
             lightColors, cameraPosition, 0.1, 0.05
+        );
+        */
+
+        EdgeData edata;
+        edata = getEdgeData(p);
+        shader.drawEdges(edata.vertices,
+            identity, viewMatrix, projectionMatrix, colorWhite
         );
 
         window.display();

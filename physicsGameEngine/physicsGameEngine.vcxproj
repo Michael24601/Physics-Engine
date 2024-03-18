@@ -211,6 +211,7 @@
     <ClInclude Include="cookTorranceShader.h" />
     <ClInclude Include="cookTorranceTextureShader.h" />
     <ClInclude Include="curvedFace.h" />
+    <ClInclude Include="customPrimitive.h" />
     <ClInclude Include="cylinder.h" />
     <ClInclude Include="gjk.h" />
     <ClInclude Include="oldCollisionDetection.h" />

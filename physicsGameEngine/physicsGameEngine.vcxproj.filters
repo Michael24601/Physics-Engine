@@ -401,6 +401,9 @@
     <ClInclude Include="cookTorranceReflectionShader.h">
       <Filter>Header Files\OpenglGraphics</Filter>
     </ClInclude>
+    <ClInclude Include="customPrimitive.h">
+      <Filter>Header Files\Polyhedron</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="todo.txt" />

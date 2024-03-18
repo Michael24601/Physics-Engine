@@ -49,9 +49,6 @@ namespace pe {
 
 			globalVertices = localVertices;
 
-			faces = faces;
-			edges = edges;
-
 			body->angularDamping = 1;
 			body->linearDamping = 1;
 			body->calculateDerivedData();
