@@ -2,8 +2,8 @@
 	Header file for the general polyhedron class.
 */
 
-#ifndef POLYHEDRON2_H
-#define POLYHEDRON2_H
+#ifndef POLYHEDRON_H
+#define POLYHEDRON_H
 
 #include "vector2D.h"
 #include "rigidBody.h"

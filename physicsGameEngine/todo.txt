@@ -230,6 +230,13 @@ has negligible weight.
 
 Add an edge to edge in the second collision generation method.
 
-Change the named of functions in the third collision generation method.
+Change the named of functions in the third collision generation
+method (DONE).
 
 Comment and explain all three collision generation methods.
+
+Consider the benefits of sending the local vertices of the
+shapes to the shaders; it could mean saving memory and time
+by using the same VBOs and VAOs as the vertices remain the same,
+but it also means we are using an extra matrix transformation for
+each vertex to get it to world coordinates.

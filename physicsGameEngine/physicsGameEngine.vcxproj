@@ -162,6 +162,7 @@
     <ClCompile Include="collisionResolver.cpp" />
     <ClCompile Include="contact.cpp" />
     <ClCompile Include="contactGeneration.cpp" />
+    <ClCompile Include="cookTorranceReflectionShader.cpp" />
     <ClCompile Include="cookTorranceShader.cpp" />
     <ClCompile Include="cookTorranceTextureShader.cpp" />
     <ClCompile Include="diffuseLightingShader.cpp" />
@@ -206,6 +207,7 @@
     <ClInclude Include="cone.h" />
     <ClInclude Include="contact.h" />
     <ClInclude Include="contactGeneration.h" />
+    <ClInclude Include="cookTorranceReflectionShader.h" />
     <ClInclude Include="cookTorranceShader.h" />
     <ClInclude Include="cookTorranceTextureShader.h" />
     <ClInclude Include="curvedFace.h" />

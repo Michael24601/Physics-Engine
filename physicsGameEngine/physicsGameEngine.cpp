@@ -67,6 +67,8 @@
 #include "fineCollisionDetection.h"
 #include "gjk.h"
 
+#include "cookTorranceReflectionShader.h"
+
 using namespace pe;
 using namespace std;
 
@@ -1305,6 +1307,41 @@ int main() {
 
     glDepthFunc(GL_LEQUAL);
 
+    glm::mat4 identity = glm::mat4(1.0);
+    glm::vec4 colorWhite(1.0, 1.0, 1.0, 1.0);
+    glm::vec4 colorRed(0.8, 0.1, 0.1, 1.0);
+    glm::vec4 colorBlue(0.5, 0.7, 1.0, 1.0);
+    glm::vec4 colorGreen(0.3, 0.9, 0.3, 1.0);
+    glm::vec4 colorYellow(0.9, 0.9, 0.5, 1.0);
+    glm::vec4 colorPurple(0.4, 0.1, 0.8, 1.0);
+    glm::vec4 colorMagenta(0.9, 0.3, 0.6, 1.0);
+    glm::vec4 colorOrange(0.9, 0.6, 0.2, 1.0);
+    glm::vec4 colorDarkBlue(0.1, 0.1, 0.4, 1.0);
+    glm::vec4 colorGrey(0.4, 0.4, 0.4, 1.0);
+    glm::vec4 colorBlack(0.05, 0.05, 0.05, 1.0);
+
+    // Shape
+    glm::vec3 lightPos[]{
+        glm::vec3(200.0f, 300.0f, 0.0f),
+        glm::vec3(200.0f, 900.0f, 0.0f),
+    };
+    glm::vec4 lightColors[]{
+        glm::vec4(1.0f, 1.0f, 1.0f, 0.6f),
+        glm::vec4(1.0f, 1.0f, 1.0f, 0.6f),
+    };
+
+    glm::vec4 colors[9]{
+        colorRed,
+        colorBlue,
+        colorPurple,
+        colorGreen,
+        colorMagenta,
+        colorYellow,
+        colorOrange,
+        colorDarkBlue,
+        colorGrey
+    };
+
     // Shaders
     SolidColorShader shader;
     DiffuseLightingShader lightShader;
@@ -1351,7 +1388,7 @@ int main() {
 
     std::vector<RectangularPrism*> prisms;
     
-    real radius = 800;
+    real radius = 1000;
 
     for (int i = 0; i < 15; i++) {
 
@@ -1363,24 +1400,24 @@ int main() {
         Quaternion r = Quaternion::rotatedByAxisAngle(Vector3D(0, 1, 0), -angle);
 
         RectangularPrism* prism = new RectangularPrism(
-            200, 600, 10, 10,
+            200, 600, 25, 10,
             position,
             new RigidBody
         );
         prism->body->orientation = r;
+
+        prism->body->angularDamping = 0.97;
+        prism->body->linearDamping = 0.97;
+
+        prism->body->canSleep = true;
+
         prisms.push_back(prism);
     }
 
     RectangularPrism ground(10000, 100, 10000, 0, Vector3D(0, -350, -0), new RigidBody);
     ground.body->inverseMass = 0;
 
-    for (RectangularPrism* prism : prisms) {
-        prism->body->angularDamping = 0.9;
-        prism->body->linearDamping = 0.95;
-        prism->body->canSleep = true;
-    }
-
-    SolidSphere s(100, 5, 20, 20, Vector3D(800, 400, -400), new RigidBody);
+    SolidSphere s(100, 5, 20, 20, Vector3D(1000, 400, -600), new RigidBody);
     s.body->canSleep = false;
     s.body->angularDamping = 0.8;
     s.body->linearDamping = 0.95;
@@ -1388,7 +1425,7 @@ int main() {
     RigidBodyGravity g(Vector3D(0, -10, 0));
 
     RigidBody b;
-    b.position = Vector3D(800, 800, -400);
+    b.position = Vector3D(1000, 700, -600);
     RigidBodySpringForce f(s.localVertices[0], &b, Vector3D(), 0.24, 300);
 
     real rotationSpeed = 0.1;
@@ -1463,16 +1500,16 @@ int main() {
             std::vector<Contact> contacts;
 
             for (int i = 0; i < prisms.size(); i++) {
-                generateContactBoxAndBox(*(prisms[i]), ground, contacts, 0.2, 0.0);
-                generateContactBoxAndSphere(*(prisms[i]), s, contacts, 0.2, 0.0);
+                generateContactBoxAndBox(*(prisms[i]), ground, contacts, 0.0, 0.0);
+                generateContactBoxAndSphere(*(prisms[i]), s, contacts, 0.5, 0.0);
                 for (int j = 0; j < prisms.size(); j++) {
                     if (i != j) {
-                        generateContactBoxAndBox(*(prisms[i]), *(prisms[j]), contacts, 0.2, 0.0);
+                        generateContactBoxAndBox(*(prisms[i]), *(prisms[j]), contacts, 0.5, 0.0);
                     }
                 }
             }
 
-            CollisionResolver resolver(10, 1);
+            CollisionResolver resolver(2, 1);
             resolver.resolveContacts(contacts.data(), contacts.size(), substep);
 
             for (RectangularPrism* prism : prisms) {
@@ -1483,6 +1520,7 @@ int main() {
             ground.update();
             s.body->integrate(substep);
             s.update();
+
         }
 
 
@@ -1490,8 +1528,8 @@ int main() {
             sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
             sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);
             //s.body->position.x = worldPos.x * 4;
-            s.body->position.y = worldPos.y * 2;
-            s.body->position.z = worldPos.x * 2;
+            s.body->position.y = worldPos.y * 3;
+            s.body->position.z = worldPos.x * 3;
             s.body->setAwake(true);
         }
 
@@ -1500,47 +1538,9 @@ int main() {
         // Clears the depth buffer (for 3D)
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // Spring/Cable
-        // Note that the model is the identity since the cable is in world
-        // coordinates
-        glm::mat4 identity = glm::mat4(1.0);
-        glm::vec4 colorWhite(1.0, 1.0, 1.0, 1.0);
-        glm::vec4 colorRed(0.8, 0.1, 0.1, 1.0);
-        glm::vec4 colorBlue(0.5, 0.7, 1.0, 1.0);
-        glm::vec4 colorGreen(0.3, 0.9, 0.3, 1.0);
-        glm::vec4 colorYellow(0.9, 0.9, 0.5, 1.0);
-        glm::vec4 colorPurple(0.4, 0.1, 0.8, 1.0);
-        glm::vec4 colorMagenta(0.9, 0.3, 0.6, 1.0);
-        glm::vec4 colorOrange(0.9, 0.6, 0.2, 1.0);
-        glm::vec4 colorDarkBlue(0.1, 0.1, 0.4, 1.0);
-        glm::vec4 colorGrey(0.4, 0.4, 0.4, 1.0);
-        glm::vec4 colorBlack(0.05, 0.05, 0.05, 1.0);
+       
 
-        // Shape
-        glm::vec3 lightPos[]{
-            glm::vec3(200.0f, 300.0f, 0.0f),
-            glm::vec3(200.0f, 900.0f, 0.0f),
-        };
-        glm::vec4 lightColors[]{
-            glm::vec4(1.0f, 1.0f, 1.0f, 0.6f),
-            glm::vec4(1.0f, 1.0f, 1.0f, 0.6f),
-        };
-
-        glm::vec4 colors[9]{
-            colorRed,
-            colorBlue,
-            colorPurple,
-            colorGreen,
-            colorMagenta,
-            colorYellow,
-            colorOrange,
-            colorDarkBlue,
-            colorGrey
-        };
-
-        // Data
         FaceData data;
-
         for (int i = 0; i < prisms.size(); i++) {
             data = getFaceData(*prisms[i]);
             cookShader.drawFaces(data.vertices, data.normals,
@@ -1578,13 +1578,16 @@ int main() {
 
 #ifdef SIM_6
 
+
 int main() {
+
+    real width = 1200, height = 800;
 
     // Needed for 3D rendering
     sf::ContextSettings settings;
     settings.depthBits = 24;
     settings.antialiasingLevel = 8;
-    sf::RenderWindow window(sf::VideoMode(1200, 800), "Physics Simulation",
+    sf::RenderWindow window(sf::VideoMode(width, height), "Physics Simulation",
         sf::Style::Default, settings);
     window.setActive();
 
@@ -1629,6 +1632,8 @@ int main() {
     TextureShader texShader;
     CookTorranceTextureShader cookTexShader;
     AnisotropicTextureShader aniTexShader;
+    CookTorranceReflectionShader refShader;
+
 
     // View matrix, used for positioning and angling the camera
     // Camera's position in world coordinates
@@ -1664,7 +1669,9 @@ int main() {
     sf::Clock clock;
     real deltaT = 0.1;
 
-    real mass = 5;
+    real mass = 1.5;
+
+    RectangularPrism c(500, 500, 50, mass, Vector3D(400, 400, 600), new RigidBody);
 
     std::vector<RectangularPrism*> prisms{
         new RectangularPrism(200, 200, 200, mass, Vector3D(0, -200, 0), new RigidBody),
@@ -1782,6 +1789,7 @@ int main() {
             ground.body->calculateDerivedData();
             s.body->calculateDerivedData();
             b.calculateDerivedData();
+            c.body->calculateDerivedData();
 
             for (RectangularPrism* prism : prisms) {
                 g.updateForce(prism->body, substep);
@@ -1813,6 +1821,7 @@ int main() {
             ground.update();
             s.body->integrate(substep);
             s.update();
+            c.update();
         }
 
         if (isButtonPressed[0]) {
@@ -1824,76 +1833,168 @@ int main() {
             s.body->setAwake(true);
         }
 
-        window.clear(sf::Color::Color(50, 50, 50));
-        // Clears the depth buffer (for 3D)
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        auto renderScene = [
+            prisms,
+                &window,
+                &shader,
+                &cookShader,
+                ground,
+                s,
+                b
+        ](
+            const glm::vec3& cameraPosition,
+            const glm::mat4& viewMatrix,
+            const glm::mat4& projectionMatrix
+        )->void {
 
-        // Spring/Cable
-        // Note that the model is the identity since the cable is in world
-        // coordinates
+            glm::mat4 identity = glm::mat4(1.0);
+            glm::vec4 colorWhite(1.0, 1.0, 1.0, 1.0);
+            glm::vec4 colorRed(0.8, 0.1, 0.1, 1.0);
+            glm::vec4 colorBlue(0.5, 0.7, 1.0, 1.0);
+            glm::vec4 colorGreen(0.3, 0.9, 0.3, 1.0);
+            glm::vec4 colorYellow(0.9, 0.9, 0.5, 1.0);
+            glm::vec4 colorPurple(0.4, 0.1, 0.8, 1.0);
+            glm::vec4 colorMagenta(0.9, 0.3, 0.6, 1.0);
+            glm::vec4 colorOrange(0.9, 0.6, 0.2, 1.0);
+            glm::vec4 colorDarkBlue(0.1, 0.1, 0.4, 1.0);
+            glm::vec4 colorGrey(0.4, 0.4, 0.4, 1.0);
+            glm::vec4 colorBlack(0.05, 0.05, 0.05, 1.0);
+
+            // Shape
+            glm::vec3 lightPos[]{
+                glm::vec3(200.0f, 300.0f, 0.0f),
+            };
+            glm::vec4 lightColors[]{
+                glm::vec4(1.0f, 1.0f, 1.0f, 0.6f),
+            };
+
+            // Data
+            FaceData data;
+            for (int i = 0; i < prisms.size(); i++) {
+                data = getFaceData(*prisms[i]);
+                cookShader.drawFaces(data.vertices, data.normals,
+                    identity, viewMatrix, projectionMatrix, colorPurple, 1, lightPos,
+                    lightColors, cameraPosition, 0.1, 0.05
+                );
+            }
+
+            data = getFaceData(ground);
+            cookShader.drawFaces(data.vertices, data.normals,
+                identity, viewMatrix, projectionMatrix, colorWhite, 1, lightPos,
+                lightColors, cameraPosition, 0.1, 0.05
+            );
+
+            data = getFaceData(s);
+            cookShader.drawFaces(data.vertices, data.normals,
+                identity, viewMatrix, projectionMatrix, colorBlack, 1, lightPos,
+                lightColors, cameraPosition, 0.1, 0.05
+            );
+
+            EdgeData ed;
+            ed.vertices.push_back(convertToGLM(b.position));
+            ed.vertices.push_back(convertToGLM(s.globalVertices[0]));
+            shader.drawEdges(ed.vertices, identity, viewMatrix, projectionMatrix,
+                colorWhite
+            );
+
+        };
+
+
+        // Assuming center is the center of the cube
+        glm::vec3 center = cameraPosition;
+        glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
+        // View matrix for the front face (positive z-axis)
+        glm::mat4 viewMatrices[6] = {
+            glm::lookAt(center, center + glm::vec3(0.0f, 0.0f, 1.0f), up),
+            glm::lookAt(center, center - glm::vec3(0.0f, 0.0f, 1.0f), up),
+            glm::lookAt(center, center - glm::vec3(1.0f, 0.0f, 0.0f), up),
+            glm::lookAt(center, center + glm::vec3(1.0f, 0.0f, 0.0f), up),
+            glm::lookAt(center, center + glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f)),
+            glm::lookAt(center, center - glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f))
+        };
+
+        // Create and bind a framebuffer object (FBO)
+        GLuint fbo;
+        glGenFramebuffers(1, &fbo);
+        glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+
+        // Create a cubemap texture
+        GLuint environmentMap;
+        glGenTextures(1, &environmentMap);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, environmentMap);
+
+        // Set texture parameters (e.g., filtering, wrapping)
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+        // Allocate storage for the cubemap texture
+        for (GLuint i = 0; i < 6; ++i) {
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA, 1000, 1000, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+        }
+
+        // Attach the cubemap texture to the framebuffer's color attachment
+        glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, environmentMap, 0);
+
+        // Check if the framebuffer is complete
+        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+            // Handle framebuffer completeness failure
+            std::cerr << "Framebuffer is not complete!" << std::endl;
+            return 1;
+        }
+
+        // Unbind the framebuffer
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+        // Loop over cubemap faces
+        for (GLuint i = 0; i < 6; ++i) {
+            // Bind the framebuffer for rendering to the current face
+            glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+
+            // Set the viewport size to match the cubemap face 
+            glViewport(0, 0, 1000, 1000);
+
+            // Clear the framebuffer
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+            // Render the scene from the perspective of the current face
+            renderScene(cameraPosition, viewMatrices[i], projectionMatrix);
+
+            // Unbind the framebuffer
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        }
+
+        // Cleanup: Delete framebuffer and texture objects
+        glDeleteFramebuffers(1, &fbo);
+        glDeleteTextures(1, &environmentMap);
+
+
         glm::mat4 identity = glm::mat4(1.0);
-        glm::vec4 colorWhite(1.0, 1.0, 1.0, 1.0);
-        glm::vec4 colorRed(0.8, 0.1, 0.1, 1.0);
-        glm::vec4 colorBlue(0.5, 0.7, 1.0, 1.0);
-        glm::vec4 colorGreen(0.3, 0.9, 0.3, 1.0);
-        glm::vec4 colorYellow(0.9, 0.9, 0.5, 1.0);
-        glm::vec4 colorPurple(0.4, 0.1, 0.8, 1.0);
-        glm::vec4 colorMagenta(0.9, 0.3, 0.6, 1.0);
         glm::vec4 colorOrange(0.9, 0.6, 0.2, 1.0);
-        glm::vec4 colorDarkBlue(0.1, 0.1, 0.4, 1.0);
-        glm::vec4 colorGrey(0.4, 0.4, 0.4, 1.0);
-        glm::vec4 colorBlack(0.05, 0.05, 0.05, 1.0);
 
         // Shape
         glm::vec3 lightPos[]{
             glm::vec3(200.0f, 300.0f, 0.0f),
-            glm::vec3(200.0f, 900.0f, 0.0f),
         };
         glm::vec4 lightColors[]{
             glm::vec4(1.0f, 1.0f, 1.0f, 0.6f),
-            glm::vec4(1.0f, 1.0f, 1.0f, 0.6f),
         };
 
-        glm::vec4 colors[9]{
-            colorRed,
-            colorBlue,
-            colorPurple,
-            colorGreen,
-            colorMagenta,
-            colorYellow,
-            colorOrange,
-            colorDarkBlue,
-            colorGrey
-        };
 
-        // Data
-        FaceData data;
+        window.clear(sf::Color::Color(50, 50, 50));
+        // Clears the depth buffer (for 3D)
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glViewport(0, 0, width, height);
 
-        for (int i = 0; i < prisms.size(); i++) {
-            data = getFaceData(*prisms[i]);
-            cookShader.drawFaces(data.vertices, data.normals,
-                identity, viewMatrix, projectionMatrix, colors[i%9], 2, lightPos,
-                lightColors, cameraPosition, 0.1, 0.05
-            );
-        }
-        
-        data = getFaceData(ground);
-        cookShader.drawFaces(data.vertices, data.normals,
-            identity, viewMatrix, projectionMatrix, colorWhite, 2, lightPos,
+        renderScene(cameraPosition, viewMatrix, projectionMatrix);
+
+        FaceData data = getFaceData(c);
+        refShader.drawFaces(data.vertices, data.normals,
+            identity, viewMatrix, projectionMatrix,
+            environmentMap, colorOrange, 1, lightPos,
             lightColors, cameraPosition, 0.1, 0.05
-        );
-
-        data = getFaceData(s);
-        cookShader.drawFaces(data.vertices, data.normals,
-            identity, viewMatrix, projectionMatrix, colorBlack, 2, lightPos,
-            lightColors, cameraPosition, 0.1, 0.05
-        );
-
-        EdgeData ed;
-        ed.vertices.push_back(convertToGLM(b.position));
-        ed.vertices.push_back(convertToGLM(s.globalVertices[0]));
-        shader.drawEdges(ed.vertices, identity, viewMatrix, projectionMatrix,
-            colorWhite
         );
 
         window.display();

@@ -183,6 +183,9 @@
     <ClCompile Include="rigidBodyBungeeForce.cpp">
       <Filter>Source Files\RigidBodyPhysics</Filter>
     </ClCompile>
+    <ClCompile Include="cookTorranceReflectionShader.cpp">
+      <Filter>Source Files\OpenglGraphics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="accuracy.h">
@@ -394,6 +397,9 @@
     </ClInclude>
     <ClInclude Include="gjk.h">
       <Filter>Header Files\Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="cookTorranceReflectionShader.h">
+      <Filter>Header Files\OpenglGraphics</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
