@@ -42,6 +42,7 @@
 #include "accuracy.h"
 #include "vector3D.h"
 #include "quaternion.h"
+#include "matrix3x3.h"
 
 namespace pe {
 
@@ -335,6 +336,31 @@ namespace pe {
 		*/
 		Vector3D getColumnVector(int i) const {
 			return Vector3D(data[i], data[i + 4], data[i + 8]);
+		}
+
+
+		// Function that returns the transaltion part of the matrix
+		Vector3D getTranslation() const {
+			return Vector3D(
+				data[3],
+				data[7],
+				data[11]
+			);
+		}
+
+		Matrix3x3 getRotation() const {
+			return Matrix3x3(
+				data[0], data[1], data[2],
+				data[4], data[5], data[6],
+				data[8], data[9], data[10]
+			);
+		}
+
+		// Function that sets the translation part of the matrix
+		void setTranslation(const Vector3D& translation) {
+			data[3] = translation.x;
+			data[7] = translation.y;
+			data[11] = translation.z;
 		}
 	};
 }

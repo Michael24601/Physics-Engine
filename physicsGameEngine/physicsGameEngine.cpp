@@ -73,8 +73,7 @@
 using namespace pe;
 using namespace std;
 
-
-#define SIM_7
+#define SIM_5
 
 #ifdef SIM_1
 
@@ -217,14 +216,6 @@ int main() {
         false,
         false
     };
-
-
-    // Bounding volume hierarchy, used for coarse collision detection
-    BoundingVolumeHierarchy<BoundingSphere> hierarchy;
-    hierarchy.insert(&c1, c1.boundingSphere);
-    hierarchy.insert(&c2, c2.boundingSphere);
-    hierarchy.insert(&c3, c3.boundingSphere);
-    hierarchy.insert(&c4, c4.boundingSphere);
 
 
     GLuint texture = loadTexture("C:\\Users\\msaba\\OneDrive\\Desktop\\textureMaps\\dirty-metal.jpg");
@@ -416,6 +407,11 @@ int main() {
         phongShader.drawFaces(data.vertices, data.normals, identity,
             viewMatrix, projectionMatrix, colorGreen, 1, lightPos,
             lightColors, cameraPosition, 40
+        );
+
+        EdgeData e = getCollisionBoxData(c4);
+        shader.drawEdges(e.vertices, identity,
+            viewMatrix, projectionMatrix, colorWhite
         );
 
         FaceData d;
@@ -815,19 +811,24 @@ int main() {
     window.setView(view);
 
     sf::Clock clock;
-    real deltaT = 0.035;
+    real deltaT = 0.07;
 
-    SolidSphere c1(200, mass, 10, 10, Vector3D(0, 600, 0), new RigidBody);
+    GLuint texture9 = loadTexture("C:\\Users\\msaba\\OneDrive\\Desktop\\textureMaps\\stone.jpg");
 
-    SolidSphere c3(150, 1, 10, 10, Vector3D(0, 200, 0), new RigidBody);
+    std::string filename = "C:\\Users\\msaba\\OneDrive\\Desktop\\textureMaps\\video_game.obj";
+    Polyhedron p = ReturnPrimitive(filename, 100, Vector3D(0, 0, 0), new RigidBody, 100);
+    //RectangularPrism p(150, 20, 100, 100, Vector3D(0, -100, -0), new RigidBody);
+    p.body->orientation = Quaternion::rotatedByAxisAngle(Vector3D(0, 0, 1), 0.5);
+
+    RectangularPrism c5(400, 200, 400, 100, Vector3D(0, -100, -0), new RigidBody);
 
     RectangularPrism c2(10000, 100, 10000, 0, Vector3D(0, -400, -0), new RigidBody);
     c2.body->inverseMass = 0;
 
-    c1.body->angularDamping = 0.9;
-    c1.body->linearDamping = 0.95;
-    c3.body->angularDamping = 0.9;
-    c3.body->linearDamping = 0.95;
+    p.body->angularDamping = 0.9;
+    p.body->linearDamping = 0.95;
+    c5.body->angularDamping = 0.9;
+    c5.body->linearDamping = 0.95;
 
     //c2.body->orientation = Quaternion::rotatedByAxisAngle(Vector3D(1, 0, 0), 0.2);
 
@@ -884,44 +885,44 @@ int main() {
             }
         }
 
-        c1.body->calculateDerivedData();
-        c2.body->calculateDerivedData();
-        c3.body->calculateDerivedData();
-
-        int numSteps = 10;
+        int numSteps = 1;
         real substep = deltaT / numSteps;
 
         while (numSteps--) {
 
-            g.updateForce(c1.body, substep);
-            g.updateForce(c3.body, substep);
+            c2.body->calculateDerivedData();
+            p.body->calculateDerivedData();
+            c5.body->calculateDerivedData();
+
+            g.updateForce(p.body, substep);
+            g.updateForce(c5.body, substep);
 
             std::vector<Contact> contacts;
            
-            generateContactSphereAndSphere(c3, c1, contacts, 0.45, 1.0);
-            generateContactBoxAndSphere(c2, c1, contacts, 0.45, 1.0);
-            generateContactBoxAndSphere(c2, c3, contacts, 0.45, 0.0);
+            generateContactBoxAndBox(c2, p, contacts, 0.4, 0.0);
+            generateContactBoxAndBox(c2, c5, contacts, 0.4, 0.0);
+            generateContactBoxAndBox(c5, p, contacts, 0.4, 0.0);
 
             CollisionResolver resolver(10, 1);
             resolver.resolveContacts(contacts.data(), contacts.size(), substep);
 
-            c1.body->integrate(substep);
             c2.body->integrate(substep);
-            c3.body->integrate(substep);
+            p.body->integrate(substep);
+            c5.body->integrate(substep);
+
+            c2.update();
+            // p.update();
+            c5.update();
         }
 
         if (isButtonPressed[0]) {
             sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
             sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);
-            c1.body->position.x = worldPos.x * 2;
-            c1.body->position.y = worldPos.y * 2;
-            c1.body->position.z = worldPos.x * 2;
-            c1.body->setAwake(true);
+            p.body->position.x = worldPos.x * 2;
+            p.body->position.y = worldPos.y * 2;
+            p.body->position.z = worldPos.x * 2;
+            p.body->setAwake(true);
         }
-
-        c1.update();
-        c2.update();
-        c3.update();
 
         window.clear(sf::Color::Black);
         // Clears the depth buffer (for 3D)
@@ -941,30 +942,40 @@ int main() {
 
         // Shape
         glm::vec3 lightPos[]{
-            glm::vec3(0.0f, 100.0f, 0.0f),
+            glm::vec3(300.0f, 400.0f, 0.0f),
         };
         glm::vec4 lightColors[]{
             glm::vec4(1.0f, 1.0f, 1.0f, 0.6f),
         };
 
-        // Data
-        FaceData data = getFaceData(c1);
-        cookTexShader.drawFaces(data.vertices, data.normals,
-            data.uvCoordinates,
-            identity, viewMatrix, projectionMatrix, texture, 1, lightPos,
-            lightColors, cameraPosition, 0.1, 0.05
-        );
-        data = getFaceData(c2);
+     
+        FaceData data = getFaceData(c2);
         cookShader.drawFaces(data.vertices, data.normals,
             identity, viewMatrix, projectionMatrix, colorGreen, 1, lightPos,
             lightColors, cameraPosition, 0.1, 0.05
         );
-        data = getFaceData(c3);
+
+
+        data = getFaceData(c5);
         cookShader.drawFaces(data.vertices, data.normals,
-            identity, viewMatrix, projectionMatrix, colorYellow, 1, lightPos,
+            identity, viewMatrix, projectionMatrix, colorRed, 1, lightPos,
             lightColors, cameraPosition, 0.1, 0.05
         );
 
+        /*
+        data = getFaceData(p);
+        cookShader.drawFaces(data.vertices, data.normals,
+            identity, viewMatrix, projectionMatrix, colorGrey, 1, lightPos,
+            lightColors, cameraPosition, 0.1, 0.05
+        );
+        */
+
+
+        EdgeData edata;
+        edata = getCollisionBoxData(p);
+        shader.drawEdges(edata.vertices,
+            identity, viewMatrix, projectionMatrix, colorWhite
+        );
 
         window.display();
     }
@@ -2032,8 +2043,12 @@ int main() {
     sf::Clock clock;
     real deltaT = 0.07;
 
-    std::string filename = "C:\\Users\\msaba\\OneDrive\\Desktop\\textureMaps\\heart.obj";
-    Polyhedron p = ReturnPrimitive(filename, 10, Vector3D(0, 0, 0), new RigidBody, 80);     
+    GLuint texture = loadTexture("C:\\Users\\msaba\\OneDrive\\Desktop\\textureMaps\\stone.jpg");
+
+    std::string filename = "C:\\Users\\msaba\\OneDrive\\Desktop\\textureMaps\\moai.obj";
+    Polyhedron p = ReturnPrimitive(filename, 10, Vector3D(0, 0, 0), new RigidBody, 2); 
+    p.body->orientation = Quaternion::rotatedByAxisAngle(Vector3D(0, 0, 1), PI/2.0);
+
 
     real rotationSpeed = 0.1;
     real angle = PI / 2;
@@ -2103,25 +2118,26 @@ int main() {
         }
 
 
-        window.clear(sf::Color::Color(50, 50, 50));
+        window.clear(sf::Color::Color(0, 0, 0));
         // Clears the depth buffer (for 3D)
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        /*
+        
         FaceData data;
-        data = getUniformFaceData(p);
-        cookShader.drawFaces(data.vertices, data.normals,
-            identity, viewMatrix, projectionMatrix, colorBlue, 2, lightPos,
+        data = getFaceData(p);
+        cookTexShader.drawFaces(data.vertices, data.normals,
+            data.uvCoordinates,
+            identity, viewMatrix, projectionMatrix, texture, 2, lightPos,
             lightColors, cameraPosition, 0.1, 0.05
         );
-        */
-
+        
+        
         EdgeData edata;
-        edata = getEdgeData(p);
+        edata = getCollisionBoxData(p);
         shader.drawEdges(edata.vertices,
             identity, viewMatrix, projectionMatrix, colorWhite
         );
-
+        
         window.display();
     }
 

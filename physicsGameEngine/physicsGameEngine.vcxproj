@@ -203,6 +203,7 @@
     <ClInclude Include="BVHNode.h" />
     <ClInclude Include="boundingSphere.h" />
     <ClInclude Include="boundingVolumeHierarchy.h" />
+    <ClInclude Include="collisionBox.h" />
     <ClInclude Include="collisionResolver.h" />
     <ClInclude Include="cone.h" />
     <ClInclude Include="contact.h" />

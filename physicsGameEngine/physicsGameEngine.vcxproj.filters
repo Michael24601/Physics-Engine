@@ -404,6 +404,9 @@
     <ClInclude Include="customPrimitive.h">
       <Filter>Header Files\Polyhedron</Filter>
     </ClInclude>
+    <ClInclude Include="collisionBox.h">
+      <Filter>Header Files\Collision</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="todo.txt" />

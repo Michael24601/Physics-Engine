@@ -229,6 +229,53 @@ FrameVectors pe::getFrameVectors(
 	return data;
 }
 
+EdgeData pe::getCollisionBoxData(const Polyhedron& polyhedron) {
+
+	EdgeData data;
+	Vector3D halfsize = polyhedron.getHalfsize();
+	Vector3D vertices[8]{
+		halfsize.componentProduct(Vector3D(-1,-1, -1)),
+		halfsize.componentProduct(Vector3D(1, -1, -1)),
+		halfsize.componentProduct(Vector3D(1, -1, 1)),
+		halfsize.componentProduct(Vector3D(-1, -1, 1)),
+		halfsize.componentProduct(Vector3D(-1, 1, -1)),
+		halfsize.componentProduct(Vector3D(1, 1, -1)),
+		halfsize.componentProduct(Vector3D(1, 1, 1)),
+		halfsize.componentProduct(Vector3D(-1, 1, 1)),
+	};
+
+	Box box(polyhedron);
+
+	for (Vector3D& vector : vertices) {
+		/*
+			As mentioned earlier, the smallest box that contains a polyhedron
+			may not be centred (the halfsize may not come out) of the
+			centre of gravity of the polyhedron, as it may not be the
+			geometric centre of the polyhedron.
+			As such, we can't use the transform matrix of the polyhedron,
+			but of the box, which is the same as the polyhedron but adds
+			the offset to the translation.
+		*/
+		vector = box.transformMatrix.transform(vector);
+	}
+
+	const std::vector<std::pair<int, int>> edges{
+		{0, 1}, {1, 2}, {2, 3}, {3, 0}, // Front face
+		{4, 5}, {5, 6}, {6, 7}, {7, 4}, // Back face
+		{0, 4}, {1, 5}, {2, 6}, {3, 7}  // Edges between front and back faces
+	};
+
+	// Populate edge data with actual vertices
+	for (const auto& edge : edges) {
+		Vector3D start = vertices[edge.first];
+		Vector3D end = vertices[edge.second];
+		data.vertices.push_back(convertToGLM(start));
+		data.vertices.push_back(convertToGLM(end));
+	}
+
+	return data;
+}
+
 FaceData pe::getFaceData(const ParticleMesh& mesh) {
 	FaceData data;
 	for (Face* face : mesh.faces) {

@@ -202,6 +202,7 @@ namespace pe {
 		void display() const {
 			std::cout << "x: " << x << ", y: " << y << ", z: " << z << "\n";
 		}
+
 	};
 
 

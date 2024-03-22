@@ -3,83 +3,10 @@
 #define FINE_COLLISION_DETECTION_H
 
 #include "contact.h"
-#include "rectangularPrism.h"
 #include "solidSphere.h"
+#include "collisionBox.h"
 
 namespace pe {
-
-    /*
-        An abstraction used in all of this collision detection system,
-        so that any shape (not necessarily a box shape) can use the
-        box collision detection and contact generation functions if
-        we allow for some small inaccuracies.
-        Any polyhedron, so long that it provides a halfSize (dimensions
-        for the box) can be considered a box collision-wise,
-        with the halfSize as the side length, and the centre of gravity
-        of the box as the centre of gravity of the object (they both
-        share the same Body object, and by extension the transform matrix).
-        Only RectangularPrism will perfectly fit in a box however.
-    */
-    struct Box {
-
-        // No arg constructor
-        Box(RigidBody* body, Vector3D halfSize) :
-            body{ body }, halfSize{halfSize} {}
-
-        /*
-            Constructs a box from a rectangular prism(They share a shape
-            so it is easy).
-        */
-        Box(const RectangularPrism& prism) {
-            body = prism.body;
-            halfSize = Vector3D(
-                prism.width / 2.0, 
-                prism.height / 2.0, 
-                prism.depth / 2.0
-            );
-        }
-
-        RigidBody* body;
-        Vector3D halfSize;
-
-        Vector3D getAxis(int index) const {
-            return body->transformMatrix.getColumnVector(index);
-        }
-    };
-
-
-    /*
-        Similarly, this is an abstraction for all the sphere collision
-        detection and contact generation functions.
-        Only a radius needs to be provided, and any Polyhedron's collisions
-        can be simulated as a sphere's with that radius and the centre at
-        the centre of gravity of the Polyhedron (they both share the same
-        Body object, and by extension the transform matrix).
-        Only the SolidSphere object will perfectly fit in a sphere however.
-   */
-    struct Sphere {
-
-        // No arg constructor
-        Sphere(RigidBody* body, real radius) :
-            body{ body }, radius{ radius } {}
-
-        /*
-            Constructs a box from a rectangular prism(They share a shape
-            so it is easy).
-        */
-        Sphere(const SolidSphere& sphere) {
-            body = sphere.body;
-            radius = sphere.radius;
-        }
-
-        RigidBody* body;
-        real radius;
-
-        Vector3D getAxis(int index) const {
-            return body->transformMatrix.getColumnVector(index);
-        }
-    };
-
 
     static inline real transformToAxis(
         const Box& box,
@@ -232,7 +159,7 @@ namespace pe {
         // Create the contact data
         contact.contactNormal = normal;
         contact.penetration = pen;
-        contact.contactPoint = two.body->transformMatrix * vertex;
+        contact.contactPoint = two.transformMatrix * vertex;
         contact.body[0] = one.body;
         contact.body[1] = two.body;
 
@@ -389,8 +316,8 @@ namespace pe {
 
             // Move them into world coordinates (they are already oriented
             // correctly, since they have been derived from the axes).
-            ptOnOneEdge = one.body->transformMatrix * ptOnOneEdge;
-            ptOnTwoEdge = two.body->transformMatrix * ptOnTwoEdge;
+            ptOnOneEdge = one.transformMatrix * ptOnOneEdge;
+            ptOnTwoEdge = two.transformMatrix * ptOnTwoEdge;
 
             // So we have a point and a direction for the colliding edges.
             // We need to find out point of closest approach of the two
@@ -475,7 +402,7 @@ namespace pe {
     ){
         // Transform the centre of the sphere into box coordinates
         Vector3D centre = sphere.getAxis(3);
-        Vector3D relCentre = box.body->transformMatrix.inverseTransform(centre);
+        Vector3D relCentre = box.transformMatrix.inverseTransform(centre);
 
         // Early out check to see if we can exclude the contact
         if (realAbs(relCentre.x) - sphere.radius > box.halfSize.x ||
@@ -509,7 +436,7 @@ namespace pe {
         if (dist > sphere.radius * sphere.radius) return 0;
 
         // Compile the contact
-        Vector3D closestPtWorld = box.body->transformMatrix.transform(closestPt);
+        Vector3D closestPtWorld = box.transformMatrix.transform(closestPt);
 
         Contact contact;
         contact.contactNormal = (closestPtWorld - centre);
@@ -525,8 +452,8 @@ namespace pe {
 
 
     void generateContactBoxAndBox(
-        const RectangularPrism& one,
-        const RectangularPrism& two,
+        const Polyhedron& one,
+        const Polyhedron& two,
         std::vector<Contact>& contacts,
         real restitution,
         real friction
@@ -548,7 +475,7 @@ namespace pe {
 
 
     void generateContactBoxAndSphere(
-        const RectangularPrism& one,
+        const Polyhedron& one,
         const SolidSphere& two,
         std::vector<Contact>& contacts,
         real restitution,

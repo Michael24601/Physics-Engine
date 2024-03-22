@@ -5,6 +5,7 @@
 #include "polyhedron.h"
 #include "particleMesh.h"
 #include <vector>
+#include "collisionBox.h"
 
 namespace pe {
 
@@ -113,7 +114,6 @@ namespace pe {
 		FrameVectors* data
 	);
 
-
 	/*
 		Uses the individual vertex normals.
 	*/
@@ -142,6 +142,9 @@ namespace pe {
 		const Polyhedron& polyhedron,
 		real length
 	);
+
+
+	EdgeData getCollisionBoxData(const Polyhedron& polyhedron);
 
 	FaceData getFaceData(const Polyhedron& polyhedron);
 

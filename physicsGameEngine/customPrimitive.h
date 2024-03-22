@@ -206,6 +206,7 @@ namespace pe {
                     faces.push_back(face);
                 }
                 else {
+
                     CurvedFace* face = new CurvedFace(
                         localVertices,
                         globalVertices,
@@ -290,8 +291,21 @@ namespace pe {
             vertex *= scale;
         }
 
+        /*
+            Calculating the inertia tensor of a complex 3d model can be very
+            challenging; even approximating it based on the vertex locations
+            can be hard.
+            We can instaed just use this inertia tensor, that assumed uniform
+            distribution of mass.
+        */
+        Matrix3x3 inertiaTensor(
+            mass * 10000, 0, 0,
+            0, mass * 10000, 0,
+            0, 0, mass * 10000
+        );
+
         Polyhedron polyhedron(
-            mass, position, Matrix3x3(), localVertices, body
+            mass, position, inertiaTensor, localVertices, body
         );
 
         std::vector<Face*> faces;

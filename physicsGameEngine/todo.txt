@@ -239,6 +239,27 @@ Consider the benefits of sending the local vertices of the
 shapes to the shaders; it could mean saving memory and time
 by using the same VBOs and VAOs as the vertices remain the same,
 but it also means we are using an extra matrix transformation for
-each vertex to get it to world coordinates.
+each vertex to get it to world coordinates. Especially now that
+transformation may not be necessary anymore for collision detection.
 
 Add an intertia tensor approximator for custom primitives.
+
+Fix pyramid colliison box halfsize (DONE. I did by adding an offset
+for the centre of gravity, and then rotating that offset by
+the rotation of the transform matrix; the new transform for the
+collision box is the rotation and the translation + the offset).
+
+When polyhedron is being imported from outside, it doesn't rotate
+when forces are applied to it (DONE, it turns out, I accidently
+gave it an all 0 intertia tensor, since I hadn't yet made a function
+to approximate the intertia tensor).
+
+Write a function to approximate the inertia tensor.
+
+Write a possible common interface to all types of collision volumes.
+
+Possibly use the same bounding sphere for the coarse collision
+detection, as it has an offset; finding the furthest point from the
+centre of gravity and using it as a radius guarantees the centre of
+the sphere is the same as the polyhedron. 
+

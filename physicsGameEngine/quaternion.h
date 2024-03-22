@@ -204,6 +204,10 @@ namespace pe {
 		Quaternion conjugated() const {
 			return Quaternion(r, -i, -j, -k);
 		}
+
+		void display() const {
+			std::cout << "r: " << r << ", i: " << i << ", j: " << j << "k" << k << "\n";
+		}
 	};
 }
 

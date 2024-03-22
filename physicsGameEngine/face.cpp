@@ -22,6 +22,13 @@ void Face::findDistinctVertices(
 			firstIndex = i;
 			break;
 		}
+		else if ((i + 1) % getVertexNumber() == givenIndex) {
+			// In this case, there are no distinct vertices,
+			// and we just return the same ones
+			firstIndex = i;
+			secondIndex = i;
+			return;
+		}
 	}
 
 	// Clockwise side
@@ -37,6 +44,15 @@ void Face::findDistinctVertices(
 			) {
 			secondIndex = i;
 			break;
+		}
+		else if (
+			(i == 0 ? getVertexNumber() - 1 : (i - 1) % getVertexNumber())
+			== givenIndex
+		) {
+			// In this case, there is no second distinct vertex,
+			// and we just return the same one
+			secondIndex = i;
+			return;
 		}
 	}
 }

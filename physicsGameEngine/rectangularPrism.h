@@ -3,10 +3,11 @@
 #define RECTANGULAR_PRISM_H
 
 #include "polyhedron.h"
+#include "breakable.h"
 
 namespace pe {
 
-	class RectangularPrism : public Polyhedron {
+	class RectangularPrism : public Polyhedron, public Breakable {
 
 	private:
 
@@ -119,6 +120,64 @@ namespace pe {
 				face->setTextureCoordinates(textureCoordinates);
 			}
 		}
+
+
+		std::vector<Polyhedron*> breakObject() {
+
+			// Point around which the object will break
+			Vector3D point(width / 5.0, -height / 4.0, depth / 6.0);
+
+			std::vector<Polyhedron*> polyhedra(8);
+
+			/*
+				This will divide the prism into 8 other polyhedrons, each of
+				which will have a coner that is the breakage point.
+			*/
+			for (int i = 0; i < 8; i++) {
+				/*
+					Of the 8 rigid bodies, each will have with width to left
+					of the point, or to its right, the height above the
+					point, or below it, the depth in front of the point,
+					or behind it; which in turn gives us 2^3 = 8
+					configurations.
+				*/
+				real width (i % 2 == 0 ? width / 2 + point.x : width / 2 - point.x);
+				real height = (i % 4 <= 1 ? height / 2 + point.y : height / 2 - point.y);
+				real depth = (i % 8 <= 3 ? depth / 2 + point.z : depth / 2 - point.z);
+
+				/*
+					The offset is the position of this new polyhedron relative
+					to the centre of gravity of this polyhedron (which is at
+					the oririn (0, 0, 0) in local coordinates.
+					Depending on which sides of the point we took depth, width
+					and height-wise, we can shift the centre half of those
+					dimensions either in the positive or negative direction.
+				*/
+				Vector3D offset;
+				offset.x = (i % 2 == 0 ? width / 2 : -width / 2);
+				offset.y = (i % 4 <= 1 ? height / 2 : -height / 2);
+				offset.z = (i % 8 <= 3 ? depth / 2 : -depth / 2);
+
+				real mass = (width * height * depth * this->body->getMass()) / 
+					(this->width * this->height * this->depth);
+
+				Vector3D position = this->body->transformMatrix.transform(offset);
+
+				RectangularPrism* prism = new RectangularPrism(
+					width, height, depth, mass, position, new RigidBody
+				);
+				prism->body->orientation = this->body->orientation;
+				prism->body->linearVelocity = this->body->linearVelocity;
+				prism->body->angularVelocity = this->body->angularVelocity;
+				prism->body->linearDamping = this->body->linearDamping;
+				prism->body->angularDamping = this->body->angularDamping;
+
+				polyhedra[i] = prism;
+			}
+			
+			return polyhedra;
+		}
+
 	};
 }
 
