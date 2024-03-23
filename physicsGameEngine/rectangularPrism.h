@@ -4,6 +4,7 @@
 
 #include "polyhedron.h"
 #include "breakable.h"
+#include "util.h"
 
 namespace pe {
 
@@ -122,12 +123,14 @@ namespace pe {
 		}
 
 
-		std::vector<Polyhedron*> breakObject() {
+		void breakObject(
+			std::vector<Polyhedron*>& polyhedra,
+			const Vector3D& contactNormal,
+			real deltaT
+		) {
 
 			// Point around which the object will break
-			Vector3D point(width / 5.0, -height / 4.0, depth / 6.0);
-
-			std::vector<Polyhedron*> polyhedra(8);
+			Vector3D point(width / 10.0, -height / 8.0, depth / 12.0);
 
 			/*
 				This will divide the prism into 8 other polyhedrons, each of
@@ -141,9 +144,9 @@ namespace pe {
 					or behind it; which in turn gives us 2^3 = 8
 					configurations.
 				*/
-				real width (i % 2 == 0 ? width / 2 + point.x : width / 2 - point.x);
-				real height = (i % 4 <= 1 ? height / 2 + point.y : height / 2 - point.y);
-				real depth = (i % 8 <= 3 ? depth / 2 + point.z : depth / 2 - point.z);
+				real width (i % 2 == 0 ? this->width / 2 + point.x : this->width / 2 - point.x);
+				real height = (i % 4 <= 1 ? this->height / 2 + point.y : this->height / 2 - point.y);
+				real depth = (i % 8 <= 3 ? this->depth / 2 + point.z : this->depth / 2 - point.z);
 
 				/*
 					The offset is the position of this new polyhedron relative
@@ -158,24 +161,31 @@ namespace pe {
 				offset.y = (i % 4 <= 1 ? height / 2 : -height / 2);
 				offset.z = (i % 8 <= 3 ? depth / 2 : -depth / 2);
 
+				// Mass is proportional to volume
 				real mass = (width * height * depth * this->body->getMass()) / 
 					(this->width * this->height * this->depth);
 
 				Vector3D position = this->body->transformMatrix.transform(offset);
 
 				RectangularPrism* prism = new RectangularPrism(
-					width, height, depth, mass, position, new RigidBody
+					width, height, depth, mass, position, new RigidBody()
 				);
+
+				// We can add for each fracture a force in its direction
+				Vector3D force = offset;
+				force += contactNormal * offset.magnitude();
+				prism->body->addForce(force * (1.0/deltaT));
+
 				prism->body->orientation = this->body->orientation;
 				prism->body->linearVelocity = this->body->linearVelocity;
 				prism->body->angularVelocity = this->body->angularVelocity;
 				prism->body->linearDamping = this->body->linearDamping;
 				prism->body->angularDamping = this->body->angularDamping;
+				prism->body->forceAccumulator = this->body->forceAccumulator;
+				prism->body->torqueAccumulator = this->body->torqueAccumulator;
 
-				polyhedra[i] = prism;
+				polyhedra.push_back(prism);
 			}
-			
-			return polyhedra;
 		}
 
 	};

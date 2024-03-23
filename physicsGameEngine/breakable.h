@@ -11,7 +11,11 @@ namespace pe {
 
 	class Breakable {
 
-		virtual std::vector<Polyhedron*> breakObject() = 0;
+		virtual void breakObject(
+			std::vector<Polyhedron*>& polyhedra, 
+			const Vector3D& contactNormal, 
+			real deltaT
+		) = 0;
 	};
 }
 

@@ -186,6 +186,9 @@
     <ClCompile Include="cookTorranceReflectionShader.cpp">
       <Filter>Source Files\OpenglGraphics</Filter>
     </ClCompile>
+    <ClCompile Include="util.cpp">
+      <Filter>Source Files\Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="accuracy.h">
@@ -406,6 +409,9 @@
     </ClInclude>
     <ClInclude Include="collisionBox.h">
       <Filter>Header Files\Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="util.h">
+      <Filter>Header Files\Core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

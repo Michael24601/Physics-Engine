@@ -193,6 +193,7 @@
     <ClCompile Include="sat.cpp" />
     <ClCompile Include="solidColorShader.cpp" />
     <ClCompile Include="textureShader.cpp" />
+    <ClCompile Include="util.cpp" />
     <ClCompile Include="vector3D.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -266,6 +267,7 @@
     <ClInclude Include="sphericalJoint.h" />
     <ClInclude Include="springJoint.h" />
     <ClInclude Include="textureShader.h" />
+    <ClInclude Include="util.h" />
     <ClInclude Include="vector2D.h" />
     <ClInclude Include="vector3D.h" />
     <ClInclude Include="vector3DAdapter.h" />

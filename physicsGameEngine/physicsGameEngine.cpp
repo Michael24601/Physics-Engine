@@ -69,6 +69,7 @@
 
 #include "cookTorranceReflectionShader.h"
 #include "customPrimitive.h"
+#include "breakable.h"
 
 using namespace pe;
 using namespace std;
@@ -1396,55 +1397,34 @@ int main() {
     window.setView(view);
 
     sf::Clock clock;
-    real deltaT = 0.07;
+    real deltaT = 0.05;
 
-    std::vector<RectangularPrism*> prisms;
-    
-    real radius = 1000;
+    std::vector<Polyhedron*> prisms;
+    RectangularPrism* prism = new RectangularPrism(
+        200, 200, 200, 100,
+        Vector3D(),
+        new RigidBody
+    );
 
-    for (int i = 0; i < 15; i++) {
+    prism->body->angularDamping = 0.97;
+    prism->body->linearDamping = 0.97;
 
-        real angle = (2 * PI * i) / 20;
-        Vector3D position(
-            cos(angle) * radius, 0, sin(angle) * radius
-        );
+    prism->body->canSleep = true;
 
-        Quaternion r = Quaternion::rotatedByAxisAngle(Vector3D(0, 1, 0), -angle);
-
-        RectangularPrism* prism = new RectangularPrism(
-            200, 600, 25, 10,
-            position,
-            new RigidBody
-        );
-        prism->body->orientation = r;
-
-        prism->body->angularDamping = 0.97;
-        prism->body->linearDamping = 0.97;
-
-        prism->body->canSleep = true;
-
-        prisms.push_back(prism);
-    }
+    prisms.push_back(prism);
 
     RectangularPrism ground(10000, 100, 10000, 0, Vector3D(0, -350, -0), new RigidBody);
     ground.body->inverseMass = 0;
 
-    SolidSphere s(100, 5, 20, 20, Vector3D(1000, 400, -600), new RigidBody);
-    s.body->canSleep = false;
-    s.body->angularDamping = 0.8;
-    s.body->linearDamping = 0.95;
-
     RigidBodyGravity g(Vector3D(0, -10, 0));
-
-    RigidBody b;
-    b.position = Vector3D(1000, 700, -600);
-    RigidBodySpringForce f(s.localVertices[0], &b, Vector3D(), 0.24, 300);
 
     real rotationSpeed = 0.1;
     real angle = PI / 2;
     bool isButtonPressed[]{
         false
     };
+
+    bool contact = false;
 
     while (window.isOpen()) {
 
@@ -1496,42 +1476,42 @@ int main() {
 
         while (numSteps--) {
 
-            for (RectangularPrism* prism : prisms) {
+            for (Polyhedron* prism : prisms) {
                 prism->body->calculateDerivedData();
             }
             ground.body->calculateDerivedData();
-            s.body->calculateDerivedData();
-            b.calculateDerivedData();
 
-            for (RectangularPrism* prism : prisms) {
+            for (Polyhedron* prism : prisms) {
                 g.updateForce(prism->body, substep);
             }
-            g.updateForce(s.body, substep);
-            f.updateForce(s.body, substep);
 
             std::vector<Contact> contacts;
 
             for (int i = 0; i < prisms.size(); i++) {
-                generateContactBoxAndBox(*(prisms[i]), ground, contacts, 0.0, 0.0);
-                generateContactBoxAndSphere(*(prisms[i]), s, contacts, 0.5, 0.0);
+                generateContactBoxAndBox(*(prisms[i]), ground, contacts, 0.25, 0.0);
                 for (int j = 0; j < prisms.size(); j++) {
                     if (i != j) {
-                        generateContactBoxAndBox(*(prisms[i]), *(prisms[j]), contacts, 0.5, 0.0);
+                        generateContactBoxAndBox(*(prisms[i]), *(prisms[j]), contacts, 0.25, 0.0);
                     }
                 }
             }
 
-            CollisionResolver resolver(2, 1);
+            if (contacts.size() > 0 && !contact) {
+                RectangularPrism* p = ((RectangularPrism*)prisms[0]);
+                prisms.clear();
+                p->breakObject(prisms, contacts[0].contactNormal * -1, substep);
+                contact = true;
+            }
+
+            CollisionResolver resolver(5, 1);
             resolver.resolveContacts(contacts.data(), contacts.size(), substep);
 
-            for (RectangularPrism* prism : prisms) {
+            for (Polyhedron* prism : prisms) {
                 prism->body->integrate(substep);
                 prism->update();
             }
             ground.body->integrate(substep);
             ground.update();
-            s.body->integrate(substep);
-            s.update();
 
         }
 
@@ -1539,10 +1519,10 @@ int main() {
         if (isButtonPressed[0]) {
             sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
             sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);
-            //s.body->position.x = worldPos.x * 4;
-            s.body->position.y = worldPos.y * 3;
-            s.body->position.z = worldPos.x * 3;
-            s.body->setAwake(true);
+            prisms[0]->body->position.x = worldPos.x * 3;
+            prisms[0]->body->position.y = worldPos.y * 3;
+            prisms[0]->body->position.z = worldPos.x * 3;
+            prisms[0]->body->setAwake(true);
         }
 
 
@@ -1556,7 +1536,8 @@ int main() {
         for (int i = 0; i < prisms.size(); i++) {
             data = getFaceData(*prisms[i]);
             cookShader.drawFaces(data.vertices, data.normals,
-                identity, viewMatrix, projectionMatrix, colors[i % 9], 2, lightPos,
+                // Use i%9 for different colors
+                identity, viewMatrix, projectionMatrix, colors[0], 2, lightPos,
                 lightColors, cameraPosition, 0.1, 0.05
             );
         }
@@ -1565,19 +1546,6 @@ int main() {
         cookShader.drawFaces(data.vertices, data.normals,
             identity, viewMatrix, projectionMatrix, colorWhite, 2, lightPos,
             lightColors, cameraPosition, 0.1, 0.05
-        );
-
-        data = getFaceData(s);
-        cookShader.drawFaces(data.vertices, data.normals,
-            identity, viewMatrix, projectionMatrix, colorBlack, 2, lightPos,
-            lightColors, cameraPosition, 0.1, 0.05
-        );
-
-        EdgeData ed;
-        ed.vertices.push_back(convertToGLM(b.position));
-        ed.vertices.push_back(convertToGLM(s.globalVertices[0]));
-        shader.drawEdges(ed.vertices, identity, viewMatrix, projectionMatrix,
-            colorWhite
         );
 
         window.display();
