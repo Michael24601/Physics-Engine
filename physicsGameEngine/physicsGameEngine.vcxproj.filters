@@ -70,6 +70,9 @@
     <Filter Include="Source Files\ParticleMesh">
       <UniqueIdentifier>{b9331864-0fb9-464d-a0f9-2b07e6fbc5b6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Camera">
+      <UniqueIdentifier>{c4df5a88-896d-4375-a291-d1a520f21bb8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="physicsGameEngine.cpp">
@@ -395,9 +398,6 @@
     <ClInclude Include="rigidBodyBungeeForce.h">
       <Filter>Header Files\RigidBodyPhysics</Filter>
     </ClInclude>
-    <ClInclude Include="oldCollisionDetection.h">
-      <Filter>Header Files\Collision</Filter>
-    </ClInclude>
     <ClInclude Include="fineCollisionDetection.h">
       <Filter>Header Files\Collision</Filter>
     </ClInclude>
@@ -421,6 +421,18 @@
     </ClInclude>
     <ClInclude Include="particleSpringDamper.h">
       <Filter>Header Files\ParticlePhysics</Filter>
+    </ClInclude>
+    <ClInclude Include="camera.h">
+      <Filter>Header Files\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="freeMovingCamera.h">
+      <Filter>Header Files\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="rotatingCamera.h">
+      <Filter>Header Files\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="particleCollisionDetection.h">
+      <Filter>Header Files\Collision</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

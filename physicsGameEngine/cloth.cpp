@@ -125,47 +125,52 @@ void Cloth::setFaces() {
 				We use triangles instead of square faces as
 				they will make normal calculation easier later.
 			*/
-			std::vector<std::vector<int>> faceIndexes{
-				std::vector<int>{
-					i* rowSize + j,
-					(i + 1) * rowSize + j,
-					(i + 1) * rowSize + (j + 1)
-				},
-				std::vector<int>{
-					(i + 1) * rowSize + (j + 1),
-					i * rowSize + (j + 1),
-					i * rowSize + j
-				}
+			std::vector<int> indexes{
+				i * rowSize + j,
+				(i + 1) * rowSize + j,
+				(i + 1) * rowSize + (j + 1),
+				i * rowSize + (j + 1)
 			};
 
-			// The uv coordinates of both triangles, which should form a square
-			std::vector<std::vector<Vector2D>> uv{
-				std::vector<Vector2D>{
-					Vector2D(i* (1.0 / rowSize), j* (1.0 / columnSize)),
-					Vector2D((i + 1)* (1.0 / rowSize), j* (1.0 / columnSize)),
-					Vector2D((i + 1)* (1.0 / rowSize), (j + 1)* (1.0 / columnSize))
-				},
-				std::vector<Vector2D>{
-					Vector2D((i + 1)* (1.0 / rowSize), (j + 1)* (1.0 / columnSize)),
-					Vector2D(i* (1.0 / rowSize), (j + 1)* (1.0 / columnSize)),
-					Vector2D(i * (1.0 / rowSize), j * (1.0 / columnSize))
-				}
+			// The uv coordinates of the square (and triangles)
+			std::vector<Vector2D> uv{
+				Vector2D(i* (1.0 / rowSize), j* (1.0 / columnSize)),
+				Vector2D((i + 1)* (1.0 / rowSize), j* (1.0 / columnSize)),
+				Vector2D((i + 1)* (1.0 / rowSize), (j + 1)* (1.0 / columnSize)),
+				Vector2D(i* (1.0 / rowSize), (j + 1)* (1.0 / columnSize))
+			};
+
+			std::vector<std::vector<int>>triangles {
+				{0, 1, 2},
+				{2, 3, 0}
 			};
 
 			// We set each of the two faces here
-			for (int i = 0; i < 2; i++) {
+			for (int i = 0; i < triangles.size(); i++) {
+
+				std::vector<int> triangleIndexes = {
+					indexes[triangles[i][0]],
+					indexes[triangles[i][1]],
+					indexes[triangles[i][2]],
+				};
+
+				std::vector<Vector2D> triangleUv = {
+					uv[triangles[i][0]],
+					uv[triangles[i][1]],
+					uv[triangles[i][2]],
+				};
 
 				// The normals are initially just the 0 vector
-				std::vector<Vector3D>faceNormals(faceIndexes[i].size(), Vector3D());
+				std::vector<Vector3D>faceNormals(triangles[i].size(), Vector3D());
 
 				CurvedFace* face = new CurvedFace(
 					&localVertices,
 					&globalVertices,
-					faceIndexes[i],
+					triangleIndexes,
 					faceNormals
 				);
 
-				face->setTextureCoordinates(uv[i]);
+				face->setTextureCoordinates(triangleUv);
 
 				faces.push_back(face);
 			}

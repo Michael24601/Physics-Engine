@@ -71,6 +71,9 @@
 #include "customPrimitive.h"
 #include "breakable.h"
 
+#include "freeMovingCamera.h"
+#include "rotatingCamera.h"
+
 using namespace pe;
 using namespace std;
 
@@ -456,6 +459,12 @@ int main() {
         sf::Style::Default, settings);
     window.setActive();
 
+    // Just in order to flip y axis
+    sf::View view = window.getDefaultView();
+    view.setSize(800, -800);
+    view.setCenter(0, 0);
+    window.setView(view);
+
     GLenum err = glewInit();
     if (GLEW_OK != err) {
         // GLEW initialization failed
@@ -499,39 +508,18 @@ int main() {
     CookTorranceShader cookShader;
     TextureShader texShader;
 
-
     GLuint texture = loadTexture("C:\\Users\\msaba\\OneDrive\\Desktop\\textureMaps\\blue.jpg");
 
-    // View matrix, used for positioning and angling the camera
-    // Camera's position in world coordinates
-    real cameraDistance = 600.0f;
-    glm::vec3 cameraPosition = glm::vec3(0.0f, 0.0f, cameraDistance);
-    // Point the camera is looking at
-    glm::vec3 cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);
-    // Up vector
-    glm::vec3 upVector = glm::vec3(0.0f, 1.0f, 0.0f);
-    glm::mat4 viewMatrix = glm::lookAt(cameraPosition,
-        cameraTarget, upVector);
-
-    // Projection matrix, used for perspective
-    // Field of View (FOV) in degrees
-    real fov = 90.0f;
-    // Aspect ratio
-    real aspectRatio = window.getSize().x
-        / static_cast<real>(window.getSize().y);
-    // Near and far clipping planes
-    real nearPlane = 0.1f;
-    real farPlane = 10000.0f;
-
-    // Create a perspective projection matrix
-    glm::mat4 projectionMatrix = glm::perspective(glm::radians(fov),
-        aspectRatio, nearPlane, farPlane);
-
-    // Just in order to flip y axis
-    sf::View view = window.getDefaultView();
-    view.setSize(800, -800);
-    view.setCenter(0, 0);
-    window.setView(view);
+    RotatingCamera camera(
+        window,
+        glm::vec3(0.0f, 0.0f, 0.0f),
+        90.0,
+        0.1,
+        10000,
+        500,
+        0.02,
+        0.1
+    );
 
     sf::Clock clock;
     real deltaT = 0.07;
@@ -582,33 +570,8 @@ int main() {
                 && event.mouseButton.button == sf::Mouse::Right) {
                 isButtonPressed[1] = false;
             }
-            // Rotates camera
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
-                angle += rotationSpeed;
-                cameraPosition.x = sin(angle) * cameraDistance;
-                cameraPosition.z = cos(angle) * cameraDistance;
-                viewMatrix = glm::lookAt(cameraPosition, cameraTarget, upVector);
-            }
-            else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
-                angle -= rotationSpeed;
-                cameraPosition.x = sin(angle) * cameraDistance;
-                cameraPosition.z = cos(angle) * cameraDistance;
-                viewMatrix = glm::lookAt(cameraPosition, cameraTarget, upVector);
-            }
-            // Moves camera
-            // Rotates camera
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
-                cameraDistance *= 0.98;
-                cameraPosition *= 0.98;
-                viewMatrix =
-                    glm::lookAt(cameraPosition, cameraTarget, upVector);
-            }
-            else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
-                cameraDistance *= 1.02;
-                cameraPosition *= 1.02;
-                viewMatrix =
-                    glm::lookAt(cameraPosition, cameraTarget, upVector);
-            }
+
+            camera.update(event, deltaT);
         }
 
         int numSteps = 20;
@@ -696,17 +659,19 @@ int main() {
             glm::vec4(1.0, 1.0, 1.0, 1.0) };
         
         
+        
         lightShader.drawFaces(
             data.vertices,
             data.normals,
             identity,
-            viewMatrix,
-            projectionMatrix,
+            camera.getViewMatrix(),
+            camera.getProjectionMatrix(),
             colorRed,
             2,
             lightPos,
             lightColor
         );
+        
         
         /*
         shader.drawEdges(

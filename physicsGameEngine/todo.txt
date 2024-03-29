@@ -263,3 +263,5 @@ detection, as it has an offset; finding the furthest point from the
 centre of gravity and using it as a radius guarantees the centre of
 the sphere is the same as the polyhedron. 
 
+Implement the camera using our core math library. That means adding
+new functions to the matrix and vector classes.

@@ -27,7 +27,8 @@ namespace pe {
 
 		/*
 			Pointer to the two particles in contact (if the second object
-			is immovable, the second pointer is kept NULL).
+			is immovable, or not a particle, the second pointer is kept
+			NULL).
 		*/
 		Particle* particle[2];
 
