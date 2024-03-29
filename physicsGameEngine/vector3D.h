@@ -176,10 +176,37 @@ namespace pe {
 			z = x * vector.y - y * vector.x;
 		}
 
+
+		// Addition of a vector and scalar (adds it to each component)
+		Vector3D operator+(real c) const {
+			return Vector3D(x + c, y + c, z + c);
+		}
+
+
+		void operator+=(real c) {
+			x += c;
+			y += c;
+			z += c;
+		}
+
+
+		Vector3D operator-(real c) const {
+			return Vector3D(x - c, y - c, z - c);
+		}
+
+
+		void operator-=(real c) {
+			x -= c;
+			y -= c;
+			z -= c;
+		}
+
+
 		// Returns each of the coordinates to 0
 		void clear() {
 			x = y = z = 0;
 		}
+
 
 		void rotate90Degrees() {
 			int temp = x;
@@ -187,17 +214,20 @@ namespace pe {
 			y = temp;
 		}
 
+
 		real operator[](unsigned int i) const {
 			if (i == 0) return x;
 			if (i == 1) return y;
 			return z;
 		}
 
+
 		real& operator[](unsigned int i){
 			if (i == 0) return x;
 			if (i == 1) return y;
 			return z;
 		}
+
 
 		void display() const {
 			std::cout << "x: " << x << ", y: " << y << ", z: " << z << "\n";

@@ -55,7 +55,7 @@
 #include "boundingVolumeHierarchy.h"
 #include "boundingSphere.h"
 
-#include "rectangularCloth.h"
+#include "cloth.h"
 
 #include "fixedJoint.h"
 #include "springJoint.h"
@@ -74,7 +74,7 @@
 using namespace pe;
 using namespace std;
 
-#define SIM_5
+#define SIM_2
 
 #ifdef SIM_1
 
@@ -534,15 +534,19 @@ int main() {
     window.setView(view);
 
     sf::Clock clock;
-    real deltaT = 0.06;
+    real deltaT = 0.07;
 
-    int size = 20;
+    int size = 22;
     real strength = 0.5;
     real mass = 0.5;
     real damping = 0.5;
 
-    RectangularCloth mesh(mass, damping, strength, size, size,
-        Vector3D(-200, 200, 0), Vector3D(200, -200, 0));
+    Cloth mesh(
+        Vector3D(-200, 200, 0), 
+        Vector3D(200, -200, 0),
+        size, size,
+        mass, damping, strength
+    );
 
     // The first row of particles is suspended
     for (int i = 0; i < size; i++) {
@@ -691,22 +695,20 @@ int main() {
         glm::vec4 lightColor[]{ glm::vec4(1.0, 1.0, 1.0, 1.0),
             glm::vec4(1.0, 1.0, 1.0, 1.0) };
         
-        /*
-        texShader.drawFaces(
+        
+        lightShader.drawFaces(
             data.vertices,
             data.normals,
-            data.uvCoordinates,
             identity,
             viewMatrix,
             projectionMatrix,
-            texture,
+            colorRed,
             2,
             lightPos,
             lightColor
         );
-        */
-
-
+        
+        /*
         shader.drawEdges(
             edata.vertices,
             identity,
@@ -714,6 +716,7 @@ int main() {
             projectionMatrix,
             colorWhite
         );
+        */
         
 
         window.display();
@@ -1401,8 +1404,8 @@ int main() {
 
     std::vector<Polyhedron*> prisms;
     RectangularPrism* prism = new RectangularPrism(
-        200, 200, 200, 100,
-        Vector3D(),
+        400, 10, 400, 100,
+        Vector3D(0, 600, 0),
         new RigidBody
     );
 
@@ -1488,10 +1491,10 @@ int main() {
             std::vector<Contact> contacts;
 
             for (int i = 0; i < prisms.size(); i++) {
-                generateContactBoxAndBox(*(prisms[i]), ground, contacts, 0.25, 0.0);
+                generateContactBoxAndBox(*(prisms[i]), ground, contacts, 0.0, 0.0);
                 for (int j = 0; j < prisms.size(); j++) {
                     if (i != j) {
-                        generateContactBoxAndBox(*(prisms[i]), *(prisms[j]), contacts, 0.25, 0.0);
+                        generateContactBoxAndBox(*(prisms[i]), *(prisms[j]), contacts, 0.0, 0.0);
                     }
                 }
             }
@@ -1499,12 +1502,16 @@ int main() {
             if (contacts.size() > 0 && !contact) {
                 RectangularPrism* p = ((RectangularPrism*)prisms[0]);
                 prisms.clear();
-                p->breakObject(prisms, contacts[0].contactNormal * -1, substep);
+                // We use deltaT even when substepping
+                Vector3D dimensionPoint(p->width / 8.0, -p->height / 2.0, p->depth / 16.0);
+                Vector3D point(-p->width / 5.0, 0.0, p->depth / 8.0);
+                p->breakObject(prisms, contacts[0], deltaT, 2500, dimensionPoint, point);
                 contact = true;
             }
 
-            CollisionResolver resolver(5, 1);
+            CollisionResolver resolver(1, 1);
             resolver.resolveContacts(contacts.data(), contacts.size(), substep);
+
 
             for (Polyhedron* prism : prisms) {
                 prism->body->integrate(substep);

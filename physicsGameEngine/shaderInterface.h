@@ -3,7 +3,7 @@
 #define SHADER_INTERFACE_H
 
 #include "polyhedron.h"
-#include "particleMesh.h"
+#include "cloth.h"
 #include <vector>
 #include "collisionBox.h"
 
@@ -154,21 +154,21 @@ namespace pe {
 		Functions that can draw the whole Mesh.
 	*/
 
-	EdgeData getEdgeData(const ParticleMesh& mesh);
+	EdgeData getEdgeData(const Cloth& mesh);
 
 	FrameVectors getUniformFrameVectors(
-		const ParticleMesh& mesh,
+		const Cloth& mesh,
 		real length
 	);
 
 	FrameVectors getFrameVectors(
-		const ParticleMesh& mesh,
+		const Cloth& mesh,
 		real length
 	);
 
-	FaceData getFaceData(const ParticleMesh& mesh);
+	FaceData getFaceData(const Cloth& mesh);
 
-	FaceData getUniformFaceData(const ParticleMesh& mesh);
+	FaceData getUniformFaceData(const Cloth& mesh);
 
 }
 

@@ -67,6 +67,9 @@
     <Filter Include="Header Files\Fracture">
       <UniqueIdentifier>{713972cc-8650-433c-a957-7f4373e592ed}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\ParticleMesh">
+      <UniqueIdentifier>{b9331864-0fb9-464d-a0f9-2b07e6fbc5b6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="physicsGameEngine.cpp">
@@ -189,6 +192,12 @@
     <ClCompile Include="util.cpp">
       <Filter>Source Files\Core</Filter>
     </ClCompile>
+    <ClCompile Include="cloth.cpp">
+      <Filter>Source Files\ParticleMesh</Filter>
+    </ClCompile>
+    <ClCompile Include="particleSpringDamper.cpp">
+      <Filter>Source Files\ParticlePhysics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="accuracy.h">
@@ -290,7 +299,7 @@
     <ClInclude Include="diffuseSpecularLightingShader.h">
       <Filter>Header Files\OpenglGraphics</Filter>
     </ClInclude>
-    <ClInclude Include="particleMesh.h">
+    <ClInclude Include="cloth.h">
       <Filter>Header Files\ParticleMesh</Filter>
     </ClInclude>
     <ClInclude Include="vector3DAdapter.h">
@@ -322,9 +331,6 @@
     </ClInclude>
     <ClInclude Include="anisotropicShader.h">
       <Filter>Header Files\OpenglGraphics</Filter>
-    </ClInclude>
-    <ClInclude Include="rectangularCloth.h">
-      <Filter>Header Files\ParticleMesh</Filter>
     </ClInclude>
     <ClInclude Include="cone.h">
       <Filter>Header Files\Polyhedron</Filter>
@@ -412,6 +418,9 @@
     </ClInclude>
     <ClInclude Include="util.h">
       <Filter>Header Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="particleSpringDamper.h">
+      <Filter>Header Files\ParticlePhysics</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -19,9 +19,10 @@ namespace pe {
 
 		std::vector<Vector3D>* localVertices;
 		std::vector<Vector3D>* globalVertices;
-		std::pair<int, int> indices;
 
 	public:
+
+		std::pair<int, int> indices;
 
 		Edge() {}
 

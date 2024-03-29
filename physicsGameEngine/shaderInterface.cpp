@@ -199,7 +199,7 @@ FaceData pe::getUniformFaceData(const Polyhedron& polyhedron) {
 }
 
 
-EdgeData pe::getEdgeData(const ParticleMesh& mesh) {
+EdgeData pe::getEdgeData(const Cloth& mesh) {
 	EdgeData data;
 	for (Edge* edge : mesh.edges) {
 		getEdgeData(edge, &data);
@@ -208,7 +208,7 @@ EdgeData pe::getEdgeData(const ParticleMesh& mesh) {
 }
 
 FrameVectors pe::getUniformFrameVectors(
-	const ParticleMesh& mesh,
+	const Cloth& mesh,
 	real length
 ) {
 	FrameVectors data;
@@ -219,7 +219,7 @@ FrameVectors pe::getUniformFrameVectors(
 }
 
 FrameVectors pe::getFrameVectors(
-	const ParticleMesh& mesh,
+	const Cloth& mesh,
 	real length
 ) {
 	FrameVectors data;
@@ -276,7 +276,7 @@ EdgeData pe::getCollisionBoxData(const Polyhedron& polyhedron) {
 	return data;
 }
 
-FaceData pe::getFaceData(const ParticleMesh& mesh) {
+FaceData pe::getFaceData(const Cloth& mesh) {
 	FaceData data;
 	for (Face* face : mesh.faces) {
 		getFaceData(face, &data);
@@ -284,7 +284,7 @@ FaceData pe::getFaceData(const ParticleMesh& mesh) {
 	return data;
 }
 
-FaceData pe::getUniformFaceData(const ParticleMesh& mesh) {
+FaceData pe::getUniformFaceData(const Cloth& mesh) {
 	FaceData data;
 	for (Face* face : mesh.faces) {
 		getUniformFaceData(face, &data);

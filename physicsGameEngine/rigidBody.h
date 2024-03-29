@@ -53,8 +53,12 @@ namespace pe {
 			and does not need updating.
 			Note that when torque is applied, the object doesn't always
 			rotate in the same axis as the torque.
+			We could also save the inertia tensor, but it would waste memory
+			as it is almost never needed, and can be calculated as the
+			inverse's inverse on the fly.
 		*/
 		Matrix3x3 inverseInertiaTensor;
+
 
 		/*
 			Since torque and rotational acceleration are given in terms of

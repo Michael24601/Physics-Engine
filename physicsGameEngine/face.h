@@ -112,14 +112,6 @@ namespace pe {
 
 		std::vector<Vector3D>* localVertices;
 		std::vector<Vector3D>* globalVertices;
-		
-		/*
-			Indexes of the vertices corresponding to the face. They have
-			to be given in either clockwise or counter-clockwise order, as
-			long as they are ordered. For this engine the order must always
-			be counter-clockwise.
-		*/
-		std::vector<int> indeces;
 
 		Vector3D normal;
 		Vector3D localNormal;
@@ -187,6 +179,15 @@ namespace pe {
 
 
 	public:
+
+		/*
+			Indexes of the vertices corresponding to the face. They have
+			to be given in either clockwise or counter-clockwise order, as
+			long as they are ordered. For this engine the order must always
+			be counter-clockwise.
+		*/
+		std::vector<int> indeces;
+
 
 		Face() {}
 

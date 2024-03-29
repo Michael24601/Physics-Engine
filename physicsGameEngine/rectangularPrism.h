@@ -125,18 +125,22 @@ namespace pe {
 
 		void breakObject(
 			std::vector<Polyhedron*>& polyhedra,
-			const Vector3D& contactNormal,
-			real deltaT
+			const Contact& contact,
+			real deltaT,
+			real strength,
+			Vector3D dimensionPoint,
+			Vector3D breakingPoint
 		) {
 
-			// Point around which the object will break
-			Vector3D point(width / 10.0, -height / 8.0, depth / 12.0);
+			Vector3D point = breakingPoint;
+			Vector3D pointGlobal = this->body->transformMatrix.transform(point + dimensionPoint);
 
 			/*
 				This will divide the prism into 8 other polyhedrons, each of
 				which will have a coner that is the breakage point.
 			*/
 			for (int i = 0; i < 8; i++) {
+
 				/*
 					Of the 8 rigid bodies, each will have with width to left
 					of the point, or to its right, the height above the
@@ -144,9 +148,20 @@ namespace pe {
 					or behind it; which in turn gives us 2^3 = 8
 					configurations.
 				*/
-				real width (i % 2 == 0 ? this->width / 2 + point.x : this->width / 2 - point.x);
-				real height = (i % 4 <= 1 ? this->height / 2 + point.y : this->height / 2 - point.y);
-				real depth = (i % 8 <= 3 ? this->depth / 2 + point.z : this->depth / 2 - point.z);
+				real width(i % 2 == 0 ? this->width / 2 + dimensionPoint.x :
+					this->width / 2 - dimensionPoint.x);
+				real height = (i % 4 <= 1 ? this->height / 2 + dimensionPoint.y :
+					this->height / 2 - dimensionPoint.y);
+				real depth = (i % 8 <= 3 ? this->depth / 2 + dimensionPoint.z :
+					this->depth / 2 - dimensionPoint.z);
+
+				/*
+					If any of them is 0 (if the volume is 0), we won't create the
+					object at all.
+				*/
+				if (width * depth * height == 0) {
+					continue;
+				}
 
 				/*
 					The offset is the position of this new polyhedron relative
@@ -162,7 +177,7 @@ namespace pe {
 				offset.z = (i % 8 <= 3 ? depth / 2 : -depth / 2);
 
 				// Mass is proportional to volume
-				real mass = (width * height * depth * this->body->getMass()) / 
+				real mass = (width * height * depth * this->body->getMass()) /
 					(this->width * this->height * this->depth);
 
 				Vector3D position = this->body->transformMatrix.transform(offset);
@@ -171,20 +186,88 @@ namespace pe {
 					width, height, depth, mass, position, new RigidBody()
 				);
 
+				/*
+					Now we need to add the point as a one of the corners of the
+					fractured pieces. If the fracture piece was the top left
+					corner to the back, the point would be the bottom right
+					corner to the front (opposite).
+				*/
+				std::vector<Vector3D> vertices;
+				for (int i = 0; i < 8; i++) {
+					// If the sign is opposite for each vertex
+					if (
+						prism->localVertices[i].x * offset.x < 0 &&
+						prism->localVertices[i].y * offset.y < 0 &&
+						prism->localVertices[i].z * offset.z < 0
+					) {
+						vertices.push_back(prism->localVertices[i] + point);
+					}
+					else {
+						vertices.push_back(prism->localVertices[i]);
+					}
+				}
+
+				
+				Polyhedron* polyhedron = new Polyhedron(
+					mass, 
+					position, 
+					Matrix3x3(
+						(mass / 12.0) * (height * height + depth * depth), 0, 0,
+						0, (mass / 12.0) * (width * width + depth * depth), 0,
+						0, 0, (mass / 12.0) * (width * width + height * height)
+					),
+					vertices, 
+					new RigidBody()
+				);
+
+				std::vector<Face*> faces;
+				for (int i = 0; i < 6; i++) {
+					faces.push_back(new Face(
+						&polyhedron->localVertices,
+						&polyhedron->globalVertices,
+						prism->faces[i]->indeces
+					));
+				}
+				std::vector<Edge*> edges;
+				for (int i = 0; i < 12; i++) {
+					edges.push_back(new Edge(
+						&polyhedron->localVertices,
+						&polyhedron->globalVertices,
+						prism->edges[i]->indices.first,
+						prism->edges[i]->indices.second
+					));
+				}
+				polyhedron->setFaces(faces);
+				polyhedron->setEdges(edges);
+
+				delete prism;
+
+				polyhedron->body->orientation = this->body->orientation;
+				polyhedron->body->linearVelocity = this->body->linearVelocity;
+				polyhedron->body->angularVelocity = this->body->angularVelocity;
+				polyhedron->body->linearDamping = this->body->linearDamping;
+				polyhedron->body->angularDamping = this->body->angularDamping;
+				// polyhedron->body->forceAccumulator = this->body->forceAccumulator;
+				// polyhedron->body->torqueAccumulator = this->body->torqueAccumulator;
+
 				// We can add for each fracture a force in its direction
-				Vector3D force = offset;
-				force += contactNormal * offset.magnitude();
-				prism->body->addForce(force * (1.0/deltaT));
+				
+				
+				Vector3D force = offset.normalized() * strength * (1/(deltaT));
+				polyhedron->body->addForce(
+					force, 
+					pointGlobal
+				);
+				
+				
+				force = contact.contactNormal * (1 / (deltaT));
+				polyhedron->body->addForce(
+					force,
+					contact.contactPoint
+				);
+				
 
-				prism->body->orientation = this->body->orientation;
-				prism->body->linearVelocity = this->body->linearVelocity;
-				prism->body->angularVelocity = this->body->angularVelocity;
-				prism->body->linearDamping = this->body->linearDamping;
-				prism->body->angularDamping = this->body->angularDamping;
-				prism->body->forceAccumulator = this->body->forceAccumulator;
-				prism->body->torqueAccumulator = this->body->torqueAccumulator;
-
-				polyhedra.push_back(prism);
+				polyhedra.push_back(polyhedron);
 			}
 		}
 

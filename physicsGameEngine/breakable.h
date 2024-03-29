@@ -6,6 +6,7 @@
 #define BREAKABLE_H
 
 #include "polyhedron.h"
+#include "contact.h"
 
 namespace pe {
 
@@ -13,8 +14,11 @@ namespace pe {
 
 		virtual void breakObject(
 			std::vector<Polyhedron*>& polyhedra, 
-			const Vector3D& contactNormal, 
-			real deltaT
+			const Contact& contact, 
+			real deltaT,
+			real strength,
+			Vector3D dimensionPoint,
+			Vector3D breakingPoint
 		) = 0;
 	};
 }
