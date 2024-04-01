@@ -65,8 +65,8 @@ namespace pe {
 			the other (two sided).
 		*/
 		struct SpringForce {
-			ParticleSpringDamper force1;
-			ParticleSpringDamper force2;
+			ParticleSpringForce force1;
+			ParticleSpringForce force2;
 		};
 
 		std::vector<SpringForce> forces;

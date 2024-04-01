@@ -6,31 +6,7 @@
 #include "vector3D.h"
 #include "drawingUtil.h"
 #include "shaderInterface.h"
-
-const std::string solidColorVertexShader = R"(
-	#version 330 core
-
-    layout(location = 0) in vec3 aPos;
-
-    uniform mat4 model;
-    uniform mat4 view;
-    uniform mat4 projection;
-
-    void main(){
-        gl_Position = projection * view * model * vec4(aPos, 1.0);
-    }
-)";
-
-const std::string solidColorFragmentShader = R"(
-	#version 330 core
-
-    uniform vec4 objectColor;
-    out vec4 FragColor;
-
-    void main(){
-        FragColor = objectColor;
-    }
-)";
+#include "openglUtility.h"
 
 namespace pe {
 
@@ -42,8 +18,9 @@ namespace pe {
 	public:
 
         SolidColorShader() : shaderProgramObject(
-            solidColorVertexShader,
-            solidColorFragmentShader) {}
+            readFileToString("solidColorVertexShader.glsl"),
+            readFileToString("solidColorFragmentShader.glsl")
+        ) {}
 
         void drawEdges(
             const std::vector<glm::vec3>& edges,

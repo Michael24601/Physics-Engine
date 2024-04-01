@@ -82,7 +82,7 @@
 using namespace pe;
 using namespace std;
 
-#define SIM_9
+#define SIM_1
 
 #ifdef SIM_1
 
@@ -2449,8 +2449,8 @@ int main() {
     sf::Clock clock;
     real deltaT = 0.065;
 
-    int size = 10;
-    real strength = 1;
+    int size = 5;
+    real strength = 0.01;
     real mass = 0.5;
     real damping = 0.5;
 
@@ -2509,50 +2509,34 @@ int main() {
 
             vector<ParticleContact> contacts;
             for (auto& force : mesh.forces) {
-                //force.force1.updateForce(force.force2.otherParticle, deltaT);
-                //force.force2.updateForce(force.force1.otherParticle, deltaT);
+                force.force1.updateForce(force.force2.otherParticle, deltaT);
+                force.force2.updateForce(force.force1.otherParticle, deltaT);
             }
 
             if (isButtonPressed[0] || isButtonPressed[1]) {
+                sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
+                sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);
+                Vector3D move;
+                move.x = worldPos.x - mesh.particles[size * size / 2]->position.x;
+                move.y = worldPos.y - mesh.particles[size * size / 2]->position.y;
+                move.z = worldPos.x - mesh.particles[size * size / 2]->position.z;
 
                 if (isButtonPressed[0]) {
-                    sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
-                    sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);
-                    Vector3D move;
-                    move.x = worldPos.x - mesh.particles[size * size / 2]->position.x;
-                    move.y = worldPos.y - mesh.particles[size * size / 2]->position.y;
-                    move.z = worldPos.x - mesh.particles[size * size / 2]->position.z;
-
-                    move *= mass;
-                    ParticleGravity f(move);
-
                     for (int i = 0; i < mesh.particles.size(); i++) {
-                        f.updateForce(mesh.particles[i], deltaT);
+                        mesh.particles[i]->position += move;
                     }
                 }
                 else if (isButtonPressed[1]) {
-                    sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
-                    sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);
-                    Vector3D move;
-                    move.x = worldPos.x - mesh.particles[size * size / 2]->position.x;
-                    move.y = worldPos.y - mesh.particles[size * size / 2]->position.y;
-                    move.z = -(worldPos.x + mesh.particles[size * size / 2]->position.z);
-
-                    move *= mass;
-                    ParticleGravity f(move);
-
-                    for (int i = 0; i < size; i++) {
-                        f.updateForce(mesh.particles[i * size], deltaT);
+                    for (int i = 0; i < mesh.particles.size()/2; i++) {
+                        mesh.particles[i]->position += move;
                     }
                 }
             }
 
             //mesh.applyConstraints();
 
-            for (int i = 0; i < size * size; i++) {
-                if (mesh.particles[i]->isAwake) {
-                    mesh.particles[i]->verletIntegrate(deltaT);
-                }
+            for (int i = 0; i < mesh.particles.size(); i++) {
+                mesh.particles[i]->verletIntegrate(deltaT);
             }
 
             mesh.update();

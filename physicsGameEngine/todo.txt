@@ -273,3 +273,5 @@ Change particle awake to fixed.
 Make sure the generateParticleGrid function can work for a cloth that
 is vertical, horizontal, or along the z axis, not just when it is
 vertical.
+
+Make the GLSL their own files.

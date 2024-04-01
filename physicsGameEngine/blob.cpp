@@ -110,6 +110,7 @@ std::vector<Edge*> Blob::calculateEdges() {
 		}
 	}
 
+	/*
 	for (int i = 0; i < particles.size() - 1; i++) {
 		edges.push_back(
 			new Edge(
@@ -119,6 +120,7 @@ std::vector<Edge*> Blob::calculateEdges() {
 			)
 		);
 	}
+	*/
 
 	return edges;
 }
@@ -188,16 +190,14 @@ void Blob::setForces() {
 
 		// Adds the bungee force for each edge twice (one from each particle)
 		SpringForce force{
-			ParticleSpringDamper(
+			ParticleSpringForce(
 				particles[edge->getIndex(1)],
 				springStrength,
-				0.2,
 				distance
 			),
-			ParticleSpringDamper(
+			ParticleSpringForce(
 				particles[edge->getIndex(0)],
 				springStrength,
-				0.2,
 				distance
 			),
 		};

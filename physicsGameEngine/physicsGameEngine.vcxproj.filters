@@ -73,6 +73,24 @@
     <Filter Include="Header Files\Camera">
       <UniqueIdentifier>{c4df5a88-896d-4375-a291-d1a520f21bb8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Shaders">
+      <UniqueIdentifier>{747ca941-f6c3-4729-a4c4-0f6692aa8f2d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Shaders\Anisotropic Shader">
+      <UniqueIdentifier>{2c1decbb-25f5-41ec-b507-431d733994cf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Shaders\Cook Torrance Shader">
+      <UniqueIdentifier>{40fdc51a-8e96-4e98-b8e8-6bf005f744cc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Shaders\Phong Shader">
+      <UniqueIdentifier>{ebdc961d-5f51-4643-8407-5b5f1afb6ad2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Shaders\Diffuse Lighting Shader">
+      <UniqueIdentifier>{0165be36-aa8c-4bf8-9036-ade57c4340a2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Shaders\Solid Color Shader">
+      <UniqueIdentifier>{aa13724f-91d6-464b-b564-b2a1235da54d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="physicsGameEngine.cpp">
@@ -203,6 +221,9 @@
     </ClCompile>
     <ClCompile Include="blob.cpp">
       <Filter>Source Files\ParticleMesh</Filter>
+    </ClCompile>
+    <ClCompile Include="openglUtility.cpp">
+      <Filter>Source Files\OpenglGraphics</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -443,8 +464,58 @@
     <ClInclude Include="mesh.h">
       <Filter>Header Files\ParticleMesh</Filter>
     </ClInclude>
+    <ClInclude Include="anisotropicFragmentShader.glsl">
+      <Filter>Header Files\Shaders\Anisotropic Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="anisotropicTextureVertexShader.glsl">
+      <Filter>Header Files\Shaders\Anisotropic Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="anisotropicTextureFragmentShader.glsl">
+      <Filter>Header Files\Shaders\Anisotropic Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="cookTorranceVertexShader.glsl">
+      <Filter>Header Files\Shaders\Cook Torrance Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="cookTorranceFragmentShader.glsl">
+      <Filter>Header Files\Shaders\Cook Torrance Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="cookTorranceTextureVertexShader.glsl">
+      <Filter>Header Files\Shaders\Cook Torrance Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="cookTorranceTextureFragmentShader.glsl">
+      <Filter>Header Files\Shaders\Cook Torrance Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="phongVertexShader.glsl">
+      <Filter>Header Files\Shaders\Phong Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="phongFragmentShader.glsl">
+      <Filter>Header Files\Shaders\Phong Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="diffuseLightingTextureVertexShader.glsl">
+      <Filter>Header Files\Shaders\Diffuse Lighting Shader</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="todo.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="anisotropicVertexShader.glsl">
+      <Filter>Header Files\Shaders\Anisotropic Shader</Filter>
+    </None>
+    <None Include="diffuseLightingVertexShader.glsl">
+      <Filter>Header Files\Shaders\Diffuse Lighting Shader</Filter>
+    </None>
+    <None Include="diffuseLightingFragmentShader.glsl">
+      <Filter>Header Files\Shaders\Diffuse Lighting Shader</Filter>
+    </None>
+    <None Include="diffuseLightingTextureFragmentShader.glsl">
+      <Filter>Header Files\Shaders\Diffuse Lighting Shader</Filter>
+    </None>
+    <None Include="solidColorVertexShader.glsl">
+      <Filter>Header Files\Shaders\Solid Color Shader</Filter>
+    </None>
+    <None Include="solidColorFragmentShader.glsl">
+      <Filter>Header Files\Shaders\Solid Color Shader</Filter>
+    </None>
   </ItemGroup>
 </Project>

@@ -171,6 +171,7 @@
     <ClCompile Include="diffuseSpecularLightingShader.cpp" />
     <ClCompile Include="drawingUtil.cpp" />
     <ClCompile Include="face.cpp" />
+    <ClCompile Include="openglUtility.cpp" />
     <ClCompile Include="particle.cpp" />
     <ClCompile Include="particleBungeeForce.cpp" />
     <ClCompile Include="particleBuoyancy.cpp" />
@@ -201,8 +202,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="accuracy.h" />
+    <ClInclude Include="anisotropicFragmentShader.glsl" />
     <ClInclude Include="anisotropicShader.h" />
+    <ClInclude Include="anisotropicTextureFragmentShader.glsl" />
     <ClInclude Include="anisotropicTextureShader.h" />
+    <ClInclude Include="anisotropicTextureVertexShader.glsl" />
     <ClInclude Include="ballJoint.h" />
     <ClInclude Include="blob.h" />
     <ClInclude Include="BVHNode.h" />
@@ -214,12 +218,17 @@
     <ClInclude Include="cone.h" />
     <ClInclude Include="contact.h" />
     <ClInclude Include="contactGeneration.h" />
+    <ClInclude Include="cookTorranceFragmentShader.glsl" />
     <ClInclude Include="cookTorranceReflectionShader.h" />
     <ClInclude Include="cookTorranceShader.h" />
+    <ClInclude Include="cookTorranceTextureFragmentShader.glsl" />
     <ClInclude Include="cookTorranceTextureShader.h" />
+    <ClInclude Include="cookTorranceTextureVertexShader.glsl" />
+    <ClInclude Include="cookTorranceVertexShader.glsl" />
     <ClInclude Include="curvedFace.h" />
     <ClInclude Include="customPrimitive.h" />
     <ClInclude Include="cylinder.h" />
+    <ClInclude Include="diffuseLightingTextureVertexShader.glsl" />
     <ClInclude Include="freeMovingCamera.h" />
     <ClInclude Include="gjk.h" />
     <ClInclude Include="fineCollisionDetection.h" />
@@ -229,6 +238,8 @@
     <ClInclude Include="mesh.h" />
     <ClInclude Include="openglUtility.h" />
     <ClInclude Include="particleCollisionDetection.h" />
+    <ClInclude Include="phongFragmentShader.glsl" />
+    <ClInclude Include="phongVertexShader.glsl" />
     <ClInclude Include="pyramid.h" />
     <ClInclude Include="rectangularPrism.h" />
     <ClInclude Include="edge.h" />
@@ -282,6 +293,14 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="todo.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="anisotropicVertexShader.glsl" />
+    <None Include="diffuseLightingFragmentShader.glsl" />
+    <None Include="diffuseLightingTextureFragmentShader.glsl" />
+    <None Include="diffuseLightingVertexShader.glsl" />
+    <None Include="solidColorFragmentShader.glsl" />
+    <None Include="solidColorVertexShader.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
