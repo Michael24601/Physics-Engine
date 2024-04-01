@@ -5,6 +5,10 @@
 
 using namespace pe;
 
+const Vector3D Vector3D::RIGHT(1, 0, 0);
+const Vector3D Vector3D::UP(0, 1, 0);
+const Vector3D Vector3D::FORWARD(0, 0, 1);
+
 Vector3D pe::localToWorld(const Vector3D& relativePosition, const
 	Matrix3x4& transformation) {
 	return transformation.transform(relativePosition);

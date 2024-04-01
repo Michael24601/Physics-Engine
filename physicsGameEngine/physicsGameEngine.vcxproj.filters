@@ -201,6 +201,9 @@
     <ClCompile Include="particleSpringDamper.cpp">
       <Filter>Source Files\ParticlePhysics</Filter>
     </ClCompile>
+    <ClCompile Include="blob.cpp">
+      <Filter>Source Files\ParticleMesh</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="accuracy.h">
@@ -433,6 +436,12 @@
     </ClInclude>
     <ClInclude Include="particleCollisionDetection.h">
       <Filter>Header Files\Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="blob.h">
+      <Filter>Header Files\ParticleMesh</Filter>
+    </ClInclude>
+    <ClInclude Include="mesh.h">
+      <Filter>Header Files\ParticleMesh</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

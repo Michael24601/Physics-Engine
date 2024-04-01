@@ -15,6 +15,11 @@ namespace pe {
 
 	public:
 
+		// Static constants
+		static const Vector3D RIGHT;
+		static const Vector3D UP;
+		static const Vector3D FORWARD;
+
 		// Vector coordinates 
 		real x;
 		real y;

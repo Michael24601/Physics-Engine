@@ -12,38 +12,24 @@ Cloth::Cloth(
 	real mass,
 	real damping,
 	real ropeStrength
-) : rowSize{ rowSize },
-columnSize{ columnSize },
-ropeStrength{ ropeStrength } {
+) : 
+	Mesh(
+		returnParticleGrid(
+			columnSize,
+			rowSize,
+			topLeft,
+			bottomRight
+		),
+		mass,
+		damping
+	),
+	rowSize{ rowSize },
+	columnSize{ columnSize },
+	ropeStrength{ ropeStrength } {
 
-	std::vector<Vector3D> particlePositions = returnParticleGrid(
-		columnSize,
-		rowSize,
-		topLeft,
-		bottomRight
-	);
+	setFaces(calculateFaces());
+	setEdges(calculateEdges());
 
-	localVertices = particlePositions;
-	/*
-		Initially, the global vertices were the same as the
-		original local ones.
-	*/
-	globalVertices = particlePositions;
-
-	/*
-		Positions(in global coordinates, as we are working with
-		particles, and there are no transformations.
-	*/
-	particles.resize(particlePositions.size());
-	for (int i = 0; i < particles.size(); i++) {
-		particles[i].position = particlePositions[i];
-		particles[i].setMass(mass);
-		particles[i].damping = damping;
-	}
-
-
-	setEdges();
-	setFaces();
 	setForces();
 	setConstraints();
 }
@@ -78,7 +64,10 @@ std::vector<pe::Vector3D>  Cloth::returnParticleGrid(
 }
 
 
-void Cloth::setEdges() {
+std::vector<Edge*> Cloth::calculateEdges() {
+
+	std::vector<Edge*> edges;
+
 	/*
 		Note that we only include unique edges: if we have
 		an edge from particle i to j, we don't also include one
@@ -108,22 +97,21 @@ void Cloth::setEdges() {
 			);
 		}
 	}
+
+	return edges;
 }
 
 
-void Cloth::setFaces() {
+std::vector<CurvedFace*> Cloth::calculateFaces() {
+
+	std::vector<CurvedFace*> faces;
 
 	for (int i = 0; i < columnSize - 1; i++) {
 		for (int j = 0; j < rowSize - 1; j++) {
 
 			/*
-				Triangle faces, which divide each square into 2
-				(The squares are defined by 2 columns and 2 rows,
-				in counter-clockwise order).
-				Here are the indexes of the two triangles of
-				the current square.
-				We use triangles instead of square faces as
-				they will make normal calculation easier later.
+				The square faces are defined by 2 columns and 2 rows,
+				in counter-clockwise order.
 			*/
 			std::vector<int> indexes{
 				i * rowSize + j,
@@ -132,7 +120,7 @@ void Cloth::setFaces() {
 				i * rowSize + (j + 1)
 			};
 
-			// The uv coordinates of the square (and triangles)
+			// The uv coordinates of the square
 			std::vector<Vector2D> uv{
 				Vector2D(i* (1.0 / rowSize), j* (1.0 / columnSize)),
 				Vector2D((i + 1)* (1.0 / rowSize), j* (1.0 / columnSize)),
@@ -140,43 +128,21 @@ void Cloth::setFaces() {
 				Vector2D(i* (1.0 / rowSize), (j + 1)* (1.0 / columnSize))
 			};
 
-			std::vector<std::vector<int>>triangles {
-				{0, 1, 2},
-				{2, 3, 0}
-			};
+			// The normals are not initially set, but will be calculated each frame
+			std::vector<Vector3D>faceNormals(indexes.size(), Vector3D());
 
-			// We set each of the two faces here
-			for (int i = 0; i < triangles.size(); i++) {
-
-				std::vector<int> triangleIndexes = {
-					indexes[triangles[i][0]],
-					indexes[triangles[i][1]],
-					indexes[triangles[i][2]],
-				};
-
-				std::vector<Vector2D> triangleUv = {
-					uv[triangles[i][0]],
-					uv[triangles[i][1]],
-					uv[triangles[i][2]],
-				};
-
-				// The normals are initially just the 0 vector
-				std::vector<Vector3D>faceNormals(triangles[i].size(), Vector3D());
-
-				CurvedFace* face = new CurvedFace(
-					&localVertices,
-					&globalVertices,
-					triangleIndexes,
-					faceNormals
-				);
-
-				face->setTextureCoordinates(triangleUv);
-
-				faces.push_back(face);
-			}
-
+			CurvedFace* face = new CurvedFace(
+				&localVertices,
+				&globalVertices,
+				indexes,
+				faceNormals
+			);
+			face->setTextureCoordinates(uv);
+			faces.push_back(face);
 		}
 	}
+
+	return faces;
 }
 
 
@@ -190,13 +156,13 @@ void Cloth::setForces() {
 		// Adds the bungee force for each edge twice (one from each particle)
 		SpringForce force{
 			ParticleSpringDamper(
-				&particles[edge->getIndex(1)],
+				particles[edge->getIndex(1)],
 				ropeStrength,
 				0.2,
 				distance
 			),
 			ParticleSpringDamper(
-				&particles[edge->getIndex(0)],
+				particles[edge->getIndex(0)],
 				ropeStrength,
 				0.2,
 				distance
@@ -215,8 +181,8 @@ void Cloth::setConstraints() {
 		real restLength = distanceVector.magnitude();
 
 		// Adds the distance constraint for each edge as well
-		Particle* particle1 = &particles[edge->getIndex(0)];
-		Particle* particle2 = &particles[edge->getIndex(1)];
+		Particle* particle1 = particles[edge->getIndex(0)];
+		Particle* particle2 = particles[edge->getIndex(1)];
 
 		ParticleDistanceConstraint distanceConstraint(
 			particle1,
@@ -235,17 +201,18 @@ void Cloth::calculateMeshNormals() {
 	// First we calculate the normal of each particle
 	for (CurvedFace* face : faces) {
 
-		Vector3D side1 = face->getVertex(1) - face->getVertex(0);
-		Vector3D side2 = face->getVertex(2) - face->getVertex(0);
-		Vector3D normal = (side1.vectorProduct(side2)).normalized();
-
 		/*
 			Since we don't have a transform matrix, we recalculate the
 			values using the formulas. The normals have to be set from
 			the outside, and the rest the face can calculate.
 		*/
 		for (int i = 0; i < face->getVertexNumber(); i++) {
-			normals[face->getIndex(i)] += normal;
+			/*
+				We add the face normal to the normal of each vertex in
+				the face (recall that mist vertices are shared among
+				several faces).
+			*/
+			normals[face->getIndex(i)] += face->getNormal();
 		}
 
 		face->update();
@@ -267,27 +234,8 @@ void Cloth::calculateMeshNormals() {
 
 
 void Cloth::applyConstraints() {
-	// Apply distance constraints
+	// Applies distance constraints
 	for (ParticleDistanceConstraint& constraint : distanceConstraints) {
 		constraint.applyConstraint();
 	}
-
-	// Apply angle constraints
-	for (ParticleAngleConstraint& constraint : angleConstraints) {
-		constraint.applyConstraint();
-	}
-}
-
-
-void Cloth::update() {
-
-	/*
-		First the global vertices need to be updated to be the same
-		as the particle's as there is not transform matrix.
-	*/
-	for (int i = 0; i < particles.size(); i++) {
-		globalVertices[i] = particles[i].position;
-	}
-
-	calculateMeshNormals();
 }

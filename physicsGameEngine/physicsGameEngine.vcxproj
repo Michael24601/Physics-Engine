@@ -158,6 +158,7 @@
     <ClCompile Include="anchoredSpringForce.cpp" />
     <ClCompile Include="anisotropicShader.cpp" />
     <ClCompile Include="anisotropicTextureShader.cpp" />
+    <ClCompile Include="blob.cpp" />
     <ClCompile Include="boundingSphere.cpp" />
     <ClCompile Include="cloth.cpp" />
     <ClCompile Include="collisionResolver.cpp" />
@@ -203,6 +204,7 @@
     <ClInclude Include="anisotropicShader.h" />
     <ClInclude Include="anisotropicTextureShader.h" />
     <ClInclude Include="ballJoint.h" />
+    <ClInclude Include="blob.h" />
     <ClInclude Include="BVHNode.h" />
     <ClInclude Include="boundingSphere.h" />
     <ClInclude Include="boundingVolumeHierarchy.h" />
@@ -224,6 +226,7 @@
     <ClInclude Include="fixedJoint.h" />
     <ClInclude Include="breakable.h" />
     <ClInclude Include="joint.h" />
+    <ClInclude Include="mesh.h" />
     <ClInclude Include="openglUtility.h" />
     <ClInclude Include="particleCollisionDetection.h" />
     <ClInclude Include="pyramid.h" />

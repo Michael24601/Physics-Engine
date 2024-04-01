@@ -95,8 +95,9 @@ void ParticleContact::resolveVelocity(real duration) {
 	Vector3D impulseVector = contactNormal * impulse;
 
 	// The impulse immediatly affects each particle based on their mass
-	particle[0]->velocity += impulseVector * particle[0]->inverseMass;
-	if (particle[1] != NULL) {
+	if(particle[0]->isAwake)
+		particle[0]->velocity += impulseVector * particle[0]->inverseMass;
+	if (particle[1] != NULL && particle[1]->isAwake) {
 		/*
 			Same formula, opposite direction, since the contact normal is
 			calculated relative to the first particle (object 1 to 2).
@@ -120,9 +121,10 @@ void ParticleContact::resolveInterpenetration(real duration) {
 				/ totalInverseMass);
 
 			// Then each particle is moved based on its mass
-			particle[0]->position += moveVector * particle[0]->inverseMass;
+			if(particle[0]->isAwake)
+				particle[0]->position += moveVector * particle[0]->inverseMass;
 
-			if (particle[1] != NULL) {
+			if (particle[1] != NULL && particle[0]->isAwake) {
 				/*
 					A minus sign is added as the contact normal is realtive
 					to the first object.

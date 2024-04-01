@@ -109,6 +109,10 @@ namespace pe {
             return projectionMatrix;
         }
 
+
+        glm::vec3 getPosition() const {
+            return cameraPosition;
+        }
 	};
 }
 

@@ -74,10 +74,15 @@
 #include "freeMovingCamera.h"
 #include "rotatingCamera.h"
 
+#include "particleCollisionDetection.h"
+#include "particleContactResolver.h"
+
+#include "blob.h"
+
 using namespace pe;
 using namespace std;
 
-#define SIM_2
+#define SIM_9
 
 #ifdef SIM_1
 
@@ -522,9 +527,9 @@ int main() {
     );
 
     sf::Clock clock;
-    real deltaT = 0.07;
+    real deltaT = 0.065;
 
-    int size = 22;
+    int size = 20;
     real strength = 0.5;
     real mass = 0.5;
     real damping = 0.5;
@@ -538,7 +543,7 @@ int main() {
 
     // The first row of particles is suspended
     for (int i = 0; i < size; i++) {
-        mesh.particles[i].setAwake(false);
+        mesh.particles[i]->setAwake(false);
     }
 
     ParticleGravity g(Vector3D(0, -10, 0));
@@ -580,7 +585,7 @@ int main() {
         while (numSteps--) {
 
             for (auto& particle : mesh.particles) {
-                g.updateForce(&particle, deltaT);
+                g.updateForce(particle, deltaT);
             }
 
             vector<ParticleContact> contacts;
@@ -595,30 +600,30 @@ int main() {
                     sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
                     sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);
                     Vector3D move;
-                    move.x = worldPos.x - mesh.particles[size * size / 2].position.x;
-                    move.y = worldPos.y - mesh.particles[size * size / 2].position.y;
-                    move.z = worldPos.x - mesh.particles[size * size / 2].position.z;
+                    move.x = worldPos.x - mesh.particles[size * size / 2]->position.x;
+                    move.y = worldPos.y - mesh.particles[size * size / 2]->position.y;
+                    move.z = worldPos.x - mesh.particles[size * size / 2]->position.z;
 
                     move *= mass;
                     ParticleGravity f(move);
 
                     for (int i = 0; i < size; i++) {
-                        f.updateForce(&mesh.particles[size + i * size - 1], deltaT);
+                        f.updateForce(mesh.particles[size + i * size - 1], deltaT);
                     }
                 }
                 else if (isButtonPressed[1]) {
                     sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
                     sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);
                     Vector3D move;
-                    move.x = worldPos.x - mesh.particles[size * size / 2].position.x;
-                    move.y = worldPos.y - mesh.particles[size * size / 2].position.y;
-                    move.z = -(worldPos.x + mesh.particles[size * size / 2].position.z);
+                    move.x = worldPos.x - mesh.particles[size * size / 2]->position.x;
+                    move.y = worldPos.y - mesh.particles[size * size / 2]->position.y;
+                    move.z = -(worldPos.x + mesh.particles[size * size / 2]->position.z);
 
                     move *= mass;
                     ParticleGravity f(move);
 
                     for (int i = 0; i < size; i++) {
-                        f.updateForce(&mesh.particles[i * size], deltaT);
+                        f.updateForce(mesh.particles[i * size], deltaT);
                     }
                 }
             }
@@ -626,8 +631,8 @@ int main() {
             mesh.applyConstraints();
 
             for (int i = 0; i < size * size; i++) {
-                if (mesh.particles[i].isAwake) {
-                    mesh.particles[i].verletIntegrate(deltaT);
+                if (mesh.particles[i]->isAwake) {
+                    mesh.particles[i]->verletIntegrate(deltaT);
                 }
             }
 
@@ -650,15 +655,13 @@ int main() {
         //shader.drawEdges(edgeData.vertices, identity, viewMatrix, 
           //   projectionMatrix, colorWhite);
 
-        FaceData data = getFaceData(mesh);
+        FaceData data = getTwoSidedFaceData(mesh);
         EdgeData edata = getEdgeData(mesh);
         FrameVectors fdata = getFrameVectors(mesh, 30);
 
         glm::vec3 lightPos[]{ glm::vec3(500, 0, 500), glm::vec3(-500, 0, -500) };
         glm::vec4 lightColor[]{ glm::vec4(1.0, 1.0, 1.0, 1.0),
             glm::vec4(1.0, 1.0, 1.0, 1.0) };
-        
-        
         
         lightShader.drawFaces(
             data.vertices,
@@ -671,7 +674,6 @@ int main() {
             lightPos,
             lightColor
         );
-        
         
         /*
         shader.drawEdges(
@@ -2078,6 +2080,533 @@ int main() {
             identity, viewMatrix, projectionMatrix, colorWhite
         );
         
+        window.display();
+    }
+
+    return 0;
+}
+
+#endif
+
+#ifdef SIM_8
+
+int main() {
+
+
+    Order defaultEngineOrder = Order::COUNTER_CLOCKWISE;
+
+    // Needed for 3D rendering
+    sf::ContextSettings settings;
+    settings.depthBits = 24;
+    settings.antialiasingLevel = 8;
+    sf::RenderWindow window(sf::VideoMode(800, 800), "Physics Simulation",
+        sf::Style::Default, settings);
+    window.setActive();
+
+    // Just in order to flip y axis
+    sf::View view = window.getDefaultView();
+    view.setSize(800, -800);
+    view.setCenter(0, 0);
+    window.setView(view);
+
+    GLenum err = glewInit();
+    if (GLEW_OK != err) {
+        // GLEW initialization failed
+        std::cerr << "Error: GLEW initialization failed: "
+            << glewGetErrorString(err) << std::endl;
+        return -1;
+    }
+
+    // Sets up OpenGL states (for 3D)
+    // Makes objects in front of others cover them
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
+
+    // Set to clockwise or counter-clockwise depending on face vertex order
+    // (Counter Clockwise for us).
+    if (defaultEngineOrder == Order::COUNTER_CLOCKWISE) {
+        glFrontFace(GL_CCW);
+    }
+    else {
+        glFrontFace(GL_CW);
+    }
+    // This only displays faces from one side, depending on the order of
+    // vertices, and what is considered front facce in the above option.
+    // Disable to show both faces (but lose on performance).
+    // Set to off in case our faces are both clockwise and counter clockwise
+    // (mixed), so we can't consisently render only one.
+    // Note that if we have opacity of face under 1 (opaque), it is definitely
+    // best not to render both sides (enable culling) so it appears correct.
+    glEnable(GL_CULL_FACE);
+
+    // Enables blending for transparency
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    glDepthFunc(GL_LEQUAL);
+
+    // Shaders
+    SolidColorShader shader;
+    DiffuseLightingShader lightShader;
+    DiffuseSpecularLightingShader phongShader;
+    CookTorranceShader cookShader;
+    TextureShader texShader;
+
+    GLuint texture = loadTexture("C:\\Users\\msaba\\OneDrive\\Desktop\\textureMaps\\blue.jpg");
+
+    RotatingCamera camera(
+        window,
+        glm::vec3(0.0f, 0.0f, 0.0f),
+        90.0,
+        0.1,
+        10000,
+        500,
+        0.02,
+        0.1
+    );
+
+    sf::Clock clock;
+    real deltaT = 0.07;
+
+    int size = 20;
+    real strength = 0.5;
+    real mass = 0.5;
+    real damping = 0.5;
+
+    Cloth mesh(
+        Vector3D(-200, 200, 0),
+        Vector3D(200, -200, 0),
+        size, size,
+        mass, damping, strength
+    );
+
+    SolidSphere c(100, 100, 20, 20, Vector3D(0, 0, 400), new RigidBody);
+
+    // The first row of particles is suspended
+    for (int i = 0; i < size; i++) {
+        mesh.particles[i]->setAwake(false);
+    }
+
+    ParticleGravity g(Vector3D(0, -10, 0));
+    RigidBodyGravity g2(Vector3D(0, -10, 0));
+
+    real rotationSpeed = 0.10;
+    real angle = PI / 2;
+    bool isButtonPressed[2]{ false , false };
+
+
+    while (window.isOpen()) {
+
+        sf::Event event;
+        while (window.pollEvent(event)) {
+            if (event.type == sf::Event::Closed) {
+                window.close();
+            }
+            else if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
+                isButtonPressed[0] = true;
+            }
+            else if (event.type == sf::Event::MouseButtonReleased
+                && event.mouseButton.button == sf::Mouse::Left) {
+                isButtonPressed[0] = false;
+            }
+            else if (sf::Mouse::isButtonPressed(sf::Mouse::Right)) {
+                isButtonPressed[1] = true;
+            }
+            else if (event.type == sf::Event::MouseButtonReleased
+                && event.mouseButton.button == sf::Mouse::Right) {
+                isButtonPressed[1] = false;
+            }
+
+            camera.update(event, deltaT);
+        }
+
+        int numSteps = 10;
+        real substep = deltaT / numSteps;
+
+        while (numSteps--) {
+            
+            c.body->calculateDerivedData();
+
+            g2.updateForce(c.body, substep);
+
+            for (auto& particle : mesh.particles) {
+                g.updateForce(particle, deltaT);
+            }
+
+            for (auto& force : mesh.forces) {
+                force.force1.updateForce(force.force2.otherParticle, deltaT);
+                force.force2.updateForce(force.force1.otherParticle, deltaT);
+            }
+
+            if (isButtonPressed[0] || isButtonPressed[1]) {
+
+                if (isButtonPressed[0]) {
+                    sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
+                    sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);
+                    Vector3D move;
+                    move.x = worldPos.x - mesh.particles[size * size / 2]->position.x;
+                    move.y = worldPos.y - mesh.particles[size * size / 2]->position.y;
+                    move.z = worldPos.x - mesh.particles[size * size / 2]->position.z;
+
+                    move *= mass;
+                    ParticleGravity f(move);
+
+                    for (int i = 0; i < size; i++) {
+                        f.updateForce(mesh.particles[size + i * size - 1], deltaT);
+                    }
+                }
+                else if (isButtonPressed[1]) {
+                    sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
+                    sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);
+                    Vector3D move;
+                    move.x = worldPos.x - mesh.particles[size * size / 2]->position.x;
+                    move.y = worldPos.y - mesh.particles[size * size / 2]->position.y;
+                    move.z = -(worldPos.x + mesh.particles[size * size / 2]->position.z);
+
+                    move *= mass;
+                    ParticleGravity f(move);
+
+                    for (int i = 0; i < size; i++) {
+                        f.updateForce(mesh.particles[i * size], deltaT);
+                    }
+                }
+            }
+
+            sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
+            sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);
+            c.body->position = {
+                c.body->position.x,
+                worldPos.y,
+                worldPos.x
+            };
+
+            
+            ParticleContactResolver r;
+            vector<ParticleContact> contacts;
+            for (Particle* particle : mesh.particles) {
+                generateContactParticleAndSphere(particle, c, contacts, 0.0);
+            }
+            r.setIterations(contacts.size() * 1);
+            if (contacts.size()) {
+                r.resolveContacts(contacts.data(), contacts.size(), substep);
+            }
+
+
+            mesh.applyConstraints();
+
+            for (int i = 0; i < size * size; i++) {
+                if (mesh.particles[i]->isAwake) {
+                    mesh.particles[i]->verletIntegrate(deltaT);
+                }
+            }
+
+            c.body->integrate(substep);
+            mesh.update();
+            c.update();
+        }
+
+        window.clear(sf::Color::Black);
+        // Clears the depth buffer (for 3D)
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        // Spring/Cable
+        // Note that the model is the identity since the cable is in world
+        // coordinates
+        glm::mat4 identity = glm::mat4(1.0);
+        glm::vec4 colorWhite(1.0, 1.0, 1.0, 1.0);
+        glm::vec4 colorRed(1.0, 0.2, 0.2, 1);
+        glm::vec4 colorBlue(0.2, 0.2, 1.0, 1);
+        glm::vec4 colorGreen(0.2, 1.0, 0.2, 1);
+
+        //shader.drawEdges(edgeData.vertices, identity, viewMatrix, 
+          //   projectionMatrix, colorWhite);
+
+        FaceData data = getTwoSidedFaceData(mesh);
+        EdgeData edata = getEdgeData(mesh);
+        FrameVectors fdata = getFrameVectors(mesh, 30);
+
+        glm::vec3 lightPos[]{ glm::vec3(500, 0, 500), glm::vec3(-500, 0, -500) };
+        glm::vec4 lightColor[]{ glm::vec4(1.0, 1.0, 1.0, 1.0),
+            glm::vec4(1.0, 1.0, 1.0, 1.0) };
+
+
+        lightShader.drawFaces(
+            data.vertices,
+            data.normals,
+            identity,
+            camera.getViewMatrix(),
+            camera.getProjectionMatrix(),
+            colorRed,
+            2,
+            lightPos,
+            lightColor
+        );
+
+
+        data = getFaceData(c);
+        cookShader.drawFaces(
+            data.vertices, data.normals,
+            identity, camera.getViewMatrix(),
+            camera.getProjectionMatrix(), colorBlue, 2, lightPos,
+            lightColor, camera.getPosition(), 0.1, 0.05
+        );
+
+        /*
+        shader.drawEdges(
+            edata.vertices,
+            identity,
+            camera.getViewMatrix(),
+            camera.getProjectionMatrix(),
+            colorWhite
+        );
+        */
+
+        window.display();
+    }
+
+    return 0;
+}
+
+#endif
+
+#ifdef SIM_9
+
+int main() {
+
+
+    Order defaultEngineOrder = Order::COUNTER_CLOCKWISE;
+
+    // Needed for 3D rendering
+    sf::ContextSettings settings;
+    settings.depthBits = 24;
+    settings.antialiasingLevel = 8;
+    sf::RenderWindow window(sf::VideoMode(800, 800), "Physics Simulation",
+        sf::Style::Default, settings);
+    window.setActive();
+
+    // Just in order to flip y axis
+    sf::View view = window.getDefaultView();
+    view.setSize(800, -800);
+    view.setCenter(0, 0);
+    window.setView(view);
+
+    GLenum err = glewInit();
+    if (GLEW_OK != err) {
+        // GLEW initialization failed
+        std::cerr << "Error: GLEW initialization failed: "
+            << glewGetErrorString(err) << std::endl;
+        return -1;
+    }
+
+    // Sets up OpenGL states (for 3D)
+    // Makes objects in front of others cover them
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
+
+    // Set to clockwise or counter-clockwise depending on face vertex order
+    // (Counter Clockwise for us).
+    if (defaultEngineOrder == Order::COUNTER_CLOCKWISE) {
+        glFrontFace(GL_CCW);
+    }
+    else {
+        glFrontFace(GL_CW);
+    }
+    // This only displays faces from one side, depending on the order of
+    // vertices, and what is considered front facce in the above option.
+    // Disable to show both faces (but lose on performance).
+    // Set to off in case our faces are both clockwise and counter clockwise
+    // (mixed), so we can't consisently render only one.
+    // Note that if we have opacity of face under 1 (opaque), it is definitely
+    // best not to render both sides (enable culling) so it appears correct.
+    glEnable(GL_CULL_FACE);
+
+    // Enables blending for transparency
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    glDepthFunc(GL_LEQUAL);
+
+    // Shaders
+    SolidColorShader shader;
+    DiffuseLightingShader lightShader;
+    DiffuseSpecularLightingShader phongShader;
+    CookTorranceShader cookShader;
+    TextureShader texShader;
+
+    GLuint texture = loadTexture("C:\\Users\\msaba\\OneDrive\\Desktop\\textureMaps\\blue.jpg");
+
+    RotatingCamera camera(
+        window,
+        glm::vec3(0.0f, 0.0f, 0.0f),
+        90.0,
+        0.1,
+        10000,
+        500,
+        0.02,
+        0.1
+    );
+
+    sf::Clock clock;
+    real deltaT = 0.065;
+
+    int size = 10;
+    real strength = 1;
+    real mass = 0.5;
+    real damping = 0.5;
+
+    Blob mesh(
+        Vector3D(0, 0, 0),
+        100,
+        size, size,
+        mass, damping, strength
+    );
+
+    // The first row of particles is suspended
+    for (int i = 0; i < size; i++) {
+        // mesh.particles[i]->setAwake(false);
+    }
+
+    ParticleGravity g(Vector3D(0, -10, 0));
+
+    real rotationSpeed = 0.10;
+    real angle = PI / 2;
+    bool isButtonPressed[2]{ false , false };
+
+
+    while (window.isOpen()) {
+
+        sf::Event event;
+        while (window.pollEvent(event)) {
+            if (event.type == sf::Event::Closed) {
+                window.close();
+            }
+            else if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
+                isButtonPressed[0] = true;
+            }
+            else if (event.type == sf::Event::MouseButtonReleased
+                && event.mouseButton.button == sf::Mouse::Left) {
+                isButtonPressed[0] = false;
+            }
+            else if (sf::Mouse::isButtonPressed(sf::Mouse::Right)) {
+                isButtonPressed[1] = true;
+            }
+            else if (event.type == sf::Event::MouseButtonReleased
+                && event.mouseButton.button == sf::Mouse::Right) {
+                isButtonPressed[1] = false;
+            }
+
+            camera.update(event, deltaT);
+        }
+
+        int numSteps = 20;
+        real substep = deltaT / numSteps;
+
+        while (numSteps--) {
+
+            for (auto& particle : mesh.particles) {
+                g.updateForce(particle, deltaT);
+            }
+
+            vector<ParticleContact> contacts;
+            for (auto& force : mesh.forces) {
+                //force.force1.updateForce(force.force2.otherParticle, deltaT);
+                //force.force2.updateForce(force.force1.otherParticle, deltaT);
+            }
+
+            if (isButtonPressed[0] || isButtonPressed[1]) {
+
+                if (isButtonPressed[0]) {
+                    sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
+                    sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);
+                    Vector3D move;
+                    move.x = worldPos.x - mesh.particles[size * size / 2]->position.x;
+                    move.y = worldPos.y - mesh.particles[size * size / 2]->position.y;
+                    move.z = worldPos.x - mesh.particles[size * size / 2]->position.z;
+
+                    move *= mass;
+                    ParticleGravity f(move);
+
+                    for (int i = 0; i < mesh.particles.size(); i++) {
+                        f.updateForce(mesh.particles[i], deltaT);
+                    }
+                }
+                else if (isButtonPressed[1]) {
+                    sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
+                    sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);
+                    Vector3D move;
+                    move.x = worldPos.x - mesh.particles[size * size / 2]->position.x;
+                    move.y = worldPos.y - mesh.particles[size * size / 2]->position.y;
+                    move.z = -(worldPos.x + mesh.particles[size * size / 2]->position.z);
+
+                    move *= mass;
+                    ParticleGravity f(move);
+
+                    for (int i = 0; i < size; i++) {
+                        f.updateForce(mesh.particles[i * size], deltaT);
+                    }
+                }
+            }
+
+            //mesh.applyConstraints();
+
+            for (int i = 0; i < size * size; i++) {
+                if (mesh.particles[i]->isAwake) {
+                    mesh.particles[i]->verletIntegrate(deltaT);
+                }
+            }
+
+            mesh.update();
+        }
+
+        window.clear(sf::Color::Black);
+        // Clears the depth buffer (for 3D)
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        // Spring/Cable
+        // Note that the model is the identity since the cable is in world
+        // coordinates
+        glm::mat4 identity = glm::mat4(1.0);
+        glm::vec4 colorWhite(1.0, 1.0, 1.0, 1.0);
+        glm::vec4 colorRed(1.0, 0.2, 0.2, 1);
+        glm::vec4 colorBlue(0.2, 0.2, 1.0, 1);
+        glm::vec4 colorGreen(0.2, 1.0, 0.2, 1);
+
+        //shader.drawEdges(edgeData.vertices, identity, viewMatrix, 
+          //   projectionMatrix, colorWhite);
+
+        FaceData data = getTwoSidedFaceData(mesh);
+        EdgeData edata = getEdgeData(mesh);
+        FrameVectors fdata = getFrameVectors(mesh, 30);
+
+        glm::vec3 lightPos[]{ glm::vec3(500, 0, 500), glm::vec3(-500, 0, -500) };
+        glm::vec4 lightColor[]{ glm::vec4(1.0, 1.0, 1.0, 1.0),
+            glm::vec4(1.0, 1.0, 1.0, 1.0) };
+
+
+        /*
+        lightShader.drawFaces(
+            data.vertices,
+            data.normals,
+            identity,
+            camera.getViewMatrix(),
+            camera.getProjectionMatrix(),
+            colorRed,
+            2,
+            lightPos,
+            lightColor
+        );
+        */
+
+        shader.drawEdges(
+            edata.vertices,
+            identity,
+            camera.getViewMatrix(),
+            camera.getProjectionMatrix(),
+            colorWhite
+        );
+        
+
+
         window.display();
     }
 

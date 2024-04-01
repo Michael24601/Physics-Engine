@@ -21,12 +21,11 @@ namespace pe {
             Vector3D delta = particle2->position - particle1->position;
             real currentDistance = delta.magnitude();
             real offset = (currentDistance - restLength) / (2 * currentDistance);
-
             if (particle1->isAwake) {
-                particle1->position += delta * offset;
+                particle1->position += delta * offset * 0;
             }
             if (particle2->isAwake) {
-                particle2->position += delta * -offset;
+                particle2->position += delta * -offset * 0;
             }
         }
     };

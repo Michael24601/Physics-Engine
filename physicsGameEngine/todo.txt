@@ -265,3 +265,11 @@ the sphere is the same as the polyhedron.
 
 Implement the camera using our core math library. That means adding
 new functions to the matrix and vector classes.
+
+Make particles pointer type and include a destructor (DONE).
+
+Change particle awake to fixed.
+
+Make sure the generateParticleGrid function can work for a cloth that
+is vertical, horizontal, or along the z axis, not just when it is
+vertical.

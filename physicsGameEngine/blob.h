@@ -1,6 +1,6 @@
 
-#ifndef CLOTH_H
-#define CLOTH_H
+#ifndef BLOB_H
+#define BLOB_H
 
 #include "mesh.h"
 #include "particleBungeeForce.h"
@@ -11,7 +11,7 @@
 
 namespace pe {
 
-	class Cloth: public Mesh {
+	class Blob : public Mesh {
 
 	private:
 
@@ -24,10 +24,10 @@ namespace pe {
 			particles per column and row.
 		*/
 		static std::vector<Vector3D> returnParticleGrid(
-			int columnSize,
 			int rowSize,
-			Vector3D topLeft,
-			Vector3D bottomRight
+			int columnSize,
+			const Vector3D& centre,
+			real radius
 		);
 
 
@@ -70,21 +70,22 @@ namespace pe {
 		};
 
 		std::vector<SpringForce> forces;
-		real ropeStrength;
+		real springStrength;
+		real radius;
 
 		/*
 			If the mesh needs to be connected with forces like spring
 			forces, or cables, or rods, this needs to be initialized
 			in the constructor of the class extending this one.
 		*/
-		Cloth(
-			Vector3D topLeft,
-			Vector3D bottomRight,
+		Blob(
+			Vector3D position,
+			real radius,
 			int rowSize,
 			int columnSize,
 			real mass,
 			real damping,
-			real ropeStrength
+			real springStrength
 		);
 
 

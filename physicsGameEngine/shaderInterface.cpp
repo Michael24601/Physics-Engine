@@ -199,7 +199,7 @@ FaceData pe::getUniformFaceData(const Polyhedron& polyhedron) {
 }
 
 
-EdgeData pe::getEdgeData(const Cloth& mesh) {
+EdgeData pe::getEdgeData(const Mesh& mesh) {
 	EdgeData data;
 	for (Edge* edge : mesh.edges) {
 		getEdgeData(edge, &data);
@@ -208,7 +208,7 @@ EdgeData pe::getEdgeData(const Cloth& mesh) {
 }
 
 FrameVectors pe::getUniformFrameVectors(
-	const Cloth& mesh,
+	const Mesh& mesh,
 	real length
 ) {
 	FrameVectors data;
@@ -219,7 +219,7 @@ FrameVectors pe::getUniformFrameVectors(
 }
 
 FrameVectors pe::getFrameVectors(
-	const Cloth& mesh,
+	const Mesh& mesh,
 	real length
 ) {
 	FrameVectors data;
@@ -276,7 +276,7 @@ EdgeData pe::getCollisionBoxData(const Polyhedron& polyhedron) {
 	return data;
 }
 
-FaceData pe::getFaceData(const Cloth& mesh) {
+FaceData pe::getFaceData(const Mesh& mesh) {
 	FaceData data;
 	for (Face* face : mesh.faces) {
 		getFaceData(face, &data);
@@ -284,7 +284,34 @@ FaceData pe::getFaceData(const Cloth& mesh) {
 	return data;
 }
 
-FaceData pe::getUniformFaceData(const Cloth& mesh) {
+FaceData pe::getTwoSidedFaceData(const Mesh& mesh) {
+
+	FaceData data;
+	for (Face* face : mesh.faces) {
+		getFaceData(face, &data);
+	}
+
+	int size = data.vertices.size();
+	for (int i = 0; i < size; i++) {
+		/*
+			Pushes vertices in reverse order to get clockwise order,
+			which corresponds to the reverse face.
+		*/
+		data.vertices.push_back(data.vertices[size - i - 1]);
+		/*
+			Same for the other elements, but normals tangents and
+			bitangents are also inverted.
+		*/
+		data.normals.push_back(-data.normals[size - i - 1]);
+		data.tangents.push_back(-data.tangents[size - i - 1]);
+		data.bitangents.push_back(-data.bitangents[size - i - 1]);
+		data.uvCoordinates.push_back(data.uvCoordinates[size - i - 1]);
+	}
+
+	return data;
+}
+
+FaceData pe::getUniformFaceData(const Mesh& mesh) {
 	FaceData data;
 	for (Face* face : mesh.faces) {
 		getUniformFaceData(face, &data);
