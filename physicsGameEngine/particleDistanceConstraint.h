@@ -22,10 +22,10 @@ namespace pe {
             real currentDistance = delta.magnitude();
             real offset = (currentDistance - restLength) / (2 * currentDistance);
             if (particle1->isAwake) {
-                particle1->position += delta * offset * 0;
+                particle1->position += delta * offset;
             }
             if (particle2->isAwake) {
-                particle2->position += delta * -offset * 0;
+                particle2->position += delta * -offset;
             }
         }
     };

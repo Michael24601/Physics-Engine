@@ -41,37 +41,22 @@ namespace pe {
 			const std::vector<Vector3D>& vertices,
 			Vector3D& halfsize,
 			Vector3D& offset
-		) {
-			if (vertices.empty()) {
-				return;
-			}
+		);
 
-			// Initialize min and max coordinates with the first vertex
-			Vector3D minCoord = vertices[0];
-			Vector3D maxCoord = vertices[0];
 
-			// Iterate through all vertices to find the minimum and maximum coordinates
-			for (const Vector3D& vertex : vertices) {
-				minCoord.x = std::min(minCoord.x, vertex.x);
-				minCoord.y = std::min(minCoord.y, vertex.y);
-				minCoord.z = std::min(minCoord.z, vertex.z);
+		/*
+			This works in the same way as a the bounding box function,
+			where we find the smallest sphere that fully contains the
+			polyhedron, even if it means the centre of the sphere is not
+			the same as the centre of gravity (which means we will have an
+			offset). 
+		*/
+		static void calculateBoundingSphere(
+			const std::vector<Vector3D>& points,
+			real& radius,
+			Vector3D& offset
+		);
 
-				maxCoord.x = std::max(maxCoord.x, vertex.x);
-				maxCoord.y = std::max(maxCoord.y, vertex.y);
-				maxCoord.z = std::max(maxCoord.z, vertex.z);
-			}
-
-			// Calculate halfsize by taking half of the distance between min and max coordinates
-			halfsize = (maxCoord - minCoord) * 0.5;
-
-			/*
-				The bounding box centre may not be the same as the centre of gravity
-				of the shape; so we need an offset to the centre of the box.
-				The offset will be equal to offset - centre of gravity = offset - 0
-				as the centre of gravity is 0 in local coordinates.
-			*/
-			offset = (maxCoord + minCoord) * 0.5;
-		}
 
 	public:
 
@@ -85,8 +70,12 @@ namespace pe {
 		Vector3D furthestPoint;
 
 		// Bounding box information
-		Vector3D halfsize;
-		Vector3D offset;
+		Vector3D boundingBoxHalfsize;
+		Vector3D boundingBoxOffset;
+
+		// Bounding sphere information
+		real boundingSphereRadius;
+		Vector3D boundingSphereOffset;
 
 		Polyhedron(
 			real mass,
@@ -94,67 +83,20 @@ namespace pe {
 			const Matrix3x3& inertiaTensor,
 			const std::vector<Vector3D>& localVertices,
 			RigidBody* body
-		) : body{ body },
-			localVertices{ localVertices },
-			furthestPoint(findFurthestPoint())
-		{
-			body->setMass(mass);
-			body->position = position;
-			body->setInertiaTensor(inertiaTensor);
-
-			globalVertices = localVertices;
-
-			body->angularDamping = 1;
-			body->linearDamping = 1;
-			body->calculateDerivedData();
-
-			calculateBoundingBox(localVertices, halfsize, offset);
-		}
+		);
 
 
-		void update() {
-			globalVertices.clear();
-			for (const Vector3D& vertex : localVertices) {
-				globalVertices.push_back(
-					body->transformMatrix.transform(vertex)
-				);
-			}
-
-			/*
-				Because we use pointers to the vectors of vertices in the
-				Polyhedron class in the Faces and Edges, we don't need
-				to update them. However, faces also have normals and
-				centroids which need to be updated here.
-			*/
-			for (Face* face : faces) {
-				face->update(body->transformMatrix);
-			}
-		}
+		/*
+			Updates the global vertices and normals and centroid etc...
+			using the transform matrix.
+		*/
+		void update();
 
 
-		Vector3D findFurthestPoint() const {
-
-			Vector3D furthestPoint = *std::max_element(
-				localVertices.begin(),
-				localVertices.end(),
-				[](const Vector3D& first, const Vector3D& second) -> bool {
-					return first.magnitudeSquared()
-						< second.magnitudeSquared();
-				}
-			);
-			return furthestPoint;
-		}
+		Vector3D findFurthestPoint() const;
 
 		
-		~Polyhedron() {
-			delete body;
-			for (int i = 0; i < faces.size(); i++) {
-				delete faces[i];
-			}
-			for (int i = 0; i < edges.size(); i++) {
-				delete edges[i];
-			}
-		}
+		~Polyhedron();
 		
 
 		/*
@@ -170,9 +112,7 @@ namespace pe {
 		*/
 		static Vector3D calculateCentreOfGravity(
 			const std::vector<Vector3D>& vertices
-		) {
-
-		}
+		);
 
 
 		/*
@@ -184,9 +124,7 @@ namespace pe {
 			of instantiating a polyhedron object without having to have
 			a suitable subclass.
 		*/
-		void setFaces(std::vector<Face*> faces) {
-			this->faces = faces;
-		}
+		void setFaces(std::vector<Face*> faces);
 
 		/*
 			We can usually get the edges from the faces, without having
@@ -196,24 +134,16 @@ namespace pe {
 			So for simple shapes, where we can define unique edges,
 			we use this function.
 		*/
-		void setEdges(std::vector<Edge*> edges) {
-			this->edges = edges;
-		}
+		void setEdges(std::vector<Edge*> edges);
 
 
-		Vector3D getAxis(int index) const {
-			return body->transformMatrix.getColumnVector(index);
-		}
+		Vector3D getAxis(int index) const;
 
 
-		Vector3D getCentre() const {
-			return body->position;
-		}
+		Vector3D getCentre() const;
 
 
-		Vector3D getFaceNormal(int index) const {
-			return faces[index]->getNormal();
-		}
+		Vector3D getFaceNormal(int index) const;
 
 
 		/*
@@ -221,22 +151,7 @@ namespace pe {
 			algorithm; it finds the furthest point from a given direction
 			in the Polyhedron.
 		*/
-		Vector3D support(const Vector3D& direction) const {
-			// Initialize with the first vertex
-			Vector3D furthestVertex = globalVertices[0];
-			real maxDot = furthestVertex.scalarProduct(direction);
-
-			// Iterate through all vertices to find the one farthest in the given direction
-			for (size_t i = 1; i < globalVertices.size(); ++i) {
-				real dotProduct = globalVertices[i].scalarProduct(direction);
-				if (dotProduct > maxDot) {
-					maxDot = dotProduct;
-					furthestVertex = globalVertices[i];
-				}
-			}
-
-			return furthestVertex;
-		}
+		Vector3D support(const Vector3D& direction) const;
 
 
 		/*
@@ -246,20 +161,34 @@ namespace pe {
 			The same applies for collision spheres, which will have
 			the radius as the magnitude of the halfsize.
 		*/
-		Vector3D getHalfsize() const {
-			return halfsize;
-		}
+		Vector3D getHalfsize() const;
 
 
 		// Returns the offset of the collision box
-		Vector3D getOffset() const {
-			return offset;
-		}
+		Vector3D getOffset() const;
 
-		Vector3D getFurthestPoint() const {
-			return furthestPoint;
-		}
+
+		Vector3D getFurthestPoint() const;
 	};
+
+
+	/*
+		Checks if a point is inside the polyhedron using the Monte-Carlo
+		algorithm;
+		we pick a random direction from the point and trace a ray to
+		infinity.
+		It may intersect th polyhedron surface several times, but if it
+		is inside the polyhedron, the number of times will be odd,
+		and if it is outside, it will be even. This is because everytime
+		we intersect the surface, we go from outside to inside, or
+		inside to outside. We always end up outside since the ray goes
+		to infinity, so if we started inside, we intersect it an odd number
+		of times.
+	*/
+	bool isPointInsidePolyhedron(
+		const Polyhedron& polyhedron,
+		const Vector3D& point
+	);
 }
 
 #endif

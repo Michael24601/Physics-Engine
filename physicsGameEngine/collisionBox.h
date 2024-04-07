@@ -46,7 +46,7 @@ namespace pe {
             */
             transformMatrix = polyhedron.body->transformMatrix;
             /*
-                However, note that that we have to trasnform the offset first
+                However, note that that we have to transform the offset first
                 in order to rotate it. So we transform the offset by the
                 rotation part of the transformation matrix of the polyhedron.
             */
@@ -59,7 +59,6 @@ namespace pe {
         Matrix3x4 transformMatrix;
         Vector3D halfSize;
         Vector3D offset;
-        // We also need to keep a copy of the body
         RigidBody* body;
 
         Vector3D getAxis(int index) const {
@@ -77,22 +76,32 @@ namespace pe {
         Body object, and by extension the transform matrix).
         Only the SolidSphere object will perfectly fit in a sphere however.
    */
-    struct Sphere {
+    struct Ball {
 
         // No arg constructor
-        Sphere(RigidBody* body, real radius) :
+        Ball (RigidBody* body, real radius) :
             body{ body }, radius{ radius } {}
 
         /*
-            Constructs a box from a rectangular prism(They share a shape
-            so it is easy).
+            Constructs a sphere from a general polyhedron.
         */
-        Sphere(const SolidSphere& sphere) {
-            body = sphere.body;
-            radius = sphere.radius;
+        Ball(const Polyhedron& polyhedron) {
+            body = polyhedron.body;
+            radius = polyhedron.boundingSphereRadius;
+            transformMatrix = polyhedron.body->transformMatrix;
+
+            /*
+                We use the same method here that we used 
+            */
+            offset = transformMatrix.getRotation().transform(offset);
+            transformMatrix.setTranslation(
+                transformMatrix.getTranslation() + offset
+            );
         }
 
+        Matrix3x4 transformMatrix;
         RigidBody* body;
+        Vector3D offset;
         real radius;
 
         Vector3D getAxis(int index) const {

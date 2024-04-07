@@ -225,6 +225,12 @@
     <ClCompile Include="openglUtility.cpp">
       <Filter>Source Files\OpenglGraphics</Filter>
     </ClCompile>
+    <ClCompile Include="polyhedron.cpp">
+      <Filter>Source Files\Primitive</Filter>
+    </ClCompile>
+    <ClCompile Include="newAnisotropicShader.cpp">
+      <Filter>Source Files\OpenglGraphics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="accuracy.h">
@@ -494,6 +500,9 @@
     <ClInclude Include="diffuseLightingTextureVertexShader.glsl">
       <Filter>Header Files\Shaders\Diffuse Lighting Shader</Filter>
     </ClInclude>
+    <ClInclude Include="newAnisotropicShader.h">
+      <Filter>Header Files\OpenglGraphics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="todo.txt" />
@@ -516,6 +525,9 @@
     </None>
     <None Include="solidColorFragmentShader.glsl">
       <Filter>Header Files\Shaders\Solid Color Shader</Filter>
+    </None>
+    <None Include="newAnisotropicFragmentShader.glsl">
+      <Filter>Header Files\Shaders\Anisotropic Shader</Filter>
     </None>
   </ItemGroup>
 </Project>

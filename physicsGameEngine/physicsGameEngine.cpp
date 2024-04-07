@@ -15,6 +15,7 @@
 
 #include <iostream>
 #include <vector>
+#include <random>
 
 #include "particle.h"
 #include "particleSpringForce.h"
@@ -79,10 +80,12 @@
 
 #include "blob.h"
 
+#include "newAnisotropicShader.h"
+
 using namespace pe;
 using namespace std;
 
-#define SIM_1
+#define SIM_7
 
 #ifdef SIM_1
 
@@ -1782,77 +1785,61 @@ int main() {
             s.body->setAwake(true);
         }
 
-        auto renderScene = [
-            prisms,
-                &window,
-                &shader,
-                &cookShader,
-                ground,
-                s,
-                b
-        ](
-            const glm::vec3& cameraPosition,
-            const glm::mat4& viewMatrix,
-            const glm::mat4& projectionMatrix
-        )->void {
-
-            glm::mat4 identity = glm::mat4(1.0);
-            glm::vec4 colorWhite(1.0, 1.0, 1.0, 1.0);
-            glm::vec4 colorRed(0.8, 0.1, 0.1, 1.0);
-            glm::vec4 colorBlue(0.5, 0.7, 1.0, 1.0);
-            glm::vec4 colorGreen(0.3, 0.9, 0.3, 1.0);
-            glm::vec4 colorYellow(0.9, 0.9, 0.5, 1.0);
-            glm::vec4 colorPurple(0.4, 0.1, 0.8, 1.0);
-            glm::vec4 colorMagenta(0.9, 0.3, 0.6, 1.0);
-            glm::vec4 colorOrange(0.9, 0.6, 0.2, 1.0);
-            glm::vec4 colorDarkBlue(0.1, 0.1, 0.4, 1.0);
-            glm::vec4 colorGrey(0.4, 0.4, 0.4, 1.0);
-            glm::vec4 colorBlack(0.05, 0.05, 0.05, 1.0);
-
-            // Shape
-            glm::vec3 lightPos[]{
-                glm::vec3(200.0f, 300.0f, 0.0f),
-            };
-            glm::vec4 lightColors[]{
-                glm::vec4(1.0f, 1.0f, 1.0f, 0.6f),
-            };
-
-            // Data
-            FaceData data;
-            for (int i = 0; i < prisms.size(); i++) {
-                data = getFaceData(*prisms[i]);
-                cookShader.drawFaces(data.vertices, data.normals,
-                    identity, viewMatrix, projectionMatrix, colorPurple, 1, lightPos,
-                    lightColors, cameraPosition, 0.1, 0.05
-                );
-            }
-
-            data = getFaceData(ground);
-            cookShader.drawFaces(data.vertices, data.normals,
-                identity, viewMatrix, projectionMatrix, colorWhite, 1, lightPos,
-                lightColors, cameraPosition, 0.1, 0.05
-            );
-
-            data = getFaceData(s);
-            cookShader.drawFaces(data.vertices, data.normals,
-                identity, viewMatrix, projectionMatrix, colorBlack, 1, lightPos,
-                lightColors, cameraPosition, 0.1, 0.05
-            );
-
-            EdgeData ed;
-            ed.vertices.push_back(convertToGLM(b.position));
-            ed.vertices.push_back(convertToGLM(s.globalVertices[0]));
-            shader.drawEdges(ed.vertices, identity, viewMatrix, projectionMatrix,
-                colorWhite
-            );
-
-        };
-
         window.clear(sf::Color::Color(50, 50, 50));
         // Clears the depth buffer (for 3D)
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        renderScene(cameraPosition, viewMatrix, projectionMatrix);
+
+
+        glm::mat4 identity = glm::mat4(1.0);
+        glm::vec4 colorWhite(1.0, 1.0, 1.0, 1.0);
+        glm::vec4 colorRed(0.8, 0.1, 0.1, 1.0);
+        glm::vec4 colorBlue(0.5, 0.7, 1.0, 1.0);
+        glm::vec4 colorGreen(0.3, 0.9, 0.3, 1.0);
+        glm::vec4 colorYellow(0.9, 0.9, 0.5, 1.0);
+        glm::vec4 colorPurple(0.4, 0.1, 0.8, 1.0);
+        glm::vec4 colorMagenta(0.9, 0.3, 0.6, 1.0);
+        glm::vec4 colorOrange(0.9, 0.6, 0.2, 1.0);
+        glm::vec4 colorDarkBlue(0.1, 0.1, 0.4, 1.0);
+        glm::vec4 colorGrey(0.4, 0.4, 0.4, 1.0);
+        glm::vec4 colorBlack(0.05, 0.05, 0.05, 1.0);
+
+        // Shape
+        glm::vec3 lightPos[]{
+            glm::vec3(200.0f, 300.0f, 0.0f),
+        };
+        glm::vec4 lightColors[]{
+            glm::vec4(1.0f, 1.0f, 1.0f, 0.6f),
+        };
+
+        // Data
+        FaceData data;
+        for (int i = 0; i < prisms.size(); i++) {
+            data = getFaceData(*prisms[i]);
+            cookShader.drawFaces(data.vertices, data.normals,
+                identity, viewMatrix, projectionMatrix, colorPurple, 1, lightPos,
+                lightColors, cameraPosition, 0.1, 0.05
+            );
+        }
+
+        data = getFaceData(ground);
+        cookShader.drawFaces(data.vertices, data.normals,
+            identity, viewMatrix, projectionMatrix, colorWhite, 1, lightPos,
+            lightColors, cameraPosition, 0.1, 0.05
+        );
+
+        data = getUniformFaceData(s);
+        cookShader.drawFaces(data.vertices, data.normals,
+            identity, viewMatrix, projectionMatrix, colorRed, 1, lightPos,
+            lightColors, cameraPosition, 0.1, 0.05
+        );
+
+        EdgeData ed;
+        ed.vertices.push_back(convertToGLM(b.position));
+        ed.vertices.push_back(convertToGLM(s.globalVertices[0]));
+        shader.drawEdges(ed.vertices, identity, viewMatrix, projectionMatrix,
+            colorWhite
+        );
 
         window.display();
     }
@@ -1922,10 +1909,8 @@ int main() {
     // Shape
     glm::vec3 lightPos[]{
         glm::vec3(200.0f, 300.0f, 0.0f),
-        glm::vec3(200.0f, 900.0f, 0.0f),
     };
     glm::vec4 lightColors[]{
-        glm::vec4(1.0f, 1.0f, 1.0f, 0.6f),
         glm::vec4(1.0f, 1.0f, 1.0f, 0.6f),
     };
 
@@ -1950,6 +1935,7 @@ int main() {
     TextureShader texShader;
     CookTorranceTextureShader cookTexShader;
     AnisotropicTextureShader aniTexShader;
+    NewAnisotropicShader newAniShader;
 
     // View matrix, used for positioning and angling the camera
     // Camera's position in world coordinates
@@ -1988,7 +1974,7 @@ int main() {
     GLuint texture = loadTexture("C:\\Users\\msaba\\OneDrive\\Desktop\\textureMaps\\stone.jpg");
 
     std::string filename = "C:\\Users\\msaba\\OneDrive\\Desktop\\textureMaps\\moai.obj";
-    Polyhedron p = ReturnPrimitive(filename, 10, Vector3D(0, 0, 0), new RigidBody, 2); 
+    SolidSphere p(200, 100, 25, 25, Vector3D::ZERO, new RigidBody());
     p.body->orientation = Quaternion::rotatedByAxisAngle(Vector3D(0, 0, 1), PI/2.0);
 
 
@@ -2064,21 +2050,39 @@ int main() {
         // Clears the depth buffer (for 3D)
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+
         
         FaceData data;
         data = getFaceData(p);
-        cookTexShader.drawFaces(data.vertices, data.normals,
-            data.uvCoordinates,
-            identity, viewMatrix, projectionMatrix, texture, 2, lightPos,
-            lightColors, cameraPosition, 0.1, 0.05
+        aniShader.drawFaces(data.vertices, data.normals,
+            data.tangents, data.bitangents,
+            identity, viewMatrix, projectionMatrix,
+            colorGrey,
+            1,
+            lightPos,
+            lightColors,
+            cameraPosition,
+            0.25, 0.15
         );
+
+        /*
+        cookShader.drawFaces(data.vertices, data.normals,
+            identity, viewMatrix, projectionMatrix,
+            colorGrey,
+            1,
+            lightPos,
+            lightColors,
+            cameraPosition,
+            0.2, 0.05
+        );
+        */
         
         
-        EdgeData edata;
-        edata = getCollisionBoxData(p);
-        shader.drawEdges(edata.vertices,
-            identity, viewMatrix, projectionMatrix, colorWhite
-        );
+       EdgeData edata;
+       FrameVectors vh = getUniformFrameVectors(p, 10);
+      // shader.drawEdges(vh.normals,
+      //     identity, viewMatrix, projectionMatrix, colorWhite
+      // );
         
         window.display();
     }
@@ -2329,20 +2333,6 @@ int main() {
         glm::vec4 lightColor[]{ glm::vec4(1.0, 1.0, 1.0, 1.0),
             glm::vec4(1.0, 1.0, 1.0, 1.0) };
 
-
-        lightShader.drawFaces(
-            data.vertices,
-            data.normals,
-            identity,
-            camera.getViewMatrix(),
-            camera.getProjectionMatrix(),
-            colorRed,
-            2,
-            lightPos,
-            lightColor
-        );
-
-
         data = getFaceData(c);
         cookShader.drawFaces(
             data.vertices, data.normals,
@@ -2351,7 +2341,7 @@ int main() {
             lightColor, camera.getPosition(), 0.1, 0.05
         );
 
-        /*
+        
         shader.drawEdges(
             edata.vertices,
             identity,
@@ -2359,7 +2349,7 @@ int main() {
             camera.getProjectionMatrix(),
             colorWhite
         );
-        */
+        
 
         window.display();
     }
@@ -2449,8 +2439,8 @@ int main() {
     sf::Clock clock;
     real deltaT = 0.065;
 
-    int size = 5;
-    real strength = 0.01;
+    int size = 10;
+    real strength = 0.5;
     real mass = 0.5;
     real damping = 0.5;
 
@@ -2504,7 +2494,7 @@ int main() {
         while (numSteps--) {
 
             for (auto& particle : mesh.particles) {
-                g.updateForce(particle, deltaT);
+                // g.updateForce(particle, deltaT);
             }
 
             vector<ParticleContact> contacts;
@@ -2522,7 +2512,7 @@ int main() {
                 move.z = worldPos.x - mesh.particles[size * size / 2]->position.z;
 
                 if (isButtonPressed[0]) {
-                    for (int i = 0; i < mesh.particles.size(); i++) {
+                    for (int i = 0; i < mesh.particles.size()/2; i++) {
                         mesh.particles[i]->position += move;
                     }
                 }
@@ -2594,6 +2584,41 @@ int main() {
         window.display();
     }
 
+    return 0;
+}
+
+#endif
+
+#ifdef SIM_10
+
+int main() {
+
+    std::random_device rd;
+    std::default_random_engine eng(rd());
+    std::uniform_real_distribution<double> distr(-100.0, 100.0);
+
+    SolidSphere s(100, 1, 25, 25, Vector3D(0, 0, 0), new RigidBody());
+
+    int n = 1000000;
+    int in = 0;
+    int in2 = 0;
+    for (int i = 0; i < n; i++) {
+        Vector3D point(
+            distr(eng),
+            distr(eng),
+            distr(eng)
+        );
+
+        if (isPointInsidePolyhedron(s, point)) {
+            in++;
+        }
+
+
+        if (point.x * point.x + point.y * point.y + point.z * point.z <= 10000) {
+            in2++;
+        }
+    }
+    std::cout << in << " " << in2;
     return 0;
 }
 

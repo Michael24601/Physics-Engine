@@ -16,8 +16,8 @@ void AnisotropicShader::drawFaces(
     glm::vec3* lightSourcesPosition,
     glm::vec4* lightSourcesColor,
     const glm::vec3& viewPosition,
-    float roughness,
-    float fresnel
+    real roughness,
+    real fresnel
 ) {
     if (activeLightSources > MAXIMUM_NUMBER_OF_LIGHT_SOURCES) {
         std::cerr << "At most, " << MAXIMUM_NUMBER_OF_LIGHT_SOURCES

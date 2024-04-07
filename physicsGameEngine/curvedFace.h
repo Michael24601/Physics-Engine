@@ -276,6 +276,25 @@ namespace pe {
 			}
 		}
 
+
+		void setTextureCoordinates(
+			std::vector<Vector2D>& textureCoordinates
+		) override {
+			this->textureCoordinates = textureCoordinates;
+
+			/*
+				We then need to recalculate the tangentand bitangents which depend
+				on the texture coordinates.
+			*/
+			localTangent = Face::calculateTangent(Basis::LOCAL);
+			localBitangent = Face::calculateBitangent(Basis::LOCAL);
+
+			for (int i = 0; i < getVertexNumber(); i++) {
+				localVertexTangents[i] = calculateTangent(i, Basis::LOCAL);
+				localVertexBitangents[i] = calculateBitangent(i, Basis::LOCAL);
+			}
+		}
+
 	};
 }
 

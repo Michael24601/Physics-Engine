@@ -253,7 +253,7 @@ namespace pe {
 		virtual void update(const Matrix3x4& transformMatrix);
 
 
-		void setTextureCoordinates(
+		virtual void setTextureCoordinates(
 			std::vector<Vector2D>& textureCoordinates
 		);
 

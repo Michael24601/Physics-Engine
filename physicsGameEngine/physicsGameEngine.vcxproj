@@ -171,6 +171,7 @@
     <ClCompile Include="diffuseSpecularLightingShader.cpp" />
     <ClCompile Include="drawingUtil.cpp" />
     <ClCompile Include="face.cpp" />
+    <ClCompile Include="newAnisotropicShader.cpp" />
     <ClCompile Include="openglUtility.cpp" />
     <ClCompile Include="particle.cpp" />
     <ClCompile Include="particleBungeeForce.cpp" />
@@ -187,6 +188,7 @@
     <ClCompile Include="particleWorld.cpp" />
     <ClCompile Include="physicsGameEngine.cpp" />
     <ClCompile Include="particleContact.cpp" />
+    <ClCompile Include="polyhedron.cpp" />
     <ClCompile Include="rigidBodyBungeeForce.cpp" />
     <ClCompile Include="shaderInterface.cpp" />
     <ClCompile Include="rigidBody.cpp" />
@@ -236,6 +238,7 @@
     <ClInclude Include="breakable.h" />
     <ClInclude Include="joint.h" />
     <ClInclude Include="mesh.h" />
+    <ClInclude Include="newAnisotropicShader.h" />
     <ClInclude Include="openglUtility.h" />
     <ClInclude Include="particleCollisionDetection.h" />
     <ClInclude Include="phongFragmentShader.glsl" />
@@ -299,6 +302,7 @@
     <None Include="diffuseLightingFragmentShader.glsl" />
     <None Include="diffuseLightingTextureFragmentShader.glsl" />
     <None Include="diffuseLightingVertexShader.glsl" />
+    <None Include="newAnisotropicFragmentShader.glsl" />
     <None Include="solidColorFragmentShader.glsl" />
     <None Include="solidColorVertexShader.glsl" />
   </ItemGroup>

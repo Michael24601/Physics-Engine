@@ -43,7 +43,7 @@ void main() {
         vec3 reflectDir = reflect(-lightDir, Normal);
         vec3 h = normalize(viewDir + lightDir);
         float NdotH = max(dot(Normal, halfwayDir), 0.0);
-        float D = (roughness * roughness) / (3.14159265359 * pow((dot(h, Tangent) 
+        float D = (roughness * roughness) / (3.14159265359 * pow((dot(h, Tangent)
             * dot(h, Bitangent) * (roughness * roughness - 1.0) + 1.0), 2.0));
         float G = min(
             1.0,

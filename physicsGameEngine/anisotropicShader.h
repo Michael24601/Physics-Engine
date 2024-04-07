@@ -47,8 +47,8 @@ namespace pe {
             glm::vec3* lightSourcesPosition,
             glm::vec4* lightSourcesColor,
             const glm::vec3& viewPosition,
-            float roughness,
-            float fresnel
+            real roughness,
+            real fresnel
         );
     };
 }

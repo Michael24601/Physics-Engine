@@ -199,7 +199,10 @@ global, not local vertices (DONE).
 
 Merge particleMesh and cloth, get rid of cord (DONE).
 
-Fix anisotropic shading (DONE).
+Fix anisotropic shading (DONE, THE ISSUE WAS THAT ONCE THE TEXTURE
+COORDINATES CHANGED, THE LOCAL TANGENT AND BITANGENTS USED TO GET
+THE TANGENTS AND BITANGENTS EACH FRAME WEREN'T MODIFIED TO REFLECT
+THAT).
 
 Fix vec2 issue in texture shading (DONE).
 
@@ -275,3 +278,6 @@ is vertical, horizontal, or along the z axis, not just when it is
 vertical.
 
 Make the GLSL their own files.
+
+Fix the way we calculate the default texture coordinates, or remove
+them entirely.

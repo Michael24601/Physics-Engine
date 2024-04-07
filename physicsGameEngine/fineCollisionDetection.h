@@ -346,8 +346,8 @@ namespace pe {
 
 
     bool sphereAndSphere(
-        const Sphere& one,
-        const Sphere& two
+        const Ball& one,
+        const Ball& two
     ){
         // Find the vector between the objects
         Vector3D midline = one.getAxis(3) - two.getAxis(3);
@@ -360,8 +360,8 @@ namespace pe {
 
 
     unsigned int sphereAndSphere(
-        const Sphere& one,
-        const Sphere& two,
+        const Ball& one,
+        const Ball& two,
         std::vector<Contact>& data
     ){
 
@@ -397,7 +397,7 @@ namespace pe {
 
     unsigned boxAndSphere(
         const Box& box,
-        const Sphere& sphere,
+        const Ball& sphere,
         std::vector<Contact>& data
     ){
         // Transform the centre of the sphere into box coordinates
@@ -476,7 +476,7 @@ namespace pe {
 
     void generateContactBoxAndSphere(
         const Polyhedron& one,
-        const SolidSphere& two,
+        const Polyhedron& two,
         std::vector<Contact>& contacts,
         real restitution,
         real friction
@@ -485,7 +485,7 @@ namespace pe {
         std::vector<Contact> contactsGenerated;
 
         Box box(one);
-        Sphere sphere(two);
+        Ball sphere(two);
         boxAndSphere(box, sphere, contactsGenerated);
 
         for (Contact& contact : contactsGenerated) {
@@ -498,8 +498,8 @@ namespace pe {
 
 
     void generateContactSphereAndSphere(
-        const SolidSphere& one,
-        const SolidSphere& two,
+        const Polyhedron& one,
+        const Polyhedron& two,
         std::vector<Contact>& contacts,
         real restitution,
         real friction
@@ -507,8 +507,8 @@ namespace pe {
 
         std::vector<Contact> contactsGenerated;
 
-        Sphere sphereOne(one);
-        Sphere sphereTwo(two);
+        Ball sphereOne(one);
+        Ball sphereTwo(two);
         sphereAndSphere(sphereOne, sphereTwo, contactsGenerated);
 
         for (Contact& contact : contactsGenerated) {

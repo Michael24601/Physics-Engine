@@ -55,7 +55,7 @@ namespace pe {
 
     unsigned int sphereAndPoint(
         const Vector3D& point,
-        const Sphere& sphere,
+        const Ball& sphere,
         std::vector<ParticleContact>& data
     ) {
         // Transforms the point into sphere coordinates
@@ -109,7 +109,7 @@ namespace pe {
 
         std::vector<ParticleContact> contactsGenerated;
 
-        Sphere sphere(one);
+        Ball sphere(one);
         sphere.radius *= 1.2;
         sphereAndPoint(particle->position, sphere, contactsGenerated);
 

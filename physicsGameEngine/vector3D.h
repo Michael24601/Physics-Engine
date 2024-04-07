@@ -16,6 +16,7 @@ namespace pe {
 	public:
 
 		// Static constants
+		static const Vector3D ZERO;
 		static const Vector3D RIGHT;
 		static const Vector3D UP;
 		static const Vector3D FORWARD;
@@ -254,6 +255,7 @@ namespace pe {
 	Vector3D localToWorld(const Vector3D& relativePosition, const Matrix3x4&
 		transformation);
 
+
 	/*
 		After a transformation is applied, to get the relative position of
 		the object to the origin, we multiply the new, absolute coordinates
@@ -266,6 +268,7 @@ namespace pe {
 	Vector3D worldToLocal(const Vector3D& absolutePosition, const Matrix3x4&
 		transformation);
 
+
 	/*
 		Returns the absolute direction vector after a transformation is
 		complete, given its relative direction to the origin of a body.
@@ -275,6 +278,7 @@ namespace pe {
 	Vector3D localToWorldDirection(const Vector3D& relativeDirection, const
 		Matrix3x4& transformation);
 
+
 	/*
 		Returns the relative direction vector to the origin of a body after
 		a transformation is complete, given its absolute direction. This
@@ -283,6 +287,7 @@ namespace pe {
 	*/
 	Vector3D worldToLocalDirection(const Vector3D& absoluteDirection, const
 		Matrix3x4& transformation);
+	
 
 	/*
 		Creates an orthonormal basis with the given x vector.
@@ -292,6 +297,17 @@ namespace pe {
 		normalized in the function.
 	*/
 	void makeOrthonormalBasis(const Vector3D& x, Vector3D* y, Vector3D* z);
+
+
+	/*
+		Returns the furthest point in a vector of points from a given
+		coordinate.
+	*/
+	Vector3D furthestPoint(
+		const Vector3D& coordinate, 
+		const std::vector<Vector3D>& points
+	);
+
 
 	// Prints the vector
 	std::ostream& operator<<(std::ostream& out, const Vector3D& vector);

@@ -119,7 +119,7 @@ Vector3D Face::calculateTangent(Basis basis) const {
 		textureCoordinates[firstIndex];
 
 	// Solve linear equation system to find tangent
-	float f = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
+	real f = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
 	Vector3D tangent(
 		f * (deltaUV2.y * edge1.x - deltaUV1.y * edge2.x),
 		f * (deltaUV2.y * edge1.y - deltaUV1.y * edge2.y),
@@ -456,6 +456,13 @@ void Face::setTextureCoordinates(
 	std::vector<Vector2D>& textureCoordinates
 ) {
 	this->textureCoordinates = textureCoordinates;
+
+	/*
+		We then need to recalculate the tangentand bitangents which depend
+		on the texture coordinates.
+	*/
+	localTangent = calculateTangent(Basis::LOCAL);
+	localBitangent = calculateBitangent(Basis::LOCAL);
 }
 
 
