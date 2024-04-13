@@ -43,12 +43,13 @@ namespace pe {
             const glm::mat4& view,
             const glm::mat4& projection,
             GLuint textureID,
-            int activeLightSources,
-            glm::vec3* lightSourcesPosition,
-            glm::vec4* lightSourcesColor,
+            const glm::vec4& specularColor,
+            const glm::vec4& ambientColor,
+            const glm::vec3& lightSourcePosition,
+            const glm::vec4& lightSourceColor,
             const glm::vec3& viewPosition,
-            real roughness,
-            real fresnel
+            real alphaX,
+            real alphaY
         );
     };
 }

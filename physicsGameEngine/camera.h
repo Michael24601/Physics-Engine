@@ -113,6 +113,11 @@ namespace pe {
         glm::vec3 getPosition() const {
             return cameraPosition;
         }
+
+
+        void setPosition(glm::vec3& cameraPosition) {
+            this->cameraPosition = cameraPosition;
+        }
 	};
 }
 

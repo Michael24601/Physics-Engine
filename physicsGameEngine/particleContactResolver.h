@@ -64,7 +64,8 @@ namespace pe {
 						ParticleContact& first, const ParticleContact& second) ->
 					bool { return first.calculateSeperationVecolity()
 					< second.calculateSeperationVecolity();
-					});
+					}
+				);
 
 				mostSevereCollision.resolveContact(duration);
 				iterationCount++;

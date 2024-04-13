@@ -1,6 +1,6 @@
 
-#ifndef TEXTURE_SHADER_H
-#define TEXTURE_SHADER_H
+#ifndef DIFFUSE_LIGHTING_TEXTURE_SHADER_H
+#define DIFFUSE_LIGHTING_TEXTURE_SHADER_H
 
 #include "shaderProgram.h"
 #include "vector3D.h"
@@ -10,7 +10,7 @@
 
 namespace pe {
 
-    class TextureShader {
+    class DiffuseLightingTextureShader {
 
     private:
 
@@ -21,7 +21,7 @@ namespace pe {
 
     public:
 
-        TextureShader() : shaderProgramObject(
+        DiffuseLightingTextureShader() : shaderProgramObject(
             readFileToString("diffuseLightingTextureVertexShader.glsl"),
             readFileToString("diffuseLightingTextureFragmentShader.glsl")
         ) {}

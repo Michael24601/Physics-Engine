@@ -4,26 +4,22 @@
 using namespace pe;
 
 void AnisotropicShader::drawFaces(
-    const std::vector<glm::vec3>& faces,
-    const std::vector<glm::vec3>& normals,
-    const std::vector<glm::vec3>& tangents,
-    const std::vector<glm::vec3>& bitangents,
+    std::vector<glm::vec3>& faces,
+    std::vector<glm::vec3>& normals,
+    std::vector<glm::vec3>& tangents,
+    std::vector<glm::vec3>& bitangents,
     const glm::mat4& model,
     const glm::mat4& view,
     const glm::mat4& projection,
     const glm::vec4& objectColor,
-    int activeLightSources,
-    glm::vec3* lightSourcesPosition,
-    glm::vec4* lightSourcesColor,
+    const glm::vec4& specularColor,
+    const glm::vec4& ambientColor,
+    const glm::vec3& lightSourcePosition,
+    const glm::vec4& lightSourceColor,
     const glm::vec3& viewPosition,
-    real roughness,
-    real fresnel
+    real alphaX,
+    real alphaY
 ) {
-    if (activeLightSources > MAXIMUM_NUMBER_OF_LIGHT_SOURCES) {
-        std::cerr << "At most, " << MAXIMUM_NUMBER_OF_LIGHT_SOURCES
-            << " light sources can be rendered";
-        return;
-    }
 
     GLuint vao;
     glGenVertexArrays(1, &vao);
@@ -41,7 +37,7 @@ void AnisotropicShader::drawFaces(
 
     // Create a buffer to hold position, normal, tangent, and bitangent data
     std::vector<glm::vec3> combinedData;
-    combinedData.reserve(faces.size() + normals.size() + tangents.size() + bitangents.size());
+    combinedData.reserve(faces.size() + normals.size() + tangents.size());
     combinedData.insert(combinedData.end(), faces.begin(), faces.end());
     combinedData.insert(combinedData.end(), normals.begin(), normals.end());
     combinedData.insert(combinedData.end(), tangents.begin(), tangents.end());
@@ -76,7 +72,6 @@ void AnisotropicShader::drawFaces(
     );
     glEnableVertexAttribArray(1);
 
-    // Specify vertex attribute pointers for tangent
     glVertexAttribPointer(
         2, 3,
         GL_FLOAT,
@@ -86,7 +81,6 @@ void AnisotropicShader::drawFaces(
     );
     glEnableVertexAttribArray(2);
 
-    // Specify vertex attribute pointers for bitangent
     glVertexAttribPointer(
         3, 3,
         GL_FLOAT,
@@ -110,23 +104,25 @@ void AnisotropicShader::drawFaces(
     GLint modelLoc = glGetUniformLocation(shaderProgram, "model");
     GLint projectionLoc = glGetUniformLocation(shaderProgram, "projection");
     GLint objectColorLoc = glGetUniformLocation(shaderProgram, "objectColor");
+    GLint specularColorLoc = glGetUniformLocation(shaderProgram, "specularColor");
+    GLint ambientColorLoc = glGetUniformLocation(shaderProgram, "ambientColor");
     GLuint lightPosLoc = glGetUniformLocation(shaderProgram, "lightPos");
-    GLuint lightColorsLoc = glGetUniformLocation(shaderProgram, "lightColors");
-    GLuint numActiveLightsLoc = glGetUniformLocation(shaderProgram, "numActiveLights");
+    GLuint lightColorLoc = glGetUniformLocation(shaderProgram, "lightColor");
     GLuint viewPosLoc = glGetUniformLocation(shaderProgram, "viewPos");
-    GLuint roughnessLoc = glGetUniformLocation(shaderProgram, "roughness");
-    GLuint fresnelLoc = glGetUniformLocation(shaderProgram, "fresnel");
+    GLuint alphaXLoc = glGetUniformLocation(shaderProgram, "alphaX");
+    GLuint alphaYLoc = glGetUniformLocation(shaderProgram, "alphaY");
 
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
     glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
     glUniform4fv(objectColorLoc, 1, &objectColor[0]);
-    glUniform3fv(lightPosLoc, activeLightSources, &lightSourcesPosition[0][0]);
-    glUniform4fv(lightColorsLoc, activeLightSources, &lightSourcesColor[0][0]);
-    glUniform1i(numActiveLightsLoc, activeLightSources);
+    glUniform4fv(ambientColorLoc, 1, &ambientColor[0]);
+    glUniform4fv(specularColorLoc, 1, &specularColor[0]);
+    glUniform4fv(lightPosLoc, 1, &lightSourcePosition[0]);
+    glUniform4fv(lightColorLoc, 1, &lightSourceColor[0]);
     glUniform3fv(viewPosLoc, 1, &viewPosition[0]);
-    glUniform1f(roughnessLoc, roughness);
-    glUniform1f(fresnelLoc, fresnel);
+    glUniform1f(alphaXLoc, alphaX);
+    glUniform1f(alphaYLoc, alphaY);
 
     glBindVertexArray(vao);
 

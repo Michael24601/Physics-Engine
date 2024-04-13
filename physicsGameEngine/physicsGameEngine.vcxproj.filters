@@ -91,6 +91,9 @@
     <Filter Include="Header Files\Shaders\Solid Color Shader">
       <UniqueIdentifier>{aa13724f-91d6-464b-b564-b2a1235da54d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Shaders\Skybox Shader">
+      <UniqueIdentifier>{dc65b283-ab1e-4a96-a8ae-daddc63bf1c2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="physicsGameEngine.cpp">
@@ -186,10 +189,7 @@
     <ClCompile Include="cookTorranceShader.cpp">
       <Filter>Source Files\OpenglGraphics</Filter>
     </ClCompile>
-    <ClCompile Include="anisotropicShader.cpp">
-      <Filter>Source Files\OpenglGraphics</Filter>
-    </ClCompile>
-    <ClCompile Include="textureShader.cpp">
+    <ClCompile Include="diffuseLightingTextureShader.cpp">
       <Filter>Source Files\OpenglGraphics</Filter>
     </ClCompile>
     <ClCompile Include="cookTorranceTextureShader.cpp">
@@ -228,7 +228,7 @@
     <ClCompile Include="polyhedron.cpp">
       <Filter>Source Files\Primitive</Filter>
     </ClCompile>
-    <ClCompile Include="newAnisotropicShader.cpp">
+    <ClCompile Include="anisotropicShader.cpp">
       <Filter>Source Files\OpenglGraphics</Filter>
     </ClCompile>
   </ItemGroup>
@@ -383,7 +383,7 @@
     <ClInclude Include="solidSphere.h">
       <Filter>Header Files\Polyhedron</Filter>
     </ClInclude>
-    <ClInclude Include="textureShader.h">
+    <ClInclude Include="diffuseLightingTextureShader.h">
       <Filter>Header Files\OpenglGraphics</Filter>
     </ClInclude>
     <ClInclude Include="openglUtility.h">
@@ -500,7 +500,10 @@
     <ClInclude Include="diffuseLightingTextureVertexShader.glsl">
       <Filter>Header Files\Shaders\Diffuse Lighting Shader</Filter>
     </ClInclude>
-    <ClInclude Include="newAnisotropicShader.h">
+    <ClInclude Include="stb_image_write.h">
+      <Filter>Header Files\OpenglGraphics</Filter>
+    </ClInclude>
+    <ClInclude Include="skyboxShader.h">
       <Filter>Header Files\OpenglGraphics</Filter>
     </ClInclude>
   </ItemGroup>
@@ -526,8 +529,11 @@
     <None Include="solidColorFragmentShader.glsl">
       <Filter>Header Files\Shaders\Solid Color Shader</Filter>
     </None>
-    <None Include="newAnisotropicFragmentShader.glsl">
-      <Filter>Header Files\Shaders\Anisotropic Shader</Filter>
+    <None Include="cookTorranceReflectionFragmentShader.glsl">
+      <Filter>Header Files\Shaders\Cook Torrance Shader</Filter>
+    </None>
+    <None Include="cookTorranceReflectionVertexShader.glsl">
+      <Filter>Header Files\Shaders\Cook Torrance Shader</Filter>
     </None>
   </ItemGroup>
 </Project>

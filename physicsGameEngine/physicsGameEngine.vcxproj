@@ -93,11 +93,12 @@
       <PreprocessorDefinitions>GLEW_STATIC;SFML_STATIC;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>C:\Users\msaba\OneDrive\Documents\college\personal\SFML-2.5.1\include;C:\Users\msaba\OneDrive\Documents\college\personal\glm-master\glm;C:\Users\msaba\OneDrive\Documents\college\personal\glew-2.2.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>sfml-graphics-s-d.lib;sfml-window-s-d.lib;sfml-system-s-d.lib;opengl32.lib;freetype.lib;winmm.lib;gdi32.lib;glu32.lib;glew32s.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Kernel32.lib;sfml-graphics-s-d.lib;sfml-window-s-d.lib;sfml-system-s-d.lib;opengl32.lib;freetype.lib;winmm.lib;gdi32.lib;glu32.lib;glew32s.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>C:\Users\msaba\OneDrive\Documents\college\personal\SFML-2.5.1\lib;C:\Users\msaba\OneDrive\Documents\college\personal\glew-2.2.0\lib\Release\Win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -110,6 +111,7 @@
       <PreprocessorDefinitions>GLEW_STATIC;SFML_STATIC;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>C:\Users\msaba\OneDrive\Documents\college\personal\SFML-2.5.1\include;C:\Users\msaba\OneDrive\Documents\college\personal\glm-master\glm;C:\Users\msaba\OneDrive\Documents\college\personal\glew-2.2.0\include;</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -117,7 +119,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>C:\Users\msaba\OneDrive\Documents\college\personal\SFML-2.5.1\lib;C:\Users\msaba\OneDrive\Documents\college\personal\glew-2.2.0\lib\Release\Win32;</AdditionalLibraryDirectories>
-      <AdditionalDependencies>sfml-graphics-s.lib;sfml-window-s.lib;sfml-system-s.lib;opengl32.lib;freetype.lib;winmm.lib;gdi32.lib;glu32.lib;glew32s.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Kernel32.lib;sfml-graphics-s.lib;sfml-window-s.lib;sfml-system-s.lib;opengl32.lib;freetype.lib;winmm.lib;gdi32.lib;glu32.lib;glew32s.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -127,11 +129,12 @@
       <PreprocessorDefinitions>GLEW_STATIC;SFML_STATIC;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>C:\Users\msaba\OneDrive\Documents\college\personal\SFML-2.5.1\include;C:\Users\msaba\OneDrive\Documents\college\personal\glm-master\glm;C:\Users\msaba\OneDrive\Documents\college\personal\glew-2.2.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>sfml-graphics-s-d.lib;sfml-window-s-d.lib;sfml-system-s-d.lib;opengl32.lib;freetype.lib;winmm.lib;gdi32.lib;glu32.lib;glew32s.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Kernel32.lib;sfml-graphics-s-d.lib;sfml-window-s-d.lib;sfml-system-s-d.lib;opengl32.lib;freetype.lib;winmm.lib;gdi32.lib;glu32.lib;glew32s.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>C:\Users\msaba\OneDrive\Documents\college\personal\SFML-2.5.1\lib;C:\Users\msaba\OneDrive\Documents\college\personal\glew-2.2.0\lib\Release\Win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -144,6 +147,7 @@
       <PreprocessorDefinitions>GLEW_STATIC;SFML_STATIC;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>C:\Users\msaba\OneDrive\Documents\college\personal\SFML-2.5.1\include;C:\Users\msaba\OneDrive\Documents\college\personal\glm-master\glm;C:\Users\msaba\OneDrive\Documents\college\personal\glew-2.2.0\include;</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -151,12 +155,11 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>C:\Users\msaba\OneDrive\Documents\college\personal\SFML-2.5.1\lib;C:\Users\msaba\OneDrive\Documents\college\personal\glew-2.2.0\lib\Release\Win32;</AdditionalLibraryDirectories>
-      <AdditionalDependencies>sfml-graphics-s.lib;sfml-window-s.lib;sfml-system-s.lib;opengl32.lib;freetype.lib;winmm.lib;gdi32.lib;glu32.lib;glew32s.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Kernel32.lib;sfml-graphics-s.lib;sfml-window-s.lib;sfml-system-s.lib;opengl32.lib;freetype.lib;winmm.lib;gdi32.lib;glu32.lib;glew32s.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="anchoredSpringForce.cpp" />
-    <ClCompile Include="anisotropicShader.cpp" />
     <ClCompile Include="anisotropicTextureShader.cpp" />
     <ClCompile Include="blob.cpp" />
     <ClCompile Include="boundingSphere.cpp" />
@@ -171,7 +174,7 @@
     <ClCompile Include="diffuseSpecularLightingShader.cpp" />
     <ClCompile Include="drawingUtil.cpp" />
     <ClCompile Include="face.cpp" />
-    <ClCompile Include="newAnisotropicShader.cpp" />
+    <ClCompile Include="anisotropicShader.cpp" />
     <ClCompile Include="openglUtility.cpp" />
     <ClCompile Include="particle.cpp" />
     <ClCompile Include="particleBungeeForce.cpp" />
@@ -198,14 +201,13 @@
     <ClCompile Include="rigidBodyWorld.cpp" />
     <ClCompile Include="sat.cpp" />
     <ClCompile Include="solidColorShader.cpp" />
-    <ClCompile Include="textureShader.cpp" />
+    <ClCompile Include="diffuseLightingTextureShader.cpp" />
     <ClCompile Include="util.cpp" />
     <ClCompile Include="vector3D.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="accuracy.h" />
     <ClInclude Include="anisotropicFragmentShader.glsl" />
-    <ClInclude Include="anisotropicShader.h" />
     <ClInclude Include="anisotropicTextureFragmentShader.glsl" />
     <ClInclude Include="anisotropicTextureShader.h" />
     <ClInclude Include="anisotropicTextureVertexShader.glsl" />
@@ -238,7 +240,7 @@
     <ClInclude Include="breakable.h" />
     <ClInclude Include="joint.h" />
     <ClInclude Include="mesh.h" />
-    <ClInclude Include="newAnisotropicShader.h" />
+    <ClInclude Include="anisotropicShader.h" />
     <ClInclude Include="openglUtility.h" />
     <ClInclude Include="particleCollisionDetection.h" />
     <ClInclude Include="phongFragmentShader.glsl" />
@@ -283,12 +285,14 @@
     <ClInclude Include="rigidBodyWorld.h" />
     <ClInclude Include="sat.h" />
     <ClInclude Include="shaderProgram.h" />
+    <ClInclude Include="skyboxShader.h" />
     <ClInclude Include="solidColorShader.h" />
     <ClInclude Include="solidSphere.h" />
     <ClInclude Include="sphericalJoint.h" />
     <ClInclude Include="particleSpringDamper.h" />
     <ClInclude Include="springJoint.h" />
-    <ClInclude Include="textureShader.h" />
+    <ClInclude Include="stb_image_write.h" />
+    <ClInclude Include="diffuseLightingTextureShader.h" />
     <ClInclude Include="util.h" />
     <ClInclude Include="vector2D.h" />
     <ClInclude Include="vector3D.h" />
@@ -299,10 +303,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="anisotropicVertexShader.glsl" />
+    <None Include="cookTorranceReflectionFragmentShader.glsl" />
+    <None Include="cookTorranceReflectionVertexShader.glsl" />
     <None Include="diffuseLightingFragmentShader.glsl" />
     <None Include="diffuseLightingTextureFragmentShader.glsl" />
     <None Include="diffuseLightingVertexShader.glsl" />
-    <None Include="newAnisotropicFragmentShader.glsl" />
     <None Include="solidColorFragmentShader.glsl" />
     <None Include="solidColorVertexShader.glsl" />
   </ItemGroup>

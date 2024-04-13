@@ -1,9 +1,9 @@
 
-#include "textureShader.h"
+#include "diffuseLightingTextureShader.h"
 
 using namespace pe;
 
-void TextureShader::drawFaces(
+void DiffuseLightingTextureShader::drawFaces(
     const std::vector<glm::vec3>& faces,
     const std::vector<glm::vec3>& normals,
     const std::vector<glm::vec2>& texCoords,

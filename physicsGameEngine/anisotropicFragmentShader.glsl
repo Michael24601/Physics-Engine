@@ -7,62 +7,75 @@ in vec3 Tangent;
 in vec3 Bitangent;
 
 uniform vec4 objectColor;
+uniform vec4 ambientColor;
+uniform vec4 specularColor;
 
-#define MAX_LIGHTS 10
-
-uniform vec3 lightPos[MAX_LIGHTS];
-uniform vec4 lightColors[MAX_LIGHTS];
-
-uniform int numActiveLights;
+uniform vec4 lightPos;
+uniform vec4 lightColor;
 
 // Anisotropic shading parameters
 uniform vec3 viewPos;
-uniform float roughness;
-uniform float fresnel;
+uniform float alphaX;
+uniform float alphaY;
 
 out vec4 FragColor;
 
 void main() {
-    vec3 finalDiffuse = vec3(0.0);
-    vec3 finalSpecular = vec3(0.0);
 
-    for (int i = 0; i < numActiveLights; ++i) {
+    vec3 normalDirection = normalize(Normal);
+    vec3 tangentDirection = normalize(Tangent);
 
-        // Diffuse calculation
-        vec3 lightDir = normalize(lightPos[i] - FragPos);
-        float diff = max(dot(Normal, lightDir), 0.0);
-        vec3 diffuse = objectColor.rgb * diff;
-        finalDiffuse += diffuse;
+    vec3 viewDirection = normalize(viewPos - FragPos);
+    vec3 lightDirection;
+    float attenuation;
 
-        // Anisotropic specular calculation
-        vec3 viewDir = normalize(viewPos - FragPos);
-        vec3 halfwayDir = normalize(lightDir + viewDir);
-        vec3 reflectDir = reflect(-lightDir, Normal);
-        vec3 h = normalize(viewDir + lightDir);
-        float NdotH = max(dot(Normal, halfwayDir), 0.0);
-        float D = (roughness * roughness) / (3.14159265359 * pow((dot(h, Tangent) 
-            * dot(h, Bitangent) * (roughness * roughness - 1.0) + 1.0), 2.0));
-        float G = min(
-            1.0, 
-            min(
-                2.0 * NdotH * dot(Normal, viewDir) / dot(viewDir, halfwayDir), 
-                2.0 * NdotH * dot(Normal, lightDir) / dot(lightDir, halfwayDir)
-            )
-        );
-        float F = fresnel + (1.0 - fresnel) * pow(1.0 - NdotH, 5.0);
+    // directional light?
+    if (0.0 == lightPos.w) {
+        attenuation = 1.0; // no attenuation
+        lightDirection = normalize(vec3(lightPos));
+    } 
+    // point or spot light
+    else {
+        vec3 vertexToLightSource = vec3(lightPos) - vec3(FragPos);
+        float distance = length(vertexToLightSource);
+        attenuation = 1.0 / distance; // linear attenuation 
+        lightDirection = normalize(vertexToLightSource);
+    }
+            
+    vec3 halfwayVector = 
+        normalize(lightDirection + viewDirection);
+    vec3 binormalDirection = 
+        cross(normalDirection, tangentDirection);
+    float dotLN = dot(lightDirection, normalDirection); 
+        // compute this dot product only once
+            
+    vec3 ambientLighting = vec3(ambientColor) 
+        * vec3(objectColor);
 
-        /* 
-            The opacity of the anisotropic shading effect is determined
-            through the alpha value
-        */
-        vec3 specular = lightColors[i].rgb * (D * G * F) 
-            / (4.0 * dot(Normal, viewDir) * dot(Normal, lightDir));
-        finalSpecular += specular;
+    vec3 diffuseReflection = attenuation * vec3(lightColor) 
+        * vec3(objectColor) * max(0.0, dotLN);
+            
+    vec3 specularReflection;
+    if (dotLN < 0.0) // light source on the wrong side?
+    {
+        specularReflection = vec3(0.0, 0.0, 0.0); 
+            // no specular reflection
+    }
+    else // light source on the right side
+    {
+        float dotHN = dot(halfwayVector, normalDirection);
+        float dotVN = dot(viewDirection, normalDirection);
+        float dotHTAlphaX = 
+            dot(halfwayVector, tangentDirection) / alphaX;
+        float dotHBAlphaY = dot(halfwayVector, 
+            binormalDirection) / alphaY;
+
+        specularReflection = attenuation * vec3(specularColor) 
+            * sqrt(max(0.0, dotLN / dotVN)) 
+            * exp(-2.0 * (dotHTAlphaX * dotHTAlphaX 
+            + dotHBAlphaY * dotHBAlphaY) / (1.0 + dotHN));
     }
 
-    // 0.1 looks best
-    vec3 ambientColor = 0.1 * objectColor.rgb;
-    vec3 resultColor = finalDiffuse + finalSpecular + ambientColor;
-
-    FragColor = vec4(resultColor, objectColor.a);
+    FragColor = vec4(ambientLighting 
+        + diffuseReflection + specularReflection, 1.0);
 }
