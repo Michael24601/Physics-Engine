@@ -15,6 +15,19 @@ namespace pe {
 
     GLuint loadTexture(const std::string& imagePath);
 
+    /*
+        To load a cubemap, we have to send the six faces to it as paths
+        to the images on the system.
+        The faces have to be sent in the following order:
+        Positive X (Right)
+        Negative X (Left)
+        Positive Y (Top)
+        Negative Y (Bottom)
+        Positive Z (Front)
+        Negative Z (Back)
+    */
+    GLuint loadCubemap(const std::vector<std::string>& faces);
+
     std::string readFileToString(const std::string& filePath);
 
     std::string getUniqueDate();

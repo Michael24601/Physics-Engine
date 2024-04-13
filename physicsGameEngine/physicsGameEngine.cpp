@@ -43,7 +43,6 @@
 #include "cookTorranceShader.h"
 #include "shaderInterface.h"
 #include "anisotropicShader.h"
-#include "textureShader.h"
 #include "cookTorranceTextureShader.h"
 #include "anisotropicTextureShader.h"
 
@@ -79,7 +78,8 @@
 #include "particleContactResolver.h"
 
 #include "blob.h"
-
+#include "skyboxShader.h"
+#include "cookTorranceReflectionShaderWithSkybox.h"
 
 using namespace pe;
 using namespace std;
@@ -2622,10 +2622,19 @@ int main() {
     DiffuseSpecularLightingShader phongShader;
     CookTorranceShader cookShader;
     CookTorranceTextureShader cookTexShader;
-    TextureShader texShader;
     CookTorranceReflectionShader refShader;
+    SkyboxShader skyboxShader;
+    CookTorranceReflectionShaderWithSkybox refShader2;
 
     GLuint texture = loadTexture("C:\\Users\\msaba\\OneDrive\\Desktop\\textureMaps\\blue.jpg");
+    GLuint skybox = loadCubemap(std::vector<std::string>{
+        "C:\\Users\\msaba\\OneDrive\\Desktop\\cubemaps\\right.jpg",
+        "C:\\Users\\msaba\\OneDrive\\Desktop\\cubemaps\\left.jpg",
+        "C:\\Users\\msaba\\OneDrive\\Desktop\\cubemaps\\top.jpg",
+        "C:\\Users\\msaba\\OneDrive\\Desktop\\cubemaps\\bottom.jpg",
+        "C:\\Users\\msaba\\OneDrive\\Desktop\\cubemaps\\front.jpg",
+        "C:\\Users\\msaba\\OneDrive\\Desktop\\cubemaps\\back.jpg"
+    });
 
     RotatingCamera camera(
         window,
@@ -2645,6 +2654,10 @@ int main() {
 
     real radius = 150;
     SolidSphere c2(radius * 2, 10, 30, 30, Vector3D(0, 0, 400), new RigidBody);
+
+    //Polyhedron c2 = returnPrimitive(filename, 1, Vector3D::ZERO, new RigidBody(), 2);
+    //c2.body->orientation = Quaternion::rotatedByAxisAngle(Vector3D(0, 0, 1), PI / 2.0);
+
 
     RigidBodyGravity g(Vector3D(0, -10, 0));
 
@@ -2784,6 +2797,7 @@ int main() {
             // Clear the framebuffer
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+
             cookShader.drawFaces(
                 data.vertices, data.normals,
                 identity, view,
@@ -2812,13 +2826,19 @@ int main() {
             lightColor, camera.getPosition(), 0.1, 0.05
         );
 
+        skyboxShader.drawSkybox(
+            camera.getViewMatrix(),
+            camera.getProjectionMatrix(), 
+            skybox, 2000
+        );
+
         // Render the textured cube using the texture
         data = getFaceData(c2);
-        refShader.drawFaces(
+        refShader2.drawFaces(
             data.vertices, data.normals, data.uvCoordinates,
             identity, camera.getViewMatrix(),
-            camera.getProjectionMatrix(), cubemapTexture, colorRed,
-            2, lightPos, lightColor, camera.getPosition(), 0.1, 0.05, 1.0
+            camera.getProjectionMatrix(), skybox, cubemapTexture, colorRed,
+            2, lightPos, lightColor, camera.getPosition(), 0.1, 0.05, 1.0, 0.0
         );
 
         // Display the rendered scene

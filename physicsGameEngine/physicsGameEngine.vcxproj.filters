@@ -94,6 +94,9 @@
     <Filter Include="Header Files\Shaders\Skybox Shader">
       <UniqueIdentifier>{dc65b283-ab1e-4a96-a8ae-daddc63bf1c2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Shaders\Reflection Shader">
+      <UniqueIdentifier>{55086f89-a10d-4866-a64e-63925a87c9d3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="physicsGameEngine.cpp">
@@ -229,6 +232,12 @@
       <Filter>Source Files\Primitive</Filter>
     </ClCompile>
     <ClCompile Include="anisotropicShader.cpp">
+      <Filter>Source Files\OpenglGraphics</Filter>
+    </ClCompile>
+    <ClCompile Include="skyboxShader.cpp">
+      <Filter>Source Files\OpenglGraphics</Filter>
+    </ClCompile>
+    <ClCompile Include="cookTorranceReflectionShaderWithSkybox.cpp">
       <Filter>Source Files\OpenglGraphics</Filter>
     </ClCompile>
   </ItemGroup>
@@ -506,6 +515,9 @@
     <ClInclude Include="skyboxShader.h">
       <Filter>Header Files\OpenglGraphics</Filter>
     </ClInclude>
+    <ClInclude Include="cookTorranceReflectionShaderWithSkybox.h">
+      <Filter>Header Files\OpenglGraphics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="todo.txt" />
@@ -529,11 +541,20 @@
     <None Include="solidColorFragmentShader.glsl">
       <Filter>Header Files\Shaders\Solid Color Shader</Filter>
     </None>
+    <None Include="skyboxFragmentShader.glsl">
+      <Filter>Header Files\Shaders\Skybox Shader</Filter>
+    </None>
+    <None Include="skyboxVertexShader.glsl">
+      <Filter>Header Files\Shaders\Skybox Shader</Filter>
+    </None>
     <None Include="cookTorranceReflectionFragmentShader.glsl">
-      <Filter>Header Files\Shaders\Cook Torrance Shader</Filter>
+      <Filter>Header Files\Shaders\Reflection Shader</Filter>
     </None>
     <None Include="cookTorranceReflectionVertexShader.glsl">
-      <Filter>Header Files\Shaders\Cook Torrance Shader</Filter>
+      <Filter>Header Files\Shaders\Reflection Shader</Filter>
+    </None>
+    <None Include="cookTorranceReflectionFragmentShaderWithSkybox.glsl">
+      <Filter>Header Files\Shaders\Reflection Shader</Filter>
     </None>
   </ItemGroup>
 </Project>

@@ -273,7 +273,7 @@ namespace pe {
     }
 
 
-    Polyhedron ReturnPrimitive(
+    Polyhedron returnPrimitive(
         std::string filename,
         real mass,
         const Vector3D& position,

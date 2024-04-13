@@ -1,16 +1,17 @@
 
-#include "cookTorranceReflectionShader.h"
+#include "cookTorranceReflectionShaderWithSkybox.h"
 
 using namespace pe;
 
 
-void CookTorranceReflectionShader::drawFaces(
+void CookTorranceReflectionShaderWithSkybox::drawFaces(
     const std::vector<glm::vec3>& faces,
     const std::vector<glm::vec3>& normals,
     const std::vector<glm::vec2>& texCoords,
     const glm::mat4& model,
     const glm::mat4& view,
     const glm::mat4& projection,
+    GLuint skybox,
     GLuint environmentMapTextureId,
     const glm::vec4& baseColor,
     int activeLightSources,
@@ -19,7 +20,8 @@ void CookTorranceReflectionShader::drawFaces(
     const glm::vec3& viewPosition,
     real roughness,
     real fresnel,
-    real reflectionStrength
+    real reflectionStrength,
+    real lightInfluence
 ) {
     if (activeLightSources > MAXIMUM_NUMBER_OF_LIGHT_SOURCES) {
         std::cerr << "At most, " << MAXIMUM_NUMBER_OF_LIGHT_SOURCES
@@ -100,6 +102,13 @@ void CookTorranceReflectionShader::drawFaces(
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_CUBE_MAP, environmentMapTextureId);
 
+    glActiveTexture(GL_TEXTURE0); // Use texture unit 0
+    glBindTexture(GL_TEXTURE_CUBE_MAP, skybox);
+
+    // The uniform samplerCube in the shader program uses texture unit 0
+    GLint skyboxLoc = glGetUniformLocation(shaderProgram, "skybox");
+    glUniform1i(skyboxLoc, 0); // 0 is the texture unit index for the skybox cubemap
+
     // The environment map sampler uniform
     GLint environmentMapLoc = glGetUniformLocation(shaderProgram, "environmentMap");
     glUniform1i(environmentMapLoc, 1); // 1 is the texture unit index for the environment map
@@ -116,6 +125,7 @@ void CookTorranceReflectionShader::drawFaces(
     GLuint roughnessLoc = glGetUniformLocation(shaderProgram, "roughness");
     GLuint fresnelLoc = glGetUniformLocation(shaderProgram, "fresnel");
     GLuint reflectionStrengthLoc = glGetUniformLocation(shaderProgram, "reflectionStrength");
+    GLuint lightInfluenceLoc = glGetUniformLocation(shaderProgram, "lightInfluence");
 
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
@@ -128,6 +138,7 @@ void CookTorranceReflectionShader::drawFaces(
     glUniform1f(roughnessLoc, roughness);
     glUniform1f(fresnelLoc, fresnel);
     glUniform1f(reflectionStrengthLoc, reflectionStrength);
+    glUniform1f(lightInfluenceLoc, lightInfluence);
 
     // Bind VAO and draw
     glBindVertexArray(vao);

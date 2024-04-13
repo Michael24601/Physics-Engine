@@ -18,14 +18,20 @@ namespace pe {
     public:
 
         SkyboxShader() : shaderProgramObject(
-            readFileToString("skyboxShader.glsl"),
-            readFileToString("skyboxShader.glsl")
+            readFileToString("skyboxVertexShader.glsl"),
+            readFileToString("skyboxFragmentShader.glsl")
         ) {}
 
+        /*
+            The cubemap is a 1 by 1 by 1 cube with its 6 internal faces
+            rendered to simulate a 3D background using a cubemap. The size
+            parameter scales this cube to fit the whole scene.
+        */
         void drawSkybox(
-            const glm::mat4& model,
             const glm::mat4& view,
-            const GLuint& cubemap
+            const glm::mat4& projection,
+            const GLuint& cubemap,
+            real size
         );
     };
 }

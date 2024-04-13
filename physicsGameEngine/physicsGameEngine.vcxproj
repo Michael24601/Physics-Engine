@@ -168,6 +168,7 @@
     <ClCompile Include="contact.cpp" />
     <ClCompile Include="contactGeneration.cpp" />
     <ClCompile Include="cookTorranceReflectionShader.cpp" />
+    <ClCompile Include="cookTorranceReflectionShaderWithSkybox.cpp" />
     <ClCompile Include="cookTorranceShader.cpp" />
     <ClCompile Include="cookTorranceTextureShader.cpp" />
     <ClCompile Include="diffuseLightingShader.cpp" />
@@ -200,6 +201,7 @@
     <ClCompile Include="rigidBodySpringForce.cpp" />
     <ClCompile Include="rigidBodyWorld.cpp" />
     <ClCompile Include="sat.cpp" />
+    <ClCompile Include="skyboxShader.cpp" />
     <ClCompile Include="solidColorShader.cpp" />
     <ClCompile Include="diffuseLightingTextureShader.cpp" />
     <ClCompile Include="util.cpp" />
@@ -224,6 +226,7 @@
     <ClInclude Include="contactGeneration.h" />
     <ClInclude Include="cookTorranceFragmentShader.glsl" />
     <ClInclude Include="cookTorranceReflectionShader.h" />
+    <ClInclude Include="cookTorranceReflectionShaderWithSkybox.h" />
     <ClInclude Include="cookTorranceShader.h" />
     <ClInclude Include="cookTorranceTextureFragmentShader.glsl" />
     <ClInclude Include="cookTorranceTextureShader.h" />
@@ -304,10 +307,13 @@
   <ItemGroup>
     <None Include="anisotropicVertexShader.glsl" />
     <None Include="cookTorranceReflectionFragmentShader.glsl" />
+    <None Include="cookTorranceReflectionFragmentShaderWithSkybox.glsl" />
     <None Include="cookTorranceReflectionVertexShader.glsl" />
     <None Include="diffuseLightingFragmentShader.glsl" />
     <None Include="diffuseLightingTextureFragmentShader.glsl" />
     <None Include="diffuseLightingVertexShader.glsl" />
+    <None Include="skyboxFragmentShader.glsl" />
+    <None Include="skyboxVertexShader.glsl" />
     <None Include="solidColorFragmentShader.glsl" />
     <None Include="solidColorVertexShader.glsl" />
   </ItemGroup>
