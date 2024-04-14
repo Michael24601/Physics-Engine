@@ -243,7 +243,7 @@ shapes to the shaders; it could mean saving memory and time
 by using the same VBOs and VAOs as the vertices remain the same,
 but it also means we are using an extra matrix transformation for
 each vertex to get it to world coordinates. Especially now that
-transformation may not be necessary anymore for collision detection.
+transformation may not be necessary anymore for collision detection (DONE).
 
 Add an intertia tensor approximator for custom primitives.
 
@@ -256,8 +256,6 @@ When polyhedron is being imported from outside, it doesn't rotate
 when forces are applied to it (DONE, it turns out, I accidently
 gave it an all 0 intertia tensor, since I hadn't yet made a function
 to approximate the intertia tensor).
-
-Write a function to approximate the inertia tensor.
 
 Write a possible common interface to all types of collision volumes.
 

@@ -5,7 +5,7 @@ in vec3 FragPos;
 in vec3 Normal;
 in vec2 TexCoord;
 
-uniform sampler2D textureSampler;
+uniform sampler2D objectTexture;
 
 #define MAX_LIGHTS 10
 
@@ -25,6 +25,6 @@ void main(){
         finalDiffuse += diff;
     }
 
-    vec4 texColor = texture(textureSampler, TexCoord);
+    vec4 texColor = texture(objectTexture, TexCoord);
     FragColor = texColor * vec4(finalDiffuse, 1.0);
 }

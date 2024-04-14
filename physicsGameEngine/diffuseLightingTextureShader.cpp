@@ -96,7 +96,7 @@ void DiffuseLightingTextureShader::drawFaces(
     glBindTexture(GL_TEXTURE_2D, textureID);
 
     // Set texture sampler uniform
-    GLint textureSamplerLoc = glGetUniformLocation(shaderProgram, "textureSampler");
+    GLint textureSamplerLoc = glGetUniformLocation(shaderProgram, "objectTexture");
     glUniform1i(textureSamplerLoc, 0); // 0 is the texture unit index
 
     // Set uniforms

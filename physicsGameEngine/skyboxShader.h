@@ -20,70 +20,77 @@
 
 #include "shader.h"
 
+/*
+    The never changing vertices(in unit coordinates, though they can be 
+    scaled).
+*/
+const static std::vector<glm::vec3> skyboxVertices {
+    // Front face
+    glm::vec3(-1.0f,  1.0f, -1.0f),
+    glm::vec3(-1.0f, -1.0f, -1.0f),
+    glm::vec3(1.0f, -1.0f, -1.0f),
+    glm::vec3(1.0f, -1.0f, -1.0f),
+    glm::vec3(1.0f,  1.0f, -1.0f),
+    glm::vec3(-1.0f,  1.0f, -1.0f),
+
+    // Back face
+    glm::vec3(1.0f,  1.0f,  1.0f),
+    glm::vec3(1.0f, -1.0f,  1.0f),
+    glm::vec3(-1.0f, -1.0f,  1.0f),
+    glm::vec3(-1.0f, -1.0f,  1.0f),
+    glm::vec3(-1.0f,  1.0f,  1.0f),
+    glm::vec3(1.0f,  1.0f,  1.0f),
+
+    // Left face
+    glm::vec3(-1.0f,  1.0f,  1.0f),
+    glm::vec3(-1.0f, -1.0f,  1.0f),
+    glm::vec3(-1.0f, -1.0f, -1.0f),
+    glm::vec3(-1.0f, -1.0f, -1.0f),
+    glm::vec3(-1.0f,  1.0f, -1.0f),
+    glm::vec3(-1.0f,  1.0f,  1.0f),
+
+    // Right face
+    glm::vec3(1.0f,  1.0f, -1.0f),
+    glm::vec3(1.0f, -1.0f, -1.0f),
+    glm::vec3(1.0f, -1.0f,  1.0f),
+    glm::vec3(1.0f, -1.0f,  1.0f),
+    glm::vec3(1.0f,  1.0f,  1.0f),
+    glm::vec3(1.0f,  1.0f, -1.0f),
+
+    // Top face
+    glm::vec3(-1.0f,  1.0f,  1.0f),
+    glm::vec3(-1.0f,  1.0f, -1.0f),
+    glm::vec3(1.0f,  1.0f, -1.0f),
+    glm::vec3(1.0f,  1.0f, -1.0f),
+    glm::vec3(1.0f,  1.0f,  1.0f),
+    glm::vec3(-1.0f,  1.0f,  1.0f),
+
+    // Bottom face
+    glm::vec3(-1.0f, -1.0f, -1.0f),
+    glm::vec3(-1.0f, -1.0f,  1.0f),
+    glm::vec3(1.0f, -1.0f,  1.0f),
+    glm::vec3(1.0f, -1.0f,  1.0f),
+    glm::vec3(1.0f, -1.0f, -1.0f),
+    glm::vec3(-1.0f, -1.0f, -1.0f)
+};
+
 namespace pe {
 
     class SkyboxShader : public Shader{
 
     public:
 
-        /*
-            The never changing vertices(in unit coordinates, though they
-            can be scaled).
-        */
-        const static GLfloat skyboxVertices[]{
-            // Front face
-            -1.0f,  1.0f, -1.0f,
-            -1.0f, -1.0f, -1.0f,
-            1.0f, -1.0f, -1.0f,
-            1.0f, -1.0f, -1.0f,
-            1.0f,  1.0f, -1.0f,
-            -1.0f,  1.0f, -1.0f,
-
-            // Back face
-            1.0f,  1.0f, 1.0f,
-            1.0f, -1.0f, 1.0f,
-            -1.0f, -1.0f, 1.0f,
-            -1.0f, -1.0f, 1.0f,
-            -1.0f,  1.0f, 1.0f,
-            1.0f,  1.0f, 1.0f,
-
-            // Left face
-            -1.0f,  1.0f,  1.0f,
-            -1.0f, -1.0f,  1.0f,
-            -1.0f, -1.0f, -1.0f,
-            -1.0f, -1.0f, -1.0f,
-            -1.0f,  1.0f, -1.0f,
-            -1.0f,  1.0f,  1.0f,
-
-            // Right face
-            1.0f,  1.0f, -1.0f,
-            1.0f, -1.0f, -1.0f,
-            1.0f, -1.0f,  1.0f,
-            1.0f, -1.0f,  1.0f,
-            1.0f,  1.0f,  1.0f,
-            1.0f,  1.0f, -1.0f,
-
-            // Top face
-            -1.0f,  1.0f,  1.0f,
-            -1.0f,  1.0f, -1.0f,
-            1.0f,  1.0f, -1.0f,
-            1.0f,  1.0f, -1.0f,
-            1.0f,  1.0f,  1.0f,
-            -1.0f,  1.0f,  1.0f,
-
-            // Bottom face
-            -1.0f, -1.0f, -1.0f,
-            -1.0f, -1.0f,  1.0f,
-            1.0f, -1.0f,  1.0f,
-            1.0f, -1.0f,  1.0f,
-            1.0f, -1.0f, -1.0f,
-            -1.0f, -1.0f, -1.0f
-        };
-
         SkyboxShader() : Shader(
             "skyboxVertexShader.glsl",
             "skyboxFragmentShader.glsl"
-        ) {}
+        ) {
+            /*
+                Because the skybox vertices are always those of the cube,
+                we can set the VAOand VBO in the constructor automatically.
+            */
+            std::vector<std::vector<glm::vec3>> data{ skyboxVertices };
+            sendVaribleData(data);
+        }
 
         /*
             Instead of sending an entire model matrix, we only send the 
