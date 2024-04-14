@@ -168,15 +168,6 @@
     <ClCompile Include="sat.cpp">
       <Filter>Source Files\Collision</Filter>
     </ClCompile>
-    <ClCompile Include="solidColorShader.cpp">
-      <Filter>Source Files\OpenglGraphics</Filter>
-    </ClCompile>
-    <ClCompile Include="diffuseLightingShader.cpp">
-      <Filter>Source Files\OpenglGraphics</Filter>
-    </ClCompile>
-    <ClCompile Include="diffuseSpecularLightingShader.cpp">
-      <Filter>Source Files\OpenglGraphics</Filter>
-    </ClCompile>
     <ClCompile Include="shaderInterface.cpp">
       <Filter>Source Files\Interfaces</Filter>
     </ClCompile>
@@ -189,18 +180,6 @@
     <ClCompile Include="collisionResolver.cpp">
       <Filter>Source Files\Collision</Filter>
     </ClCompile>
-    <ClCompile Include="cookTorranceShader.cpp">
-      <Filter>Source Files\OpenglGraphics</Filter>
-    </ClCompile>
-    <ClCompile Include="diffuseLightingTextureShader.cpp">
-      <Filter>Source Files\OpenglGraphics</Filter>
-    </ClCompile>
-    <ClCompile Include="cookTorranceTextureShader.cpp">
-      <Filter>Source Files\OpenglGraphics</Filter>
-    </ClCompile>
-    <ClCompile Include="anisotropicTextureShader.cpp">
-      <Filter>Source Files\OpenglGraphics</Filter>
-    </ClCompile>
     <ClCompile Include="face.cpp">
       <Filter>Source Files\Primitive</Filter>
     </ClCompile>
@@ -209,9 +188,6 @@
     </ClCompile>
     <ClCompile Include="rigidBodyBungeeForce.cpp">
       <Filter>Source Files\RigidBodyPhysics</Filter>
-    </ClCompile>
-    <ClCompile Include="cookTorranceReflectionShader.cpp">
-      <Filter>Source Files\OpenglGraphics</Filter>
     </ClCompile>
     <ClCompile Include="util.cpp">
       <Filter>Source Files\Core</Filter>
@@ -230,15 +206,6 @@
     </ClCompile>
     <ClCompile Include="polyhedron.cpp">
       <Filter>Source Files\Primitive</Filter>
-    </ClCompile>
-    <ClCompile Include="anisotropicShader.cpp">
-      <Filter>Source Files\OpenglGraphics</Filter>
-    </ClCompile>
-    <ClCompile Include="skyboxShader.cpp">
-      <Filter>Source Files\OpenglGraphics</Filter>
-    </ClCompile>
-    <ClCompile Include="cookTorranceReflectionShaderWithSkybox.cpp">
-      <Filter>Source Files\OpenglGraphics</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

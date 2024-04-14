@@ -160,22 +160,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="anchoredSpringForce.cpp" />
-    <ClCompile Include="anisotropicTextureShader.cpp" />
     <ClCompile Include="blob.cpp" />
     <ClCompile Include="boundingSphere.cpp" />
     <ClCompile Include="cloth.cpp" />
     <ClCompile Include="collisionResolver.cpp" />
     <ClCompile Include="contact.cpp" />
     <ClCompile Include="contactGeneration.cpp" />
-    <ClCompile Include="cookTorranceReflectionShader.cpp" />
-    <ClCompile Include="cookTorranceReflectionShaderWithSkybox.cpp" />
-    <ClCompile Include="cookTorranceShader.cpp" />
-    <ClCompile Include="cookTorranceTextureShader.cpp" />
-    <ClCompile Include="diffuseLightingShader.cpp" />
-    <ClCompile Include="diffuseSpecularLightingShader.cpp" />
     <ClCompile Include="drawingUtil.cpp" />
     <ClCompile Include="face.cpp" />
-    <ClCompile Include="anisotropicShader.cpp" />
     <ClCompile Include="openglUtility.cpp" />
     <ClCompile Include="particle.cpp" />
     <ClCompile Include="particleBungeeForce.cpp" />
@@ -201,9 +193,6 @@
     <ClCompile Include="rigidBodySpringForce.cpp" />
     <ClCompile Include="rigidBodyWorld.cpp" />
     <ClCompile Include="sat.cpp" />
-    <ClCompile Include="skyboxShader.cpp" />
-    <ClCompile Include="solidColorShader.cpp" />
-    <ClCompile Include="diffuseLightingTextureShader.cpp" />
     <ClCompile Include="util.cpp" />
     <ClCompile Include="vector3D.cpp" />
   </ItemGroup>
