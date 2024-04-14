@@ -2,41 +2,35 @@
 #ifndef SOLID_COLOR_SHADER_H
 #define SOLID_COLOR_SHADER_H
 
-#include "shaderProgram.h"
-#include "vector3D.h"
-#include "drawingUtil.h"
-#include "shaderInterface.h"
-#include "openglUtility.h"
+#include "shader.h"
 
 namespace pe {
 
-	class SolidColorShader {
-	private:
-
-        ShaderProgram shaderProgramObject;
+	class SolidColorShader : public Shader {
 
 	public:
 
-        SolidColorShader() : shaderProgramObject(
-            readFileToString("solidColorVertexShader.glsl"),
-            readFileToString("solidColorFragmentShader.glsl")
+        SolidColorShader() : Shader(
+            "solidColorVertexShader.glsl",
+            "solidColorFragmentShader.glsl"
         ) {}
 
-        void drawEdges(
-            const std::vector<glm::vec3>& edges,
-            const glm::mat4& model,
-            const glm::mat4& view,
-            const glm::mat4& projection,
-            const glm::vec4& objectColor 
-        );
+        void setModelMatrix(const glm::mat4& model) {
+            setUniform("model", model);
+        }
 
-        void drawFaces(
-            const std::vector<glm::vec3>& faces,
-            const glm::mat4& model,
-            const glm::mat4& view,
-            const glm::mat4& projection,
-            const glm::vec4& objectColor
-        );
+        void setViewMatrix(const glm::mat4& view) {
+            setUniform("view", view);
+        }
+
+        void setProjectionMatrix(const glm::mat4& projection) {
+            setUniform("projection", projection);
+        }
+
+        void setObjectColor(const glm::vec4& color) {
+            setUniform("objectColor", color);
+        }
+
 	};
 }
 

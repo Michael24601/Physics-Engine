@@ -84,7 +84,7 @@
 using namespace pe;
 using namespace std;
 
-#define SIM_10
+#define SIM_7
 
 #ifdef SIM_1
 
@@ -136,7 +136,6 @@ int main() {
     DiffuseSpecularLightingShader phongShader;
     CookTorranceShader cookShader;
     AnisotropicShader aniShader;
-    TextureShader texShader;
     CookTorranceTextureShader cookTexShader;
     AnisotropicTextureShader aniTexShader;
 
@@ -411,8 +410,8 @@ int main() {
         );
 
         data = getFaceData(c3);
-        cookShader.drawFaces(data.vertices, data.normals, identity,
-            viewMatrix, projectionMatrix, colorRed, 1, lightPos,
+        cookTexShader.drawFaces(data.vertices, data.normals, data.uvCoordinates, identity,
+            viewMatrix, projectionMatrix, texture, 1, lightPos,
             lightColors, cameraPosition, 0.1, 1
         );
 
@@ -430,18 +429,18 @@ int main() {
         FaceData d;
         getFaceData(c2.faces[0], &d);
         getFaceData(c2.faces[1], &d);
-        cookShader.drawFaces(d.vertices, d.normals, identity,
+        phongShader.drawFaces(d.vertices, d.normals, identity,
             viewMatrix, projectionMatrix, colorGrey, 1, lightPos,
-            lightColors, cameraPosition, 0.05, 1
+            lightColors, cameraPosition, 20
         );
 
         FaceData d2;
         for (int i = 2; i < c2.faces.size(); i++) {
             getFaceData(c2.faces[i], &d2);
         }
-        cookShader.drawFaces(d2.vertices, d2.normals, identity,
+        phongShader.drawFaces(d2.vertices, d2.normals, identity,
             viewMatrix, projectionMatrix, colorYellow, 1, lightPos,
-            lightColors, cameraPosition, 0.1, 1
+            lightColors, cameraPosition, 20
         );
         
 
@@ -1933,7 +1932,6 @@ int main() {
     DiffuseSpecularLightingShader phongShader;
     CookTorranceShader cookShader;
     AnisotropicShader aniShader;
-    TextureShader texShader;
     CookTorranceTextureShader cookTexShader;
     AnisotropicTextureShader aniTexShader;
 
@@ -1961,9 +1959,21 @@ int main() {
     GLuint texture = loadTexture("C:\\Users\\msaba\\OneDrive\\Desktop\\textureMaps\\scratched-metal.jpg");
 
     std::string filename = "C:\\Users\\msaba\\OneDrive\\Desktop\\textureMaps\\moai.obj";
-    Polyhedron p = ReturnPrimitive(filename, 1, Vector3D::ZERO, new RigidBody(), 2);
+    Polyhedron p = returnPrimitive(filename, 1, Vector3D::ZERO, new RigidBody(), 2);
     p.body->orientation = Quaternion::rotatedByAxisAngle(Vector3D(0, 0, 1), PI/2.0);
 
+    FaceData data = getFaceData(p);
+    std::vector<std::vector<glm::vec3>> d = {
+        data.vertices, data.normals
+    };
+    cookShader.sendVaribleData(d);
+    cookShader.setVerticesSize(data.vertices.size());
+    cookShader.setActiveLightsCount(1);
+    cookShader.setLightPosition(lightPos);
+    cookShader.setLightColors(lightColors);
+    cookShader.setObjectColor(colorRed);
+    cookShader.setRoughness(0.05);
+    cookShader.setFresnel(0.5);
 
     real rotationSpeed = 0.1;
     real angle = PI / 2;
@@ -2004,56 +2014,17 @@ int main() {
 
         }
 
-
         window.clear(sf::Color::Color(0, 0, 0));
         // Clears the depth buffer (for 3D)
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        cookShader.setModelMatrix(convertToGLM(p.body->transformMatrix));
+        cookShader.setViewMatrix(camera.getViewMatrix());
+        cookShader.setViewPosition(camera.getPosition());
+        cookShader.setProjectionMatrix(camera.getProjectionMatrix());
 
-        FaceData data;
-        data = getFaceData(p);
-
-        aniTexShader.drawFaces(data.vertices, data.normals,
-            data.tangents, data.bitangents, data.uvCoordinates,
-            identity, camera.getViewMatrix(), camera.getProjectionMatrix(),
-            texture, colorWhite, colorBlack,
-            glm::vec3(500.0f, 500.0f, 0.0f),
-            colorWhite,
-            camera.getPosition(),
-            0.2, 0.2
-        );
-        
-        /*
-        cookTexShader.drawFaces(
-            data.vertices, data.normals, data.uvCoordinates,
-            identity, camera.getViewMatrix(), camera.getProjectionMatrix(),
-            texture,
-            1,
-            lightPos,
-            lightColors,
-            camera.getPosition(),
-            0.1, 0.5
-        );
-        
-        
-        phongShader.drawFaces(data.vertices, data.normals,
-            identity, camera.getViewMatrix(), camera.getProjectionMatrix(),
-            colorGrey,
-            1,
-            lightPos,
-            lightColors,
-            camera.getPosition(),
-            10
-        ); */
-
-        
-        
-       EdgeData edata;
-       FrameVectors vh = getUniformFrameVectors(p, 10);
-       //shader.drawEdges(vh.tangents,
-       //     identity, camera.getViewMatrix(), 
-       //     camera.getProjectionMatrix(), colorWhite
-       //);
+        cookShader.drawFaces();
+       
         
         window.display();
     }
@@ -2726,6 +2697,7 @@ int main() {
         glm::vec4 colorRed(1.0, 0.2, 0.2, 1);
         glm::vec4 colorBlue(0.2, 0.2, 1.0, 1);
         glm::vec4 colorGreen(0.2, 1.0, 0.2, 1);
+        glm::vec4 colorGrey(0.35, 0.35, 0.35, 1);
         glm::vec4 colorTrans(0, 0, 0, 1.0);
 
 
@@ -2810,10 +2782,10 @@ int main() {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
         // Save each face of the cubemap as an image file
-       // saveCubemapFaces(
-       //     cubemapTexture, width, height, 
-       //     "C:\\Users\\msaba\\OneDrive\\Desktop\\cubemaps"
-       // );
+        // saveCubemapFaces(
+        //     cubemapTexture, width, height, 
+        //     "C:\\Users\\msaba\\OneDrive\\Desktop\\cubemaps"
+        // );
 
         // Clear default framebuffer (window)
         window.clear(sf::Color::Color(0, 0, 0));
@@ -2837,8 +2809,8 @@ int main() {
         refShader2.drawFaces(
             data.vertices, data.normals, data.uvCoordinates,
             identity, camera.getViewMatrix(),
-            camera.getProjectionMatrix(), skybox, cubemapTexture, colorRed,
-            2, lightPos, lightColor, camera.getPosition(), 0.1, 0.05, 1.0, 0.0
+            camera.getProjectionMatrix(), skybox, cubemapTexture, colorGrey,
+            2, lightPos, lightColor, camera.getPosition(), 0.1, 0.05, 1.0, 0.3
         );
 
         // Display the rendered scene

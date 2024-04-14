@@ -10,7 +10,8 @@ void pe::drawVectorOfLines3D(
     glm::mat4& view,
     glm::mat4& model,
     sf::Color color,
-    real lineWidth) {
+    real lineWidth
+) {
 
     glm::mat4 matrix = projection * view * model;
 
@@ -37,7 +38,8 @@ void pe::drawVectorOfPolygons3D(
     glm::mat4& view,
     glm::mat4& model,
     sf::Color color, 
-    real opacity) {
+    real opacity
+) {
 
     glm::mat4 matrix = projection * view * model;
 

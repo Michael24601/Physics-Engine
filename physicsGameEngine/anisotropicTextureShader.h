@@ -2,55 +2,80 @@
 #ifndef ANISOTROPIC_TEXTURE_SHADER_H
 #define ANISOTROPIC_TEXTURE_SHADER_H
 
-#include "shaderProgram.h"
-#include "vector3D.h"
-#include "drawingUtil.h"
-#include "shaderInterface.h"
-#include "openglUtility.h"
+#include "shader.h"
 
 namespace pe {
 
-    class AnisotropicTextureShader {
-
-    private:
-
-        // Coded into the shader, as it must be known at compile time
-        static constexpr int MAXIMUM_NUMBER_OF_LIGHT_SOURCES = 10;
-
-        ShaderProgram shaderProgramObject;
+    class AnisotropicTextureShader : public Shader {
 
     public:
 
-        AnisotropicTextureShader() : shaderProgramObject(
-            readFileToString("anisotropicTextureVertexShader.glsl"),
-            readFileToString("anisotropicTextureFragmentShader.glsl")
+        AnisotropicTextureShader() : Shader(
+            "anisotropicTextureVertexShader.glsl",
+            "anisotropicTextureFragmentShader.glsl"
         ) {}
 
-        /*
-            Here, the view position is just the camera position.
-            Roughness controls the surface roughness of the material,
-            where 0 is very smooth and 1 is very rough.
-            Fresnel controls the reflectivity at glancing angles, with
-            0 being less reflective, and 1 being more reflective.
-        */
-        void drawFaces(
-            const std::vector<glm::vec3>& faces,
-            const std::vector<glm::vec3>& normals,
-            const std::vector<glm::vec3>& tangents,
-            const std::vector<glm::vec3>& bitangents,
-            const std::vector<glm::vec2>& texCoords,
-            const glm::mat4& model,
-            const glm::mat4& view,
-            const glm::mat4& projection,
-            GLuint textureID,
-            const glm::vec4& specularColor,
-            const glm::vec4& ambientColor,
-            const glm::vec3& lightSourcePosition,
-            const glm::vec4& lightSourceColor,
-            const glm::vec3& viewPosition,
-            real alphaX,
-            real alphaY
-        );
+        void setObjectTexture(const GLuint& textureId) {
+            setTextureUniform(
+                "objectTexture",
+                textureId,
+                GL_TEXTURE_2D,
+                0
+            );
+        }
+
+        void setModelMatrix(const glm::mat4& model) {
+            setUniform("model", model);
+        }
+
+        void setViewMatrix(const glm::mat4& view) {
+            setUniform("view", view);
+        }
+
+        void setProjectionMatrix(const glm::mat4& projection) {
+            setUniform("projection", projection);
+        }
+
+        void setViewMatrix(const glm::mat4& view) {
+            setUniform("view", view);
+        }
+
+        void setModelMatrix(const glm::mat4& model) {
+            setUniform("model", model);
+        }
+
+        void setProjectionMatrix(const glm::mat4& projection) {
+            setUniform("projection", projection);
+        }
+
+        void setSpecularColor(const glm::vec4& color) {
+            setUniform("specularColor", color);
+        }
+
+        void setAmbientColor(const glm::vec4& color) {
+            setUniform("ambientColor", color);
+        }
+
+        void setLightPosition(const glm::vec4& position) {
+            setUniform("lightPos", position);
+        }
+
+        void setLightColor(const glm::vec4& color) {
+            setUniform("lightColor", color);
+        }
+
+        void setViewPosition(const glm::vec3& position) {
+            setUniform("viewPos", position);
+        }
+
+        void setAlphaX(float alphaXValue) {
+            setUniform("alphaX", alphaXValue);
+        }
+
+        void setAlphaY(float alphaYValue) {
+            setUniform("alphaY", alphaYValue);
+        }
+
     };
 }
 

@@ -277,7 +277,19 @@ Make sure the generateParticleGrid function can work for a cloth that
 is vertical, horizontal, or along the z axis, not just when it is
 vertical.
 
-Make the GLSL their own files.
+Make the GLSL their own files (DONE).
 
 Fix the way we calculate the default texture coordinates, or remove
 them entirely.
+
+Restructure the shaders so that each frame doesn't recreate the VAO
+and VBO. This avoids the need for updating the global vertices each
+frame manually as the shader will do it.
+
+Add a check in the camera to verify the point the camera is looking at
+isn't the same as its position (which makes the screen black).
+
+Use the custom core classes for the camera, not the openGL ones.
+
+Make VAO and VBO not part of the shader object; send the VAO to the
+draw function instead.

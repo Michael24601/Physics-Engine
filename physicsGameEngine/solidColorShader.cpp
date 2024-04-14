@@ -1,3 +1,4 @@
+/*
 
 #include "solidColorShader.h"
 
@@ -141,3 +142,5 @@ void SolidColorShader::drawFaces(
         std::cout << "OpenGL Error: " << error << '\n';
     }
 }
+
+*/

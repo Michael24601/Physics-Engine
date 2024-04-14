@@ -2,61 +2,96 @@
 #ifndef COOK_TORRANCE_REFLECTION_SHADER_WITH_SKYBOX_H
 #define COOK_TORRANCE_REFLECTION_SHADER_WITH_SKYBOX_H
 
-#include "shaderProgram.h"
-#include "vector3D.h"
-#include "drawingUtil.h"
-#include "shaderInterface.h"
-#include "openglUtility.h"
+#include "shader.h"
 
 namespace pe {
 
-    class CookTorranceReflectionShaderWithSkybox {
-
-    private:
-
-        // Coded into the shader, as it must be known at compile time
-        static constexpr int MAXIMUM_NUMBER_OF_LIGHT_SOURCES = 10;
-
-        ShaderProgram shaderProgramObject;
+    class CookTorranceReflectionShaderWithSkybox : public Shader {
 
     public:
 
-        CookTorranceReflectionShaderWithSkybox() : shaderProgramObject(
-            readFileToString("cookTorranceReflectionVertexShader.glsl"),
-            readFileToString("cookTorranceReflectionFragmentShaderWithSkybox.glsl")
+        CookTorranceReflectionShaderWithSkybox() : Shader(
+            "cookTorranceReflectionVertexShader.glsl",
+            "cookTorranceReflectionFragmentShaderWithSkybox.glsl"
         ) {}
 
-        /*
-            Here, the view position is just the camera position.
-            Roughness controls the surface roughness of the material,
-            where 0 is very smooth and 1 is very rough.
-            Fresnel controls the reflectivity at glancing angles, with
-            0 being less reflective, and 1 being more reflective.
+        void setEnvironmentMap(GLuint environmentMapTextureId) {
+            setTextureUniform(
+                "environmentMap",
+                environmentMapTextureId,
+                GL_TEXTURE_CUBE_MAP,
+                1
+            );
+        }
 
-            Reflection Stregth is how much the object reflects, and how
-            much it is matte, and light influence is how much the light
-            influences the reflection (e.g. does the darkness make the
-            surface less reflective or not).
-        */
-        void drawFaces(
-            const std::vector<glm::vec3>& faces,
-            const std::vector<glm::vec3>& normals,
-            const std::vector<glm::vec2>& texCoords,
-            const glm::mat4& model,
-            const glm::mat4& view,
-            const glm::mat4& projection,
-            GLuint skybox,
-            GLuint environmentMapTextureId,
-            const glm::vec4& baseColor,
-            int activeLightSources,
-            glm::vec3* lightSourcesPosition,
-            glm::vec4* lightSourcesColor,
-            const glm::vec3& viewPosition,
-            real roughness,
-            real fresnel,
-            real reflectionStrength,
-            real lightInfluence
-        );
+        void setSkybox(GLuint skyboxTextureId) {
+            setTextureUniform(
+                "skybox",
+                skyboxTextureId,
+                GL_TEXTURE_CUBE_MAP,
+                0
+            );
+        }
+
+        void setModelMatrix(const glm::mat4& model) {
+            setUniform("model", model);
+        }
+
+        void setViewMatrix(const glm::mat4& view) {
+            setUniform("view", view);
+        }
+
+        void setProjectionMatrix(const glm::mat4& projection) {
+            setUniform("projection", projection);
+        }
+
+        void setViewMatrix(const glm::mat4& viewMatrix) {
+            setUniform("view", viewMatrix);
+        }
+
+        void setModelMatrix(const glm::mat4& modelMatrix) {
+            setUniform("model", modelMatrix);
+        }
+
+        void setProjectionMatrix(const glm::mat4& projectionMatrix) {
+            setUniform("projection", projectionMatrix);
+        }
+
+        void setLightPosition(const glm::vec3* positions) {
+            setUniform("lightPos", positions[0]);
+        }
+
+        void setBaseColor(const glm::vec4& baseColor) {
+            setUniform("objectColor", baseColor);
+        }
+
+        void setLightColors(const glm::vec4* colors) {
+            setUniform("lightColors", colors[0]);
+        }
+
+        void setNumActiveLights(int numActiveLights) {
+            setUniform("numActiveLights", numActiveLights);
+        }
+
+        void setViewPosition(const glm::vec3& viewPosition) {
+            setUniform("viewPos", viewPosition);
+        }
+
+        void setRoughness(float roughness) {
+            setUniform("roughness", roughness);
+        }
+
+        void setFresnel(float fresnel) {
+            setUniform("fresnel", fresnel);
+        }
+
+        void setReflectionStrength(float reflectionStrength) {
+            setUniform("reflectionStrength", reflectionStrength);
+        }
+
+        void setReflectionStrength(float lightInfluence) {
+            setUniform("lightInfluence", lightInfluence);
+        }
     };
 }
 

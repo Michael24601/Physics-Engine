@@ -1,3 +1,5 @@
+/*
+
 #include "cookTorranceShader.h"
 
 using namespace pe;
@@ -115,3 +117,5 @@ void CookTorranceShader::drawFaces(
         std::cout << "OpenGL Error: " << error << '\n';
     }
 }
+
+*/

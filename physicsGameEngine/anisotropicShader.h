@@ -2,45 +2,63 @@
 #ifndef NEW_ANISOTROPIC_SHADER_H
 #define NEW_ANISOTROPIC_SHADER_H
 
-#include "shaderProgram.h"
-#include "vector3D.h"
-#include "drawingUtil.h"
-#include "shaderInterface.h"
-#include "openglUtility.h"
+#include "shader.h"
 
 namespace pe {
 
-    class AnisotropicShader {
-
-    private:
-
-        ShaderProgram shaderProgramObject;
+    class AnisotropicShader: public Shader {
 
     public:
 
-        AnisotropicShader() : shaderProgramObject(
-            readFileToString("anisotropicVertexShader.glsl"),
-            readFileToString("anisotropicFragmentShader.glsl")
+        AnisotropicShader() : Shader(
+            "anisotropicVertexShader.glsl",
+            "anisotropicFragmentShader.glsl"
         ) {}
 
+        void setModelMatrix(const glm::mat4& model) {
+            setUniform("model", model);
+        }
 
-        void drawFaces(
-            std::vector<glm::vec3>& faces,
-            std::vector<glm::vec3>& normals,
-            std::vector<glm::vec3>& tangents,
-            std::vector<glm::vec3>& bitangents,
-            const glm::mat4& model,
-            const glm::mat4& view,
-            const glm::mat4& projection,
-            const glm::vec4& objectColor,
-            const glm::vec4& specularColor,
-            const glm::vec4& ambientColor,
-            const glm::vec3& lightSourcePosition,
-            const glm::vec4& lightSourceColor,
-            const glm::vec3& viewPosition,
-            real alphaX,
-            real alphaY
-        );
+        void setViewMatrix(const glm::mat4& view) {
+            setUniform("view", view);
+        }
+
+        void setProjectionMatrix(const glm::mat4& projection) {
+            setUniform("projection", projection);
+        }
+
+        void setObjectColor(const glm::vec4& color) {
+            setUniform("objectColor", color);
+        }
+
+        void setAmbientColor(const glm::vec4& color) {
+            setUniform("ambientColor", color);
+        }
+
+        void setSpecularColor(const glm::vec4& color) {
+            setUniform("specularColor", color);
+        }
+
+        void setLightPosition(const glm::vec4& position) {
+            setUniform("lightPos", position);
+        }
+
+        void setLightColor(const glm::vec4& color) {
+            setUniform("lightColor", color);
+        }
+
+        void setViewPosition(const glm::vec3& position) {
+            setUniform("viewPos", position);
+        }
+
+        void setAlphaX(float alphaXValue) {
+            setUniform("alphaX", alphaXValue);
+        }
+
+        void setAlphaY(float alphaYValue) {
+            setUniform("alphaY", alphaYValue);
+        }
+        
     };
 }
 

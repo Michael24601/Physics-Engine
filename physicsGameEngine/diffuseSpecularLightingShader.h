@@ -2,48 +2,56 @@
 #ifndef DIFFUSE_SPECULAR_LIGHTING_SHADER_H
 #define DIFFUSE_SPECULAR_LIGHTING_SHADER_H
 
-#include "shaderProgram.h"
-#include "vector3D.h"
-#include "drawingUtil.h"
-#include "shaderInterface.h"
-#include "openglUtility.h"
+#include "shader.h"
 
 namespace pe {
 
-    class DiffuseSpecularLightingShader {
-
-    private:
-
-        // Coded into the shader, as it must be known at compile time
-        static constexpr int MAXIMUM_NUMBER_OF_LIGHT_SOURCES = 10;
-
-        ShaderProgram shaderProgramObject;
+    class DiffuseSpecularLightingShader : public Shader {
 
     public:
 
-        DiffuseSpecularLightingShader() : shaderProgramObject(
-            readFileToString("phongVertexShader.glsl"),
-            readFileToString("phongFragmentShader.glsl")
+        DiffuseSpecularLightingShader() : Shader(
+            "phongVertexShader.glsl",
+            "phongFragmentShader.glsl"
         ) {}
 
-        /*
-            Here, the view position is just the camera position.
-            Shininess is how shiny the specular effect is, with
-            1 being extremly strong, and 100000 being very weak.
-        */
-        void drawFaces(
-            const std::vector<glm::vec3>& faces,
-            const std::vector<glm::vec3>& normals,
-            const glm::mat4& model,
-            const glm::mat4& view,
-            const glm::mat4& projection,
-            const glm::vec4& objectColor,
-            int activeLightSources,
-            glm::vec3* lightSourcesPosition,
-            glm::vec4* lightSourcesColor,
-            const glm::vec3& viewPosition,
-            real shininess
-        );
+        void setModelMatrix(const glm::mat4& model) {
+            setUniform("model", model);
+        }
+
+        void setViewMatrix(const glm::mat4& view) {
+            setUniform("view", view);
+        }
+
+        void setProjectionMatrix(const glm::mat4& projection) {
+            setUniform("projection", projection);
+        }
+
+        void setObjectColor(const glm::vec4& color) {
+            setUniform("objectColor", color);
+        }
+
+        void setLightPosition(const glm::vec3* positions) {
+            // Setting an array means sending the first value
+            setUniform("lightPos", positions[0]);
+        }
+
+        void setLightColors(const glm::vec4* colors) {
+            setUniform("lightColors", colors[0]);
+        }
+
+        void setActiveLightsCount(int count) {
+            setUniform("numActiveLights", count);
+        }
+
+        void setViewPosition(const glm::vec3& viewPos) {
+            setUniform("viewPos", viewPos);
+        }
+
+        void setShininess(float shininess) {
+            setUniform("shininess", shininess);
+        }
+
     };
 }
 

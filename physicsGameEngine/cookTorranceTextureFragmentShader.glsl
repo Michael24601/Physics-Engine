@@ -5,7 +5,7 @@ in vec3 FragPos;
 in vec3 Normal;
 in vec2 TexCoord;
 
-uniform sampler2D textureSampler;
+uniform sampler2D objectTexture;
 
 #define MAX_LIGHTS 10
 
@@ -27,7 +27,7 @@ void main(){
     for (int i = 0; i < numActiveLights; ++i) {
         vec3 lightDir = normalize(lightPos[i] - FragPos);
         float diff = max(dot(Normal, lightDir), 0.0);
-        vec3 diffuse = texture(textureSampler, TexCoord).rgb * diff;
+        vec3 diffuse = texture(objectTexture, TexCoord).rgb * diff;
         finalDiffuse += diffuse;
 
         vec3 viewDir = normalize(viewPos - FragPos);
@@ -50,7 +50,7 @@ void main(){
         finalSpecular += specular;
     }
 
-    vec3 ambientColor = 0.1 * texture(textureSampler, TexCoord).rgb;
+    vec3 ambientColor = 0.1 * texture(objectTexture, TexCoord).rgb;
     vec3 resultColor = finalDiffuse + finalSpecular + ambientColor;
 
     FragColor = vec4(resultColor, 1.0);

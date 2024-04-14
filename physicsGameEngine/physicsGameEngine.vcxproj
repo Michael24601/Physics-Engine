@@ -258,6 +258,7 @@
     <ClInclude Include="polyhedron.h" />
     <ClInclude Include="rigidBodyBungeeForce.h" />
     <ClInclude Include="rotatingCamera.h" />
+    <ClInclude Include="shader.h" />
     <ClInclude Include="shaderInterface.h" />
     <ClInclude Include="diffuseLightingShader.h" />
     <ClInclude Include="diffuseSpecularLightingShader.h" />

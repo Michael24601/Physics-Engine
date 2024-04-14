@@ -2,41 +2,47 @@
 #ifndef DIFFUSE_LIGHTING_SHADER_H
 #define DIFFUSE_LIGHTING_SHADER_H
 
-#include "shaderProgram.h"
-#include "vector3D.h"
-#include "drawingUtil.h"
-#include "shaderInterface.h"
-#include "openglUtility.h"
+#include "shader.h"
 
 namespace pe {
 
-    class DiffuseLightingShader {
-
-    private:
-
-        // Coded into the shader, as it must be known at compile time
-        static constexpr int MAXIMUM_NUMBER_OF_LIGHT_SOURCES = 10;
-
-        ShaderProgram shaderProgramObject;
+    class DiffuseLightingShader : public Shader{
 
     public:
 
-        DiffuseLightingShader() : shaderProgramObject(
-            readFileToString("diffuseLightingVertexShader.glsl"),
-            readFileToString("diffuseLightingFragmentShader.glsl")
+        DiffuseLightingShader() : Shader(
+            "diffuseLightingVertexShader.glsl",
+            "diffuseLightingFragmentShader.glsl"
         ) {}
 
-        void drawFaces(
-            const std::vector<glm::vec3>& faces,
-            const std::vector<glm::vec3>& normals,
-            const glm::mat4& model,
-            const glm::mat4& view,
-            const glm::mat4& projection,
-            const glm::vec4& objectColor,
-            int activeLightSources,
-            glm::vec3* lightSourcesPosition,
-            glm::vec4* lightSourcesColor
-        );
+        void setModelMatrix(const glm::mat4& model) {
+            setUniform("model", model);
+        }
+
+        void setViewMatrix(const glm::mat4& view) {
+            setUniform("view", view);
+        }
+
+        void setProjectionMatrix(const glm::mat4& projection) {
+            setUniform("projection", projection);
+        }
+
+        void setObjectColor(const glm::vec4& color) {
+            setUniform("objectColor", color);
+        }
+
+        void setLightPosition(const glm::vec3* positions) {
+            // Setting an array means sending the first value
+            setUniform("lightPos", positions[0]);
+        }
+
+        void setLightColors(const glm::vec4* colors) {
+            setUniform("lightColors", colors[0]);
+        }
+
+        void setActiveLightsCount(int count) {
+            setUniform("numActiveLights", count);
+        }
     };
 }
 

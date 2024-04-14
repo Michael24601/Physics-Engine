@@ -518,6 +518,9 @@
     <ClInclude Include="cookTorranceReflectionShaderWithSkybox.h">
       <Filter>Header Files\OpenglGraphics</Filter>
     </ClInclude>
+    <ClInclude Include="shader.h">
+      <Filter>Header Files\OpenglGraphics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="todo.txt" />
