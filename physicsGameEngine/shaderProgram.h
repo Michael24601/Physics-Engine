@@ -128,6 +128,13 @@ namespace pe {
                 fragmentShaderSource);
         }
 
+        /*
+            Releases shader program resources.
+        */
+        ~ShaderProgram() {
+            glDeleteProgram(shaderProgram);
+        }
+
         // Returns the shader program itself (by reference)
         GLuint& getShaderProgram() {
             return shaderProgram;

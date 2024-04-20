@@ -14,18 +14,6 @@ namespace pe {
             "cookTorranceReflectionFragmentShader.glsl"
         ) {}
 
-        void setModelMatrix(const glm::mat4& model) {
-            setUniform("model", model);
-        }
-
-        void setViewMatrix(const glm::mat4& view) {
-            setUniform("view", view);
-        }
-
-        void setProjectionMatrix(const glm::mat4& projection) {
-            setUniform("projection", projection);
-        }
-
         void setEnvironmentMap(GLuint environmentMapTextureId) {
             setTextureUniform(
                 "environmentMap",
@@ -33,18 +21,6 @@ namespace pe {
                 GL_TEXTURE_CUBE_MAP, 
                 1
             );
-        }
-
-        void setViewMatrix(const glm::mat4& viewMatrix) {
-            setUniform("view", viewMatrix);
-        }
-
-        void setModelMatrix(const glm::mat4& modelMatrix) {
-            setUniform("model", modelMatrix);
-        }
-
-        void setProjectionMatrix(const glm::mat4& projectionMatrix) {
-            setUniform("projection", projectionMatrix);
         }
 
         void setLightPosition(const glm::vec3* positions) {
@@ -61,10 +37,6 @@ namespace pe {
 
         void setNumActiveLights(int numActiveLights) {
             setUniform("numActiveLights", numActiveLights);
-        }
-
-        void setViewPosition(const glm::vec3& viewPosition) {
-            setUniform("viewPos", viewPosition);
         }
 
         void setRoughness(float roughness) {

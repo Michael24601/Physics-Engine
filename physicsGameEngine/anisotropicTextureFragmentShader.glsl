@@ -14,14 +14,19 @@ uniform vec4 specularColor;
 uniform vec4 lightPos;
 uniform vec4 lightColor;
 
+uniform mat4 view;
+
 // Anisotropic shading parameters
-uniform vec3 viewPos;
 uniform float alphaX;
 uniform float alphaY;
 
 out vec4 FragColor;
 
 void main() {
+
+    // We can extract the camera position from thew view matrix, 
+    // no need to send it as a uniform
+    vec3 viewPos = (inverse(view))[3].xyz;
 
     vec3 normalDirection = normalize(Normal);
     vec3 tangentDirection = normalize(Tangent);

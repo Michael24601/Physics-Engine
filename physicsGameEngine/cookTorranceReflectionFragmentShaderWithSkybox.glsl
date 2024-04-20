@@ -16,12 +16,13 @@ uniform vec4 lightColors[MAX_LIGHTS];
 
 uniform int numActiveLights;
 
-uniform vec3 viewPos;
 uniform float roughness;
 uniform float fresnel;
 
 uniform float reflectionStrength;
 uniform float lightInfluence;
+
+uniform mat4 view;
 
 out vec4 FragColor;
 
@@ -33,6 +34,11 @@ float customFunction(float a, float x) {
 }
 
 void main() {
+
+    // We can extract the camera position from thew view matrix, 
+    // no need to send it as a uniform
+    vec3 viewPos = (inverse(view))[3].xyz;
+
     vec3 finalDiffuse = vec3(0.0);
     vec3 finalSpecular = vec3(0.0);
 

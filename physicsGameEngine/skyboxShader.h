@@ -90,17 +90,31 @@ namespace pe {
             */
             std::vector<std::vector<glm::vec3>> data{ skyboxVertices };
             sendVaribleData(data);
+            setTrianglesNumber(skyboxVertices.size());
+        }
+
+        void setSkybox(GLuint skyboxTextureId) {
+            setTextureUniform(
+                "skybox",
+                skyboxTextureId,
+                GL_TEXTURE_CUBE_MAP,
+                0
+            );
         }
 
         /*
-            Instead of sending an entire model matrix, we only send the 
-            scaling factor that will resize the cube to fit our scene
+            While we can set the model matrix manually when rendering
+            a skybox (since the uniform exists in the shader), we usually
+            only really want to scale the cube to fit our scene
             (since we don't need to translate and rotate it).
+            So we can use this function instead which takes in a scale
+            and applies it to the identity matrix, then calls
+            setModel.
         */
-        void setModelMatrix(float scale) {
+        void setModelScale(float scale) {
             glm::mat4 model = glm::mat4(1.0f);
             model = glm::scale(model, glm::vec3(scale));
-            setUniform("model", model);
+            setModelMatrix(model);
         }
 
         void setViewMatrix(const glm::mat4& view) {
@@ -119,7 +133,7 @@ namespace pe {
             used for drawing the background, appears in the back of all
             objects.
         */
-        void drawFaces() override {
+        void drawSkyboxFaces() {
        
             // First we disable depth writing
             glDepthMask(GL_FALSE);

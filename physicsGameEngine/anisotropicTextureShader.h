@@ -24,30 +24,6 @@ namespace pe {
             );
         }
 
-        void setModelMatrix(const glm::mat4& model) {
-            setUniform("model", model);
-        }
-
-        void setViewMatrix(const glm::mat4& view) {
-            setUniform("view", view);
-        }
-
-        void setProjectionMatrix(const glm::mat4& projection) {
-            setUniform("projection", projection);
-        }
-
-        void setViewMatrix(const glm::mat4& view) {
-            setUniform("view", view);
-        }
-
-        void setModelMatrix(const glm::mat4& model) {
-            setUniform("model", model);
-        }
-
-        void setProjectionMatrix(const glm::mat4& projection) {
-            setUniform("projection", projection);
-        }
-
         void setSpecularColor(const glm::vec4& color) {
             setUniform("specularColor", color);
         }
@@ -62,10 +38,6 @@ namespace pe {
 
         void setLightColor(const glm::vec4& color) {
             setUniform("lightColor", color);
-        }
-
-        void setViewPosition(const glm::vec3& position) {
-            setUniform("viewPos", position);
         }
 
         void setAlphaX(float alphaXValue) {

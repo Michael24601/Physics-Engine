@@ -9,7 +9,6 @@ uniform vec4 objectColor;
 #define MAX_LIGHTS 10
 
 uniform vec3 lightPos[MAX_LIGHTS];
-uniform vec4 lightColors[MAX_LIGHTS];
 
 uniform int numActiveLights;
 

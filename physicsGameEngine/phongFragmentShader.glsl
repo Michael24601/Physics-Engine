@@ -13,13 +13,19 @@ uniform vec4 lightColors[MAX_LIGHTS];
 
 uniform int numActiveLights;
 
+uniform mat4 view;
+
 // Specular lighting parameters
-uniform vec3 viewPos;
 uniform float shininess;
 
 out vec4 FragColor;
 
 void main(){
+
+    // We can extract the camera position from thew view matrix, 
+    // no need to send it as a uniform
+    vec3 viewPos = (inverse(view))[3].xyz;
+
     vec3 finalDiffuse = vec3(0.0);
     vec3 finalSpecular = vec3(0.0);
 

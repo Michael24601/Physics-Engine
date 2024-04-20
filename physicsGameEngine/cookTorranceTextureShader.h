@@ -25,18 +25,6 @@ namespace pe {
             );
         }
 
-        void setModelMatrix(const glm::mat4& model) {
-            setUniform("model", model);
-        }
-
-        void setViewMatrix(const glm::mat4& view) {
-            setUniform("view", view);
-        }
-
-        void setProjectionMatrix(const glm::mat4& projection) {
-            setUniform("projection", projection);
-        }
-
         void setLightPosition(const glm::vec3* positions) {
             // Setting an array means sending the first value
             setUniform("lightPos", positions[0]);
@@ -48,10 +36,6 @@ namespace pe {
 
         void setActiveLightsCount(int count) {
             setUniform("numActiveLights", count);
-        }
-
-        void setViewPosition(const glm::vec3& viewPos) {
-            setUniform("viewPos", viewPos);
         }
 
         void setRoughness(float roughness) {

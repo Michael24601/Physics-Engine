@@ -13,7 +13,7 @@ Make the inverse transform into one single operation instead of
 two when converting world to local coordinates (DONE).
 
 Get rid of preprocessor macros (except for header guards), use
-global variables or typedef instead.
+global variables or typedef instead (DONE).
 
 Include H in header guards.
 
@@ -64,7 +64,7 @@ a general algorithm that works for all convex polyhedra. (DONE)
 Initialize in each shape's contructor the transform variable.
 
 Fix the generation of contacts in the array, right now only the
-first value is being set. Maybe use a counter.
+first value is being set. Maybe use a counter (DONE).
 
 Figure out what offset should be when we don't want to rotate,
 and add it by default in transform. Make sure its updated every
@@ -236,6 +236,11 @@ Add an edge to edge in the second collision generation method.
 Change the named of functions in the third collision generation
 method (DONE).
 
+Consider using EBOs instead of sending all vertices. 
+
+Consider creating the shadow and environment maps only during
+initialization.
+
 Comment and explain all three collision generation methods.
 
 Consider the benefits of sending the local vertices of the
@@ -289,5 +294,10 @@ isn't the same as its position (which makes the screen black).
 
 Use the custom core classes for the camera, not the openGL ones.
 
-Make VAO and VBO not part of the shader object; send the VAO to the
-draw function instead.
+Add a first person camera.
+
+Calculate the camera position from the view matrix in the vertex,
+not fragment shader, and send it to the fragment shader.
+
+Consider using a bias matrix to turn the homogenous coordinates
+into texture coordinates instead of doing it in the shader.

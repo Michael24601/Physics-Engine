@@ -29,7 +29,8 @@ namespace pe {
         GLuint vao;
         GLuint vbo;
 
-        GLsizei vertexNumber;
+        GLsizei triangleNumber;
+        GLsizei edgeNumber;
 
         /*
             Below are functions that allow us to set uniforms of any type.
@@ -111,6 +112,7 @@ namespace pe {
             GLenum textureType, 
             GLuint textureUnit
         ) {
+            glUseProgram(shaderProgram.getShaderProgram());
 
             glActiveTexture(GL_TEXTURE0 + textureUnit);
             glBindTexture(textureType, textureId);
@@ -132,6 +134,8 @@ namespace pe {
                 the texture.
             */
             glActiveTexture(GL_TEXTURE0);
+
+            glUseProgram(0);
         }
 
 
@@ -143,7 +147,7 @@ namespace pe {
         ) : shaderProgram(
             readFileToString(vertexShaderSource),
             readFileToString(fragmentShaderSource)
-        ), vao(0), vbo(0), vertexNumber(0) {
+        ), vao(0), vbo(0), triangleNumber(0), edgeNumber(0) {
 
             glGenVertexArrays(1, &vao);
             glGenBuffers(1, &vbo);
@@ -153,6 +157,7 @@ namespace pe {
         ~Shader() {
             // Deletes the VAO and VBO and removes the program
             cleanUpVAOandVBO();
+            shaderProgram.~ShaderProgram();
             glUseProgram(0);
         }
 
@@ -247,8 +252,18 @@ namespace pe {
             data is needed when drawing the shapes as it will be partitioned
             into threes, which are used to draw triangles.
         */
-        void setVerticesSize(int size) {
-            this->vertexNumber = size;
+        void setTrianglesNumber(int size) {
+            this->triangleNumber = size;
+        }
+
+
+        void setEdgeNumber(int size) {
+            this->edgeNumber = size;
+        }
+
+        
+        GLuint& getShaderProgram() {
+            return shaderProgram.getShaderProgram();
         }
 
 
@@ -267,19 +282,14 @@ namespace pe {
         /*
             Function that draws faces (assuming the vertices that were
             sent to it in the vao correspond to triangles).
-
-            The function is virtual as it may need to be overriden by 
-            specific shaders for certain purposes (for instance,
-            some shaders may be used to draw skyboxes, which requires
-            dooing some extra steps like disabling depth writing.
         */
-        virtual void drawFaces() {
+        void drawFaces() {
 
             glUseProgram(shaderProgram.getShaderProgram());
 
             // Binds VAO and draw
             glBindVertexArray(vao);
-            glDrawArrays(GL_TRIANGLES, 0, vertexNumber);
+            glDrawArrays(GL_TRIANGLES, 0, triangleNumber);
             glBindVertexArray(0);
 
             GLenum error = glGetError();
@@ -304,7 +314,7 @@ namespace pe {
 
             // Binds VAO and draw
             glBindVertexArray(vao);
-            glDrawArrays(GL_LINES, 0, vertexNumber);
+            glDrawArrays(GL_LINES, 0, edgeNumber);
             glBindVertexArray(0);
 
             GLenum error = glGetError();
@@ -319,6 +329,28 @@ namespace pe {
             glUseProgram(0);
         }
 
+        /*
+            The below three functions are public setters for the 3 matrices
+            used to transform vertices in the vertex shaders; the model,
+            view, and projection.
+            Other more specific uniforms such as color, alpha value,
+            lightSource etc... are specific to certain shaders, and their
+            setters are included in the subclasses. The 3 matrix setters
+            are included in the parent class because they are the only
+            uniforms guaranteed to be present in every shader.
+        */
+
+        void setModelMatrix(const glm::mat4& model) {
+            setUniform("model", model);
+        }
+
+        void setViewMatrix(const glm::mat4& view) {
+            setUniform("view", view);
+        }
+
+        void setProjectionMatrix(const glm::mat4& projection) {
+            setUniform("projection", projection);
+        }
 	};
 }
 
