@@ -83,10 +83,13 @@
 #include "shadowMappingShader.h"
 #include "simpleShader.h"
 
+#include "environmentMapper.h"
+#include "depthMapper.h"
+
 using namespace pe;
 using namespace std;
 
-#define SIM_11
+#define SIM_10
 
 #ifdef SIM_1
 
@@ -2642,8 +2645,8 @@ int main() {
     Polyhedron c2 = returnPrimitive(filename, 1, Vector3D::ZERO, new RigidBody(), 2);
     c2.body->orientation = Quaternion::rotatedByAxisAngle(Vector3D(0, 0, 1), PI / 2.0);
 
-
     skyboxShader.setSkybox(skybox);
+    skyboxShader.setModelScale(2000);
 
     FaceData data = getFaceData(c2);
     std::vector<std::vector<glm::vec3>> d = {
@@ -2674,13 +2677,7 @@ int main() {
     cookShader.setRoughness(0.05);
     cookShader.setFresnel(0.5);
 
-
-    RigidBodyGravity g(Vector3D(0, -10, 0));
-
-    real rotationSpeed = 0.10;
-    real angle = PI / 2;
-    bool isButtonPressed[2]{ false , false };
-
+    EnvironmentMapper mapper(512, 512);
 
     while (window.isOpen()) {
 
@@ -2689,53 +2686,22 @@ int main() {
             if (event.type == sf::Event::Closed) {
                 window.close();
             }
-            else if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
-                isButtonPressed[0] = true;
-            }
-            else if (event.type == sf::Event::MouseButtonReleased
-                && event.mouseButton.button == sf::Mouse::Left) {
-                isButtonPressed[0] = false;
-            }
-            else if (sf::Mouse::isButtonPressed(sf::Mouse::Right)) {
-                isButtonPressed[1] = true;
-            }
-            else if (event.type == sf::Event::MouseButtonReleased
-                && event.mouseButton.button == sf::Mouse::Right) {
-                isButtonPressed[1] = false;
-            }
 
             camera.update(event, deltaT);
         }
 
-        int numSteps = 10;
-        real substep = deltaT / numSteps;
+        c.body->calculateDerivedData();
+        c2.body->calculateDerivedData();
 
-        while (numSteps--) {
 
-            c.body->calculateDerivedData();
-            c2.body->calculateDerivedData();
+        sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
+        sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);
+        c.body->position = {
+            c.body->position.x,
+            worldPos.y,
+            worldPos.x
+        };
 
-            if (isButtonPressed[0] || isButtonPressed[1]) {
-
-                if (isButtonPressed[0]) {
-                }
-                else if (isButtonPressed[1]) {
-                }
-            }
-
-            sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
-            sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);
-            c.body->position = {
-                c.body->position.x,
-                worldPos.y,
-                worldPos.x
-            };
-
-            //c.body->integrate(substep);
-            // c.update();
-            // c2.body->integrate(substep);
-            //c2.update();
-        }
 
         cookShader.setModelMatrix(convertToGLM(c.body->transformMatrix));
         cookShader.setViewMatrix(camera.getViewMatrix());
@@ -2748,9 +2714,8 @@ int main() {
 
         std::vector<Shader*> shaders{ &cookShader };
 
-        GLuint cubemapTexture = captureEnvironment(
+        mapper.captureEnvironment(
             convertToGLM(c2.body->position),
-            800, 800,
             shaders
         );
 
@@ -2760,20 +2725,20 @@ int main() {
         */
         glActiveTexture(GL_TEXTURE0);
 
-        refShader2.setEnvironmentMap(cubemapTexture);
+        refShader2.setEnvironmentMap(mapper.getTexture());
 
         cookShader.setViewMatrix(camera.getViewMatrix());
         cookShader.setProjectionMatrix(camera.getProjectionMatrix());
 
         skyboxShader.setViewMatrix(camera.getViewMatrix());
         skyboxShader.setProjectionMatrix(camera.getProjectionMatrix());
-        skyboxShader.setModelScale(2000);
 
         // Unbind framebuffer to render to default framebuffer (window)
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
         // Clear default framebuffer (window)
         window.clear(sf::Color::Color(0, 0, 0));
+        glViewport(0, 0, 800, 800);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         cookShader.drawFaces();
@@ -2782,9 +2747,6 @@ int main() {
 
         // Display the rendered scene
         window.display();
-
-        // Cleanup: delete framebuffer and texture
-        glDeleteTextures(1, &cubemapTexture);
     }
 
     return 0;
@@ -2938,32 +2900,8 @@ int main() {
     cookShader.setFresnel(0.5);
 
 
-    RigidBodyGravity g(Vector3D(0, -10, 0));
-
-    real rotationSpeed = 0.10;
-    real angle = PI / 2;
-    bool isButtonPressed[2]{ false , false };
-
-
-    float width = 512, height = 512;
-
-    GLuint depthMapFBO;
-    glGenFramebuffers(1, &depthMapFBO);
-
-    GLuint depthMap;
-    glGenTextures(1, &depthMap);
-    glBindTexture(GL_TEXTURE_2D, depthMap);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,
-        width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-    glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
-    glDrawBuffer(GL_NONE);
-    glReadBuffer(GL_NONE);
+    DepthMapper depthMapper(512, 512);
+     
 
     GLenum framebufferStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
     if (framebufferStatus != GL_FRAMEBUFFER_COMPLETE) {
@@ -3005,25 +2943,14 @@ int main() {
         glm::mat4 projection = glm::ortho(
             -200.0f, 200.0f, -200.0f, 200.0f, near_plane,far_plane
         );
-
-
+    
         simpleShader.setModelMatrix(convertToGLM(c.body->transformMatrix));
         simpleShader2.setModelMatrix(convertToGLM(c2.body->transformMatrix));
-        simpleShader.setViewMatrix(view);
-        simpleShader.setProjectionMatrix(projection);
-        simpleShader2.setViewMatrix(view);
-        simpleShader2.setProjectionMatrix(projection);
-        
-        glViewport(0, 0, width, height);
-        glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
-        glClear(GL_DEPTH_BUFFER_BIT);
-        glEnable(GL_DEPTH_TEST);
+        std::vector<Shader*> shaders{
+            &simpleShader, &simpleShader2
+        };
 
-        simpleShader.drawFaces();
-        simpleShader2.drawFaces();
-
-        // We finally unbind the framebuffer
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        depthMapper.captureDepth(view, projection, shaders);
 
         glm::mat4 viewM = camera.getViewMatrix();
         glm::mat4 projectionM = camera.getProjectionMatrix();
@@ -3042,7 +2969,6 @@ int main() {
 
         // Unbind framebuffer to render to default framebuffer (window)
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
  
         // Clear default framebuffer (window)
         window.clear(sf::Color::Color(0, 0, 0)); 
@@ -3050,7 +2976,7 @@ int main() {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // Needs to be set here
-        cookShader2.setShadowMap(depthMap);
+        cookShader2.setShadowMap(depthMapper.getTexture());
 
         cookShader2.drawFaces();
         cookShader.drawFaces();
@@ -3060,12 +2986,6 @@ int main() {
         window.display();
 
     }
-
-    // Cleanup: delete framebuffer and texture
-    glDeleteTextures(1, &depthMap);
-    
-    // The buffer is deleted here
-    glDeleteFramebuffers(1, &depthMapFBO);
 
     return 0;
 }

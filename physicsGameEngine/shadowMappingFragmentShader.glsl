@@ -31,7 +31,7 @@ float ShadowCalculation(vec4 fragPosLightSpace, vec3 lightDir){
     // does not cast a shadow on itself (since its shadow will be 
     // immediatly on top of it, and small numericall inaccuracies
     // can cause it to overshadow the shape, depending on the angle).
-    float bias = 0.005;
+    float bias = 0.05;
 
     // check whether current frag pos is in shadow
     float shadow = currentDepth - bias > closestDepth ? 1.0 : 0.0;

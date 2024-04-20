@@ -506,6 +506,9 @@
     <ClInclude Include="environmentMapper.h">
       <Filter>Header Files\OpenGL Utilities</Filter>
     </ClInclude>
+    <ClInclude Include="depthMapper.h">
+      <Filter>Header Files\OpenGL Utilities</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="todo.txt" />

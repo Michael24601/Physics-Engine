@@ -297,7 +297,11 @@ Use the custom core classes for the camera, not the openGL ones.
 Add a first person camera.
 
 Calculate the camera position from the view matrix in the vertex,
-not fragment shader, and send it to the fragment shader.
+not fragment shader, and send it to the fragment shader (DONE).
 
 Consider using a bias matrix to turn the homogenous coordinates
 into texture coordinates instead of doing it in the shader.
+
+Switch to GLFW.
+
+Create lighting type for 

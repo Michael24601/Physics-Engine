@@ -217,6 +217,7 @@
     <ClInclude Include="cookTorranceReflectionShader.h" />
     <ClInclude Include="cookTorranceReflectionShaderWithSkybox.h" />
     <ClInclude Include="cookTorranceShader.h" />
+    <ClInclude Include="depthMapper.h" />
     <ClInclude Include="environmentMapper.h" />
     <ClInclude Include="shadowMappingShader.h" />
     <ClInclude Include="cookTorranceTextureFragmentShader.glsl" />

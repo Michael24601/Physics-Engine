@@ -262,7 +262,7 @@ namespace pe {
         }
 
         
-        GLuint& getShaderProgram() {
+        GLuint getShaderProgram() {
             return shaderProgram.getShaderProgram();
         }
 

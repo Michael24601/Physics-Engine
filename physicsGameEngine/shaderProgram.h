@@ -136,7 +136,7 @@ namespace pe {
         }
 
         // Returns the shader program itself (by reference)
-        GLuint& getShaderProgram() {
+        GLuint getShaderProgram() const {
             return shaderProgram;
         }
 	};
