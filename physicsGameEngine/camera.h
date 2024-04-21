@@ -3,7 +3,7 @@
 #define CAMERA_H
 
 #include <GL/gl.h>
-#include <SFML/Graphics.hpp>
+#include <GLFW/glfw3.h>
 #include "accuracy.h"
 
 namespace pe {
@@ -11,6 +11,8 @@ namespace pe {
 	class Camera {
 
     protected:
+
+        GLFWwindow* window;
 
         // Position of the camera
         glm::vec3 cameraPosition;
@@ -23,12 +25,12 @@ namespace pe {
         glm::mat4 viewMatrix;
 
         // Field of View (FOV) in degrees
-        real fov;
+        float fov;
         // Aspect ratio
-        real aspectRatio;
+        float aspectRatio;
         // Near and far clipping planes
-        real nearPlane;
-        real farPlane;
+        float nearPlane;
+        float farPlane;
 
         // The projection matrix is used for perspective
         glm::mat4 projectionMatrix;
@@ -48,10 +50,10 @@ namespace pe {
 
 
         static inline glm::mat4 calculateProjectionMatrix(
-            real fov,
-            real aspectRatio,
-            real nearPlane,
-            real farPlane
+            float fov,
+            float aspectRatio,
+            float nearPlane,
+            float farPlane
         ) {
             return glm::perspective(
                 glm::radians(fov),
@@ -65,20 +67,26 @@ namespace pe {
     public:
 
         Camera(
-            const sf::Window& window,
+            GLFWwindow* window,
             const glm::vec3& cameraPosition,
             const glm::vec3& cameraTarget,
-            real fov,
-            real nearPlane,
-            real farPlane
+            float fov,
+            float nearPlane,
+            float farPlane
         ) {
+
+            this->window = window;
+
             this->cameraPosition = cameraPosition;
             this->cameraTarget = cameraTarget;
             // We always use this vector to indicate the up direction
             upVector = glm::vec3(0.0f, 1.0f, 0.0f);
             this->fov = fov;
+
             // We can get the aspect ratio from the window size
-            aspectRatio = window.getSize().x / static_cast<real>(window.getSize().y);
+            int width, height;
+            glfwGetWindowSize(window, &width, &height);
+            aspectRatio = width / static_cast<float>(height);
             this->nearPlane = nearPlane;
             this->farPlane = farPlane;
 
@@ -96,8 +104,8 @@ namespace pe {
         }
 
 
-        // Used in order to update the camera using events each frame
-        virtual void update(sf::Event& event, real deltaT) = 0;
+        // Used in order to update the camera each frame
+        virtual void processInput(float deltaT) = 0;
 
 
         glm::mat4 getViewMatrix() const {

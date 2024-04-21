@@ -11,20 +11,20 @@ namespace pe {
 	private:
 
 		// Indicates how fast the camera moves
-		real movementSpeed;
-		real rotationSpeed;
+		float movementSpeed;
+		float rotationSpeed;
 
 	public:
 
 		FreeMovingCamera(
-			const sf::Window& window,
+			GLFWwindow* window,
 			const glm::vec3& cameraPosition,
 			const glm::vec3& cameraTarget,
-			real fov,
-			real nearPlane,
-			real farPlane,
-			real movementSpeed,
-			real rotationSpeed
+			float fov,
+			float nearPlane,
+			float farPlane,
+			float movementSpeed,
+			float rotationSpeed
 		) : Camera(
 			window,
 			cameraPosition,
@@ -36,11 +36,7 @@ namespace pe {
 			rotationSpeed{rotationSpeed} {}
 
 
-		void update(sf::Event& event, real duration) {
-
-			float deltaT = static_cast<float>(duration);
-			float speed = static_cast<float>(movementSpeed);
-			float rSpeed = static_cast<float>(rotationSpeed);
+		void processInput(float duration) override {
 
 			// The direction the camera is facing based on the view matrix
 			glm::vec3 forward = glm::normalize(cameraTarget - cameraPosition);
@@ -48,47 +44,45 @@ namespace pe {
 			glm::vec3 right = glm::normalize(glm::cross(forward, upVector));
 
 			// Updating camera position based on keys pressed
-			if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
-				cameraPosition += forward * speed * deltaT;
-				cameraTarget += forward * speed * deltaT;
+			if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+				cameraPosition += forward * movementSpeed * duration;
+				cameraTarget += forward * movementSpeed * duration;
 			}
-			if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {
-				cameraPosition -= forward * speed * deltaT;
-				cameraTarget -= forward * speed * deltaT;
+			if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+				cameraPosition -= forward * movementSpeed * duration;
+				cameraTarget -= forward * movementSpeed * duration;
 			}
-			if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) {
-				cameraPosition -= right * speed * deltaT;
-				cameraTarget -= right * speed * deltaT;
+			if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+				cameraPosition -= right * movementSpeed * duration;
+				cameraTarget -= right * movementSpeed * duration;
 			}
-			if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) {
-				cameraPosition += right * speed * deltaT;
-				cameraTarget += right * speed * deltaT;
+			if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+				cameraPosition += right * movementSpeed * duration;
+				cameraTarget += right * movementSpeed * duration;
 			}
-			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Z)) {
-				cameraPosition += upVector * speed * deltaT;
-				cameraTarget += upVector * speed * deltaT;
+			if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS) {
+				cameraPosition += upVector * movementSpeed * duration;
+				cameraTarget += upVector * movementSpeed * duration;
 			}
-			if (sf::Keyboard::isKeyPressed(sf::Keyboard::X)) {
-				cameraPosition -= upVector * speed * deltaT;
-				cameraTarget -= upVector * speed * deltaT;
+			if (glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS) {
+				cameraPosition -= upVector * movementSpeed * duration;
+				cameraTarget -= upVector * movementSpeed * duration;
 			}
 
 			// Updating camera rotation based on arrow keys pressed
-			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
-				glm::quat rotation = glm::angleAxis(rSpeed * deltaT, upVector);
+			if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
+				glm::quat rotation = glm::angleAxis(rotationSpeed * duration, upVector);
 				glm::vec3 newForward = glm::normalize(rotation * forward);
 				cameraTarget = cameraPosition + newForward;
 			}
-			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
-				glm::quat rotation = glm::angleAxis(-rSpeed * deltaT, upVector);
+			if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
+				glm::quat rotation = glm::angleAxis(-rotationSpeed * duration, upVector);
 				glm::vec3 newForward = glm::normalize(rotation * forward);
 				cameraTarget = cameraPosition + newForward;
 			}
-			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
+			if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
 				glm::vec3 rotationAxis = glm::normalize(glm::cross(forward, upVector));
-				glm::mat4 rotationMatrix = glm::rotate(
-					glm::mat4(1.0f), rSpeed * deltaT, rotationAxis
-				);
+				glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f), rotationSpeed * duration, rotationAxis);
 
 				glm::vec4 newForward4 = rotationMatrix * glm::vec4(forward, 1.0f);
 				glm::vec3 newForward = glm::vec3(newForward4);
@@ -97,12 +91,9 @@ namespace pe {
 				glm::vec4 newUp4 = rotationMatrix * glm::vec4(upVector, 1.0f);
 				upVector = glm::vec3(newUp4);
 			}
-			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
-				// Rotate camera down
+			if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
 				glm::vec3 rotationAxis = glm::normalize(glm::cross(forward, upVector));
-				glm::mat4 rotationMatrix = glm::rotate(
-					glm::mat4(1.0f), -rSpeed * deltaT, rotationAxis
-				);
+				glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f), -rotationSpeed * duration, rotationAxis);
 
 				glm::vec4 newForward4 = rotationMatrix * glm::vec4(forward, 1.0f);
 				glm::vec3 newForward = glm::vec3(newForward4);
@@ -111,7 +102,6 @@ namespace pe {
 				glm::vec4 newUp4 = rotationMatrix * glm::vec4(upVector, 1.0f);
 				upVector = glm::vec3(newUp4);
 			}
-
 
 			viewMatrix = calculateViewMatrix(
 				cameraPosition,
@@ -119,6 +109,7 @@ namespace pe {
 				upVector
 			);
 		}
+
 	};
 }
 

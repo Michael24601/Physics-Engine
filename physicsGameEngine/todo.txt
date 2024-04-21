@@ -304,4 +304,12 @@ into texture coordinates instead of doing it in the shader.
 
 Switch to GLFW.
 
-Create lighting type for 
+Create lighting types for the shadow mapping. 
+
+Release vertex and fragment shaders when done creating the shader
+program.
+
+Remove global vertices from faces, edges and from the polyhedron
+class; neither the collision nor rendeirng module need them since
+both use the transform matrices. For meshes that don't have a
+transform matrix, we can create a new face each frame.

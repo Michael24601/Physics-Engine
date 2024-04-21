@@ -5,6 +5,9 @@
 
 // Must be before any SFML or glfw or glm or glew files                        
 #include <GL/glew.h>
+
+#include <GLFW/glfw3.h>
+
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
 #include <SFML/OpenGL.hpp>
@@ -85,11 +88,12 @@
 
 #include "environmentMapper.h"
 #include "depthMapper.h"
+#include "glfwWindowWrapper.h"
 
 using namespace pe;
 using namespace std;
 
-#define SIM_10
+#define SIM_12
 
 #ifdef SIM_1
 
@@ -2761,15 +2765,15 @@ int main() {
 
     Order defaultEngineOrder = Order::COUNTER_CLOCKWISE;
 
+    real sourceWidth = 800, sourceHeight = 800;
+
     // Needed for 3D rendering
     sf::ContextSettings settings;
     settings.depthBits = 24;
     settings.antialiasingLevel = 8;
-    sf::RenderWindow window(sf::VideoMode(800, 800), "Physics Simulation",
+    sf::RenderWindow window(sf::VideoMode(sourceWidth, sourceHeight), "Physics Simulation",
         sf::Style::Default, settings);
     window.setActive();
-
-    real sourceWidth = 800, sourceHeight = 800;
 
     // Just in order to flip y axis
     sf::View view = window.getDefaultView();
@@ -2899,17 +2903,7 @@ int main() {
     cookShader.setRoughness(0.05);
     cookShader.setFresnel(0.5);
 
-
     DepthMapper depthMapper(512, 512);
-     
-
-    GLenum framebufferStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-    if (framebufferStatus != GL_FRAMEBUFFER_COMPLETE) {
-        std::cerr << "Framebuffer is incomplete!" << std::endl;
-    }
-
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
 
     while (window.isOpen()) {
 
@@ -2992,3 +2986,184 @@ int main() {
 
 #endif
 
+#ifdef SIM_12
+
+int main() {
+
+    GlfwWindowWrapper window(800, 800, 6, "window");
+
+    RotatingCamera camera(
+        window.getWindow(),
+        glm::vec3(0.0f, 0.0f, 0.0f),
+        90.0,
+        0.1,
+        10000,
+        500,
+        0.0001,
+        0.001
+    );
+
+    CookTorranceShader cookShader;
+    ShadowMappingShader cookShader2;
+    SkyboxShader skyboxShader;
+    SimpleShader simpleShader;
+    SimpleShader simpleShader2;
+
+    GLuint texture = loadTexture("C:\\Users\\msaba\\OneDrive\\Desktop\\textureMaps\\blue.jpg");
+    GLuint skybox = loadCubemap(std::vector<std::string>{
+        "C:\\Users\\msaba\\OneDrive\\Desktop\\cubemaps\\right.jpg",
+            "C:\\Users\\msaba\\OneDrive\\Desktop\\cubemaps\\left.jpg",
+            "C:\\Users\\msaba\\OneDrive\\Desktop\\cubemaps\\top.jpg",
+            "C:\\Users\\msaba\\OneDrive\\Desktop\\cubemaps\\bottom.jpg",
+            "C:\\Users\\msaba\\OneDrive\\Desktop\\cubemaps\\front.jpg",
+            "C:\\Users\\msaba\\OneDrive\\Desktop\\cubemaps\\back.jpg"
+    });
+
+    glm::mat4 identity = glm::mat4(1.0);
+    glm::vec4 colorWhite(1.0, 1.0, 1.0, 1.0);
+    glm::vec4 colorRed(1.0, 0.2, 0.2, 1);
+    glm::vec4 colorBlue(0.2, 0.2, 1.0, 1);
+    glm::vec4 colorGreen(0.2, 1.0, 0.2, 1);
+    glm::vec4 colorGrey(0.35, 0.35, 0.35, 1);
+    glm::vec4 colorTrans(0, 0, 0, 1.0);
+
+
+    glm::vec3 lightPos[]{ glm::vec3(0, 0, -500) };
+    glm::vec4 lightColor[]{ glm::vec4(1.0, 1.0, 1.0, 1.0) };
+
+    RectangularPrism c(50, 50, 50, 20, Vector3D(0, 0, 400), new RigidBody);
+
+    real radius = 150;
+    std::string filename = "C:\\Users\\msaba\\OneDrive\\Desktop\\textureMaps\\moai.obj";
+    Polyhedron c2 = returnPrimitive(filename, 1, Vector3D::ZERO, new RigidBody(), 2);
+    c2.body->orientation = Quaternion::rotatedByAxisAngle(Vector3D(0, 0, 1), PI / 2.0);
+
+    skyboxShader.setSkybox(skybox);
+    skyboxShader.setModelScale(2000);
+
+    FaceData data = getFaceData(c2);
+    std::vector<std::vector<glm::vec3>> d = {
+        data.vertices
+    };
+    simpleShader2.sendVaribleData(d);
+    simpleShader2.setTrianglesNumber(data.vertices.size());
+    d = {
+        data.vertices, data.normals
+    };
+    cookShader2.sendVaribleData(d);
+    cookShader2.setTrianglesNumber(data.vertices.size());
+    // cookShader2.setActiveLightsCount(1);
+    cookShader2.setLightPosition(lightPos[0]);
+    cookShader2.setObjectColor(colorGrey);
+
+    data = getFaceData(c);
+    d = {
+        data.vertices
+    };
+    simpleShader.sendVaribleData(d);
+    simpleShader.setTrianglesNumber(data.vertices.size());
+    d = {
+        data.vertices, data.normals
+    };
+    cookShader.sendVaribleData(d);
+    cookShader.setTrianglesNumber(data.vertices.size());
+    cookShader.setActiveLightsCount(1);
+    cookShader.setLightPosition(lightPos);
+    cookShader.setLightColors(lightColor);
+    cookShader.setObjectColor(colorRed);
+    cookShader.setRoughness(0.05);
+    cookShader.setFresnel(0.5);
+
+    DepthMapper depthMapper(512, 512);
+
+    float lastTime = glfwGetTime();
+    float deltaTime = 0.0;
+    float framesPerSecond = 240;
+    float frameRate = 1.0 / framesPerSecond;
+
+    glfwSetFramebufferSizeCallback(
+        window.getWindow(), 
+        window.framebuffer_size_callback
+    );
+    while (!glfwWindowShouldClose(window.getWindow())) {
+
+        double currentTime = glfwGetTime();
+        deltaTime += (currentTime - lastTime);
+        lastTime = currentTime;
+
+        window.processInput();
+        camera.processInput(frameRate);
+
+        c.body->calculateDerivedData();
+        c2.body->calculateDerivedData();
+
+        glm::vec2 position = window.getCursorPosition();
+        c.body->position = {
+            c.body->position.x,
+            position.y,
+            -position.x
+        };
+
+        glm::mat4 view = glm::lookAt(
+            glm::vec3(0.0, 0.0, -500),
+            glm::vec3(0.0f, 0.0f, 0.0f),
+            glm::vec3(0.0f, 1.0f, 0.0f)
+        );
+
+        float near_plane = 1.0f, far_plane = 1000.0f;
+        glm::mat4 projection = glm::ortho(
+            -200.0f, 200.0f, -200.0f, 200.0f, near_plane, far_plane
+        );
+
+        simpleShader.setModelMatrix(convertToGLM(c.body->transformMatrix));
+        simpleShader2.setModelMatrix(convertToGLM(c2.body->transformMatrix));
+        std::vector<Shader*> shaders{
+            &simpleShader, &simpleShader2
+        };
+
+        depthMapper.captureDepth(view, projection, shaders);
+
+        glm::mat4 viewM = camera.getViewMatrix();
+        glm::mat4 projectionM = camera.getProjectionMatrix();
+
+        cookShader2.setModelMatrix(convertToGLM(c2.body->transformMatrix));
+        cookShader2.setLightSpaceMatrix(projection * view);
+        cookShader2.setViewMatrix(viewM);
+        cookShader2.setProjectionMatrix(projectionM);
+
+        cookShader.setModelMatrix(convertToGLM(c.body->transformMatrix));
+        cookShader.setViewMatrix(viewM);
+        cookShader.setProjectionMatrix(projectionM);
+
+        skyboxShader.setViewMatrix(viewM);
+        skyboxShader.setProjectionMatrix(projectionM);
+
+
+        if (deltaTime >= frameRate) {
+
+            // Unbind framebuffer to render to default framebuffer (window)
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            glViewport(0, 0, window.getWidth(), window.getHeight());
+            glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+            // Needs to be set here
+            cookShader2.setShadowMap(depthMapper.getTexture());
+
+            cookShader2.drawFaces();
+            cookShader.drawFaces();
+            skyboxShader.drawFaces();
+
+            glfwSwapBuffers(window.getWindow());
+            glfwPollEvents();
+
+            deltaTime = 0.0f;
+        }
+    }
+
+    glfwTerminate();
+    return 0;
+}
+
+
+#endif
