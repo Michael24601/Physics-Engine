@@ -89,7 +89,7 @@ namespace pe {
                 we can set the VAOand VBO in the constructor automatically.
             */
             std::vector<std::vector<glm::vec3>> data{ skyboxVertices };
-            sendVaribleData(data);
+            sendVaribleData(data, GL_STATIC_DRAW);
             setTrianglesNumber(skyboxVertices.size());
         }
 

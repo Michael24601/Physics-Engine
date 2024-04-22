@@ -10,6 +10,8 @@ uniform vec4 objectColor;
 
 uniform vec3 lightPos;
 
+uniform float shadowStrength;
+
 uniform sampler2D shadowMap;
 
 out vec4 FragColor;
@@ -34,7 +36,7 @@ float ShadowCalculation(vec4 fragPosLightSpace, vec3 lightDir){
     float bias = max(0.05 * (1.0 - dot(Normal, lightDir)), 0.05);  
 
     // check whether current frag pos is in shadow
-    float shadow = currentDepth - bias > closestDepth ? 1.0 : 0.0;
+    float shadow = currentDepth - bias > closestDepth ? shadowStrength : 0.0;
 
     return shadow;
 }
@@ -54,9 +56,16 @@ void main(){
     float spec = 0.0;
     vec3 halfwayDir = normalize(lightDir + viewDir);  
     spec = pow(max(dot(normal, halfwayDir), 0.0), 64.0);
-    vec3 specular = spec * lightColor;    
-    // calculate shadow
+    vec3 specular = spec * lightColor;  
+    
+    // The shadow component
     float shadow = ShadowCalculation(FragPosLightSpace, lightDir);       
+
+    // If there is a shadow, there shouldn't be anny shine
+    if(shadow > 0){
+        specular = vec3(0.0);
+    }
+
     vec3 lighting = (ambient + (1.0 - shadow) * (diffuse + specular)) * color; 
 
     FragColor = vec4(lighting, 1.0);

@@ -303,7 +303,7 @@ namespace pe {
 		Returns the furthest point in a vector of points from a given
 		coordinate.
 	*/
-	Vector3D furthestPoint(
+	Vector3D findFurthestPointFromCoordinate(
 		const Vector3D& coordinate, 
 		const std::vector<Vector3D>& points
 	);

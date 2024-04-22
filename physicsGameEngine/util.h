@@ -6,7 +6,10 @@
 #include <random>
 
 namespace pe {
+
     int generateRandomNumber(int min, int max);
+
+    real generateRandomNumber(real min, real max);
 }
 
 #endif

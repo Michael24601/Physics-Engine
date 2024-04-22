@@ -20,8 +20,6 @@ namespace pe {
 
 	class RigidBody {
 
-	private:
-
 	public:
 
 		/*

@@ -124,8 +124,10 @@ namespace pe {
             const std::string& vertexShaderSource,
             const std::string& fragmentShaderSource
         ) {
-            compileAndLinkShaderProgram(vertexShaderSource,
-                fragmentShaderSource);
+            compileAndLinkShaderProgram(
+                vertexShaderSource,
+                fragmentShaderSource
+            );
         }
 
         /*

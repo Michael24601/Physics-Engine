@@ -89,11 +89,12 @@
 #include "environmentMapper.h"
 #include "depthMapper.h"
 #include "glfwWindowWrapper.h"
+#include "diffuseLightingTextureShader.h"
 
 using namespace pe;
 using namespace std;
 
-#define SIM_12
+#define SIM_11
 
 #ifdef SIM_1
 
@@ -465,240 +466,219 @@ int main() {
 
 int main() {
     
-
-    Order defaultEngineOrder = Order::COUNTER_CLOCKWISE;
-
-    // Needed for 3D rendering
-    sf::ContextSettings settings;
-    settings.depthBits = 24;
-    settings.antialiasingLevel = 8;
-    sf::RenderWindow window(sf::VideoMode(800, 800), "Physics Simulation",
-        sf::Style::Default, settings);
-    window.setActive();
-
-    // Just in order to flip y axis
-    sf::View view = window.getDefaultView();
-    view.setSize(800, -800);
-    view.setCenter(0, 0);
-    window.setView(view);
-
-    GLenum err = glewInit();
-    if (GLEW_OK != err) {
-        // GLEW initialization failed
-        std::cerr << "Error: GLEW initialization failed: "
-            << glewGetErrorString(err) << std::endl;
-        return -1;
-    }
-
-    // Sets up OpenGL states (for 3D)
-    // Makes objects in front of others cover them
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LESS);
-
-    // Set to clockwise or counter-clockwise depending on face vertex order
-    // (Counter Clockwise for us).
-    if (defaultEngineOrder == Order::COUNTER_CLOCKWISE) {
-        glFrontFace(GL_CCW);
-    }
-    else {
-        glFrontFace(GL_CW);
-    }
-    // This only displays faces from one side, depending on the order of
-    // vertices, and what is considered front facce in the above option.
-    // Disable to show both faces (but lose on performance).
-    // Set to off in case our faces are both clockwise and counter clockwise
-    // (mixed), so we can't consisently render only one.
-    // Note that if we have opacity of face under 1 (opaque), it is definitely
-    // best not to render both sides (enable culling) so it appears correct.
-    glEnable(GL_CULL_FACE);
-
-    // Enables blending for transparency
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    glDepthFunc(GL_LEQUAL);
-
-    // Shaders
-    SolidColorShader shader;
-    DiffuseLightingShader lightShader;
-    DiffuseSpecularLightingShader phongShader;
-    CookTorranceShader cookShader;
-    TextureShader texShader;
-
-    GLuint texture = loadTexture("C:\\Users\\msaba\\OneDrive\\Desktop\\textureMaps\\blue.jpg");
+    GlfwWindowWrapper window(800, 800, 6, "window");
 
     RotatingCamera camera(
-        window,
-        glm::vec3(0.0f, 0.0f, 0.0f),
+        window.getWindow(),
+        glm::vec3(-200.0f, 0.0f, 0.0f),
         90.0,
         0.1,
         10000,
         500,
-        0.02,
-        0.1
+        0.0005,
+        0.001
     );
 
-    sf::Clock clock;
-    real deltaT = 0.065;
+    // Shaders
+    DiffuseLightingTextureShader poleShader;
+    DiffuseLightingTextureShader lightShader;
+    SkyboxShader skyboxShader;
 
-    int size = 20;
+    GLuint texture1 = loadTexture(
+        "C:\\Users\\msaba\\OneDrive\\Desktop\\textureMaps\\leb.jpg"
+    );
+    GLuint texture2 = loadTexture(
+        "C:\\Users\\msaba\\OneDrive\\Desktop\\textureMaps\\hit.png"
+    );
+    GLuint texture3 = loadTexture(
+        "C:\\Users\\msaba\\OneDrive\\Desktop\\textureMaps\\wood.jpg"
+    );
+
+    GLuint skybox = loadCubemap(std::vector<std::string>{
+        "C:\\Users\\msaba\\OneDrive\\Desktop\\cubemaps\\right.jpg",
+            "C:\\Users\\msaba\\OneDrive\\Desktop\\cubemaps\\left.jpg",
+            "C:\\Users\\msaba\\OneDrive\\Desktop\\cubemaps\\top.jpg",
+            "C:\\Users\\msaba\\OneDrive\\Desktop\\cubemaps\\bottom.jpg",
+            "C:\\Users\\msaba\\OneDrive\\Desktop\\cubemaps\\front.jpg",
+            "C:\\Users\\msaba\\OneDrive\\Desktop\\cubemaps\\back.jpg"
+    });
+
+    glm::mat4 identity = glm::mat4(1.0);
+    glm::vec4 colorWhite(1.0, 1.0, 1.0, 1.0);
+    glm::vec4 colorRed(1.0, 0.2, 0.2, 1);
+    glm::vec4 colorBlue(0.2, 0.2, 1.0, 1);
+    glm::vec4 colorGreen(0.2, 1.0, 0.2, 1);
+
+    glm::vec3 lightPos[]{ 
+        glm::vec3(500, 0, 500), 
+        glm::vec3(-500, 0, -500) 
+    };
+    glm::vec4 lightColor[]{ 
+        glm::vec4(1.0, 1.0, 1.0, 1.0),
+        glm::vec4(1.0, 1.0, 1.0, 1.0)
+    };
+
+    int size = 18;
     real strength = 0.5;
     real mass = 0.5;
     real damping = 0.5;
 
     Cloth mesh(
         Vector3D(-200, 200, 0), 
-        Vector3D(200, -200, 0),
+        Vector3D(300, -200, 0),
         size, size,
         mass, damping, strength
     );
 
+    Cylinder cylinder(10, 800, 10, 20, Vector3D(-205, -200, 0), new RigidBody());
+
+    lightShader.setLightPosition(lightPos);
+    lightShader.setActiveLightsCount(2);
+
+    poleShader.setLightPosition(lightPos);
+    poleShader.setActiveLightsCount(2);
+    FaceData data = getFaceData(cylinder);
+    std::vector<std::vector<glm::vec3>> d{
+           data.vertices, data.normals, data.uvCoordinates
+    };
+    poleShader.sendVaribleData(d, GL_DYNAMIC_DRAW);
+    poleShader.setTrianglesNumber(data.vertices.size());
+
+    skyboxShader.setSkybox(skybox);
+    skyboxShader.setModelScale(2000);
+
     // The first row of particles is suspended
-    for (int i = 0; i < size; i++) {
-        mesh.particles[i]->setAwake(false);
+    for (int i = 0; i < size * size; i++) {
+        if (i % size == 0) {
+            mesh.particles[i]->setAwake(false);
+        }
     }
 
     ParticleGravity g(Vector3D(0, -10, 0));
 
-    real rotationSpeed = 0.10;
-    real angle = PI / 2;
-    bool isButtonPressed[2] { false , false};
+    bool isPressed{false};
+    
+    float deltaT = 0.07;
 
+    float lastTime = glfwGetTime();
+    float deltaTime = 0.0;
+    float framesPerSecond = 30;
+    float frameRate = 1.0 / framesPerSecond;
 
-    while (window.isOpen()) {
+    glfwSetFramebufferSizeCallback(
+        window.getWindow(),
+        window.framebuffer_size_callback
+    );
+    while (!glfwWindowShouldClose(window.getWindow())) {
 
+        double currentTime = glfwGetTime();
+        deltaTime += (currentTime - lastTime);
+        lastTime = currentTime;
 
-        sf::Event event;
-        while (window.pollEvent(event)) {
-            if (event.type == sf::Event::Closed) {
-                window.close();
-            }
-            else if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
-                isButtonPressed[0] = true;
-            }
-            else if (event.type == sf::Event::MouseButtonReleased
-                && event.mouseButton.button == sf::Mouse::Left) {
-                isButtonPressed[0] = false;
-            }
-            else if (sf::Mouse::isButtonPressed(sf::Mouse::Right)) {
-                isButtonPressed[1] = true;
-            }
-            else if (event.type == sf::Event::MouseButtonReleased
-                && event.mouseButton.button == sf::Mouse::Right) {
-                isButtonPressed[1] = false;
-            }
-
-            camera.update(event, deltaT);
+        glfwPollEvents();
+        window.processInput();
+        camera.processInput(frameRate);
+        if (glfwGetKey(window.getWindow(), GLFW_KEY_A) == GLFW_PRESS) {
+            isPressed = true;
+        }
+        else if (glfwGetKey(window.getWindow(), GLFW_KEY_A) == GLFW_RELEASE) {
+            isPressed = false;
         }
 
-        int numSteps = 20;
+        int numSteps = 1;
         real substep = deltaT / numSteps;
 
         while (numSteps--) {
 
-            for (auto& particle : mesh.particles) {
-                g.updateForce(particle, deltaT);
+            if (isPressed) {
+
+                glm::vec2 mouse = window.getCursorPosition();
+
+                Vector3D move;
+                move.x = mouse.x - mesh.particles[size * size / 2]->position.x;
+                move.y = mouse.y - mesh.particles[size * size / 2]->position.y;
+                move.z = mouse.x - mesh.particles[size * size / 2]->position.z;
+
+                move *= 0.2;
+                ParticleGravity f(move);
+
+                for (int i = 0; i < size; i++) {
+                    f.updateForce(mesh.particles[size + i * size - 1], frameRate);
+                }
             }
 
-            vector<ParticleContact> contacts;
+            for (Particle* particle : mesh.particles) {
+                g.updateForce(particle, substep);
+            }
+
+            for (int i = 0; i < mesh.particles.size(); i++) {
+
+                if (i < size) {
+                    mesh.particles[i]->addForce(Vector3D(3, 4, 0));
+                    continue;
+                }
+
+                int enter = generateRandomNumber(0, 5);
+                if (enter) {
+                    real x = generateRandomNumber(1.0, 4.0);
+                    real y = generateRandomNumber(3.0, 6.0);
+                    real z = generateRandomNumber(0.0, 2.0);
+                    mesh.particles[i]->addForce(Vector3D(x, y, z));
+                }
+            }
+
             for (auto& force : mesh.forces) {
-                force.force1.updateForce(force.force2.otherParticle, deltaT);
-                force.force2.updateForce(force.force1.otherParticle, deltaT);
-            }
-
-            if (isButtonPressed[0] || isButtonPressed[1]) {
-
-                if (isButtonPressed[0]) {
-                    sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
-                    sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);
-                    Vector3D move;
-                    move.x = worldPos.x - mesh.particles[size * size / 2]->position.x;
-                    move.y = worldPos.y - mesh.particles[size * size / 2]->position.y;
-                    move.z = worldPos.x - mesh.particles[size * size / 2]->position.z;
-
-                    move *= mass;
-                    ParticleGravity f(move);
-
-                    for (int i = 0; i < size; i++) {
-                        f.updateForce(mesh.particles[size + i * size - 1], deltaT);
-                    }
-                }
-                else if (isButtonPressed[1]) {
-                    sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
-                    sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);
-                    Vector3D move;
-                    move.x = worldPos.x - mesh.particles[size * size / 2]->position.x;
-                    move.y = worldPos.y - mesh.particles[size * size / 2]->position.y;
-                    move.z = -(worldPos.x + mesh.particles[size * size / 2]->position.z);
-
-                    move *= mass;
-                    ParticleGravity f(move);
-
-                    for (int i = 0; i < size; i++) {
-                        f.updateForce(mesh.particles[i * size], deltaT);
-                    }
-                }
-            }
-
+                force.force1.updateForce(force.force2.otherParticle, substep);
+                force.force2.updateForce(force.force1.otherParticle, substep);
+            }  
+          
             mesh.applyConstraints();
 
             for (int i = 0; i < size * size; i++) {
                 if (mesh.particles[i]->isAwake) {
-                    mesh.particles[i]->verletIntegrate(deltaT);
+                    mesh.particles[i]->verletIntegrate(substep);
                 }
             }
 
             mesh.update();
         }
 
-        window.clear(sf::Color::Black);
-        // Clears the depth buffer (for 3D)
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        // Spring/Cable
-        // Note that the model is the identity since the cable is in world
-        // coordinates
-        glm::mat4 identity = glm::mat4(1.0);
-        glm::vec4 colorWhite(1.0, 1.0, 1.0, 1.0);
-        glm::vec4 colorRed(1.0, 0.2, 0.2, 1);
-        glm::vec4 colorBlue(0.2, 0.2, 1.0, 1);
-        glm::vec4 colorGreen(0.2, 1.0, 0.2, 1);
-
-        //shader.drawEdges(edgeData.vertices, identity, viewMatrix, 
-          //   projectionMatrix, colorWhite);
-
         FaceData data = getTwoSidedFaceData(mesh);
-        EdgeData edata = getEdgeData(mesh);
-        FrameVectors fdata = getFrameVectors(mesh, 30);
+        std::vector<std::vector<glm::vec3>> d{
+            data.vertices, data.normals, data.uvCoordinates
+        };
+        lightShader.sendVaribleData(d, GL_DYNAMIC_DRAW);
+        lightShader.setTrianglesNumber(data.vertices.size());
+        lightShader.setModelMatrix(identity);
+        lightShader.setViewMatrix(camera.getViewMatrix());
+        lightShader.setProjectionMatrix(camera.getProjectionMatrix());
 
-        glm::vec3 lightPos[]{ glm::vec3(500, 0, 500), glm::vec3(-500, 0, -500) };
-        glm::vec4 lightColor[]{ glm::vec4(1.0, 1.0, 1.0, 1.0),
-            glm::vec4(1.0, 1.0, 1.0, 1.0) };
-        
-        lightShader.drawFaces(
-            data.vertices,
-            data.normals,
-            identity,
-            camera.getViewMatrix(),
-            camera.getProjectionMatrix(),
-            colorRed,
-            2,
-            lightPos,
-            lightColor
-        );
-        
-        /*
-        shader.drawEdges(
-            edata.vertices,
-            identity,
-            viewMatrix,
-            projectionMatrix,
-            colorWhite
-        );
-        */
-        
+        poleShader.setModelMatrix(convertToGLM(cylinder.getTransformMatrix()));
+        poleShader.setViewMatrix(camera.getViewMatrix());
+        poleShader.setProjectionMatrix(camera.getProjectionMatrix());
 
-        window.display();
+        skyboxShader.setProjectionMatrix(camera.getProjectionMatrix());
+        skyboxShader.setViewMatrix(camera.getViewMatrix());
+   
+        if (deltaTime >= frameRate) {
+
+            // Unbind framebuffer to render to default framebuffer (window)
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            glViewport(0, 0, window.getWidth(), window.getHeight());
+            glClearColor(0.1f, 0.15f, 0.15f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+            // We set the texture here cause they use the same unit
+            lightShader.setObjectTexture(texture1);
+            lightShader.drawFaces();
+            poleShader.setObjectTexture(texture3);
+            poleShader.drawFaces();
+            skyboxShader.drawFaces();
+
+            glfwSwapBuffers(window.getWindow());
+
+            deltaTime = 0.0f;
+        }
     }
 
     return 0;
@@ -2762,234 +2742,6 @@ int main() {
 
 int main() {
 
-
-    Order defaultEngineOrder = Order::COUNTER_CLOCKWISE;
-
-    real sourceWidth = 800, sourceHeight = 800;
-
-    // Needed for 3D rendering
-    sf::ContextSettings settings;
-    settings.depthBits = 24;
-    settings.antialiasingLevel = 8;
-    sf::RenderWindow window(sf::VideoMode(sourceWidth, sourceHeight), "Physics Simulation",
-        sf::Style::Default, settings);
-    window.setActive();
-
-    // Just in order to flip y axis
-    sf::View view = window.getDefaultView();
-    view.setSize(sourceWidth, -sourceHeight);
-    view.setCenter(0, 0);
-    window.setView(view);
-
-    GLenum err = glewInit();
-    if (GLEW_OK != err) {
-        // GLEW initialization failed
-        std::cerr << "Error: GLEW initialization failed: "
-            << glewGetErrorString(err) << std::endl;
-        return -1;
-    }
-
-    // Sets up OpenGL states (for 3D)
-    // Makes objects in front of others cover them
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LESS);
-
-    // Set to clockwise or counter-clockwise depending on face vertex order
-    // (Counter Clockwise for us).
-    if (defaultEngineOrder == Order::COUNTER_CLOCKWISE) {
-        glFrontFace(GL_CCW);
-    }
-    else {
-        glFrontFace(GL_CW);
-    }
-    // This only displays faces from one side, depending on the order of
-    // vertices, and what is considered front facce in the above option.
-    // Disable to show both faces (but lose on performance).
-    // Set to off in case our faces are both clockwise and counter clockwise
-    // (mixed), so we can't consisently render only one.
-    // Note that if we have opacity of face under 1 (opaque), it is definitely
-    // best not to render both sides (enable culling) so it appears correct.
-    glEnable(GL_CULL_FACE);
-
-    // Enables blending for transparency
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    glDepthFunc(GL_LEQUAL);
-
-
-    CookTorranceShader cookShader;
-    ShadowMappingShader cookShader2;
-    SkyboxShader skyboxShader;
-    SimpleShader simpleShader;
-    SimpleShader simpleShader2;
-
-    GLuint texture = loadTexture("C:\\Users\\msaba\\OneDrive\\Desktop\\textureMaps\\blue.jpg");
-    GLuint skybox = loadCubemap(std::vector<std::string>{
-        "C:\\Users\\msaba\\OneDrive\\Desktop\\cubemaps\\right.jpg",
-        "C:\\Users\\msaba\\OneDrive\\Desktop\\cubemaps\\left.jpg",
-        "C:\\Users\\msaba\\OneDrive\\Desktop\\cubemaps\\top.jpg",
-        "C:\\Users\\msaba\\OneDrive\\Desktop\\cubemaps\\bottom.jpg",
-        "C:\\Users\\msaba\\OneDrive\\Desktop\\cubemaps\\front.jpg",
-        "C:\\Users\\msaba\\OneDrive\\Desktop\\cubemaps\\back.jpg"
-    });
-
-    glm::mat4 identity = glm::mat4(1.0);
-    glm::vec4 colorWhite(1.0, 1.0, 1.0, 1.0);
-    glm::vec4 colorRed(1.0, 0.2, 0.2, 1);
-    glm::vec4 colorBlue(0.2, 0.2, 1.0, 1);
-    glm::vec4 colorGreen(0.2, 1.0, 0.2, 1);
-    glm::vec4 colorGrey(0.35, 0.35, 0.35, 1);
-    glm::vec4 colorTrans(0, 0, 0, 1.0);
-
-
-    glm::vec3 lightPos[]{ glm::vec3(0, 0, -500)};
-    glm::vec4 lightColor[]{ glm::vec4(1.0, 1.0, 1.0, 1.0) };
-
-    RotatingCamera camera(
-        window,
-        glm::vec3(0.0f, 0.0f, 0.0f),
-        90.0,
-        0.1,
-        10000,
-        500,
-        0.02,
-        0.1
-    );
-
-    sf::Clock clock;
-    real deltaT = 0.07;
-
-    RectangularPrism c(50, 50, 50, 20, Vector3D(0, 0, 400), new RigidBody);
-
-    real radius = 150;
-    std::string filename = "C:\\Users\\msaba\\OneDrive\\Desktop\\textureMaps\\moai.obj";
-    Polyhedron c2 = returnPrimitive(filename, 1, Vector3D::ZERO, new RigidBody(), 2);
-    c2.body->orientation = Quaternion::rotatedByAxisAngle(Vector3D(0, 0, 1), PI / 2.0);
-
-    skyboxShader.setSkybox(skybox);
-    skyboxShader.setModelScale(2000);
-
-    FaceData data = getFaceData(c2);
-    std::vector<std::vector<glm::vec3>> d = {
-        data.vertices
-    };
-    simpleShader2.sendVaribleData(d);
-    simpleShader2.setTrianglesNumber(data.vertices.size());
-    d = {
-        data.vertices, data.normals
-    };
-    cookShader2.sendVaribleData(d);
-    cookShader2.setTrianglesNumber(data.vertices.size());
-    // cookShader2.setActiveLightsCount(1);
-    cookShader2.setLightPosition(lightPos[0]);
-    cookShader2.setObjectColor(colorGrey);
-
-    data = getFaceData(c);
-    d = {
-        data.vertices
-    };
-    simpleShader.sendVaribleData(d);
-    simpleShader.setTrianglesNumber(data.vertices.size());
-    d = {
-        data.vertices, data.normals
-    };
-    cookShader.sendVaribleData(d);
-    cookShader.setTrianglesNumber(data.vertices.size());
-    cookShader.setActiveLightsCount(1);
-    cookShader.setLightPosition(lightPos);
-    cookShader.setLightColors(lightColor);
-    cookShader.setObjectColor(colorRed);
-    cookShader.setRoughness(0.05);
-    cookShader.setFresnel(0.5);
-
-    DepthMapper depthMapper(512, 512);
-
-    while (window.isOpen()) {
-
-        sf::Event event;
-        while (window.pollEvent(event)) {
-            if (event.type == sf::Event::Closed) {
-                window.close();
-            }
-
-            camera.update(event, deltaT);
-        }
-
-        c.body->calculateDerivedData();
-        c2.body->calculateDerivedData();
-
-        sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
-        sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);
-        c.body->position = {
-            c.body->position.x,
-            worldPos.y,
-            -worldPos.x
-        };
-
-        glm::mat4 view = glm::lookAt(
-            glm::vec3(0.0, 0.0, -500),
-            glm::vec3(0.0f, 0.0f, 0.0f),
-            glm::vec3(0.0f, 1.0f, 0.0f)
-        );
-
-        float near_plane = 1.0f, far_plane = 1000.0f;
-        glm::mat4 projection = glm::ortho(
-            -200.0f, 200.0f, -200.0f, 200.0f, near_plane,far_plane
-        );
-    
-        simpleShader.setModelMatrix(convertToGLM(c.body->transformMatrix));
-        simpleShader2.setModelMatrix(convertToGLM(c2.body->transformMatrix));
-        std::vector<Shader*> shaders{
-            &simpleShader, &simpleShader2
-        };
-
-        depthMapper.captureDepth(view, projection, shaders);
-
-        glm::mat4 viewM = camera.getViewMatrix();
-        glm::mat4 projectionM = camera.getProjectionMatrix();
-
-        cookShader2.setModelMatrix(convertToGLM(c2.body->transformMatrix));
-        cookShader2.setLightSpaceMatrix(projection * view);
-        cookShader2.setViewMatrix(viewM);
-        cookShader2.setProjectionMatrix(projectionM);
-
-        cookShader.setModelMatrix(convertToGLM(c.body->transformMatrix));
-        cookShader.setViewMatrix(viewM);
-        cookShader.setProjectionMatrix(projectionM);
-
-        skyboxShader.setViewMatrix(viewM);
-        skyboxShader.setProjectionMatrix(projectionM);
-
-        // Unbind framebuffer to render to default framebuffer (window)
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
- 
-        // Clear default framebuffer (window)
-        window.clear(sf::Color::Color(0, 0, 0)); 
-        glViewport(0, 0, sourceWidth, sourceHeight);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        // Needs to be set here
-        cookShader2.setShadowMap(depthMapper.getTexture());
-
-        cookShader2.drawFaces();
-        cookShader.drawFaces();
-        skyboxShader.drawFaces();
-
-        // Display the rendered scene
-        window.display();
-
-    }
-
-    return 0;
-}
-
-#endif
-
-#ifdef SIM_12
-
-int main() {
-
     GlfwWindowWrapper window(800, 800, 6, "window");
 
     RotatingCamera camera(
@@ -3009,15 +2761,19 @@ int main() {
     SimpleShader simpleShader;
     SimpleShader simpleShader2;
 
-    GLuint texture = loadTexture("C:\\Users\\msaba\\OneDrive\\Desktop\\textureMaps\\blue.jpg");
-    GLuint skybox = loadCubemap(std::vector<std::string>{
-        "C:\\Users\\msaba\\OneDrive\\Desktop\\cubemaps\\right.jpg",
+    GLuint texture = loadTexture(
+        "C:\\Users\\msaba\\OneDrive\\Desktop\\textureMaps\\blue.jpg"
+    );
+    GLuint skybox = loadCubemap(
+        std::vector<std::string>{
+            "C:\\Users\\msaba\\OneDrive\\Desktop\\cubemaps\\right.jpg",
             "C:\\Users\\msaba\\OneDrive\\Desktop\\cubemaps\\left.jpg",
             "C:\\Users\\msaba\\OneDrive\\Desktop\\cubemaps\\top.jpg",
             "C:\\Users\\msaba\\OneDrive\\Desktop\\cubemaps\\bottom.jpg",
             "C:\\Users\\msaba\\OneDrive\\Desktop\\cubemaps\\front.jpg",
             "C:\\Users\\msaba\\OneDrive\\Desktop\\cubemaps\\back.jpg"
-    });
+        }
+    );
 
     glm::mat4 identity = glm::mat4(1.0);
     glm::vec4 colorWhite(1.0, 1.0, 1.0, 1.0);
@@ -3026,7 +2782,6 @@ int main() {
     glm::vec4 colorGreen(0.2, 1.0, 0.2, 1);
     glm::vec4 colorGrey(0.35, 0.35, 0.35, 1);
     glm::vec4 colorTrans(0, 0, 0, 1.0);
-
 
     glm::vec3 lightPos[]{ glm::vec3(0, 0, -500) };
     glm::vec4 lightColor[]{ glm::vec4(1.0, 1.0, 1.0, 1.0) };
@@ -3045,14 +2800,14 @@ int main() {
     std::vector<std::vector<glm::vec3>> d = {
         data.vertices
     };
-    simpleShader2.sendVaribleData(d);
+    simpleShader2.sendVaribleData(d, GL_STATIC_DRAW);
     simpleShader2.setTrianglesNumber(data.vertices.size());
     d = {
         data.vertices, data.normals
     };
-    cookShader2.sendVaribleData(d);
+    cookShader2.sendVaribleData(d, GL_STATIC_DRAW);
     cookShader2.setTrianglesNumber(data.vertices.size());
-    // cookShader2.setActiveLightsCount(1);
+    cookShader2.setShadowStrength(0.8);
     cookShader2.setLightPosition(lightPos[0]);
     cookShader2.setObjectColor(colorGrey);
 
@@ -3060,12 +2815,12 @@ int main() {
     d = {
         data.vertices
     };
-    simpleShader.sendVaribleData(d);
+    simpleShader.sendVaribleData(d, GL_STATIC_DRAW);
     simpleShader.setTrianglesNumber(data.vertices.size());
     d = {
         data.vertices, data.normals
     };
-    cookShader.sendVaribleData(d);
+    cookShader.sendVaribleData(d, GL_STATIC_DRAW);
     cookShader.setTrianglesNumber(data.vertices.size());
     cookShader.setActiveLightsCount(1);
     cookShader.setLightPosition(lightPos);
@@ -3076,9 +2831,11 @@ int main() {
 
     DepthMapper depthMapper(512, 512);
 
+    float deltaT = 0.07;
+
     float lastTime = glfwGetTime();
     float deltaTime = 0.0;
-    float framesPerSecond = 240;
+    float framesPerSecond = 120;
     float frameRate = 1.0 / framesPerSecond;
 
     glfwSetFramebufferSizeCallback(
@@ -3092,7 +2849,7 @@ int main() {
         lastTime = currentTime;
 
         window.processInput();
-        camera.processInput(frameRate);
+        camera.processInput(deltaT);
 
         c.body->calculateDerivedData();
         c2.body->calculateDerivedData();
@@ -3128,6 +2885,7 @@ int main() {
 
         cookShader2.setModelMatrix(convertToGLM(c2.body->transformMatrix));
         cookShader2.setLightSpaceMatrix(projection * view);
+        cookShader2.setShadowMap(depthMapper.getTexture());
         cookShader2.setViewMatrix(viewM);
         cookShader2.setProjectionMatrix(projectionM);
 
@@ -3138,7 +2896,6 @@ int main() {
         skyboxShader.setViewMatrix(viewM);
         skyboxShader.setProjectionMatrix(projectionM);
 
-
         if (deltaTime >= frameRate) {
 
             // Unbind framebuffer to render to default framebuffer (window)
@@ -3146,9 +2903,6 @@ int main() {
             glViewport(0, 0, window.getWidth(), window.getHeight());
             glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-            // Needs to be set here
-            cookShader2.setShadowMap(depthMapper.getTexture());
 
             cookShader2.drawFaces();
             cookShader.drawFaces();
@@ -3161,7 +2915,6 @@ int main() {
         }
     }
 
-    glfwTerminate();
     return 0;
 }
 

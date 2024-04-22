@@ -34,6 +34,12 @@ namespace pe {
             setUniform("lightPos", position);
         }
 
+
+        void setShadowStrength(float strength) {
+            setUniform("shadowStrength", strength);
+        }
+
+
         /*
             The lightSpace matrix is the projection * view matrix used
             in rendering the shadow map from the light's perspective.

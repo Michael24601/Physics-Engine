@@ -225,7 +225,12 @@ Vector3D Polyhedron::getFurthestPoint() const {
 }
 
 
-bool isPointInsideFace(
+Matrix3x4& Polyhedron::getTransformMatrix() {
+	return this->body->transformMatrix;
+}
+
+
+bool Polyhedron::isPointInsideFace(
 	const Face* face, 
 	const Vector3D& point,
 	real rayLength
@@ -277,10 +282,9 @@ bool isPointInsideFace(
 }
 
 
-bool pe::isPointInsidePolyhedron(
-	const Polyhedron& polyhedron,
+bool Polyhedron::isPointInsidePolyhedron(
 	const Vector3D& point
-) {
+) const {
 
 	int intersectionCount = 0;
 
@@ -291,12 +295,12 @@ bool pe::isPointInsidePolyhedron(
 		outside the polyhedron, is find the vertex furthest to the point
 		and project the ray from the point at least that far.
 	*/
-	 real furthestDistance = furthestPoint(
+	 real furthestDistance = findFurthestPointFromCoordinate(
 		 point, 
-		 polyhedron.globalVertices
+		 this->globalVertices
 	 ).magnitude();
 
-	for (const Face* face : polyhedron.faces) {
+	for (const Face* face : this->faces) {
 		// Here we check if the point is inside the current face
 		if (isPointInsideFace(face, point, furthestDistance)) {
 			++intersectionCount;

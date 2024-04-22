@@ -40,8 +40,10 @@ namespace pe {
 		/*
 			The uv-coordinates of each vertex in each face, used for
 			texture mapping.
+			We use a 3D instead of a 2D vector for the coordinates as it
+			makes it easier to group with others.
 		*/
-		std::vector<glm::vec2> uvCoordinates;
+		std::vector<glm::vec3> uvCoordinates;
 	};
 
 

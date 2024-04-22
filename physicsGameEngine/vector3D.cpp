@@ -48,7 +48,8 @@ void pe::makeOrthonormalBasis(const Vector3D& x, Vector3D* y, Vector3D* z) {
 	z->normalize();
 }
 
-Vector3D pe::furthestPoint(
+
+Vector3D pe::findFurthestPointFromCoordinate(
 	const Vector3D& coordinate,
 	const std::vector<Vector3D>& points
 ) {

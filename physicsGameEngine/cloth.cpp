@@ -120,14 +120,6 @@ std::vector<CurvedFace*> Cloth::calculateFaces() {
 				i * rowSize + (j + 1)
 			};
 
-			// The uv coordinates of the square
-			std::vector<Vector2D> uv{
-				Vector2D(i* (1.0 / rowSize), j* (1.0 / columnSize)),
-				Vector2D((i + 1)* (1.0 / rowSize), j* (1.0 / columnSize)),
-				Vector2D((i + 1)* (1.0 / rowSize), (j + 1)* (1.0 / columnSize)),
-				Vector2D(i* (1.0 / rowSize), (j + 1)* (1.0 / columnSize))
-			};
-
 			// The normals are not initially set, but will be calculated each frame
 			std::vector<Vector3D>faceNormals(indexes.size(), Vector3D());
 
@@ -137,6 +129,15 @@ std::vector<CurvedFace*> Cloth::calculateFaces() {
 				indexes,
 				faceNormals
 			);
+
+			std::vector<Vector2D> uv{
+				Vector2D(i * (1.0 / rowSize), j * (1.0 / columnSize)),
+				Vector2D((i + 1) * (1.0 / rowSize), j * (1.0 / columnSize)),
+				Vector2D((i + 1) * (1.0 / rowSize), (j + 1) * (1.0 / columnSize)),
+				Vector2D(i * (1.0 / rowSize), (j + 1) * (1.0 / columnSize)),
+			};
+
+
 			face->setTextureCoordinates(uv);
 			faces.push_back(face);
 		}

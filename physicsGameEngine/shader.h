@@ -112,6 +112,7 @@ namespace pe {
             GLenum textureType, 
             GLuint textureUnit
         ) {
+
             glUseProgram(shaderProgram.getShaderProgram());
 
             glActiveTexture(GL_TEXTURE0 + textureUnit);
@@ -181,12 +182,20 @@ namespace pe {
             vec2 coordinates for example, such as uv coordinates,
             we can just cast the, to vec3 first. They will be cast back to
             vec2 in the shader.
+            
+            The draw type is sent to tell the OpenGL if the data will be sent
+            once at initialization (STATIC_DRAW), or if it will be sent
+            once per frame (DYNAMIC_DRAW) in the case of deformable bodies.
         */
         void sendVaribleData(
-            const std::vector<std::vector<glm::vec3>>& data
+            const std::vector<std::vector<glm::vec3>>& data,
+            GLenum drawType
         ) {
             glBindVertexArray(vao);
             glBindBuffer(GL_ARRAY_BUFFER, vbo);
+
+            // Clearing the VBO
+            glBufferData(GL_ARRAY_BUFFER, 0, nullptr, drawType);
 
             unsigned int totalSize = 0;
             for (int i = 0; i < data.size(); i++) {
@@ -215,7 +224,7 @@ namespace pe {
                     move and rotate, the vertices remain the same (the model
                     matrix can transform them).
                 */
-                GL_STATIC_DRAW
+                drawType
             );
 
             GLenum error;

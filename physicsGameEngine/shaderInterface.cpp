@@ -109,7 +109,7 @@ void pe::getFaceData(Face* face, FaceData* data) {
 			);
 
 			data->uvCoordinates.push_back(
-				convertToGLM(face->getTextureCoordinate(indexes[j]))
+				glm::vec3(convertToGLM(face->getTextureCoordinate(indexes[j])), 0.0)
 			);
 		}
 	}
@@ -145,7 +145,7 @@ void pe::getUniformFaceData(Face* face, FaceData* data) {
 			data->tangents.push_back(faceTangent);
 			data->bitangents.push_back(faceBitangent);
 			data->uvCoordinates.push_back(
-				convertToGLM(face->getTextureCoordinate(indexes[j]))
+				glm::vec3(convertToGLM(face->getTextureCoordinate(indexes[j])), 0.0)
 			);
 		}
 	}

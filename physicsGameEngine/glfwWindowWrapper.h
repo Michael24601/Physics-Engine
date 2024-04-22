@@ -81,6 +81,11 @@ namespace pe {
         }
 
 
+        ~GlfwWindowWrapper() {
+            glfwTerminate();
+        }
+
+
         /*
             This is a callback that needs to be sent to the
             glfwSetFramebufferSizeCallback function.

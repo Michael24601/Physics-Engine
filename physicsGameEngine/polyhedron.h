@@ -58,14 +58,24 @@ namespace pe {
 		);
 
 
+		/*
+			Checks if point is inside a face.
+		*/
+		static bool isPointInsideFace(
+			const Face* face,
+			const Vector3D& point,
+			real rayLength
+		);
+
+
 	public:
 
 		std::vector<Vector3D> localVertices;
+		std::vector<Vector3D> globalVertices;
 		RigidBody* body;
 
 		std::vector<Face*> faces;
 		std::vector<Edge*> edges;
-		std::vector<Vector3D> globalVertices;
 
 		Vector3D furthestPoint;
 
@@ -169,26 +179,17 @@ namespace pe {
 
 
 		Vector3D getFurthestPoint() const;
+
+
+		Matrix3x4& getTransformMatrix();
+
+
+		bool isPointInsidePolyhedron(
+			const Vector3D& point
+		) const ;
+
+
 	};
-
-
-	/*
-		Checks if a point is inside the polyhedron using the Monte-Carlo
-		algorithm;
-		we pick a random direction from the point and trace a ray to
-		infinity.
-		It may intersect th polyhedron surface several times, but if it
-		is inside the polyhedron, the number of times will be odd,
-		and if it is outside, it will be even. This is because everytime
-		we intersect the surface, we go from outside to inside, or
-		inside to outside. We always end up outside since the ray goes
-		to infinity, so if we started inside, we intersect it an odd number
-		of times.
-	*/
-	bool isPointInsidePolyhedron(
-		const Polyhedron& polyhedron,
-		const Vector3D& point
-	);
 }
 
 #endif

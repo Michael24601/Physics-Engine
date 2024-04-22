@@ -231,7 +231,8 @@ Fix the the sleep state, which is currently not correct.
 The contact joint now only works if the last object in a series
 has negligible weight.
 
-Add an edge to edge in the second collision generation method.
+Add an edge to edge in the second collision generation method 
+(DECIDED AGAINST IT).
 
 Change the named of functions in the third collision generation
 method (DONE).
@@ -239,7 +240,7 @@ method (DONE).
 Consider using EBOs instead of sending all vertices. 
 
 Consider creating the shadow and environment maps only during
-initialization.
+initialization (DONE).
 
 Comment and explain all three collision generation methods.
 
@@ -252,7 +253,7 @@ transformation may not be necessary anymore for collision detection (DONE).
 
 Add an intertia tensor approximator for custom primitives.
 
-Fix pyramid colliison box halfsize (DONE. I did by adding an offset
+Fix pyramid collison box halfsize (DONE. I did by adding an offset
 for the centre of gravity, and then rotating that offset by
 the rotation of the transform matrix; the new transform for the
 collision box is the rotation and the translation + the offset).
@@ -262,15 +263,13 @@ when forces are applied to it (DONE, it turns out, I accidently
 gave it an all 0 intertia tensor, since I hadn't yet made a function
 to approximate the intertia tensor).
 
-Write a possible common interface to all types of collision volumes.
+Write a possible common interface to all types of collision volumes
+(DONE, DECIDED AGAINST IT).
 
 Possibly use the same bounding sphere for the coarse collision
 detection, as it has an offset; finding the furthest point from the
 centre of gravity and using it as a radius guarantees the centre of
-the sphere is the same as the polyhedron. 
-
-Implement the camera using our core math library. That means adding
-new functions to the matrix and vector classes.
+the sphere is the same as the polyhedron (DECIDED AGAINST IT). 
 
 Make particles pointer type and include a destructor (DONE).
 
@@ -287,12 +286,13 @@ them entirely.
 
 Restructure the shaders so that each frame doesn't recreate the VAO
 and VBO. This avoids the need for updating the global vertices each
-frame manually as the shader will do it.
+frame manually as the shader will do it (DONE).
 
 Add a check in the camera to verify the point the camera is looking at
 isn't the same as its position (which makes the screen black).
 
-Use the custom core classes for the camera, not the openGL ones.
+Use the custom core classes for the camera, not the openGL ones
+(DECIDED AGAINST THIS ONE).
 
 Add a first person camera.
 
@@ -302,14 +302,15 @@ not fragment shader, and send it to the fragment shader (DONE).
 Consider using a bias matrix to turn the homogenous coordinates
 into texture coordinates instead of doing it in the shader.
 
-Switch to GLFW.
+Switch to GLFW (DONE).
 
-Create lighting types for the shadow mapping. 
-
-Release vertex and fragment shaders when done creating the shader
-program.
+Create lighting types for the shadow mapping.
 
 Remove global vertices from faces, edges and from the polyhedron
 class; neither the collision nor rendeirng module need them since
 both use the transform matrices. For meshes that don't have a
 transform matrix, we can create a new face each frame.
+
+Add wind effect.
+
+Add tetxure mapping functions for cloth so textures can be scaled.
