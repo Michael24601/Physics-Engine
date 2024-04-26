@@ -37,9 +37,6 @@
     <Filter Include="Source Files\Collision">
       <UniqueIdentifier>{daf10cc5-698b-46c7-b412-42350ceef7af}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\OpenglGraphics">
-      <UniqueIdentifier>{528a04ee-a99a-4fac-9ff7-2720c586fe4d}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\ParticleMesh">
       <UniqueIdentifier>{1aa70bbb-545d-4597-8b7f-bec87747f6db}</UniqueIdentifier>
     </Filter>
@@ -76,35 +73,38 @@
     <Filter Include="Header Files\OpenGL Shaders">
       <UniqueIdentifier>{411a34ef-23fd-41d4-aa67-ebd1bfa89859}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\GLSL Shaders">
+    <Filter Include="Source Files\GLSL Shaders">
       <UniqueIdentifier>{747ca941-f6c3-4729-a4c4-0f6692aa8f2d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\GLSL Shaders\Anisotropic Shader">
+    <Filter Include="Source Files\GLSL Shaders\Anisotropic Shader">
       <UniqueIdentifier>{2c1decbb-25f5-41ec-b507-431d733994cf}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\GLSL Shaders\Cook Torrance Shader">
+    <Filter Include="Source Files\GLSL Shaders\Cook Torrance Shader">
       <UniqueIdentifier>{40fdc51a-8e96-4e98-b8e8-6bf005f744cc}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\GLSL Shaders\Phong Shader">
+    <Filter Include="Source Files\GLSL Shaders\Phong Shader">
       <UniqueIdentifier>{ebdc961d-5f51-4643-8407-5b5f1afb6ad2}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\GLSL Shaders\Diffuse Lighting Shader">
+    <Filter Include="Source Files\GLSL Shaders\Diffuse Lighting Shader">
       <UniqueIdentifier>{0165be36-aa8c-4bf8-9036-ade57c4340a2}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\GLSL Shaders\Solid Color Shader">
+    <Filter Include="Source Files\GLSL Shaders\Solid Color Shader">
       <UniqueIdentifier>{aa13724f-91d6-464b-b564-b2a1235da54d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\GLSL Shaders\Skybox Shader">
+    <Filter Include="Source Files\GLSL Shaders\Skybox Shader">
       <UniqueIdentifier>{dc65b283-ab1e-4a96-a8ae-daddc63bf1c2}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\GLSL Shaders\Reflection Shader">
+    <Filter Include="Source Files\GLSL Shaders\Reflection Shader">
       <UniqueIdentifier>{55086f89-a10d-4866-a64e-63925a87c9d3}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\GLSL Shaders\Shadow Shader">
+    <Filter Include="Source Files\GLSL Shaders\Shadow Shader">
       <UniqueIdentifier>{89bc0cf5-ed25-4aa4-8746-6b1c217367b4}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\GLSL Shaders\Simple Shader">
+    <Filter Include="Source Files\GLSL Shaders\Simple Shader">
       <UniqueIdentifier>{9010f6b8-c6ff-451b-8f42-ede477e8a8f9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\OpenGL Graphics">
+      <UniqueIdentifier>{528a04ee-a99a-4fac-9ff7-2720c586fe4d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -121,7 +121,7 @@
       <Filter>Source Files\Collision</Filter>
     </ClCompile>
     <ClCompile Include="drawingUtil.cpp">
-      <Filter>Source Files\OpenglGraphics</Filter>
+      <Filter>Source Files\OpenGL Graphics</Filter>
     </ClCompile>
     <ClCompile Include="particle.cpp">
       <Filter>Source Files\ParticlePhysics</Filter>
@@ -211,7 +211,7 @@
       <Filter>Source Files\ParticleMesh</Filter>
     </ClCompile>
     <ClCompile Include="openglUtility.cpp">
-      <Filter>Source Files\OpenglGraphics</Filter>
+      <Filter>Source Files\OpenGL Graphics</Filter>
     </ClCompile>
     <ClCompile Include="polyhedron.cpp">
       <Filter>Source Files\Primitive</Filter>
@@ -429,34 +429,34 @@
       <Filter>Header Files\ParticleMesh</Filter>
     </ClInclude>
     <ClInclude Include="anisotropicFragmentShader.glsl">
-      <Filter>Header Files\GLSL Shaders\Anisotropic Shader</Filter>
+      <Filter>Source Files\GLSL Shaders\Anisotropic Shader</Filter>
     </ClInclude>
     <ClInclude Include="anisotropicTextureVertexShader.glsl">
-      <Filter>Header Files\GLSL Shaders\Anisotropic Shader</Filter>
+      <Filter>Source Files\GLSL Shaders\Anisotropic Shader</Filter>
     </ClInclude>
     <ClInclude Include="anisotropicTextureFragmentShader.glsl">
-      <Filter>Header Files\GLSL Shaders\Anisotropic Shader</Filter>
+      <Filter>Source Files\GLSL Shaders\Anisotropic Shader</Filter>
     </ClInclude>
     <ClInclude Include="cookTorranceVertexShader.glsl">
-      <Filter>Header Files\GLSL Shaders\Cook Torrance Shader</Filter>
+      <Filter>Source Files\GLSL Shaders\Cook Torrance Shader</Filter>
     </ClInclude>
     <ClInclude Include="cookTorranceFragmentShader.glsl">
-      <Filter>Header Files\GLSL Shaders\Cook Torrance Shader</Filter>
+      <Filter>Source Files\GLSL Shaders\Cook Torrance Shader</Filter>
     </ClInclude>
     <ClInclude Include="cookTorranceTextureVertexShader.glsl">
-      <Filter>Header Files\GLSL Shaders\Cook Torrance Shader</Filter>
+      <Filter>Source Files\GLSL Shaders\Cook Torrance Shader</Filter>
     </ClInclude>
     <ClInclude Include="cookTorranceTextureFragmentShader.glsl">
-      <Filter>Header Files\GLSL Shaders\Cook Torrance Shader</Filter>
+      <Filter>Source Files\GLSL Shaders\Cook Torrance Shader</Filter>
     </ClInclude>
     <ClInclude Include="phongVertexShader.glsl">
-      <Filter>Header Files\GLSL Shaders\Phong Shader</Filter>
+      <Filter>Source Files\GLSL Shaders\Phong Shader</Filter>
     </ClInclude>
     <ClInclude Include="phongFragmentShader.glsl">
-      <Filter>Header Files\GLSL Shaders\Phong Shader</Filter>
+      <Filter>Source Files\GLSL Shaders\Phong Shader</Filter>
     </ClInclude>
     <ClInclude Include="diffuseLightingTextureVertexShader.glsl">
-      <Filter>Header Files\GLSL Shaders\Diffuse Lighting Shader</Filter>
+      <Filter>Source Files\GLSL Shaders\Diffuse Lighting Shader</Filter>
     </ClInclude>
     <ClInclude Include="stb_image_write.h">
       <Filter>Header Files\OpenGL Utilities</Filter>
@@ -512,55 +512,58 @@
     <ClInclude Include="glfwWindowWrapper.h">
       <Filter>Header Files\OpenGL Utilities</Filter>
     </ClInclude>
+    <ClInclude Include="firstPersonCamera.h">
+      <Filter>Header Files\Camera</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="todo.txt" />
   </ItemGroup>
   <ItemGroup>
     <None Include="anisotropicVertexShader.glsl">
-      <Filter>Header Files\GLSL Shaders\Anisotropic Shader</Filter>
+      <Filter>Source Files\GLSL Shaders\Anisotropic Shader</Filter>
     </None>
     <None Include="diffuseLightingVertexShader.glsl">
-      <Filter>Header Files\GLSL Shaders\Diffuse Lighting Shader</Filter>
+      <Filter>Source Files\GLSL Shaders\Diffuse Lighting Shader</Filter>
     </None>
     <None Include="diffuseLightingFragmentShader.glsl">
-      <Filter>Header Files\GLSL Shaders\Diffuse Lighting Shader</Filter>
+      <Filter>Source Files\GLSL Shaders\Diffuse Lighting Shader</Filter>
     </None>
     <None Include="diffuseLightingTextureFragmentShader.glsl">
-      <Filter>Header Files\GLSL Shaders\Diffuse Lighting Shader</Filter>
+      <Filter>Source Files\GLSL Shaders\Diffuse Lighting Shader</Filter>
     </None>
     <None Include="solidColorVertexShader.glsl">
-      <Filter>Header Files\GLSL Shaders\Solid Color Shader</Filter>
+      <Filter>Source Files\GLSL Shaders\Solid Color Shader</Filter>
     </None>
     <None Include="solidColorFragmentShader.glsl">
-      <Filter>Header Files\GLSL Shaders\Solid Color Shader</Filter>
+      <Filter>Source Files\GLSL Shaders\Solid Color Shader</Filter>
     </None>
     <None Include="skyboxFragmentShader.glsl">
-      <Filter>Header Files\GLSL Shaders\Skybox Shader</Filter>
+      <Filter>Source Files\GLSL Shaders\Skybox Shader</Filter>
     </None>
     <None Include="skyboxVertexShader.glsl">
-      <Filter>Header Files\GLSL Shaders\Skybox Shader</Filter>
+      <Filter>Source Files\GLSL Shaders\Skybox Shader</Filter>
     </None>
     <None Include="cookTorranceReflectionFragmentShader.glsl">
-      <Filter>Header Files\GLSL Shaders\Reflection Shader</Filter>
+      <Filter>Source Files\GLSL Shaders\Reflection Shader</Filter>
     </None>
     <None Include="cookTorranceReflectionVertexShader.glsl">
-      <Filter>Header Files\GLSL Shaders\Reflection Shader</Filter>
+      <Filter>Source Files\GLSL Shaders\Reflection Shader</Filter>
     </None>
     <None Include="cookTorranceReflectionFragmentShaderWithSkybox.glsl">
-      <Filter>Header Files\GLSL Shaders\Reflection Shader</Filter>
+      <Filter>Source Files\GLSL Shaders\Reflection Shader</Filter>
     </None>
     <None Include="shadowMappingFragmentShader.glsl">
-      <Filter>Header Files\GLSL Shaders\Shadow Shader</Filter>
+      <Filter>Source Files\GLSL Shaders\Shadow Shader</Filter>
     </None>
     <None Include="simpleVertexShader.glsl">
-      <Filter>Header Files\GLSL Shaders\Simple Shader</Filter>
+      <Filter>Source Files\GLSL Shaders\Simple Shader</Filter>
     </None>
     <None Include="simpleFragmentShader.glsl">
-      <Filter>Header Files\GLSL Shaders\Simple Shader</Filter>
+      <Filter>Source Files\GLSL Shaders\Simple Shader</Filter>
     </None>
     <None Include="shadowMappingVertexShader.glsl">
-      <Filter>Header Files\GLSL Shaders\Shadow Shader</Filter>
+      <Filter>Source Files\GLSL Shaders\Shadow Shader</Filter>
     </None>
   </ItemGroup>
 </Project>

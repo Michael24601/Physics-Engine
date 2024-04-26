@@ -56,12 +56,13 @@ bool pe::testIntersection(const Polyhedron& C0, const Polyhedron& C1) {
 
 	for (int i = 0; i < C0.faces.size(); i++) {
 		pe::Vector3D P = C0.faces[i]->getVertex(0);
-		pe::Vector3D N = C0.faces[i]->getNormal(); // outward pointing
+		pe::Vector3D N = C0.faces[i]->getNormal();
 		if (whichSide(C1, P, N) > 0) {
 			// C1 is entirely on the positive side of the line P + t * N.
 			return false;
 		}
 	}
+
 	/*
 		Test faces of C1 for separation. Because of the counterclockwise
 		ordering, the  projection interval for C1 is [T,0] whereT<0.

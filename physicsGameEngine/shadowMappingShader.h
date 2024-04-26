@@ -34,11 +34,17 @@ namespace pe {
             setUniform("lightPos", position);
         }
 
-
         void setShadowStrength(float strength) {
             setUniform("shadowStrength", strength);
         }
 
+        /*
+            Percentage-closer filtering, or PCF, is used to lessen the
+            jaggedness of the edges of shadows.
+        */
+        void setPCF(bool PCF) {
+            setUniform("PCF", PCF);
+        }
 
         /*
             The lightSpace matrix is the projection * view matrix used

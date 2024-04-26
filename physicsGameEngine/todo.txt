@@ -249,9 +249,10 @@ shapes to the shaders; it could mean saving memory and time
 by using the same VBOs and VAOs as the vertices remain the same,
 but it also means we are using an extra matrix transformation for
 each vertex to get it to world coordinates. Especially now that
-transformation may not be necessary anymore for collision detection (DONE).
+transformation may not be necessary anymore for collision
+detection (DONE).
 
-Add an intertia tensor approximator for custom primitives.
+Add an intertia tensor approximator for custom primitives (DONE).
 
 Fix pyramid collison box halfsize (DONE. I did by adding an offset
 for the centre of gravity, and then rotating that offset by
@@ -311,6 +312,10 @@ class; neither the collision nor rendeirng module need them since
 both use the transform matrices. For meshes that don't have a
 transform matrix, we can create a new face each frame.
 
-Add wind effect.
+Add wind effect (DONE).
 
 Add tetxure mapping functions for cloth so textures can be scaled.
+
+Fix rotating camera centre.
+
+Create an anchored body spring force.
