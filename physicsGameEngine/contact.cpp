@@ -450,7 +450,7 @@ void Contact::calculateDesiredDeltaVelocity(real duration) {
 	*/
 	real thisRestitution = restitution;
 	if (realAbs(contactVelocity.x) < velocityLimit) {
-		thisRestitution = (real)0.0f;
+		thisRestitution = 0;
 	}
 
 	// Combine the bounce velocity with the removed

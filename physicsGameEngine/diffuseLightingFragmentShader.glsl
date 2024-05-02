@@ -16,7 +16,7 @@ out vec4 FragColor;
 
 void main(){
 
-    vec3 finalDiffuse = vec3(0.0);
+    vec3 finalDiffuse = vec3(0.1);
 
     for (int i = 0; i < numActiveLights; ++i) {
         vec3 lightDir = normalize(lightPos[i] - FragPos);

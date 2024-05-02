@@ -218,9 +218,12 @@
     <ClInclude Include="cookTorranceReflectionShaderWithSkybox.h" />
     <ClInclude Include="cookTorranceShader.h" />
     <ClInclude Include="depthMapper.h" />
+    <ClInclude Include="diffuseLightingFourTextureShader.h" />
+    <ClInclude Include="directionalProjection.h" />
     <ClInclude Include="environmentMapper.h" />
     <ClInclude Include="firstPersonCamera.h" />
     <ClInclude Include="glfwWindowWrapper.h" />
+    <ClInclude Include="pointProjection.h" />
     <ClInclude Include="shadowMappingShader.h" />
     <ClInclude Include="cookTorranceTextureFragmentShader.glsl" />
     <ClInclude Include="cookTorranceTextureShader.h" />
@@ -292,6 +295,7 @@
     <ClInclude Include="springJoint.h" />
     <ClInclude Include="stb_image_write.h" />
     <ClInclude Include="diffuseLightingTextureShader.h" />
+    <ClInclude Include="textureShader.h" />
     <ClInclude Include="util.h" />
     <ClInclude Include="vector2D.h" />
     <ClInclude Include="vector3D.h" />
@@ -305,6 +309,7 @@
     <None Include="cookTorranceReflectionFragmentShader.glsl" />
     <None Include="cookTorranceReflectionFragmentShaderWithSkybox.glsl" />
     <None Include="cookTorranceReflectionVertexShader.glsl" />
+    <None Include="diffuseLightingFourTextureFragmentShader.glsl" />
     <None Include="shadowMappingVertexShader.glsl" />
     <None Include="shadowMappingFragmentShader.glsl" />
     <None Include="diffuseLightingFragmentShader.glsl" />
@@ -316,6 +321,8 @@
     <None Include="skyboxVertexShader.glsl" />
     <None Include="solidColorFragmentShader.glsl" />
     <None Include="solidColorVertexShader.glsl" />
+    <None Include="textureFragmentShader.glsl" />
+    <None Include="textureVertexShader.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

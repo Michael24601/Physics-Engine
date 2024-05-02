@@ -17,7 +17,7 @@ uniform int numActiveLights;
 out vec4 FragColor;
 
 void main(){
-    vec3 finalDiffuse = vec3(0.0);
+    vec3 finalDiffuse = vec3(0.1);
 
     for (int i = 0; i < numActiveLights; ++i) {
         vec3 lightDir = normalize(lightPos[i] - FragPos);
@@ -26,5 +26,11 @@ void main(){
     }
 
     vec4 texColor = texture(objectTexture, TexCoord);
-    FragColor = texColor * vec4(finalDiffuse, 1.0);
+
+    // This just ensures that when the texture is transparent
+    // no color is rendered
+    if(texColor.a < 0.2)
+        discard;
+
+    FragColor = texColor * vec4(finalDiffuse, texColor.a);
 }

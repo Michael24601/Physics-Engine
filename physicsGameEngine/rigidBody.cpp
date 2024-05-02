@@ -127,8 +127,6 @@ void RigidBody::setInertiaTensor(const Matrix3x3& inertiaTensor) {
 
 void RigidBody::addForce(const Vector3D& force) {
 	forceAccumulator += force;
-
-	setAwake(true);
 }
 
 
@@ -181,25 +179,6 @@ void RigidBody::integrate(real duration) {
 
 	// Accumulators cleared each frame
 	clearAccumulators();
-
-	// Calculation of motion, so 
-	real currentMotion = linearVelocity.scalarProduct(linearVelocity) +
-		angularVelocity.scalarProduct(angularVelocity);
-
-	real bias = realPow(0.5, duration);
-	motion = bias * motion + (1 - bias) * currentMotion;
-
-	if (motion < 5.0) {
-		consecutiveLowMotionTime += duration;
-		// Check if motion has been low for a certain consecutive duration
-		//if (consecutiveLowMotionTime >= 1.0) {
-			setAwake(false);
-		// }
-	}
-	 else {
-	 // Reset consecutive low motion frames when motion is not low
-	 consecutiveLowMotionTime = 0;
-	}
 }
 
 

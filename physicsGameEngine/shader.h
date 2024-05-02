@@ -75,6 +75,32 @@ namespace pe {
             glUseProgram(0);
         }
 
+        void setUniform(const std::string& name, const glm::vec3* arr, int size) {
+            glUseProgram(shaderProgram.getShaderProgram());
+            GLint location = glGetUniformLocation(shaderProgram.getShaderProgram(), name.c_str());
+            if (location != -1) {
+                glUniform3fv(location, size, glm::value_ptr(arr[0]));
+            }
+            else {
+                // Handle error: Uniform location not found
+                std::cerr << "Uniform '" << name << "' not found in shader program.\n";
+            }
+            glUseProgram(0);
+        }
+
+        void setUniform(const std::string& name, const glm::vec4* arr, int size) {
+            glUseProgram(shaderProgram.getShaderProgram());
+            GLint location = glGetUniformLocation(shaderProgram.getShaderProgram(), name.c_str());
+            if (location != -1) {
+                glUniform4fv(location, size, glm::value_ptr(arr[0]));
+            }
+            else {
+                // Handle error: Uniform location not found
+                std::cerr << "Uniform '" << name << "' not found in shader program.\n";
+            }
+            glUseProgram(0);
+        }
+
         void setUniform(const std::string& name, float value) {
             glUseProgram(shaderProgram.getShaderProgram());
             GLint location = glGetUniformLocation(shaderProgram.getShaderProgram(), name.c_str());

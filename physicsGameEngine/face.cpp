@@ -440,13 +440,13 @@ void Face::update(const Matrix3x4& transformMatrix) {
 	normal = transformedNormal - centre;
 	normal.normalize();
 
-	Vector3D transformedTangent = transformMatrix.transform(localTangent);
-	tangent = transformedTangent - centre;
-	tangent.normalize();
+	//Vector3D transformedTangent = transformMatrix.transform(localTangent);
+	//tangent = transformedTangent - centre;
+	//tangent.normalize();
 
-	Vector3D transformedBitangent = transformMatrix.transform(localBitangent);
-	bitangent = transformedBitangent - centre;
-	bitangent.normalize();
+	//Vector3D transformedBitangent = transformMatrix.transform(localBitangent);
+	//bitangent = transformedBitangent - centre;
+	//bitangent.normalize();
 
 	centroid = transformMatrix.transform(localCentroid);
 }

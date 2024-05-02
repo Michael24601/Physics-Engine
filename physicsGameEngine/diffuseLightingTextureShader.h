@@ -24,13 +24,9 @@ namespace pe {
             );
         }
 
-        void setLightPosition(const glm::vec3* positions) {
+        void setLightPosition(const glm::vec3* positions, int size) {
             // Setting an array means sending the first value
-            setUniform("lightPos", positions[0]);
-        }
-
-        void setLightColors(const glm::vec4* colors) {
-            setUniform("lightColors", colors[0]);
+            setUniform("lightPos", positions, size);
         }
 
         void setActiveLightsCount(int count) {

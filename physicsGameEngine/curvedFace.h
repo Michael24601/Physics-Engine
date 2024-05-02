@@ -213,11 +213,11 @@ namespace pe {
 		void update() {
 			centroid = Face::calculateCentroid(Basis::GLOBAL);
 			normal = Face::calculateNormal(Basis::GLOBAL);
-			tangent = Face::calculateTangent(Basis::GLOBAL);
-			bitangent = Face::calculateBitangent(Basis::GLOBAL);
+			//tangent = Face::calculateTangent(Basis::GLOBAL);
+			//bitangent = Face::calculateBitangent(Basis::GLOBAL);
 			for (int i = 0; i < getVertexNumber(); i++) {
-				vertexTangents[i] = calculateTangent(i, Basis::GLOBAL);
-				vertexBitangents[i] = calculateBitangent(i, Basis::GLOBAL);
+			//	vertexTangents[i] = calculateTangent(i, Basis::GLOBAL);
+			//	vertexBitangents[i] = calculateBitangent(i, Basis::GLOBAL);
 			}
 		}
 

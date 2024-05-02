@@ -46,8 +46,10 @@ namespace pe{
 			bounding spheres, which wastes more space but is better
 			performance-wise.
 		*/
-		BoundingSphere(const BoundingSphere& sphere1,
-			const BoundingSphere& sphere2);
+		BoundingSphere(
+			const BoundingSphere& sphere1,
+			const BoundingSphere& sphere2
+		);
 
 		/*
 			Returns the volume of the bounding volume sphere.

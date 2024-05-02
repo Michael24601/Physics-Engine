@@ -8,8 +8,10 @@ BoundingSphere::BoundingSphere(const Vector3D& centre, real radius) :
     radius{ radius }, centre{ centre } {}
 
 
-BoundingSphere::BoundingSphere(const BoundingSphere& sphere1,
-    const BoundingSphere& sphere2) {
+BoundingSphere::BoundingSphere(
+    const BoundingSphere& sphere1,
+    const BoundingSphere& sphere2
+) {
     Vector3D centreTocentre = sphere2.centre - sphere1.centre;
     // We use the square of the distance to save on performance
     real centreDistanceSquared = centreTocentre.magnitudeSquared();

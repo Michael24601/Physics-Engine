@@ -32,7 +32,7 @@
 #define REAL_MAX DBL_MAX
 
 namespace pe {
-	typedef double real;
+	typedef float real;
 	constexpr real PI = 3.141592f;
 	constexpr real sleepEpsilon = 0.5f;
 

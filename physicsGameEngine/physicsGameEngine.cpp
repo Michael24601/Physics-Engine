@@ -92,11 +92,16 @@
 #include "diffuseLightingTextureShader.h"
 
 #include "firstPersonCamera.h"
+#include "directionalProjection.h"
+
+#include "textureShader.h"
+#include "diffuseLightingFourTextureShader.h"
+
 
 using namespace pe;
 using namespace std;
 
-#define SIM_6
+#define SIM_7
 
 #ifdef SIM_1
 
@@ -472,11 +477,11 @@ int main() {
 
     RotatingCamera camera(
         window.getWindow(),
+        glm::vec3(0, 0, 500),
         glm::vec3(0.0f, 0.0f, 0.0f),
         90.0,
         0.1,
         10000,
-        500,
         0.0005,
         0.001
     );
@@ -487,22 +492,22 @@ int main() {
     SkyboxShader skyboxShader;
 
     GLuint texture1 = loadTexture(
-        "C:\\Users\\msaba\\OneDrive\\Desktop\\textureMaps\\leb.jpg"
+        "C:\\Users\\msaba\\OneDrive\\Desktop\\physen\\textureMaps\\leb.jpg"
     );
     GLuint texture2 = loadTexture(
-        "C:\\Users\\msaba\\OneDrive\\Desktop\\textureMaps\\hit.png"
+        "C:\\Users\\msaba\\OneDrive\\Desktop\\physen\\textureMaps\\hit.png"
     );
     GLuint texture3 = loadTexture(
-        "C:\\Users\\msaba\\OneDrive\\Desktop\\textureMaps\\wood.jpg"
+        "C:\\Users\\msaba\\OneDrive\\Desktop\\physen\\textureMaps\\wood.jpg"
     );
 
     GLuint skybox = loadCubemap(std::vector<std::string>{
-        "C:\\Users\\msaba\\OneDrive\\Desktop\\cubemaps\\right.jpg",
-            "C:\\Users\\msaba\\OneDrive\\Desktop\\cubemaps\\left.jpg",
-            "C:\\Users\\msaba\\OneDrive\\Desktop\\cubemaps\\top.jpg",
-            "C:\\Users\\msaba\\OneDrive\\Desktop\\cubemaps\\bottom.jpg",
-            "C:\\Users\\msaba\\OneDrive\\Desktop\\cubemaps\\front.jpg",
-            "C:\\Users\\msaba\\OneDrive\\Desktop\\cubemaps\\back.jpg"
+        "C:\\Users\\msaba\\OneDrive\\Desktop\\physen\\cubemaps\\right.jpg",
+            "C:\\Users\\msaba\\OneDrive\\Desktop\\physen\\cubemaps\\left.jpg",
+            "C:\\Users\\msaba\\OneDrive\\Desktop\\physen\\cubemaps\\top.jpg",
+            "C:\\Users\\msaba\\OneDrive\\Desktop\\physen\\cubemaps\\bottom.jpg",
+            "C:\\Users\\msaba\\OneDrive\\Desktop\\physen\\cubemaps\\front.jpg",
+            "C:\\Users\\msaba\\OneDrive\\Desktop\\physen\\cubemaps\\back.jpg"
     });
 
     glm::mat4 identity = glm::mat4(1.0);
@@ -520,7 +525,7 @@ int main() {
         glm::vec4(1.0, 1.0, 1.0, 1.0)
     };
 
-    int size = 20;
+    int size = 19;
     real strength = 0.5;
     real mass = 0.5;
     real damping = 0.3;
@@ -633,7 +638,7 @@ int main() {
                     continue;
                 }
                 else if (i >= (size - 1) * size) {
-                    mesh.particles[i]->addForce(Vector3D(3, 1, 0) * windMultiplier);
+                    mesh.particles[i]->addForce(Vector3D(4, 3, 0) * windMultiplier);
                     continue;
                 }
 
@@ -688,7 +693,7 @@ int main() {
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             // We set the texture here cause they use the same unit
-            lightShader.setObjectTexture(texture2);
+            lightShader.setObjectTexture(texture1);
             lightShader.drawFaces();
             poleShader.setObjectTexture(texture3);
             poleShader.drawFaces();
@@ -1549,11 +1554,11 @@ int main() {
 
     RotatingCamera camera(
         window.getWindow(),
-        glm::vec3(0.0f, 0.0f, 0.0f),
+        glm::vec3(0.0f, 200.0f, 500.0f),
+        glm::vec3(0.0f, 200.0f, 0.0f),
         90.0,
         0.1,
         10000,
-        500,
         0.001,
         0.005
     );
@@ -1573,7 +1578,7 @@ int main() {
 
     // Shape
     glm::vec3 lightPos[]{
-        glm::vec3(200.0f, 1000.0f, 0.0f),
+        glm::vec3(200.0f, 1500.0f, 0.0f),
     };
     glm::vec4 lightColors[]{
         glm::vec4(1.0f, 1.0f, 1.0f, 1.0f),
@@ -1671,6 +1676,10 @@ int main() {
 
     DepthMapper depthMapper(512, 512);
 
+    DirectionalProjection projection(
+        lightPos[0], 2000.0f, window.getWidth(), window.getHeight(), 0.1f, 5000.0f
+    );
+
     float deltaT = 0.012;
 
     float lastTime = glfwGetTime();
@@ -1762,19 +1771,9 @@ int main() {
         for (int i = 0; i < prisms.size(); i++) {
             shaders.push_back(&cubeShaders[i]);
         }
-
-        glm::mat4 view = glm::lookAt(
-            lightPos[0],
-            glm::vec3(0.0f, 0.0f, 0.0f),
-            glm::vec3(0.0f, 1.0f, 0.0f)
+        depthMapper.captureDepth(
+            projection.getView(), projection.getProjection(), shaders
         );
-
-        float near_plane = 1.0f, far_plane = 5000.0f;
-        glm::mat4 projection = glm::ortho(
-            -2000.0f, 2000.0f, -2000.0f, 2000.0f, near_plane, far_plane
-        );
-
-        depthMapper.captureDepth(view, projection, shaders);
 
 
         for (int i = 0; i < prisms.size(); i++) {
@@ -1784,7 +1783,7 @@ int main() {
 
         groundShader.setProjectionMatrix(camera.getProjectionMatrix());
         groundShader.setViewMatrix(camera.getViewMatrix());
-        groundShader.setLightSpaceMatrix(projection * view);
+        groundShader.setLightSpaceMatrix(projection.getProjectionView());
         groundShader.setShadowMap(depthMapper.getTexture());
 
         sphereShader.setProjectionMatrix(camera.getProjectionMatrix());
@@ -1831,45 +1830,7 @@ int main() {
 
 int main() {
 
-    // Needed for 3D rendering
-    sf::ContextSettings settings;
-    settings.depthBits = 24;
-    settings.antialiasingLevel = 8;
-    sf::RenderWindow window(sf::VideoMode(1200, 800), "Physics Simulation",
-        sf::Style::Default, settings);
-    window.setActive();
-
-    GLenum err = glewInit();
-    if (GLEW_OK != err) {
-        // GLEW initialization failed
-        std::cerr << "Error: GLEW initialization failed: "
-            << glewGetErrorString(err) << std::endl;
-        return -1;
-    }
-
-    // Sets up OpenGL states (for 3D)
-    // Makes objects in front of others cover them
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LESS);
-
-    // Set to clockwise or counter-clockwise depending on face vertex order
-    // (Counter Clockwise for us).
-    glFrontFace(GL_CCW);
-    // This only displays faces from one side, depending on the order of
-    // vertices, and what is considered front facce in the above option.
-    // Disable to show both faces (but lose on performance).
-    // Set to off in case our faces are both clockwise and counter clockwise
-    // (mixed), so we can't consisently render only one.
-    // Note that if we have opacity of face under 1 (opaque), it is
-    // definitely best not to render both sides (enable culling) so it
-    // appears correct.
-    glEnable(GL_CULL_FACE);
-
-    // Enables blending for transparency
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    glDepthFunc(GL_LEQUAL);
+    GlfwWindowWrapper window(1200, 800, 6, "window");
 
     glm::mat4 identity = glm::mat4(1.0);
     glm::vec4 colorWhite(1.0, 1.0, 1.0, 1.0);
@@ -1884,127 +1845,108 @@ int main() {
     glm::vec4 colorGrey(0.4, 0.4, 0.4, 1.0);
     glm::vec4 colorBlack(0.1, 0.1, 0.1, 1.0);
 
+    glDisable(GL_CULL_FACE);
+
     // Shape
     glm::vec3 lightPos[]{
-        glm::vec3(200.0f, 300.0f, 0.0f),
+        glm::vec3(30.0f, 400.0f, 30.0f),
+        glm::vec3(100.0f, 40.0f, 30.0f),
+        glm::vec3(30.0f, 40.0f, 100.0f),
+        glm::vec3(-100.0f, 40.0f, 30.0f),
+        glm::vec3(30.0f, 40.0f, -1000.0f),
+        glm::vec3(100.0f, 40.0f, 100.0f),
+        glm::vec3(-100.0f, 40.0f, 100.0f),
+        glm::vec3(-100.0f, 40.0f, -100.0f),
+        glm::vec3(1000.0f, 40.0f, -100.0f),
     };
     glm::vec4 lightColors[]{
         glm::vec4(1.0f, 1.0f, 1.0f, 0.6f),
     };
 
-    glm::vec4 colors[9]{
-        colorRed,
-        colorBlue,
-        colorPurple,
-        colorGreen,
-        colorMagenta,
-        colorYellow,
-        colorOrange,
-        colorDarkBlue,
-        colorGrey
-    };
-
     // Shaders
-    SolidColorShader shader;
-    DiffuseLightingShader lightShader;
-    DiffuseSpecularLightingShader phongShader;
-    CookTorranceShader cookShader;
-    AnisotropicShader aniShader;
-    CookTorranceTextureShader cookTexShader;
-    AnisotropicTextureShader aniTexShader;
+    DiffuseLightingFourTextureShader texShader;
 
 
     RotatingCamera camera(
-        window,
+        window.getWindow(),
+        glm::vec3(0.0f, 0.0f, 500.0f),
         glm::vec3(0.0f, 0.0f, 0.0f),
         90.0,
         0.1,
         10000,
-        500,
-        0.02,
-        0.025
+        0.00002,
+        0.000025
     );
 
-    // Just in order to flip y axis
-    sf::View view = window.getDefaultView();
-    view.setSize(1200, -800);
-    view.setCenter(0, 0);
-    window.setView(view);
 
-    sf::Clock clock;
-    real deltaT = 0.07;
+    GLuint texture1 = loadTexture(
+        "C:\\Users\\msaba\\OneDrive\\Desktop\\physen\\tree\\texture.jpg"
+    );
+    GLuint opacity = loadTexture(
+        "C:\\Users\\msaba\\OneDrive\\Desktop\\physen\\tree\\opacity.png"
+    );
 
-    GLuint texture = loadTexture("C:\\Users\\msaba\\OneDrive\\Desktop\\textureMaps\\scratched-metal.jpg");
-
-    std::string filename = "C:\\Users\\msaba\\OneDrive\\Desktop\\textureMaps\\moai.obj";
-    Polyhedron p = returnPrimitive(filename, 1, Vector3D::ZERO, new RigidBody(), 2);
-    p.body->orientation = Quaternion::rotatedByAxisAngle(Vector3D(0, 0, 1), PI/2.0);
+    std::string filename = "C:\\Users\\msaba\\OneDrive\\Desktop\\physen\\tree\\object.obj";
+    Polyhedron p = returnPrimitive(filename, 1, Vector3D::ZERO, new RigidBody(), 100);
 
     FaceData data = getFaceData(p);
     std::vector<std::vector<glm::vec3>> d = {
-        data.vertices, data.normals
+        data.vertices, data.normals, data.uvCoordinates
     };
-    cookShader.sendVaribleData(d);
-    cookShader.setVerticesSize(data.vertices.size());
-    cookShader.setActiveLightsCount(1);
-    cookShader.setLightPosition(lightPos);
-    cookShader.setLightColors(lightColors);
-    cookShader.setObjectColor(colorRed);
-    cookShader.setRoughness(0.05);
-    cookShader.setFresnel(0.5);
+    texShader.sendVaribleData(d, GL_STATIC_DRAW);
+    texShader.setActiveLightsCount(1);
+    texShader.setLightPosition(lightPos, 1);
+    texShader.setTrianglesNumber(data.vertices.size());
 
-    real rotationSpeed = 0.1;
-    real angle = PI / 2;
-    bool isButtonPressed[]{
-        false
-    };
+    texShader.setObjectTexture(texture1);
+    texShader.setOpacityTexture(opacity);
 
-    while (window.isOpen()) {
+    // texShader.setNoLight(true);
 
-        sf::Event event;
-        while (window.pollEvent(event))
-        {
-            if (event.type == sf::Event::Closed)
-                window.close();
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::R)) {
-                isButtonPressed[0] = true;
-            }
-            else if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
-                isButtonPressed[0] = isButtonPressed[1] =
-                    isButtonPressed[2] = isButtonPressed[3] = false;
-            }
-            camera.update(event, deltaT);
+    float deltaT = 0.001;
+
+    float lastTime = glfwGetTime();
+    float deltaTime = 0.0;
+    float framesPerSecond = 60;
+    float frameRate = 1.0 / framesPerSecond;
+
+    bool isPressed = false;
+
+    p.body->calculateDerivedData();
+
+    glfwSetFramebufferSizeCallback(
+        window.getWindow(),
+        window.framebuffer_size_callback
+    );
+    while (!glfwWindowShouldClose(window.getWindow())) {
+
+        double currentTime = glfwGetTime();
+        deltaTime += (currentTime - lastTime);
+        lastTime = currentTime;
+
+        glfwPollEvents();
+        window.processInput();
+        camera.processInput(frameRate);
+
+        texShader.setModelMatrix(convertToGLM(p.body->transformMatrix));
+        texShader.setViewMatrix(camera.getViewMatrix());
+        texShader.setProjectionMatrix(camera.getProjectionMatrix());
+
+        if (deltaTime >= frameRate) {
+
+            // Unbind framebuffer to render to default framebuffer (window)
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            glViewport(0, 0, window.getWidth(), window.getHeight());
+            glClearColor(0.1f, 0.15f, 0.15f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+            texShader.drawFaces();
+
+            glfwSwapBuffers(window.getWindow());
+
+            deltaTime = 0.0f;
         }
 
-        int numSteps = 1;
-        real substep = deltaT / numSteps;
-
-        while (numSteps--) {
-
-            p.body->calculateDerivedData();
-
-            std::vector<Contact> contacts;
-
-            CollisionResolver resolver(2, 1);
-            resolver.resolveContacts(contacts.data(), contacts.size(), substep);
-
-            p.update();
-
-        }
-
-        window.clear(sf::Color::Color(0, 0, 0));
-        // Clears the depth buffer (for 3D)
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        cookShader.setModelMatrix(convertToGLM(p.body->transformMatrix));
-        cookShader.setViewMatrix(camera.getViewMatrix());
-        cookShader.setViewPosition(camera.getPosition());
-        cookShader.setProjectionMatrix(camera.getProjectionMatrix());
-
-        cookShader.drawFaces();
-       
-        
-        window.display();
     }
 
     return 0;
@@ -2907,5 +2849,851 @@ int main() {
     return 0;
 }
 
+
+#endif
+
+#ifdef SIM_12
+
+int main() {
+
+    GlfwWindowWrapper window(1200, 800, 6, "window");
+
+    RotatingCamera camera(
+        window.getWindow(),
+        glm::vec3(0.0f, 200.0f, 500.0f),
+        glm::vec3(0.0f, 200.0f, 0.0f),
+        90.0,
+        0.1,
+        10000,
+        0.001,
+        0.005
+    );
+
+    glm::mat4 identity = glm::mat4(1.0);
+    glm::vec4 colorWhite(1.0, 1.0, 1.0, 1.0);
+    glm::vec4 colorRed(0.8, 0.1, 0.1, 1.0);
+    glm::vec4 colorBlue(0.5, 0.7, 1.0, 1.0);
+    glm::vec4 colorGreen(0.3, 0.9, 0.3, 1.0);
+    glm::vec4 colorYellow(0.9, 0.9, 0.5, 1.0);
+    glm::vec4 colorPurple(0.4, 0.1, 0.8, 1.0);
+    glm::vec4 colorMagenta(0.9, 0.3, 0.6, 1.0);
+    glm::vec4 colorOrange(0.9, 0.6, 0.2, 1.0);
+    glm::vec4 colorDarkBlue(0.1, 0.1, 0.4, 1.0);
+    glm::vec4 colorGrey(0.4, 0.4, 0.4, 1.0);
+    glm::vec4 colorBlack(0.05, 0.05, 0.05, 1.0);
+
+    // Shape
+    glm::vec3 lightPos[]{
+        glm::vec3(200.0f, 1500.0f, 0.0f),
+    };
+    glm::vec4 lightColors[]{
+        glm::vec4(1.0f, 1.0f, 1.0f, 1.0f),
+    };
+
+    // Shaders
+    std::vector<CookTorranceShader> cubeShaders(9);
+    CookTorranceShader sphereShader;
+    ShadowMappingShader groundShader;
+    SolidColorShader lineShader;
+
+    real mass = 1.5;
+
+    std::vector<RectangularPrism*> prisms;
+    for (int i = 0; i < 1; i++) {
+        for (int j = 0; j < 3; j++) {
+            for (int k = 0; k < 3; k++) {
+
+                int index = i * 9 + j * 3 + k;
+
+                real x = i * 200 - 200;
+                real y = j * 200 - 200;
+                real z = k * 200 - 200;
+
+                RectangularPrism* prism = new RectangularPrism(
+                    200, 200, 200, mass, Vector3D(x, y, z), new RigidBody
+                );
+                prism->body->angularDamping = 0.8;
+                prism->body->linearDamping = 0.95;
+
+                prisms.push_back(prism);
+
+                FaceData data = getFaceData(*prism);
+                std::vector<std::vector<glm::vec3>> vertices{
+                    data.vertices, data.normals
+                };
+
+                cubeShaders[index].sendVaribleData(vertices, GL_STATIC_DRAW);
+                cubeShaders[index].setTrianglesNumber(data.vertices.size());
+                cubeShaders[index].setLightPosition(lightPos);
+                cubeShaders[index].setLightColors(lightColors);
+                cubeShaders[index].setFresnel(0.05);
+                cubeShaders[index].setRoughness(0.5);
+                cubeShaders[index].setObjectColor(colorPurple);
+                cubeShaders[index].setActiveLightsCount(1);
+            }
+        }
+    }
+
+    // Ground
+
+    RectangularPrism ground(5000, 100, 5000, 0, Vector3D(0, -350, -0), new RigidBody);
+    ground.body->inverseMass = 0;
+
+    FaceData data = getFaceData(ground);
+    std::vector<std::vector<glm::vec3>> vertices{
+        data.vertices, data.normals
+    };
+    groundShader.sendVaribleData(vertices, GL_STATIC_DRAW);
+    groundShader.setTrianglesNumber(data.vertices.size());
+    groundShader.setLightPosition(lightPos[0]);
+    groundShader.setObjectColor(colorWhite);
+    groundShader.setShadowStrength(1);
+    groundShader.setPCF(true);
+
+    // Sphere
+
+    SolidSphere sphere(200, 2, 20, 20, Vector3D(800, 400, 0), new RigidBody);
+    sphere.body->canSleep = false;
+    sphere.body->angularDamping = 0.8;
+    sphere.body->linearDamping = 0.95;
+
+    data = getFaceData(sphere);
+    vertices = {
+        data.vertices, data.normals
+    };
+    sphereShader.sendVaribleData(vertices, GL_STATIC_DRAW);
+    sphereShader.setTrianglesNumber(data.vertices.size());
+    sphereShader.setLightPosition(lightPos);
+    sphereShader.setLightColors(lightColors);
+    sphereShader.setFresnel(0.05);
+    sphereShader.setRoughness(0.5);
+    sphereShader.setObjectColor(colorRed);
+    sphereShader.setActiveLightsCount(1);
+
+    lineShader.setObjectColor(colorWhite);
+
+    // Forces
+
+    RigidBodyGravity g(Vector3D(0, -10, 0));
+
+    RigidBody b;
+    b.position = Vector3D(800, 700, 0);
+    RigidBodySpringForce f(sphere.localVertices[0], &b, Vector3D(), 0.09, 300);
+
+
+    // Coarse Collision
+    BoundingVolumeHierarchy<BoundingSphere> tree;
+    for (RectangularPrism* prism : prisms) {
+        tree.insert(
+            prism,
+            BoundingSphere(prism->boundingSphereOffset, prism->boundingSphereRadius)
+        );
+    }
+    tree.insert(
+        &sphere,
+        BoundingSphere(Vector3D::ZERO, sphere.radius)
+    );
+    tree.insert(
+        &ground,
+        BoundingSphere(ground.boundingSphereOffset, ground.boundingSphereRadius)
+    );
+
+
+    DepthMapper depthMapper(512, 512);
+
+    DirectionalProjection projection(
+        lightPos[0], 2000.0f, window.getWidth(), window.getHeight(), 0.1f, 5000.0f
+    );
+
+    float deltaT = 0.012;
+
+    float lastTime = glfwGetTime();
+    float deltaTime = 0.0;
+    float framesPerSecond = 60;
+    float frameRate = 1.0 / framesPerSecond;
+
+    bool isPressed = false;
+
+    glfwSetFramebufferSizeCallback(
+        window.getWindow(),
+        window.framebuffer_size_callback
+    );
+    while (!glfwWindowShouldClose(window.getWindow())) {
+
+        double currentTime = glfwGetTime();
+        deltaTime += (currentTime - lastTime);
+        lastTime = currentTime;
+
+        glfwPollEvents();
+        window.processInput();
+        camera.processInput(frameRate);
+        if (glfwGetKey(window.getWindow(), GLFW_KEY_A) == GLFW_PRESS) {
+            isPressed = true;
+        }
+        else if (glfwGetKey(window.getWindow(), GLFW_KEY_A) == GLFW_RELEASE) {
+            isPressed = false;
+        }
+
+        if (isPressed) {
+            glm::vec2 worldPos = window.getCursorPosition();
+            sphere.body->position.x = worldPos.x * 4;
+            sphere.body->position.y = worldPos.y * 4;
+            sphere.body->setAwake(true);
+        }
+
+        int numSteps = 10;
+        real substep = deltaT / numSteps;
+
+        while (numSteps--) {
+
+            for (RectangularPrism* prism : prisms) {
+                prism->body->calculateDerivedData();
+            }
+            ground.body->calculateDerivedData();
+            sphere.body->calculateDerivedData();
+            b.calculateDerivedData();
+
+            for (RectangularPrism* prism : prisms) {
+                g.updateForce(prism->body, substep);
+            }
+            g.updateForce(sphere.body, substep);
+            f.updateForce(sphere.body, substep);
+
+
+            std::vector<Contact> contacts;
+
+            // Coarse Collision
+            BoundingVolumeHierarchy<BoundingSphere> tree;
+            for (RectangularPrism* prism : prisms) {
+                tree.insert(
+                    prism,
+                    BoundingSphere(
+                        prism->getCentre(),
+                        prism->getFurthestPoint().magnitude()
+                    )
+                );
+            }
+            tree.insert(
+                &sphere,
+                BoundingSphere(sphere.getCentre(), sphere.radius)
+            );
+            tree.insert(
+                &ground,
+                BoundingSphere(
+                    ground.getCentre(),
+                    ground.getFurthestPoint().magnitude()
+                )
+            );
+
+            PotentialContact* potentialContacts = new PotentialContact[1000];
+            int n = tree.getRoot()->getPotentialContacts(potentialContacts, 1000);
+
+            std::cout << n << "\n";
+
+            for (int i = 0; i < n; i++) {
+                PotentialContact p = potentialContacts[i];
+                if (p.polyhedron[0] == &sphere) {
+                    generateContactBoxAndSphere(*p.polyhedron[1], *p.polyhedron[0], contacts, 0.25, 0.0);
+                }
+                else if (p.polyhedron[1] == &sphere) {
+                    generateContactBoxAndSphere(*p.polyhedron[0], *p.polyhedron[1], contacts, 0.25, 0.0);
+                }
+                else {
+                    generateContactBoxAndBox(*p.polyhedron[0], *p.polyhedron[1], contacts, 0.25, 0.0);
+                }
+            }
+
+            CollisionResolver resolver(10, 1);
+            resolver.resolveContacts(contacts.data(), contacts.size(), substep);
+
+            for (RectangularPrism* prism : prisms) {
+                prism->body->integrate(substep);
+            }
+            ground.body->integrate(substep);
+            sphere.body->integrate(substep);
+        }
+
+
+        for (int i = 0; i < prisms.size(); i++) {
+            cubeShaders[i].setModelMatrix(convertToGLM(prisms[i]->getTransformMatrix()));
+        }
+        groundShader.setModelMatrix(convertToGLM(ground.getTransformMatrix()));
+        sphereShader.setModelMatrix(convertToGLM(sphere.getTransformMatrix()));
+
+
+        std::vector<Shader*> shaders{
+            &sphereShader
+        };
+        for (int i = 0; i < prisms.size(); i++) {
+            shaders.push_back(&cubeShaders[i]);
+        }
+        depthMapper.captureDepth(
+            projection.getView(), projection.getProjection(), shaders
+        );
+
+
+        for (int i = 0; i < prisms.size(); i++) {
+            cubeShaders[i].setProjectionMatrix(camera.getProjectionMatrix());
+            cubeShaders[i].setViewMatrix(camera.getViewMatrix());
+        }
+
+        groundShader.setProjectionMatrix(camera.getProjectionMatrix());
+        groundShader.setViewMatrix(camera.getViewMatrix());
+        groundShader.setLightSpaceMatrix(projection.getProjectionView());
+        groundShader.setShadowMap(depthMapper.getTexture());
+
+        sphereShader.setProjectionMatrix(camera.getProjectionMatrix());
+        sphereShader.setViewMatrix(camera.getViewMatrix());
+
+        std::vector<std::vector<glm::vec3>> spring{ {
+            convertToGLM(b.position),
+            convertToGLM(sphere.getTransformMatrix().transform(sphere.localVertices[0]))
+        } };
+        lineShader.sendVaribleData(spring, GL_DYNAMIC_DRAW);
+        lineShader.setEdgeNumber(2);
+        lineShader.setModelMatrix(identity);
+        lineShader.setProjectionMatrix(camera.getProjectionMatrix());
+        lineShader.setViewMatrix(camera.getViewMatrix());
+
+        if (deltaTime >= frameRate) {
+
+            // Unbind framebuffer to render to default framebuffer (window)
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            glViewport(0, 0, window.getWidth(), window.getHeight());
+            glClearColor(0.1f, 0.15f, 0.15f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+            for (int i = 0; i < prisms.size(); i++) {
+                cubeShaders[i].drawFaces();
+            }
+            groundShader.drawFaces();
+            sphereShader.drawFaces();
+            lineShader.drawEdges();
+
+            glfwSwapBuffers(window.getWindow());
+
+            deltaTime = 0.0f;
+        }
+
+    }
+
+    return 0;
+}
+
+#endif
+
+#ifdef SIM_13
+
+int main() {
+
+    GlfwWindowWrapper window(1200, 800, 6, "window");
+
+    RotatingCamera camera(
+        window.getWindow(),
+        glm::vec3(0.0f, 2000.0f, 1000.0f),
+        glm::vec3(0.0f, 1800.0f, 0.0f),
+        90.0,
+        0.1,
+        10000,
+        0.0001,
+        0.00025
+    );
+
+    glm::mat4 identity = glm::mat4(1.0);
+    glm::vec4 colorWhite(1.0, 1.0, 1.0, 1.0);
+    glm::vec4 colorRed(0.8, 0.1, 0.1, 1.0);
+    glm::vec4 colorBlue(0.5, 0.7, 1.0, 1.0);
+    glm::vec4 colorGreen(0.3, 0.9, 0.3, 1.0);
+    glm::vec4 colorYellow(0.9, 0.9, 0.5, 1.0);
+    glm::vec4 colorPurple(0.4, 0.1, 0.8, 1.0);
+    glm::vec4 colorMagenta(0.9, 0.3, 0.6, 1.0);
+    glm::vec4 colorOrange(0.9, 0.6, 0.2, 1.0);
+    glm::vec4 colorDarkBlue(0.1, 0.1, 0.4, 1.0);
+    glm::vec4 colorGrey(0.4, 0.4, 0.4, 1.0);
+    glm::vec4 colorBlack(0.05, 0.05, 0.05, 1.0);
+
+    // Shape
+    glm::vec3 lightPos[]{
+        glm::vec3(200.0f, 1800.0f, 0.0f),
+    };
+    glm::vec4 lightColors[]{
+        glm::vec4(1.0f, 1.0f, 1.0f, 1.0f),
+    };
+
+    // Shaders
+    std::vector<CookTorranceShader> cubeShaders(36);
+    CookTorranceShader sphereShader;
+    ShadowMappingShader groundShader;
+    SolidColorShader lineShader;
+
+    const real mass = 0;
+
+    // Sqrt(1^2 + 0.5^2)
+    const real s = 1.118;
+
+    std::vector<RectangularPrism*> prisms{
+        new RectangularPrism(200, 100, 200 * s, mass, Vector3D(-400, 1556, 420), new RigidBody),
+        new RectangularPrism(200, 100, 200, mass, Vector3D(-400, 1500, 200), new RigidBody),
+        new RectangularPrism(200, 100, 200 * s, mass, Vector3D(-400, 1456, 20), new RigidBody),
+        new RectangularPrism(200, 100, 200, mass, Vector3D(-400, 1400, -200), new RigidBody),
+
+        new RectangularPrism(200 * s, 100, 200, mass, Vector3D(-420, 1356, -400), new RigidBody),
+        new RectangularPrism(200, 100, 200, mass, Vector3D(-200, 1300, -400), new RigidBody),
+        new RectangularPrism(200 * s, 100, 200, mass, Vector3D(-20, 1256, -400), new RigidBody),
+        new RectangularPrism(200, 100, 200, mass, Vector3D(200, 1200, -400), new RigidBody),
+
+        new RectangularPrism(200, 100, 200 * s, mass, Vector3D(400, 1156, -420), new RigidBody),
+        new RectangularPrism(200, 100, 200, mass, Vector3D(400, 1100, -200), new RigidBody),
+        new RectangularPrism(200, 100, 200 * s, mass, Vector3D(400, 1056, -20), new RigidBody),
+        new RectangularPrism(200, 100, 200, mass, Vector3D(400, 1000, 200), new RigidBody),
+
+        new RectangularPrism(200 * s, 100, 200, mass, Vector3D(420, 956, 400), new RigidBody),
+        new RectangularPrism(200, 100, 200, mass, Vector3D(200, 900, 400), new RigidBody),
+        new RectangularPrism(200 * s, 100, 200, mass, Vector3D(20, 856, 400), new RigidBody),
+        new RectangularPrism(200, 100, 200, mass, Vector3D(-200, 800, 400), new RigidBody),
+    };
+
+    for (int i = 0; i < 16; i++) {
+        prisms.push_back(
+            new RectangularPrism(
+                prisms[i]->width,
+                prisms[i]->height,
+                prisms[i]->depth,
+                mass, 
+                prisms[i]->getCentre() - Vector3D(0, 800, 0),
+                new RigidBody
+            )
+        );
+    }
+
+    prisms.push_back(new RectangularPrism(
+        100, 1600, 1200, mass, Vector3D(-550, 800, 0), new RigidBody
+    ));
+    prisms.push_back(new RectangularPrism(
+        100, 1600, 1200, mass, Vector3D(550, 800, 0), new RigidBody
+    ));
+    prisms.push_back(new RectangularPrism(
+        1000, 1600, 100, mass, Vector3D(0, 800, 550), new RigidBody
+    ));
+    prisms.push_back(new RectangularPrism(
+        1000, 1600, 100, mass, Vector3D(0, 800, -550), new RigidBody
+    ));
+
+    for (int i = 0; i < prisms.size(); i++) {
+
+        prisms[i]->body->inverseMass = 0;
+
+        FaceData data = getFaceData(*prisms[i]);
+        std::vector<std::vector<glm::vec3>> vertices{
+            data.vertices, data.normals
+        };
+
+        cubeShaders[i].sendVaribleData(vertices, GL_STATIC_DRAW);
+        cubeShaders[i].setTrianglesNumber(data.vertices.size());
+        cubeShaders[i].setLightPosition(lightPos);
+        cubeShaders[i].setLightColors(lightColors);
+        cubeShaders[i].setFresnel(0.05);
+        cubeShaders[i].setRoughness(0.5);
+        cubeShaders[i].setObjectColor(colorWhite);
+        cubeShaders[i].setActiveLightsCount(1);
+    }
+
+    for (int i = 0; i < 2; i++) {
+        prisms[0 + i * 16]->body->orientation = Quaternion::rotatedByAxisAngle(Vector3D::FORWARD, PI / 7);
+        prisms[2 + i * 16]->body->orientation = Quaternion::rotatedByAxisAngle(Vector3D::FORWARD, PI / 7);
+        prisms[4 + i * 16]->body->orientation = Quaternion::rotatedByAxisAngle(Vector3D::RIGHT, PI / 7);
+        prisms[6 + i * 16]->body->orientation = Quaternion::rotatedByAxisAngle(Vector3D::RIGHT, PI / 7);
+        prisms[8 + i * 16]->body->orientation = Quaternion::rotatedByAxisAngle(Vector3D::FORWARD, -PI / 7);
+        prisms[10 + i * 16]->body->orientation = Quaternion::rotatedByAxisAngle(Vector3D::FORWARD, -PI / 7);
+        prisms[12 + i * 16]->body->orientation = Quaternion::rotatedByAxisAngle(Vector3D::RIGHT, -PI / 7);
+        prisms[14 + i * 16]->body->orientation = Quaternion::rotatedByAxisAngle(Vector3D::RIGHT, -PI / 7);
+    }
+
+    // Sphere
+
+    SolidSphere sphere(50, 5, 30, 30, Vector3D(-400, 1700, 400), new RigidBody);
+    sphere.body->canSleep = false;
+    sphere.body->angularDamping = 0.8;
+    sphere.body->linearDamping = 0.95;
+
+    FaceData data = getFaceData(sphere);
+    std::vector<std::vector<glm::vec3>>vertices = {
+        data.vertices, data.normals
+    };
+    sphereShader.sendVaribleData(vertices, GL_STATIC_DRAW);
+    sphereShader.setTrianglesNumber(data.vertices.size());
+    sphereShader.setLightPosition(lightPos);
+    sphereShader.setLightColors(lightColors);
+    sphereShader.setFresnel(0.05);
+    sphereShader.setRoughness(0.5);
+    sphereShader.setObjectColor(colorRed);
+    sphereShader.setActiveLightsCount(1);
+
+    lineShader.setObjectColor(colorWhite);
+
+    // Forces
+
+    RigidBodyGravity g(Vector3D(0, -10, 0));
+
+    float deltaT = 0.001;
+
+    float lastTime = glfwGetTime();
+    float deltaTime = 0.0;
+    float framesPerSecond = 60;
+    float frameRate = 1.0 / framesPerSecond;
+
+    bool isPressed = false;
+
+    glfwSetFramebufferSizeCallback(
+        window.getWindow(),
+        window.framebuffer_size_callback
+    );
+    while (!glfwWindowShouldClose(window.getWindow())) {
+
+        double currentTime = glfwGetTime();
+        deltaTime += (currentTime - lastTime);
+        lastTime = currentTime;
+
+        glfwPollEvents();
+        window.processInput();
+        camera.processInput(frameRate);
+        if (glfwGetKey(window.getWindow(), GLFW_KEY_A) == GLFW_PRESS) {
+            isPressed = true;
+        }
+        else if (glfwGetKey(window.getWindow(), GLFW_KEY_A) == GLFW_RELEASE) {
+            isPressed = false;
+        }
+
+        if (isPressed) {
+            sphere.body->addForce(Vector3D(0, 0, -100));
+        }
+
+        int numSteps = 10;
+        real substep = deltaT / numSteps;
+
+        while (numSteps--) {
+
+            for (RectangularPrism* prism : prisms) {
+                prism->body->calculateDerivedData();
+            }
+            sphere.body->calculateDerivedData();
+
+            g.updateForce(sphere.body, substep);
+
+            std::vector<Contact> contacts;
+
+            for (int i = 0; i < prisms.size(); i++) {
+                generateContactBoxAndSphere(*(prisms[i]), sphere, contacts, 0.25, 0.0);
+            }
+
+            CollisionResolver resolver(10, 1);
+            resolver.resolveContacts(contacts.data(), contacts.size(), substep);
+
+            sphere.body->integrate(substep);
+        }
+
+
+        for (int i = 0; i < prisms.size(); i++) {
+            cubeShaders[i].setProjectionMatrix(camera.getProjectionMatrix());
+            cubeShaders[i].setViewMatrix(camera.getViewMatrix());
+            cubeShaders[i].setModelMatrix(convertToGLM(prisms[i]->getTransformMatrix()));
+        }
+        sphereShader.setProjectionMatrix(camera.getProjectionMatrix());
+        sphereShader.setViewMatrix(camera.getViewMatrix());
+        sphereShader.setModelMatrix(convertToGLM(sphere.getTransformMatrix()));
+
+
+        if (deltaTime >= frameRate) {
+
+            // Unbind framebuffer to render to default framebuffer (window)
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            glViewport(0, 0, window.getWidth(), window.getHeight());
+            glClearColor(0.1f, 0.15f, 0.15f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+            for (int i = 0; i < prisms.size(); i++) {
+                cubeShaders[i].drawFaces();
+            }
+            sphereShader.drawFaces();
+
+            glfwSwapBuffers(window.getWindow());
+
+            deltaTime = 0.0f;
+        }
+
+    }
+
+    return 0;
+}
+
+#endif
+
+#ifdef SIM_14
+
+int main() {
+
+    GlfwWindowWrapper window(1200, 800, 6, "window");
+
+    RotatingCamera camera(
+        window.getWindow(),
+        glm::vec3(0.0f, 1000.0f, 1000.0f),
+        glm::vec3(0.0f, 300.0f, 0.0f),
+        90.0,
+        0.1,
+        10000,
+        0.00003,
+        0.0001
+    );
+
+    glm::mat4 identity = glm::mat4(1.0);
+    glm::vec4 colorWhite(1.0, 1.0, 1.0, 1.0);
+    glm::vec4 colorRed(0.8, 0.1, 0.1, 1.0);
+    glm::vec4 colorBlue(0.5, 0.7, 1.0, 1.0);
+    glm::vec4 colorGreen(0.3, 0.9, 0.3, 1.0);
+    glm::vec4 colorYellow(0.9, 0.9, 0.5, 1.0);
+    glm::vec4 colorPurple(0.4, 0.1, 0.8, 1.0);
+    glm::vec4 colorMagenta(0.9, 0.3, 0.6, 1.0);
+    glm::vec4 colorOrange(0.9, 0.6, 0.2, 1.0);
+    glm::vec4 colorDarkBlue(0.1, 0.1, 0.4, 1.0);
+    glm::vec4 colorGrey(0.4, 0.4, 0.4, 1.0);
+    glm::vec4 colorBlack(0.05, 0.05, 0.05, 1.0);
+
+    // Shape
+    glm::vec3 lightPos[]{
+        glm::vec3(200.0f, 1800.0f, 0.0f),
+    };
+    glm::vec4 lightColors[]{
+        glm::vec4(1.0f, 1.0f, 1.0f, 1.0f),
+    };
+
+    const int MAX_SPHERES = 50;
+    int numSpheres = 0;
+
+    // Shaders
+    CookTorranceShader sphereShader;
+    std::vector<CookTorranceShader> cubeShaders(13);
+
+    const real mass = 0;
+
+
+    std::vector<SolidSphere*> spheres;
+    std::vector<RectangularPrism*> walls;
+
+
+    walls.push_back(new RectangularPrism(
+        100, 400, 1200, mass, Vector3D(-550, 250, 0), new RigidBody
+    ));
+    walls.push_back(new RectangularPrism(
+        100, 400, 1200, mass, Vector3D(550, 250, 0), new RigidBody
+    ));
+    walls.push_back(new RectangularPrism(
+        1200, 400, 100, mass, Vector3D(0, 250, 550), new RigidBody
+    ));
+    walls.push_back(new RectangularPrism(
+        1200, 400, 100, mass, Vector3D(0, 250, -550), new RigidBody
+    ));
+
+    walls.push_back(new RectangularPrism(
+        400, 400, 400, mass, Vector3D(400, 250, 400), new RigidBody
+    ));
+    walls.push_back(new RectangularPrism(
+        400, 400, 400, mass, Vector3D(400, 250, -400), new RigidBody
+    ));
+    walls.push_back(new RectangularPrism(
+        400, 400, 400, mass, Vector3D(-400, 250, 400), new RigidBody
+    ));
+    walls.push_back(new RectangularPrism(
+        400, 400, 400, mass, Vector3D(-400, 250, -400), new RigidBody
+    ));
+
+    walls.push_back(new RectangularPrism(
+        400 * 1.45, 10, 400, mass, Vector3D(325, 210, 0), new RigidBody
+    ));
+    walls.push_back(new RectangularPrism(
+        400, 10, 400 * 1.5, mass, Vector3D(0, 210, -325), new RigidBody
+    ));
+    walls.push_back(new RectangularPrism(
+        400, 10, 400 * 1.5, mass, Vector3D(0, 210, 325), new RigidBody
+    ));
+    walls.push_back(new RectangularPrism(
+        400 * 1.5, 10, 400, mass, Vector3D(-325, 210, -0), new RigidBody
+    ));
+
+    walls.push_back(new RectangularPrism(
+        1200, 50, 1200, mass, Vector3D(0, 25, 0), new RigidBody
+    ));
+
+    walls[8]->body->orientation = Quaternion::rotatedByAxisAngle(Vector3D::RIGHT, -PI / 3.4);
+    walls[9]->body->orientation = Quaternion::rotatedByAxisAngle(Vector3D::FORWARD, -PI / 3.4);
+    walls[10]->body->orientation = Quaternion::rotatedByAxisAngle(Vector3D::FORWARD, PI / 3.4);
+    walls[11]->body->orientation = Quaternion::rotatedByAxisAngle(Vector3D::RIGHT, PI / 3.4);
+
+
+    for (RectangularPrism* prism : walls) {
+        prism->body->calculateDerivedData();
+    }
+
+
+    for (int i = 0; i < walls.size(); i++) {
+
+        walls[i]->body->inverseMass = 0;
+        walls[i]->body->canSleep = true;
+
+        FaceData data = getFaceData(*walls[i]);
+        std::vector<std::vector<glm::vec3>> vertices{
+            data.vertices, data.normals
+        };
+
+        cubeShaders[i].sendVaribleData(vertices, GL_STATIC_DRAW);
+        cubeShaders[i].setTrianglesNumber(data.vertices.size());
+        cubeShaders[i].setLightPosition(lightPos);
+        cubeShaders[i].setLightColors(lightColors);
+        cubeShaders[i].setFresnel(0.05);
+        cubeShaders[i].setRoughness(0.5);
+        cubeShaders[i].setObjectColor(colorWhite);
+        cubeShaders[i].setActiveLightsCount(1);
+    }
+
+    // Sphere
+
+    SolidSphere sphere(60, 5, 20, 20, Vector3D(0, 0, 0), new RigidBody);
+
+    FaceData data = getFaceData(sphere);
+    std::vector<std::vector<glm::vec3>>vertices = {
+        data.vertices, data.normals
+    };
+    sphereShader.sendVaribleData(vertices, GL_STATIC_DRAW);
+    sphereShader.setTrianglesNumber(data.vertices.size());
+    sphereShader.setLightPosition(lightPos);
+    sphereShader.setLightColors(lightColors);
+    sphereShader.setFresnel(0.05);
+    sphereShader.setRoughness(0.5);
+    sphereShader.setObjectColor(colorBlue);
+    sphereShader.setActiveLightsCount(1);
+
+
+    // Forces
+
+    RigidBodyGravity g(Vector3D(0, -10, 0));
+
+    float deltaT = 0.0005;
+
+    float lastTime = glfwGetTime();
+    float deltaTime = 0.0;
+    float framesPerSecond = 60;
+    float frameRate = 1.0 / framesPerSecond;
+
+    bool isPressed = false;
+
+    glfwSetFramebufferSizeCallback(
+        window.getWindow(),
+        window.framebuffer_size_callback
+    );
+    while (!glfwWindowShouldClose(window.getWindow())) {
+
+        double currentTime = glfwGetTime();
+        deltaTime += (currentTime - lastTime);
+        lastTime = currentTime;
+
+        glfwPollEvents();
+        window.processInput();
+        camera.processInput(frameRate);
+        if (glfwGetKey(window.getWindow(), GLFW_KEY_A) == GLFW_PRESS) {
+            isPressed = true;
+        }
+        else if (glfwGetKey(window.getWindow(), GLFW_KEY_A) == GLFW_RELEASE) {
+
+            if (isPressed) {
+                int n = generateRandomNumber(-300, 300);
+                int m = generateRandomNumber(-500, 500);
+                // We can generate only 1 vertex for
+                    // these spheres as they will be shaded later
+                SolidSphere* v = new SolidSphere(60, 0.1, 1, 1, Vector3D(n, 1000, m), new RigidBody);
+                v->body->angularDamping = 0.3;
+                v->body->linearDamping = 0.95;
+                v->body->canSleep = true;
+                spheres.push_back(v);
+            }
+
+            isPressed = false;
+        }
+
+        int numSteps = 1;
+        real substep = deltaT / numSteps;
+
+        while (numSteps--) {
+
+            for (SolidSphere* s : spheres) {
+                s->body->calculateDerivedData();
+            }
+
+            for (SolidSphere* s : spheres) {
+                g.updateForce(s->body, substep);
+            }
+
+
+            std::vector<Contact> contacts;
+            for (int i = 0; i < walls.size(); i++) {
+                for (SolidSphere* s : spheres) {
+                    generateContactBoxAndSphere(*(walls[i]), *s, contacts, 0.8, 0.5);
+                }
+            }
+            for (SolidSphere* s : spheres) {
+                for (SolidSphere* s2 : spheres) {
+                    if (
+                        (s2->getCentre() - s->getCentre()).magnitudeSquared() <
+                        (s2->radius + s->radius) * (s2->radius + s->radius)
+                    ) {
+                        generateContactSphereAndSphere(*s2, *s, contacts, 0.8, 0.5);
+                    }
+                }
+            }
+
+
+            CollisionResolver resolver(2, 0);
+            resolver.resolveContacts(contacts.data(), contacts.size(), substep);
+
+            for (SolidSphere* s : spheres) {
+                s->body->integrate(substep);
+            }
+        }
+
+
+        for (int i = 0; i < walls.size(); i++) {
+            cubeShaders[i].setProjectionMatrix(camera.getProjectionMatrix());
+            cubeShaders[i].setViewMatrix(camera.getViewMatrix());
+            cubeShaders[i].setModelMatrix(convertToGLM(walls[i]->getTransformMatrix()));
+        }
+        
+        sphereShader.setProjectionMatrix(camera.getProjectionMatrix());
+        sphereShader.setViewMatrix(camera.getViewMatrix());
+
+
+        if (deltaTime >= frameRate) {
+
+            // Unbind framebuffer to render to default framebuffer (window)
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            glViewport(0, 0, window.getWidth(), window.getHeight());
+            glClearColor(0.1f, 0.15f, 0.15f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+            for (int i = 0; i < walls.size(); i++) {
+                cubeShaders[i].drawFaces();
+            }
+            for (SolidSphere* s : spheres) {
+                sphereShader.setModelMatrix(convertToGLM(s->getTransformMatrix()));
+                sphereShader.drawFaces();
+            }
+
+           
+            glfwSwapBuffers(window.getWindow());
+
+            deltaTime = 0.0f;
+        }
+
+    }
+
+    return 0;
+}
 
 #endif

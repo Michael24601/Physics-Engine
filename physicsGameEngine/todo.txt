@@ -319,3 +319,15 @@ Add tetxure mapping functions for cloth so textures can be scaled.
 Fix rotating camera centre.
 
 Create an anchored body spring force.
+
+Fix bounding volume hierarhcy.
+
+Include a setter fot inverse mass that recalculates everything.
+
+Fix alhpa value for texture shaders (so the transparent ones
+are actually transparent and don't just match bakground color
+while still having alpha value 1).
+
+Add all the types of textures.
+
+Fix arrays sent to shaders.

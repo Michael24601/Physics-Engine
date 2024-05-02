@@ -20,26 +20,28 @@ namespace pe {
 
 		RotatingCamera(
 			GLFWwindow* window,
+			const glm::vec3& cameraPosition,
 			const glm::vec3& cameraTarget,
 			float fov,
 			float nearPlane,
 			float farPlane,
-			float distanceFromCentre,
 			float movementSpeed,
 			float rotationSpeed
 		) : Camera(
 			window,
-			// The position is pre-set
-			glm::vec3(0, 0, distanceFromCentre),
+			cameraPosition,
 			cameraTarget,
 			fov,
 			nearPlane,
 			farPlane
 		), rotationSpeed{ rotationSpeed },
 			movementSpeed{movementSpeed},
-			distanceFromCentre{distanceFromCentre},
 			// Initial value
-			angle{ 0 }{}
+			angle{ 0 }{
+
+			glm::vec3 horizontalPosition(cameraPosition.x, 0, cameraPosition.z);
+			distanceFromCentre = glm::length(horizontalPosition);
+		}
 
 
 		void processInput(float duration) override {
@@ -59,15 +61,17 @@ namespace pe {
 			}
 
 			// Moves camera
-			// Rotates camera
+			// Rotates camera (only x and z are moved, y stays in place)
 			if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
 				distanceFromCentre *= (1 - movementSpeed);
-				cameraPosition *= (1 - movementSpeed);
+				cameraPosition.x *= (1 - movementSpeed);
+				cameraPosition.z *= (1 - movementSpeed);
 				viewMatrix = glm::lookAt(cameraPosition, cameraTarget, upVector);
 			}
 			else if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
 				distanceFromCentre *= (1 + movementSpeed);
-				cameraPosition *= (1 + movementSpeed);
+				cameraPosition.x *= (1 + movementSpeed);
+				cameraPosition.z *= (1 + movementSpeed);
 				viewMatrix = glm::lookAt(cameraPosition, cameraTarget, upVector);
 			}
 

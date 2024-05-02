@@ -200,7 +200,7 @@ namespace pe {
 			To check that two nodes overlap is to check that their bounding
 			volumes intersect.
 		*/
-		return boundingVolume.overlaps(other->boundingVolume.getSize());
+		return boundingVolume.overlaps(&(other->boundingVolume));
 	}
 
 
@@ -220,8 +220,11 @@ namespace pe {
 			is just the list of potential contacts that bodies in the first
 			child may have with bodies of the second child.
 		*/
-		return children[0]->getPotentialContactsWith(children[1], contacts,
-			limit);
+		return children[0]->getPotentialContactsWith(
+			children[1], 
+			contacts,
+			limit
+		);
 	}
 
 	// Function definitions (included in the header because of the template)
@@ -324,7 +327,7 @@ namespace pe {
 			);
 			// Child two holds the new body
 			children[1] = new BVHNode<BoundingVolumeClass>(
-				this->polyhedron,
+				polyhedron,
 				boundingVolume, 
 				this
 			);
@@ -401,7 +404,7 @@ namespace pe {
 		}
 		if (children[1]) {
 			children[1]->parent = nullptr;
-			delete children[0];
+			delete children[1];
 		}
 	}
 
