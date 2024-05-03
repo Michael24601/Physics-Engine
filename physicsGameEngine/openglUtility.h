@@ -34,6 +34,7 @@ namespace pe {
         Negative Y (Bottom)
         Positive Z (Front)
         Negative Z (Back)
+        All of the images need to have the exact same square dimensions.
     */
     GLuint loadCubemap(const std::vector<std::string>& faces);
 
@@ -56,6 +57,8 @@ namespace pe {
         int height, 
         const std::string& folder
     );
+
+    void saveDepthMap(GLuint texture, int width, int height, std::string path);
 }
 
 #endif

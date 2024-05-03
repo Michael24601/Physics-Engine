@@ -110,9 +110,12 @@ namespace pe {
             So we can use this function instead which takes in a scale
             and applies it to the identity matrix, then calls
             setModel.
+
+            Same for the translate
         */
-        void setModelScale(float scale) {
+        void setModelScaleAndTranslate(float scale, const glm::vec3& translate) {
             glm::mat4 model = glm::mat4(1.0f);
+            model = glm::translate(model, translate);
             model = glm::scale(model, glm::vec3(scale));
             setModelMatrix(model);
         }

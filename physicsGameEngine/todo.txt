@@ -322,7 +322,7 @@ Create an anchored body spring force.
 
 Fix bounding volume hierarhcy.
 
-Include a setter fot inverse mass that recalculates everything.
+Include a setter for inverse mass that recalculates everything.
 
 Fix alhpa value for texture shaders (so the transparent ones
 are actually transparent and don't just match bakground color
@@ -331,3 +331,11 @@ while still having alpha value 1).
 Add all the types of textures.
 
 Fix arrays sent to shaders.
+
+Fix first person camera.
+
+Add image splitter.
+
+Seperate rigid body from polyhedron as classes. Get rid of global
+vertices. Make the faces only have static functions for calculating
+normals and whatnot once. Rectreate faces for cloth each frame.

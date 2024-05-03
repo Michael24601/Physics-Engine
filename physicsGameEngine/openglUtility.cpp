@@ -58,15 +58,30 @@ GLuint pe::loadCubemap(const std::vector<std::string>& faces) {
     glGenTextures(1, &textureID);
     glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
 
-    sf::Image image;
+    sf::Image firstImage;
+    if (!firstImage.loadFromFile(faces[0])) {
+        std::cerr << "Failed to load cubemap texture: " << faces[0] << std::endl;
+        return 0;
+    }
+    GLint width = firstImage.getSize().x;
+    GLint height = firstImage.getSize().y;
+
     for (GLuint i = 0; i < faces.size(); ++i) {
+        sf::Image image;
         if (!image.loadFromFile(faces[i])) {
             std::cerr << "Failed to load cubemap texture: " << faces[i] << std::endl;
             return 0;
         }
+
+        // Checking size mismatch
+        if (image.getSize().x != width || image.getSize().y != height) {
+            std::cerr << "Size mismatch in cubemap textures." << std::endl;
+            return 0;
+        }
+
         glTexImage2D(
             GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
-            0, GL_RGBA, image.getSize().x, image.getSize().y, 0, 
+            0, GL_RGBA, width, height, 0,
             GL_RGBA, GL_UNSIGNED_BYTE, image.getPixelsPtr()
         );
     }
@@ -79,6 +94,12 @@ GLuint pe::loadCubemap(const std::vector<std::string>& faces) {
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+
+    GLenum error = glGetError();
+    if (error != GL_NO_ERROR) {
+        std::cerr << "OpenGL error before returning texture ID: " << error << "\n";
+        return 0;
+    }
 
     return textureID;
 }
@@ -169,4 +190,38 @@ void pe::saveCubemapFaces(
         std::string filename = folderName + "\\cubemap_face_" + std::to_string(face) + ".png";
         saveImage(filename, width, height, pixels);
     }
+}
+
+
+void pe::saveDepthMap(GLuint texture, int width, int height, std::string path) {
+
+    // Bind the depth map texture
+    glBindTexture(GL_TEXTURE_2D, texture);
+
+    // Allocate memory to store depth map pixels
+    float* depthMapPixels = new float[width * height];
+
+    // Retrieve depth map data
+    glGetTexImage(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, GL_FLOAT, depthMapPixels);
+
+    // Convert depth map to grayscale
+    unsigned char* grayscalePixels = new unsigned char[width * height];
+    float minDepth = std::numeric_limits<float>::max();
+    float maxDepth = std::numeric_limits<float>::min();
+    for (int i = 0; i < width * height; ++i) {
+        if (depthMapPixels[i] < minDepth) minDepth = depthMapPixels[i];
+        if (depthMapPixels[i] > maxDepth) maxDepth = depthMapPixels[i];
+    }
+    for (int i = 0; i < width * height; ++i) {
+        grayscalePixels[i] = static_cast<unsigned char>((depthMapPixels[i] - minDepth) / (maxDepth - minDepth) * 255);
+    }
+
+    // Save the depth map as a PNG file
+    stbi_write_png(path.c_str(), width, height, 1, grayscalePixels, width);
+
+    // Cleanup
+    delete[] depthMapPixels;
+    delete[] grayscalePixels;
+
+    glBindTexture(GL_TEXTURE_2D, 0);
 }

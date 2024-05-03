@@ -93,15 +93,17 @@
 
 #include "firstPersonCamera.h"
 #include "directionalProjection.h"
+#include "pointProjection.h"
 
 #include "textureShader.h"
 #include "diffuseLightingFourTextureShader.h"
+#include "shadowMappingTextureShader.h"
 
 
 using namespace pe;
 using namespace std;
 
-#define SIM_7
+#define SIM_15
 
 #ifdef SIM_1
 
@@ -473,7 +475,7 @@ int main() {
 
 int main() {
     
-    GlfwWindowWrapper window(800, 800, 6, "window");
+    GlfwWindowWrapper window(800, 800, 6, "window", false);
 
     RotatingCamera camera(
         window.getWindow(),
@@ -502,12 +504,12 @@ int main() {
     );
 
     GLuint skybox = loadCubemap(std::vector<std::string>{
-        "C:\\Users\\msaba\\OneDrive\\Desktop\\physen\\cubemaps\\right.jpg",
-            "C:\\Users\\msaba\\OneDrive\\Desktop\\physen\\cubemaps\\left.jpg",
-            "C:\\Users\\msaba\\OneDrive\\Desktop\\physen\\cubemaps\\top.jpg",
-            "C:\\Users\\msaba\\OneDrive\\Desktop\\physen\\cubemaps\\bottom.jpg",
-            "C:\\Users\\msaba\\OneDrive\\Desktop\\physen\\cubemaps\\front.jpg",
-            "C:\\Users\\msaba\\OneDrive\\Desktop\\physen\\cubemaps\\back.jpg"
+        "C:\\Users\\msaba\\Downloads\\cubemap_faces\\right.jpg",
+            "C:\\Users\\msaba\\Downloads\\cubemap_faces\\left.jpg",
+            "C:\\Users\\msaba\\Downloads\\cubemap_faces\\up.jpg",
+            "C:\\Users\\msaba\\Downloads\\cubemap_faces\\down.jpg",
+            "C:\\Users\\msaba\\Downloads\\cubemap_faces\\front.jpg",
+            "C:\\Users\\msaba\\Downloads\\cubemap_faces\\back.jpg",
     });
 
     glm::mat4 identity = glm::mat4(1.0);
@@ -525,9 +527,9 @@ int main() {
         glm::vec4(1.0, 1.0, 1.0, 1.0)
     };
 
-    int size = 19;
-    real strength = 0.5;
-    real mass = 0.5;
+    int size = 21;
+    real strength = 0.4;
+    real mass = 0.45;
     real damping = 0.3;
 
     const real height = 400;
@@ -541,11 +543,9 @@ int main() {
 
     Cylinder cylinder(10, 800, 10, 20, Vector3D(-205, -200, 0), new RigidBody());
 
-    lightShader.setLightPosition(lightPos);
-    lightShader.setActiveLightsCount(2);
+    lightShader.setLightPosition(lightPos, 2);
+    poleShader.setLightPosition(lightPos, 2);
 
-    poleShader.setLightPosition(lightPos);
-    poleShader.setActiveLightsCount(2);
     FaceData data = getFaceData(cylinder);
     std::vector<std::vector<glm::vec3>> d{
            data.vertices, data.normals, data.uvCoordinates
@@ -644,9 +644,9 @@ int main() {
 
                 int enter = generateRandomNumber(0, 5);
                 if (enter) {
-                    real x = generateRandomNumber(0.0, 4.0);
-                    real y = generateRandomNumber(4.0, 7.0);
-                    real z = generateRandomNumber(0.0, 2.0);
+                    real x = generateRandomNumber(0.0f, 4.0f);
+                    real y = generateRandomNumber(4.0f, 7.0f);
+                    real z = generateRandomNumber(0.0f, 2.0f);
                     mesh.particles[i]->addForce(Vector3D(x, y, z) * windMultiplier);
                 }
             }
@@ -667,7 +667,7 @@ int main() {
             mesh.update();
         }
 
-        FaceData data = getTwoSidedFaceData(mesh);
+        FaceData data = getFaceData(mesh);
         std::vector<std::vector<glm::vec3>> d{
             data.vertices, data.normals, data.uvCoordinates
         };
@@ -1845,8 +1845,6 @@ int main() {
     glm::vec4 colorGrey(0.4, 0.4, 0.4, 1.0);
     glm::vec4 colorBlack(0.1, 0.1, 0.1, 1.0);
 
-    glDisable(GL_CULL_FACE);
-
     // Shape
     glm::vec3 lightPos[]{
         glm::vec3(30.0f, 400.0f, 30.0f),
@@ -1864,30 +1862,31 @@ int main() {
     };
 
     // Shaders
-    DiffuseLightingFourTextureShader texShader;
+    DiffuseLightingTextureShader texShader;
 
 
-    RotatingCamera camera(
+    FirstPersonCamera camera(
         window.getWindow(),
         glm::vec3(0.0f, 0.0f, 500.0f),
         glm::vec3(0.0f, 0.0f, 0.0f),
         90.0,
         0.1,
         10000,
-        0.00002,
-        0.000025
+        0.2,
+        0.0005
     );
 
 
     GLuint texture1 = loadTexture(
-        "C:\\Users\\msaba\\OneDrive\\Desktop\\physen\\tree\\texture.jpg"
+        "C:\\Users\\msaba\\OneDrive\\Desktop\\physen\\spruce\\texture_branch.png"
     );
     GLuint opacity = loadTexture(
         "C:\\Users\\msaba\\OneDrive\\Desktop\\physen\\tree\\opacity.png"
     );
 
-    std::string filename = "C:\\Users\\msaba\\OneDrive\\Desktop\\physen\\tree\\object.obj";
+    std::string filename = "C:\\Users\\msaba\\OneDrive\\Desktop\\physen\\spruce\\object_branch.obj";
     Polyhedron p = returnPrimitive(filename, 1, Vector3D::ZERO, new RigidBody(), 100);
+    p.body->orientation = Quaternion::rotatedByAxisAngle(Vector3D::FORWARD, PI/2);
 
     FaceData data = getFaceData(p);
     std::vector<std::vector<glm::vec3>> d = {
@@ -1899,7 +1898,6 @@ int main() {
     texShader.setTrianglesNumber(data.vertices.size());
 
     texShader.setObjectTexture(texture1);
-    texShader.setOpacityTexture(opacity);
 
     // texShader.setNoLight(true);
 
@@ -2856,7 +2854,7 @@ int main() {
 
 int main() {
 
-    GlfwWindowWrapper window(1200, 800, 6, "window");
+    GlfwWindowWrapper window(1200, 800, 6, "window", true);
 
     RotatingCamera camera(
         window.getWindow(),
@@ -3686,6 +3684,254 @@ int main() {
             }
 
            
+            glfwSwapBuffers(window.getWindow());
+
+            deltaTime = 0.0f;
+        }
+
+    }
+
+    return 0;
+}
+
+#endif
+
+#ifdef SIM_15
+
+struct Object {
+
+    DiffuseLightingTextureShader texShader;
+    SimpleShader shader;
+    GLuint texture;
+
+    Object(
+        string object,
+        int scale,
+        Vector3D position,
+        Vector3D rotationAxis,
+        float angle,
+        const glm::vec3* lightPos,
+        int lightNumber,
+        GLuint texture
+    ) : texture{texture} {
+
+        std::string filename =
+            "C:\\Users\\msaba\\OneDrive\\Desktop\\physen\\" + object;
+        Polyhedron p = (returnPrimitive(filename, 1, 
+            position, new RigidBody(), scale));
+
+        if (rotationAxis != Vector3D::ZERO) {
+            p.body->orientation = Quaternion::rotatedByAxisAngle(
+                rotationAxis, glm::radians(angle)
+            );
+            p.body->calculateDerivedData();
+        }
+
+        FaceData data = getFaceData(p);
+        std::vector<std::vector<glm::vec3>> d = {
+            data.vertices, data.normals, data.uvCoordinates
+        };
+        texShader.sendVaribleData(d, GL_STATIC_DRAW);
+        texShader.setTrianglesNumber(data.vertices.size());
+
+        shader.sendVaribleData(d, GL_STATIC_DRAW);
+        shader.setTrianglesNumber(data.vertices.size());
+
+        texShader.setLightPosition(lightPos, lightNumber);
+
+        glm::mat4 modelMatrix = glm::mat4(convertToGLM(p.getTransformMatrix()));
+        texShader.setModelMatrix(modelMatrix);
+        shader.setModelMatrix(modelMatrix);
+    }
+
+    void setTexture() {
+        texShader.setObjectTexture(texture);
+    }
+
+    void setVP(
+        const glm::mat4& view,
+        const glm::mat4& projection
+    ){
+        texShader.setViewMatrix(view);
+        texShader.setProjectionMatrix(projection);
+    }
+
+    void render() {
+        texShader.drawFaces();
+    }
+
+};
+
+int main() {
+
+    GlfwWindowWrapper window(800, 800, 6, "window", false);
+
+    glm::mat4 identity = glm::mat4(1.0);
+    glm::vec4 colorWhite(1.0, 1.0, 1.0, 1.0);
+    glm::vec4 colorRed(0.8, 0.1, 0.1, 1.0);
+    glm::vec4 colorBlue(0.5, 0.7, 1.0, 1.0);
+    glm::vec4 colorGreen(0.3, 0.9, 0.3, 1.0);
+    glm::vec4 colorYellow(0.9, 0.9, 0.5, 1.0);
+    glm::vec4 colorPurple(0.4, 0.1, 0.8, 1.0);
+    glm::vec4 colorMagenta(0.9, 0.3, 0.6, 1.0);
+    glm::vec4 colorOrange(0.9, 0.6, 0.2, 1.0);
+    glm::vec4 colorDarkBlue(0.1, 0.1, 0.4, 1.0);
+    glm::vec4 colorGrey(0.4, 0.4, 0.4, 1.0);
+    glm::vec4 colorBlack(0.1, 0.1, 0.1, 1.0);
+
+    // Shape
+    glm::vec3 lightPos[]{
+        glm::vec3(40.0f, 500.0f, -800.0f)
+    };
+    glm::vec4 lightColors[]{
+        glm::vec4(1.0f, 1.0f, 1.0f, 0.6f),
+    };
+
+    GLuint texture = loadTexture(
+        "C:\\Users\\msaba\\OneDrive\\Desktop\\physen\\mansion\\texture.jpg"
+    );
+    GLuint textureGrass = loadTexture(
+        "C:\\Users\\msaba\\OneDrive\\Desktop\\physen\\textureMaps\\grassLarge.jpg"
+    );
+    GLuint textureCabin = loadTexture(
+        "C:\\Users\\msaba\\OneDrive\\Desktop\\physen\\cabin\\texture.jpg"
+    );
+    GLuint textureBranch = loadTexture(
+        "C:\\Users\\msaba\\OneDrive\\Desktop\\physen\\spruce\\texture_branch.png"
+    );
+    GLuint textureTrunk = loadTexture(
+        "C:\\Users\\msaba\\OneDrive\\Desktop\\physen\\spruce\\texture_trunk.jpeg"
+    );
+
+
+    GLuint skybox = loadCubemap(std::vector<std::string>{
+        "C:\\Users\\msaba\\Downloads\\cubemap_faces\\right.jpg",
+            "C:\\Users\\msaba\\Downloads\\cubemap_faces\\left.jpg",
+            "C:\\Users\\msaba\\Downloads\\cubemap_faces\\up.jpg",
+            "C:\\Users\\msaba\\Downloads\\cubemap_faces\\down.jpg",
+            "C:\\Users\\msaba\\Downloads\\cubemap_faces\\front.jpg",
+            "C:\\Users\\msaba\\Downloads\\cubemap_faces\\back.jpg",
+    });
+
+    FirstPersonCamera camera(
+        window.getWindow(),
+        glm::vec3(0.0f, -40.0f, 500.0f),
+        glm::vec3(0.0f, -40.0f, 0.0f),
+        90.0,
+        0.1,
+        10000,
+        5,
+        0.01
+    );
+
+    std::vector<Object*> objects{
+        new Object("mansion\\object.obj", 20, Vector3D(0, 100, -300), Vector3D::ZERO, 0, lightPos, 1, texture),
+        new Object("cabin\\object.obj", 3, Vector3D(0, -15, 300), Vector3D::ZERO, 0, lightPos, 1, textureCabin),
+        new Object("spruce\\object_branch.obj", 40, Vector3D(-400, 150, 400), Vector3D(0, 0, 1), 90, lightPos, 1, textureBranch),
+        new Object("spruce\\object_trunk.obj", 40, Vector3D(-400, 150, 400), Vector3D(0, 0, 1), 90, lightPos, 1, textureTrunk),
+        new Object("spruce\\object_branch.obj", 40, Vector3D(-480, 150, 480), Vector3D(0, 0, 1), 90, lightPos, 1, textureBranch),
+        new Object("spruce\\object_trunk.obj", 40, Vector3D(-480, 150, 480), Vector3D(0, 0, 1), 90, lightPos, 1, textureTrunk),
+        new Object("spruce\\object_branch.obj", 40, Vector3D(-480, 150, 320), Vector3D(0, 0, 1), 90, lightPos, 1, textureBranch),
+        new Object("spruce\\object_trunk.obj", 40, Vector3D(-480, 150, 320), Vector3D(0, 0, 1), 90, lightPos, 1, textureTrunk),
+    };
+
+    RectangularPrism ground(4000, 10, 4000, 0, Vector3D(0, -100, 0), new RigidBody());
+    FaceData data = getFaceData(ground);
+    std::vector<std::vector<glm::vec3>> d = {
+        data.vertices, data.normals, data.uvCoordinates
+    };
+
+    ShadowMappingTextureShader groundShader;
+    groundShader.sendVaribleData(d, GL_STATIC_DRAW);
+    groundShader.setTrianglesNumber(data.vertices.size());
+    groundShader.setLightPosition(lightPos[0]);
+    groundShader.setPCF(true);
+    groundShader.setModelMatrix(convertToGLM(ground.getTransformMatrix()));
+    groundShader.setShadowStrength(0.9);
+
+    SkyboxShader skyShader;
+    skyShader.setSkybox(skybox);
+    skyShader.setModelScaleAndTranslate(2000, glm::vec3(0, -40, 0));
+
+    float deltaT = 0.001;
+
+    float lastTime = glfwGetTime();
+    float deltaTime = 0.0;
+    float framesPerSecond = 60;
+    float frameRate = 1.0 / framesPerSecond;
+
+    bool isPressed = false;
+
+    DirectionalProjection projection(lightPos[0], 1000, 800, 800, 0.1, 5000);
+    DepthMapper mapper(512, 512);
+
+    glfwSetFramebufferSizeCallback(
+        window.getWindow(),
+        window.framebuffer_size_callback
+    );
+    while (!glfwWindowShouldClose(window.getWindow())) {
+
+        double currentTime = glfwGetTime();
+        deltaTime += (currentTime - lastTime);
+        lastTime = currentTime;
+
+        glfwPollEvents();
+        window.processInput();
+        camera.processInput(frameRate);
+        if (glfwGetKey(window.getWindow(), GLFW_KEY_A) == GLFW_PRESS) {
+            lightPos[0].z += 0.02;
+            for (Object* o : objects) {
+                o->texShader.setLightPosition(lightPos, 1);
+            }
+            groundShader.setLightPosition(lightPos[0]);
+            projection.setLightPosition(lightPos[0]);
+        }
+        if (glfwGetKey(window.getWindow(), GLFW_KEY_S) == GLFW_PRESS) {
+            lightPos[0].z -= 0.02;
+            for (Object* o : objects) {
+                o->texShader.setLightPosition(lightPos, 1);
+            }
+            groundShader.setLightPosition(lightPos[0]);
+            projection.setLightPosition(lightPos[0]);
+        }
+
+
+        std::vector<Shader*> shaders;
+        for (Object* o : objects) {
+            shaders.push_back(&(o->shader));
+        }
+        mapper.captureDepth(projection.getView(), projection.getProjection(), shaders);
+        
+        //saveDepthMap(mapper.getTexture(), 512, 512, "C:\\Users\\msaba\\Downloads\\cubemap_faces\\p.png");
+
+        if (deltaTime >= frameRate) {
+
+            // Unbind framebuffer to render to default framebuffer (window)
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            glViewport(0, 0, window.getWidth(), window.getHeight());
+            glClearColor(0.1f, 0.15f, 0.15f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+            glm::mat4 vm = camera.getViewMatrix();
+            glm::mat4 pm = camera.getProjectionMatrix();
+
+            groundShader.setViewMatrix(vm);
+            groundShader.setProjectionMatrix(pm);
+            groundShader.setObjectTexture(textureGrass);
+            groundShader.setShadowMap(mapper.getTexture());
+            groundShader.setLightSpaceMatrix(projection.getProjectionView());
+            groundShader.drawFaces();
+
+            for (Object* o : objects) {
+                o->setVP(vm, pm);
+                o->setTexture();
+                o->render();
+            }
+
+            skyShader.setViewMatrix(vm);
+            skyShader.setProjectionMatrix(pm);
+            skyShader.drawFaces();
+
             glfwSwapBuffers(window.getWindow());
 
             deltaTime = 0.0f;

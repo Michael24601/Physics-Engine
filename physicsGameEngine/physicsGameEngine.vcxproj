@@ -286,6 +286,8 @@
     <ClInclude Include="rigidBodyWorld.h" />
     <ClInclude Include="sat.h" />
     <ClInclude Include="shaderProgram.h" />
+    <ClInclude Include="ShadowMappingTextureFragmentShader.glsl" />
+    <ClInclude Include="shadowMappingTextureShader.h" />
     <ClInclude Include="simpleShader.h" />
     <ClInclude Include="skyboxShader.h" />
     <ClInclude Include="solidColorShader.h" />
@@ -310,6 +312,7 @@
     <None Include="cookTorranceReflectionFragmentShaderWithSkybox.glsl" />
     <None Include="cookTorranceReflectionVertexShader.glsl" />
     <None Include="diffuseLightingFourTextureFragmentShader.glsl" />
+    <None Include="shadowMappingTextureVertexShader.glsl" />
     <None Include="shadowMappingVertexShader.glsl" />
     <None Include="shadowMappingFragmentShader.glsl" />
     <None Include="diffuseLightingFragmentShader.glsl" />

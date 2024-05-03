@@ -24,7 +24,8 @@ namespace pe {
             int sourceWidth, 
             int sourceHeight, 
             int multisampling, 
-            std::string name
+            std::string name,
+            bool cullFaces
         ) : sourceWidth{ sourceWidth }, sourceHeight{sourceHeight} {
 
             glfwInit();
@@ -68,7 +69,12 @@ namespace pe {
             // (mixed), so we can't consisently render only one.
             // Note that if we have opacity of face under 1 (opaque), it is definitely
             // best not to render both sides (enable culling) so it appears correct.
-            glEnable(GL_CULL_FACE);
+            if (cullFaces) {
+                glEnable(GL_CULL_FACE);
+            }
+            else {
+                glDisable(GL_CULL_FACE);
+            }
 
             // Enables blending for transparency
             glEnable(GL_BLEND);

@@ -12,7 +12,7 @@ namespace pe {
 
         // Indicates how fast the camera moves
         float movementSpeed;
-        glm::vec2 lastCursorPosition;
+        float rotationSpeed;
 
     public:
 
@@ -23,7 +23,8 @@ namespace pe {
             float fov,
             float nearPlane,
             float farPlane,
-            float movementSpeed
+            float movementSpeed,
+            float rotationSpeed
         ) : Camera(
             window,
             cameraPosition,
@@ -31,7 +32,8 @@ namespace pe {
             fov,
             nearPlane,
             farPlane
-        ), movementSpeed{ movementSpeed }, lastCursorPosition{ 0.0f } {}
+        ), movementSpeed{ movementSpeed },
+            rotationSpeed{rotationSpeed} {}
 
 
         void processInput(float duration) override {
@@ -46,16 +48,6 @@ namespace pe {
             glfwGetCursorPos(window, &xpos, &ypos);
             int width, height;
             glfwGetFramebufferSize(window, &width, &height);
-            glm::vec2 cursorPosition(
-                xpos - width/ 2.0f,
-                -ypos + height / 2.0f
-            );
-
-            // Calculate the change in cursor position
-            glm::vec2 cursorDelta = cursorPosition - lastCursorPosition;
-
-            // Update last cursor position
-            lastCursorPosition = cursorPosition;
 
             // Updating camera position based on arrow keys pressed
             if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
@@ -75,15 +67,32 @@ namespace pe {
                 cameraTarget += right * movementSpeed * duration;
             }
 
-            // Calculate horizontal rotation based on mouse movement
-            float horizontalRotation = -cursorDelta.x / (float)width;
+
+            float rSpeed{ 0 };
+            // The further it is is the more the rotation
+            if (xpos < (width / 5.0)) {
+                float multiplier = (width / 5.0 - xpos) / 200.0;
+                rSpeed = rotationSpeed * duration * multiplier;
+            }
+            else if (xpos > (width - width / 5.0)) {
+                float multiplier = (xpos - (width - width / 5.0)) / 200.0;
+                rSpeed = -rotationSpeed * duration * multiplier;
+            }
 
             // Rotate the forward vector around the up vector
-            glm::mat4 horizontalRotationMatrix = glm::rotate(glm::mat4(1.0f), horizontalRotation, upVector);
-            glm::vec3 newForward = glm::normalize(glm::vec3(horizontalRotationMatrix * glm::vec4(forward, 1.0f)));
+            glm::mat4 horizontalRotationMatrix = glm::rotate(glm::mat4(1.0f), rSpeed, upVector);
+            glm::vec3 newForward = glm::normalize(glm::vec3(horizontalRotationMatrix * glm::vec4(forward, 0.0f)));
+
+            // Calculate new right vector based on new forward vector
+            glm::vec3 newRight = glm::normalize(glm::cross(newForward, upVector));
+
+            // Calculate new camera target position
+            glm::vec3 offset = cameraTarget - cameraPosition;
+            glm::vec3 newOffset = glm::normalize(newForward) * glm::length(offset);
 
             // Update camera target based on horizontal rotation
-            cameraTarget = cameraPosition + newForward;
+            cameraTarget = cameraPosition + newOffset;
+
 
             // Update view matrix
             viewMatrix = calculateViewMatrix(
