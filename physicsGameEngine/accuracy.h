@@ -3,16 +3,16 @@
 #ifndef ACCURACY_H
 #define ACCURACY_H
 
-// For SFML and GLEW static version (no dlls)
-#define SFML_STATIC
+// For GLEW static version (no dlls) and stb library
+// Note that they also need to be included in the preprocessor definitions
 #define GLEW_STATIC
+#define _CRT_SECURE_NO_WARNINGS
+#define STB_IMAGE_IMPLEMENTATION
+#define STB_IMAGE_WRITE_IMPLEMENTATION
 
 // Can't have both Glew and Glad
 // Glew has to be included first
 #include <GL/glew.h>
-#include <SFML/Graphics.hpp>
-#include <SFML/Window.hpp>
-#include <SFML/OpenGL.hpp>
 #include <GL/gl.h>
 #include <iostream>
 #include <fstream>
@@ -22,6 +22,7 @@
 #include <cfloat>
 #include <limits>
 #include <iostream>
+#include <vector>
 
 #include <glm.hpp>
 #include <gtc/matrix_transform.hpp>
@@ -34,7 +35,6 @@
 namespace pe {
 	typedef float real;
 	constexpr real PI = 3.141592f;
-	constexpr real sleepEpsilon = 0.5f;
 
 	// Enum
 	enum class Order {

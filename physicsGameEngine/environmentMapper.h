@@ -7,7 +7,6 @@
 #ifndef ENVIRONMENT_MAPPER_H
 #define ENVIRONMENT_MAPPER_H
 
-#include <SFML/Graphics.hpp>
 #include <GL/glew.h>
 #include <glm.hpp>
 #include <glm.hpp>

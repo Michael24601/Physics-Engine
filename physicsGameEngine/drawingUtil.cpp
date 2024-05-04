@@ -5,11 +5,11 @@ using namespace pe;
 
 
 void pe::drawVectorOfLines3D(
-    const std::vector<std::pair<Vector3D, Vector3D>>& lines,
+    const std::vector<std::pair<glm::vec3, glm::vec3>>& lines,
     glm::mat4& projection,
     glm::mat4& view,
     glm::mat4& model,
-    sf::Color color,
+    glm::vec3& color,
     real lineWidth
 ) {
 
@@ -21,7 +21,7 @@ void pe::drawVectorOfLines3D(
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
-    for (const std::pair<Vector3D, Vector3D>& pair : lines) {
+    for (const std::pair<glm::vec3, glm::vec3>& pair : lines) {
         glBegin(GL_LINES);
         glLineWidth(lineWidth);
         glColor3ub(color.r, color.g, color.b);
@@ -33,11 +33,11 @@ void pe::drawVectorOfLines3D(
 
 
 void pe::drawVectorOfPolygons3D(
-    const std::vector<std::vector<Vector3D>>& polygons,
+    const std::vector<std::vector<glm::vec3>>& polygons,
     glm::mat4& projection,
     glm::mat4& view,
     glm::mat4& model,
-    sf::Color color, 
+    glm::vec3& color, 
     real opacity
 ) {
 
@@ -49,10 +49,10 @@ void pe::drawVectorOfPolygons3D(
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
-    for (const std::vector<Vector3D>& polygon : polygons) {
+    for (const std::vector<glm::vec3>& polygon : polygons) {
         glBegin(GL_POLYGON);
         glColor4ub(color.r, color.g, color.b, opacity);
-        for (const Vector3D& point : polygon) {
+        for (const glm::vec3& point : polygon) {
             glVertex3f(point.x, point.y, point.z);
         }
         glEnd();

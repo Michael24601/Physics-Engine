@@ -14,17 +14,11 @@
 #define DRAWING_UTIL_H
 
 #include <GL/glew.h>
-#include <SFML/Graphics.hpp>
-#include <SFML/Window.hpp>
-#include <SFML/OpenGL.hpp>
 #include <GL/gl.h>
 
-#include <SFML/Graphics.hpp>
 #include <glm.hpp>
 #include <gtc/type_ptr.hpp>
 #include <gtc/matrix_transform.hpp>
-#include <SFML/OpenGL.hpp>
-#include "vector3D.h"
 #include "matrix3x4.h"
 
 namespace pe {
@@ -32,7 +26,7 @@ namespace pe {
 	/*
 		Draws lines in 3D openGl.
 		Note that we send a viewProjection matrix as a parameters.
-		This transforms each Vector3D point int 3D space into another point,
+		This transforms each glm::vec3 point int 3D space into another point,
 		before drawing it, in the sfml/opengl world, according to the
 		position and angle of the camera (view) and perspective (projection).
 		This matrix is a glm concept, and can be used to rotate, project,
@@ -40,11 +34,11 @@ namespace pe {
 		This function is used with 2D opengl integrated sfml.
 	*/
 	void drawVectorOfLines3D(
-		const std::vector<std::pair<Vector3D, Vector3D>>& lines,
+		const std::vector<std::pair<glm::vec3, glm::vec3>>& lines,
 		glm::mat4& projection,
 		glm::mat4& view,
 		glm::mat4& model,
-		sf::Color color,
+		glm::vec3& color,
 		real lineWidth
 	);
 
@@ -53,11 +47,11 @@ namespace pe {
 		Same, but draws faces, instead of lines.
 	*/
 	void drawVectorOfPolygons3D(
-		const std::vector<std::vector<Vector3D>>& polygons,
+		const std::vector<std::vector<glm::vec3>>& polygons,
 		glm::mat4& projection,
 		glm::mat4& view,
 		glm::mat4& model,
-		sf::Color color,
+		glm::vec3& color,
 		real opacity
 	);
 }

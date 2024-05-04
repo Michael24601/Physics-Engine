@@ -172,6 +172,7 @@ namespace pe {
 				normalizedAxis.z * sinHalfAngle,
 				cosHalfAngle
 			);
+
 			return rotationQuaternion.normalized();
 		}
 

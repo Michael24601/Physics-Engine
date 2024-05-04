@@ -2,7 +2,6 @@
 #ifndef OPENGL_UTILITY_H
 #define OPENGL_UTILITY_H
 
-#include <SFML/Graphics.hpp>
 #include <GL/glew.h>
 #include <iostream>
 #include <fstream>
@@ -13,12 +12,9 @@
 #include <ctime>
 #include <filesystem>
 #include <glm.hpp>
-#include "stb_image_write.h"
 #include <glm.hpp>
 #include <gtc/matrix_transform.hpp>
 
-// Necessary
-#define STB_IMAGE_WRITE_IMPLEMENTATION
 
 namespace pe {
 

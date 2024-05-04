@@ -11,7 +11,6 @@
 #define SAT_H
 
 #include "rigidBody.h"
-#include "SFML/Graphics.hpp"
 #include <vector>
 #include "contact.h"
 

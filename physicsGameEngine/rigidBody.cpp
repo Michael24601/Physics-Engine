@@ -4,6 +4,10 @@
 
 using namespace pe;
 
+
+const real RigidBody::SLEEP_EPSILON = 0.5f;
+
+
 /*
 	Creates a transform matrix from the orientationand position of the
 	object.

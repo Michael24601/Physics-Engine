@@ -1,21 +1,44 @@
 
 #include "openglUtility.h"
 
+#include <stb_image_write.h>
+#include <stb_image.h>
+
 using namespace pe;
 
+
 GLuint pe::loadTexture(const std::string& imagePath) {
-    // Load image using SFML
-    sf::Image image;
-    if (!image.loadFromFile(imagePath)) {
-        std::cerr << "Failed to load texture: " << imagePath << "\n";
+
+    int width, height, channels;
+    /*
+        Here we have to flip the image vertically. This is necessary
+        because OpenGL expects the bottom-left corner to be the origin.
+    */
+    stbi_set_flip_vertically_on_load(true);
+    unsigned char* pixels = stbi_load(imagePath.c_str(), &width, &height, &channels, 0);
+    if (!pixels) {
+        std::cerr << "Failed to load image: " << imagePath << std::endl;
         return 0;
     }
 
-    /*
-        We flip the image vertically
-        (OpenGL expects the bottom - left corner to be the origin).
-    */
-    image.flipVertically();
+    // Resetting the flip setting to avoid affecting other image loads
+    stbi_set_flip_vertically_on_load(false);
+
+    // png generally has 4 channels, while jpeg generally has 3 (no opacity)
+    GLenum textureFormat;
+    if (channels == 3) {
+        textureFormat = GL_RGB; // JPGE image without alpha channel
+    }
+    else if (channels == 4) {
+        textureFormat = GL_RGBA; // PNG image with alpha channel
+    }
+    else {
+        std::cerr << "Unsupported number of channels: " << channels << std::endl;
+        // If the format is unsupported, the memory allocated by STB Image is freed
+        stbi_image_free(pixels);
+        return 0;
+    }
+
 
     // Generate texture ID
     GLuint textureID;
@@ -34,13 +57,13 @@ GLuint pe::loadTexture(const std::string& imagePath) {
     glTexImage2D(
         GL_TEXTURE_2D,
         0,
-        GL_RGBA,
-        image.getSize().x,
-        image.getSize().y,
+        textureFormat,
+        width,
+        height,
         0,
-        GL_RGBA,
+        textureFormat,
         GL_UNSIGNED_BYTE,
-        image.getPixelsPtr()
+        pixels
     );
 
     // Generate mipmaps
@@ -58,31 +81,34 @@ GLuint pe::loadCubemap(const std::vector<std::string>& faces) {
     glGenTextures(1, &textureID);
     glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
 
-    sf::Image firstImage;
-    if (!firstImage.loadFromFile(faces[0])) {
-        std::cerr << "Failed to load cubemap texture: " << faces[0] << std::endl;
-        return 0;
-    }
-    GLint width = firstImage.getSize().x;
-    GLint height = firstImage.getSize().y;
-
     for (GLuint i = 0; i < faces.size(); ++i) {
-        sf::Image image;
-        if (!image.loadFromFile(faces[i])) {
-            std::cerr << "Failed to load cubemap texture: " << faces[i] << std::endl;
+
+        int width, height, channels;
+        unsigned char* pixels = stbi_load(faces[i].c_str(), &width, &height, &channels, 0);
+        if (!pixels) {
+            std::cerr << "Failed to load image: " << faces[i].c_str() << std::endl;
             return 0;
         }
 
-        // Checking size mismatch
-        if (image.getSize().x != width || image.getSize().y != height) {
-            std::cerr << "Size mismatch in cubemap textures." << std::endl;
+        GLenum textureFormat;
+        if (channels == 3) {
+            textureFormat = GL_RGB; // JPGE image without alpha channel
+        }
+        else if (channels == 4) {
+            textureFormat = GL_RGBA; // PNG image with alpha channel
+        }
+        else {
+            std::cerr << "Unsupported number of channels: " << channels << std::endl;
+            // If the format is unsupported, the memory allocated by STB Image is freed
+            stbi_image_free(pixels);
             return 0;
         }
 
+        // Upload image data to appropriate face of the cubemap
         glTexImage2D(
             GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
-            0, GL_RGBA, width, height, 0,
-            GL_RGBA, GL_UNSIGNED_BYTE, image.getPixelsPtr()
+            0, textureFormat, width, height, 0,
+            textureFormat, GL_UNSIGNED_BYTE, pixels
         );
     }
 
@@ -94,12 +120,6 @@ GLuint pe::loadCubemap(const std::vector<std::string>& faces) {
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
-
-    GLenum error = glGetError();
-    if (error != GL_NO_ERROR) {
-        std::cerr << "OpenGL error before returning texture ID: " << error << "\n";
-        return 0;
-    }
 
     return textureID;
 }

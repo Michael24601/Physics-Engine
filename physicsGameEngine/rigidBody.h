@@ -20,6 +20,10 @@ namespace pe {
 
 	class RigidBody {
 
+	private:
+
+		static const real SLEEP_EPSILON;
+
 	public:
 
 		/*

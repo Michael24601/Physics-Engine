@@ -7,13 +7,9 @@
 #define SHADER_PROGRAM_H
 
 #include <GL/glew.h>
-#include <SFML/Graphics.hpp>
-#include <SFML/Window.hpp>
-#include <SFML/OpenGL.hpp>
 #include <GL/gl.h>
 #include <iostream>
 
-#include <SFML/Graphics.hpp>
 #include <glm.hpp>
 #include <gtc/type_ptr.hpp>
 #include <gtc/matrix_transform.hpp>

@@ -69,14 +69,16 @@ namespace pe {
 
 
             float rSpeed{ 0 };
-            // The further it is is the more the rotation
-            if (xpos < (width / 5.0)) {
-                float multiplier = (width / 5.0 - xpos) / 200.0;
-                rSpeed = rotationSpeed * duration * multiplier;
-            }
-            else if (xpos > (width - width / 5.0)) {
-                float multiplier = (xpos - (width - width / 5.0)) / 200.0;
-                rSpeed = -rotationSpeed * duration * multiplier;
+            if (ypos > 0 && ypos < height){
+                // The further it is is the more the rotation
+                if (xpos < (width / 5.0)) {
+                    float multiplier = (width / 5.0 - xpos) / 200.0;
+                    rSpeed = rotationSpeed * duration * multiplier;
+                }
+                else if (xpos > (width - width / 5.0)) {
+                    float multiplier = (xpos - (width - width / 5.0)) / 200.0;
+                    rSpeed = -rotationSpeed * duration * multiplier;
+                }
             }
 
             // Rotate the forward vector around the up vector
