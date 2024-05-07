@@ -84,7 +84,16 @@ namespace pe {
         glm::mat4 getProjectionView() const {
             return projection * view;
         }
+
+
+        int getWidth() const {
+            return sourceWidth;
+        }
    
+
+        int getHeight() const {
+            return sourceHeight;
+        }
     };
 }
 

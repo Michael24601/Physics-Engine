@@ -119,7 +119,7 @@ namespace pe {
 
                 // We have to set the viewport for the current cubemap face
                 glViewport(0, 0, width, height);
-
+                glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
                 // We then clear the framebuffer
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
