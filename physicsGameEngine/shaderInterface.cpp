@@ -190,6 +190,59 @@ FaceData pe::getFaceData(const Polyhedron& polyhedron) {
 	return data;
 }
 
+
+std::vector<FaceData> pe::getFaceDataWithMaterials(
+	const Polyhedron& polyhedron,
+	std::vector<std::string>& materials
+) {
+
+	std::map<std::string, std::vector<FaceData>> textureFacesMap;
+
+	// Grouping faces by their texture names
+	for (Face* face : polyhedron.faces) {
+		std::string textureName = face->texture;
+		FaceData faceData;
+		getFaceData(face, &faceData);
+		textureFacesMap[textureName].push_back(faceData);
+	}
+
+	for (const auto& pair : textureFacesMap) {
+		// Texture name vector
+		materials.push_back(pair.first);
+	}
+
+	// Merging the FaceData vectors into a single vector in the order of materials
+	std::vector<FaceData> faceDataVector(materials.size());
+	for (int i = 0; i < materials.size(); i++) {
+		std::vector<FaceData> faceDataForTexture = textureFacesMap[materials[i]];
+		for (FaceData& data : faceDataForTexture) {
+			faceDataVector[i].vertices.insert(
+				faceDataVector[i].vertices.end(), data.vertices.begin(), 
+				data.vertices.end()
+			);
+			faceDataVector[i].tangents.insert(
+				faceDataVector[i].tangents.end(), data.tangents.begin(),
+				data.tangents.end()
+			);
+			faceDataVector[i].bitangents.insert(
+				faceDataVector[i].bitangents.end(), data.bitangents.begin(),
+				data.bitangents.end()
+			);
+			faceDataVector[i].uvCoordinates.insert(
+				faceDataVector[i].uvCoordinates.end(), data.uvCoordinates.begin(),
+				data.uvCoordinates.end()
+			);
+			faceDataVector[i].normals.insert(
+				faceDataVector[i].normals.end(), data.normals.begin(),
+				data.normals .end()
+			);
+		}
+	}
+
+	return faceDataVector;
+}
+
+
 FaceData pe::getUniformFaceData(const Polyhedron& polyhedron) {
 	FaceData data;
 	for (Face* face : polyhedron.faces) {
@@ -284,32 +337,6 @@ FaceData pe::getFaceData(const Mesh& mesh) {
 	return data;
 }
 
-FaceData pe::getTwoSidedFaceData(const Mesh& mesh) {
-
-	FaceData data;
-	for (Face* face : mesh.faces) {
-		getFaceData(face, &data);
-	}
-
-	int size = data.vertices.size();
-	for (int i = 0; i < size; i++) {
-		/*
-			Pushes vertices in reverse order to get clockwise order,
-			which corresponds to the reverse face.
-		*/
-		data.vertices.push_back(data.vertices[size - i - 1]);
-		/*
-			Same for the other elements, but normals tangents and
-			bitangents are also inverted.
-		*/
-		data.normals.push_back(-data.normals[size - i - 1]);
-		data.tangents.push_back(-data.tangents[size - i - 1]);
-		data.bitangents.push_back(-data.bitangents[size - i - 1]);
-		data.uvCoordinates.push_back(data.uvCoordinates[size - i - 1]);
-	}
-
-	return data;
-}
 
 FaceData pe::getUniformFaceData(const Mesh& mesh) {
 	FaceData data;

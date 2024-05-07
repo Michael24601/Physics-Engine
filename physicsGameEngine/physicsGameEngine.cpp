@@ -3766,11 +3766,6 @@ struct Object {
         shader.setModelMatrix(modelMatrix);
     }
 
-
-    void setTexture() {
-        texShader.setObjectTexture(texture);
-    }
-
     void setVP(
         const glm::mat4& view,
         const glm::mat4& projection
@@ -3780,9 +3775,79 @@ struct Object {
     }
 
     void render() {
+        texShader.setObjectTexture(texture);
         texShader.drawFaces();
     }
 };
+
+
+struct LargeObject {
+
+    std::vector<DiffuseLightingTextureShader*> texShaders;
+    std::vector<SimpleShader*> shaders;
+    std::vector<GLuint> textures;
+
+  
+    LargeObject(
+        string object,
+        float scale,
+        Vector3D position,
+        Quaternion q,
+        const glm::vec3* lightPos,
+        int lightNumber,
+        std::vector<GLuint> textures
+    ) : textures{ textures } {
+
+        std::string filename =
+            "C:\\Users\\msaba\\Documents\\physen\\" + object;
+        Polyhedron p = (returnPrimitive(filename, 1,
+            position, new RigidBody(), scale));
+
+        p.body->orientation = q;
+        p.body->calculateDerivedData();
+
+        std::vector<string> s;
+        std::vector<FaceData> materialsData = getFaceDataWithMaterials(p, s);
+        for (auto& data : materialsData) {
+
+            std::vector<std::vector<glm::vec3>> d = {
+                data.vertices, data.normals, data.uvCoordinates
+            };
+
+            DiffuseLightingTextureShader* texShader = new DiffuseLightingTextureShader;
+            SimpleShader* shader = new SimpleShader;
+
+            texShader->sendVaribleData(d, GL_STATIC_DRAW);
+            texShader->setTrianglesNumber(data.vertices.size());
+            texShader->setLightPosition(lightPos, lightNumber);
+
+            glm::mat4 modelMatrix = glm::mat4(convertToGLM(p.getTransformMatrix()));
+            texShader->setModelMatrix(modelMatrix);
+            shader->setModelMatrix(modelMatrix);
+
+            shaders.push_back(shader);
+            texShaders.push_back(texShader);
+        }
+    }
+
+    void setVP(
+        const glm::mat4& view,
+        const glm::mat4& projection
+    ) {
+        for (int i = 0; i < textures.size(); i++) {
+            texShaders[i]->setViewMatrix(view);
+            texShaders[i]->setProjectionMatrix(projection);
+        }
+    }
+
+    void render() {
+        for (int i = 0; i < textures.size(); i++) {
+            texShaders[i]->setObjectTexture(textures[i]);
+            texShaders[i]->drawFaces();
+        }
+    }
+};
+
 
 int main() {
 
@@ -3803,7 +3868,7 @@ int main() {
 
     // Shape
     glm::vec3 lightPos[]{
-        glm::vec3(40.0f, 500.0f, -800.0f)
+        glm::vec3(40.0f, 500.0f, -100.0f)
     };
     glm::vec4 lightColors[]{
         glm::vec4(1.0f, 1.0f, 1.0f, 0.6f),
@@ -3815,6 +3880,9 @@ int main() {
     GLuint textureCabin = loadTexture(
         "C:\\Users\\msaba\\Documents\\physen\\cabin\\texture.jpg"
     );
+    GLuint textureMansion = loadTexture(
+        "C:\\Users\\msaba\\Documents\\physen\\mansion\\texture.jpg"
+    );
     GLuint textureBranch = loadTexture(
         "C:\\Users\\msaba\\Documents\\physen\\spruce\\texture_branch.png"
     );
@@ -3823,7 +3891,7 @@ int main() {
     );
     GLuint textureWatch = loadTexture(
         "C:\\Users\\msaba\\Documents\\physen\\watchtower\\texture.png"
-    );    
+    );
     GLuint textureLong = loadTexture(
         "C:\\Users\\msaba\\Documents\\physen\\long_house\\texture.jpg"
     );
@@ -3848,30 +3916,29 @@ int main() {
     GLuint textureBarrel = loadTexture(
         "C:\\Users\\msaba\\Documents\\physen\\barrel\\texture.png"
     );
-    GLuint textureStoneHouse = loadTexture(
-        "C:\\Users\\msaba\\Documents\\physen\\stone_house\\texture.png"
+    GLuint textureTower = loadTexture(
+        "C:\\Users\\msaba\\Documents\\physen\\watchtower\\texture.png"
     );
-
 
 
     GLuint skybox = loadCubemap(std::vector<std::string>{
         "C:\\Users\\msaba\\Documents\\physen\\cubemaps\\cubemap_faces\\right.jpg",
-        "C:\\Users\\msaba\\Documents\\physen\\cubemaps\\cubemap_faces\\left.jpg",
-        "C:\\Users\\msaba\\Documents\\physen\\cubemaps\\cubemap_faces\\up.jpg",
-        "C:\\Users\\msaba\\Documents\\physen\\cubemaps\\cubemap_faces\\down.jpg",
-        "C:\\Users\\msaba\\Documents\\physen\\cubemaps\\cubemap_faces\\front.jpg",
-        "C:\\Users\\msaba\\Documents\\physen\\cubemaps\\cubemap_faces\\back.jpg",
+            "C:\\Users\\msaba\\Documents\\physen\\cubemaps\\cubemap_faces\\left.jpg",
+            "C:\\Users\\msaba\\Documents\\physen\\cubemaps\\cubemap_faces\\up.jpg",
+            "C:\\Users\\msaba\\Documents\\physen\\cubemaps\\cubemap_faces\\down.jpg",
+            "C:\\Users\\msaba\\Documents\\physen\\cubemaps\\cubemap_faces\\front.jpg",
+            "C:\\Users\\msaba\\Documents\\physen\\cubemaps\\cubemap_faces\\back.jpg",
     });
 
     FirstPersonCamera camera(
         window.getWindow(),
-        glm::vec3(0.0f, -40.0f,-1200.0f),
+        glm::vec3(0.0f, -40.0f, -1200.0f),
         glm::vec3(0.0f, -40.0f, 0.0f),
         90.0,
         0.1,
         10000,
-        7,
-        0.03
+        0.3,
+        0.001
     );
 
     std::vector<Object*> objects{
@@ -3924,7 +3991,7 @@ int main() {
 
         new Object("cabin\\object.obj", 4, Vector3D(-250, 0, -800), Quaternion(0.5, 0, 0.5, 0), lightPos, 1, textureCabin),
         new Object("grey_house\\object.obj", 1.3, Vector3D(340, 50, -750), Quaternion(0.5, 0, 0.5, 0), lightPos, 1, textureGrey),
-               
+
         new Object("cart\\object.obj", 30, Vector3D(110, -70, -1000), Quaternion(0.8, 0, 0.2, 0), lightPos, 1, textureCart),
 
         new Object("long_house\\object.obj", 40, Vector3D(610, 130, -450), Quaternion(0.6, 0, -0.3, 0), lightPos, 1, textureLong),
@@ -3960,12 +4027,65 @@ int main() {
         new Object("barrel\\object.obj", 2, Vector3D(-370, -65, -635), Quaternion(0.7, 0, 0.3, 0), lightPos, 1, textureBarrel),
         new Object("black_smith\\object.obj", 140, Vector3D(-450, -30, -450), Quaternion(0.7, 0, 0.3, 0), lightPos, 1, textureBlack),
         new Object("grey_house\\object.obj", 1.3, Vector3D(-650, 50, -100), Quaternion(-0.5, 0, -0.5, 0), lightPos, 1, textureGrey),
+        new Object("watchtower\\object.obj", 2.5, Vector3D(-540, 210, 250), Quaternion(-0.7, 0, 0.3, 0), lightPos, 1, textureTower),
 
         new Object("cart\\object.obj", 30, Vector3D(-500, -70, -290), Quaternion(0.8, 0, 0.2, 0), lightPos, 1, textureCart),
 
         // Opposite side
 
+        new Object("cabin\\object.obj", 4, Vector3D(730, -0, -100), Quaternion(-0.4, 0, 0.5, 0), lightPos, 1, textureCabin),
+        new Object("black_smith\\object.obj", 140, Vector3D(550, -30, 130), Quaternion(-0.3, 0, 0.7, 0), lightPos, 1, textureBlack),
+        new Object("mansion\\object.obj", 15, Vector3D(0, 60, 350), Quaternion(0, 0, 1, 0), lightPos, 1, textureMansion),
+
+        // Back 
+
+        new Object("long_house\\object.obj", 50, Vector3D(650, 160, 700), Quaternion(0.2, 0, -0.7, 0), lightPos, 1, textureLong),
+        new Object("long_house\\object.obj", 40, Vector3D(1050, 90, 200), Quaternion(0.2, 0, 0.7, 0), lightPos, 1, textureLong),
+        new Object("long_house\\object.obj", 60, Vector3D(-450, 190, 900), Quaternion(0.5, 0, 0.4, 0), lightPos, 1, textureLong),
+        new Object("long_house\\object.obj", 70, Vector3D(-1210, 290, 50), Quaternion(0.5, 0, 0.5, 0), lightPos, 1, textureLong),
+
+        // Trees
+
+        new Object("spruce\\object_branch.obj", 50, Vector3D(890, 220, -300), Vector3D(0, 0, 1), 90, lightPos, 1, textureBranch),
+        new Object("spruce\\object_trunk.obj", 50, Vector3D(890, 220, -300), Vector3D(0, 0, 1), 90, lightPos, 1, textureTrunk),
+
+        new Object("spruce\\object_branch.obj", 80, Vector3D(-770, 420, 220), Vector3D(0, 0, 1), 90, lightPos, 1, textureBranch),
+        new Object("spruce\\object_trunk.obj", 80, Vector3D(890, 420, -300), Vector3D(0, 0, 1), 90, lightPos, 1, textureTrunk),
+
+        new Object("spruce\\object_branch.obj", 60, Vector3D(-940, 340, 390), Vector3D(0, 0, 1), 90, lightPos, 1, textureBranch),
+        new Object("spruce\\object_trunk.obj", 60, Vector3D(-940, 340, 390), Vector3D(0, 0, 1), 90, lightPos, 1, textureTrunk),
+
+        new Object("spruce\\object_branch.obj", 80, Vector3D(10, 390, 880), Vector3D(0, 0, 1), 90, lightPos, 1, textureBranch),
+        new Object("spruce\\object_trunk.obj", 80, Vector3D(10, 390, 880), Vector3D(0, 0, 1), 90, lightPos, 1, textureTrunk),
+
+        new Object("spruce\\object_branch.obj", 70, Vector3D(250, 260, 750), Vector3D(0, 0, 1), 90, lightPos, 1, textureBranch),
+        new Object("spruce\\object_trunk.obj", 70, Vector3D(250, 260, 750), Vector3D(0, 0, 1), 90, lightPos, 1, textureTrunk),
+
+        new Object("spruce\\object_branch.obj", 40, Vector3D(520, 140, 450), Vector3D(0, 0, 1), 90, lightPos, 1, textureBranch),
+        new Object("spruce\\object_trunk.obj", 40, Vector3D(520, 140, 450), Vector3D(0, 0, 1), 90, lightPos, 1, textureTrunk),
+
+        new Object("spruce\\object_branch.obj", 60, Vector3D(810, 240, 455), Vector3D(0, 0, 1), 90, lightPos, 1, textureBranch),
+        new Object("spruce\\object_trunk.obj", 60, Vector3D(810, 240, 455), Vector3D(0, 0, 1), 90, lightPos, 1, textureTrunk),
+
+        new Object("spruce\\object_branch.obj", 80, Vector3D(10, 390, 880), Vector3D(0, 0, 1), 90, lightPos, 1, textureBranch),
+        new Object("spruce\\object_trunk.obj", 80, Vector3D(10, 390, 880), Vector3D(0, 0, 1), 90, lightPos, 1, textureTrunk),
+
+        new Object("spruce\\object_branch.obj", 70, Vector3D(250, 260, 750), Vector3D(0, 0, 1), 90, lightPos, 1, textureBranch),
+        new Object("spruce\\object_trunk.obj", 70, Vector3D(250, 260, 750), Vector3D(0, 0, 1), 90, lightPos, 1, textureTrunk),
+
+        new Object("spruce\\object_branch.obj", 40, Vector3D(520, 140, 450), Vector3D(0, 0, 1), 90, lightPos, 1, textureBranch),
+        new Object("spruce\\object_trunk.obj", 40, Vector3D(520, 140, 450), Vector3D(0, 0, 1), 90, lightPos, 1, textureTrunk),
     };
+
+    std::vector<GLuint> texs = loadMultipleTextures(
+        std::vector<std::string>{
+            "C:\\Users\\msaba\\Documents\\physen\\spruce\\texture_branch.png",
+            "C:\\Users\\msaba\\Documents\\physen\\spruce\\texture_trunk.jpeg"
+        }
+    );
+
+    LargeObject o("spruce\\object.obj", 40, Vector3D(0, 100, 0), Quaternion(), lightPos, 1, texs);
+
 
     RectangularPrism ground(6000, 10, 6000, 0, Vector3D(0, -100, 0), new RigidBody());
     FaceData data = getFaceData(ground);
@@ -3994,7 +4114,7 @@ int main() {
 
     bool isPressed = false;
 
-    DirectionalProjection projection(lightPos[0], 1000, 800, 800, 0.1, 5000);
+    DirectionalProjection projection(lightPos[0], 2000, 800, 800, 0.1, 5000);
     DepthMapper mapper(512, 512);
 
     glfwSetFramebufferSizeCallback(
@@ -4011,15 +4131,20 @@ int main() {
         window.processInput();
         camera.processInput(frameRate);
         if (glfwGetKey(window.getWindow(), GLFW_KEY_A) == GLFW_PRESS) {
-            lightPos[0].z += 0.02;
+            lightPos[0].z += 0.5;
             for (Object* o : objects) {
                 o->texShader.setLightPosition(lightPos, 1);
             }
             groundShader.setLightPosition(lightPos[0]);
             projection.setLightPosition(lightPos[0]);
+
+            //glm::mat4 viewMatrix = camera.getViewMatrix();
+            //glm::mat4 invertedViewMatrix = glm::inverse(viewMatrix);
+            //glm::vec3 c = glm::vec3(invertedViewMatrix[3]);
+            // std::cout << c.x << " " << c.y << " " << c.z << "\n";
         }
         if (glfwGetKey(window.getWindow(), GLFW_KEY_S) == GLFW_PRESS) {
-            lightPos[0].z -= 0.02;
+            lightPos[0].z -= 0.5;
             for (Object* o : objects) {
                 o->texShader.setLightPosition(lightPos, 1);
             }
@@ -4032,9 +4157,12 @@ int main() {
         for (Object* o : objects) {
             shaders.push_back(&(o->shader));
         }
-        mapper.captureDepth(projection.getView(), projection.getProjection(), shaders);
-        
+        // mapper.captureDepth(projection.getView(), projection.getProjection(), shaders);
+
         //saveDepthMap(mapper.getTexture(), 512, 512, "C:\\Users\\msaba\\Downloads\\cubemap_faces\\p.png");
+
+        glm::mat4 vm = camera.getViewMatrix();
+        glm::mat4 pm = camera.getProjectionMatrix();
 
         if (deltaTime >= frameRate) {
 
@@ -4043,9 +4171,6 @@ int main() {
             glViewport(0, 0, window.getWidth(), window.getHeight());
             glClearColor(0.1f, 0.15f, 0.15f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-            glm::mat4 vm = camera.getViewMatrix();
-            glm::mat4 pm = camera.getProjectionMatrix();
 
             groundShader.setViewMatrix(vm);
             groundShader.setProjectionMatrix(pm);
@@ -4056,9 +4181,11 @@ int main() {
 
             for (Object* o : objects) {
                 o->setVP(vm, pm);
-                o->setTexture();
                 o->render();
             }
+
+            o.setVP(vm, pm);
+            o.render();
 
             skyShader.setViewMatrix(vm);
             skyShader.setProjectionMatrix(pm);

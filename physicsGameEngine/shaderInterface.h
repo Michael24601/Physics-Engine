@@ -5,6 +5,7 @@
 #include "polyhedron.h"
 #include "mesh.h"
 #include <vector>
+#include <map>
 #include "collisionBox.h"
 
 namespace pe {
@@ -150,6 +151,16 @@ namespace pe {
 
 	FaceData getFaceData(const Polyhedron& polyhedron);
 
+	/*
+		This function is used when there may be more than one texture used
+		per polyhedron, and we want to seperate the faces based on the
+		material.
+	*/
+	std::vector<FaceData> getFaceDataWithMaterials(
+		const Polyhedron& polyhedron, 
+		std::vector<std::string>& materials
+	);
+
 	FaceData getUniformFaceData(const Polyhedron& polyhedron);
 
 	/*
@@ -169,8 +180,6 @@ namespace pe {
 	);
 
 	FaceData getFaceData(const Mesh& mesh);
-
-	FaceData getTwoSidedFaceData(const Mesh& mesh);
 
 	FaceData getUniformFaceData(const Mesh& mesh);
 

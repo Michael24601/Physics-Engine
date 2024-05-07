@@ -188,6 +188,12 @@ namespace pe {
 		*/
 		std::vector<int> indeces;
 
+		/*
+			In case a Polyhedron has several textures, this can be used as
+			an identifier for the faces' textre.
+		*/
+		std::string texture;
+
 
 		Face() {}
 

@@ -136,18 +136,25 @@ namespace pe {
         }
 
         std::string line;
+        // By default the current texture is None
+        std::string currentTexture = "None";
         while (std::getline(objFile, line)) {
 
             std::istringstream iss(line);
             std::string token;
             iss >> token;
+            if (token == "usemtl") {
+                std::string texStr;
+                std::getline(iss, texStr);
+                currentTexture = texStr;
+            }
             /*
                 As there is no chance that a face will reference a vertex
                 that has not yet been defined at this point in the file
                 (same for normals and texture coordinates),
                 we can create the faces during the same pass.
             */
-            if (token == "f") { // Check if the line starts with 'f' (face)
+            else if (token == "f") { // Check if the line starts with 'f' (face)
 
                 std::string faceStr;
                 std::getline(iss, faceStr); // Read the rest of the line after 'f'
@@ -203,6 +210,8 @@ namespace pe {
                         face->setTextureCoordinates(faceTextures);
                     }
 
+                    face->texture = currentTexture;
+
                     faces.push_back(face);
                 }
                 else {
@@ -218,6 +227,8 @@ namespace pe {
                     if (faceTextures.size() > 0) {
                         face->setTextureCoordinates(faceTextures);
                     }
+
+                    face->texture = currentTexture;
 
                     faces.push_back(face);
                 }

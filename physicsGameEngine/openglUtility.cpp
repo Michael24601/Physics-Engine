@@ -76,6 +76,17 @@ GLuint pe::loadTexture(const std::string& imagePath) {
 }
 
 
+std::vector<GLuint> pe::loadMultipleTextures(
+    const std::vector<std::string>& imagePaths
+) {
+    std::vector<GLuint> textures;
+    for (const std::string& imagePath : imagePaths) {
+        textures.push_back(loadTexture(imagePath));
+    }
+    return textures;
+}
+
+
 GLuint pe::loadCubemap(const std::vector<std::string>& faces) {
     GLuint textureID;
     glGenTextures(1, &textureID);

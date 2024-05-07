@@ -20,6 +20,10 @@ namespace pe {
 
     GLuint loadTexture(const std::string& imagePath);
 
+    std::vector<GLuint> loadMultipleTextures(
+        const std::vector<std::string>& imagePaths
+    );
+
     /*
         To load a cubemap, we have to send the six faces to it as paths
         to the images on the system.
