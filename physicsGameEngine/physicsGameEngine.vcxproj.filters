@@ -109,6 +109,15 @@
     <Filter Include="Source Files\GLSL Shaders\Shadow Shader\Skybox Shader">
       <UniqueIdentifier>{dc65b283-ab1e-4a96-a8ae-daddc63bf1c2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Simulations">
+      <UniqueIdentifier>{cdd87a84-6bbd-4319-88df-7a57008b66a2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Simulations">
+      <UniqueIdentifier>{74eb1b04-fba4-4814-99a5-662e30c1bd61}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Polyhedron">
+      <UniqueIdentifier>{d72b1258-bfa2-4a0f-b0b0-372dc4cb6957}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="physicsGameEngine.cpp">
@@ -216,8 +225,41 @@
     <ClCompile Include="openglUtility.cpp">
       <Filter>Source Files\OpenGL Graphics</Filter>
     </ClCompile>
+    <ClCompile Include="wreckingBall.cpp">
+      <Filter>Source Files\Simulations</Filter>
+    </ClCompile>
+    <ClCompile Include="staircase.cpp">
+      <Filter>Source Files\Simulations</Filter>
+    </ClCompile>
+    <ClCompile Include="ballPit.cpp">
+      <Filter>Source Files\Simulations</Filter>
+    </ClCompile>
+    <ClCompile Include="flag.cpp">
+      <Filter>Source Files\Simulations</Filter>
+    </ClCompile>
+    <ClCompile Include="ragdoll.cpp">
+      <Filter>Source Files\Simulations</Filter>
+    </ClCompile>
+    <ClCompile Include="reflection.cpp">
+      <Filter>Source Files\Simulations</Filter>
+    </ClCompile>
+    <ClCompile Include="videoGameLevel.cpp">
+      <Filter>Source Files\Simulations</Filter>
+    </ClCompile>
+    <ClCompile Include="fineCollisionDetection.cpp">
+      <Filter>Source Files\Collision</Filter>
+    </ClCompile>
+    <ClCompile Include="particleCollisionDetection.cpp">
+      <Filter>Source Files\Collision</Filter>
+    </ClCompile>
+    <ClCompile Include="gjk.cpp">
+      <Filter>Source Files\Collision</Filter>
+    </ClCompile>
+    <ClCompile Include="customPrimitive.cpp">
+      <Filter>Source Files\Polyhedron</Filter>
+    </ClCompile>
     <ClCompile Include="polyhedron.cpp">
-      <Filter>Source Files\Primitive</Filter>
+      <Filter>Source Files\Polyhedron</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -532,6 +574,9 @@
     </ClInclude>
     <ClInclude Include="ShadowMappingTextureFragmentShader.glsl">
       <Filter>Source Files\GLSL Shaders\Shadow Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="simulations.h">
+      <Filter>Header Files\Simulations</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

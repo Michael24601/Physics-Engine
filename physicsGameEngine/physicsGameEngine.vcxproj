@@ -160,19 +160,25 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="anchoredSpringForce.cpp" />
+    <ClCompile Include="ballPit.cpp" />
     <ClCompile Include="blob.cpp" />
     <ClCompile Include="boundingSphere.cpp" />
     <ClCompile Include="cloth.cpp" />
     <ClCompile Include="collisionResolver.cpp" />
     <ClCompile Include="contact.cpp" />
     <ClCompile Include="contactGeneration.cpp" />
+    <ClCompile Include="customPrimitive.cpp" />
     <ClCompile Include="drawingUtil.cpp" />
     <ClCompile Include="face.cpp" />
+    <ClCompile Include="fineCollisionDetection.cpp" />
+    <ClCompile Include="flag.cpp" />
+    <ClCompile Include="gjk.cpp" />
     <ClCompile Include="openglUtility.cpp" />
     <ClCompile Include="particle.cpp" />
     <ClCompile Include="particleBungeeForce.cpp" />
     <ClCompile Include="particleBuoyancy.cpp" />
     <ClCompile Include="particleCable.cpp" />
+    <ClCompile Include="particleCollisionDetection.cpp" />
     <ClCompile Include="particleContactResolver.h" />
     <ClCompile Include="particleDrag.cpp" />
     <ClCompile Include="particleForceRegistry.cpp" />
@@ -185,6 +191,8 @@
     <ClCompile Include="physicsGameEngine.cpp" />
     <ClCompile Include="particleContact.cpp" />
     <ClCompile Include="polyhedron.cpp" />
+    <ClCompile Include="ragdoll.cpp" />
+    <ClCompile Include="reflection.cpp" />
     <ClCompile Include="rigidBodyBungeeForce.cpp" />
     <ClCompile Include="shaderInterface.cpp" />
     <ClCompile Include="rigidBody.cpp" />
@@ -193,8 +201,11 @@
     <ClCompile Include="rigidBodySpringForce.cpp" />
     <ClCompile Include="rigidBodyWorld.cpp" />
     <ClCompile Include="sat.cpp" />
+    <ClCompile Include="staircase.cpp" />
     <ClCompile Include="util.cpp" />
     <ClCompile Include="vector3D.cpp" />
+    <ClCompile Include="videoGameLevel.cpp" />
+    <ClCompile Include="wreckingBall.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="accuracy.h" />
@@ -289,6 +300,7 @@
     <ClInclude Include="ShadowMappingTextureFragmentShader.glsl" />
     <ClInclude Include="shadowMappingTextureShader.h" />
     <ClInclude Include="simpleShader.h" />
+    <ClInclude Include="simulations.h" />
     <ClInclude Include="skyboxShader.h" />
     <ClInclude Include="solidColorShader.h" />
     <ClInclude Include="solidSphere.h" />
