@@ -91,9 +91,6 @@
     <Filter Include="Source Files\GLSL Shaders\Solid Color Shader">
       <UniqueIdentifier>{aa13724f-91d6-464b-b564-b2a1235da54d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\GLSL Shaders\Skybox Shader">
-      <UniqueIdentifier>{dc65b283-ab1e-4a96-a8ae-daddc63bf1c2}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\GLSL Shaders\Reflection Shader">
       <UniqueIdentifier>{55086f89-a10d-4866-a64e-63925a87c9d3}</UniqueIdentifier>
     </Filter>
@@ -108,6 +105,9 @@
     </Filter>
     <Filter Include="Source Files\GLSL Shaders\Texture Shader">
       <UniqueIdentifier>{a6a5dfe1-0aec-4964-b4f3-94b506591bf5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\GLSL Shaders\Shadow Shader\Skybox Shader">
+      <UniqueIdentifier>{dc65b283-ab1e-4a96-a8ae-daddc63bf1c2}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -557,10 +557,10 @@
       <Filter>Source Files\GLSL Shaders\Solid Color Shader</Filter>
     </None>
     <None Include="skyboxFragmentShader.glsl">
-      <Filter>Source Files\GLSL Shaders\Skybox Shader</Filter>
+      <Filter>Source Files\GLSL Shaders\Shadow Shader\Skybox Shader</Filter>
     </None>
     <None Include="skyboxVertexShader.glsl">
-      <Filter>Source Files\GLSL Shaders\Skybox Shader</Filter>
+      <Filter>Source Files\GLSL Shaders\Shadow Shader\Skybox Shader</Filter>
     </None>
     <None Include="cookTorranceReflectionFragmentShader.glsl">
       <Filter>Source Files\GLSL Shaders\Reflection Shader</Filter>

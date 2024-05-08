@@ -217,6 +217,7 @@ namespace pe {
             const std::vector<std::vector<glm::vec3>>& data,
             GLenum drawType
         ) {
+
             glBindVertexArray(vao);
             glBindBuffer(GL_ARRAY_BUFFER, vbo);
 

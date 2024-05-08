@@ -380,13 +380,11 @@ void Contact::applyVelocityChange(
 	// We will calculate the impulse for each contact axis
 	Vector3D impulseContact;
 
-	if (friction == (real)0.0)
-	{
-		// Use the short format for frictionless contacts
+	if (friction == (real)0.0){
+		// Short format for frictionless contacts
 		impulseContact = calculateFrictionlessImpulse(inverseInertiaTensor);
 	}
-	else
-	{
+	else{
 		// Otherwise we may have impulses that aren't in the direction of the
 		// contact, so we need the more complex version.
 		impulseContact = calculateFrictionImpulse(inverseInertiaTensor);

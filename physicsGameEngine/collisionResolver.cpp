@@ -128,20 +128,18 @@ void CollisionResolver::adjustVelocities(
 
 	// iteratively handle impacts in order of severity.
 	velocityIterationsUsed = 0;
-	while (velocityIterationsUsed < velocityIterations)
-	{
+	while (velocityIterationsUsed < velocityIterations){
 		// Find contact with maximum magnitude of probable velocity change.
 		real max = velocityEpsilon;
 		unsigned int index = numContacts;
-		for (unsigned int i = 0; i < numContacts; i++)
-		{
-			if (c[i].desiredDeltaVelocity > max)
-			{
+		for (unsigned int i = 0; i < numContacts; i++){
+			if (c[i].desiredDeltaVelocity > max){
 				max = c[i].desiredDeltaVelocity;
 				index = i;
 			}
 		}
 		if (index == numContacts) break;
+
 
 		// Match the awake state at the contact
 		c[index].matchAwakeState();
