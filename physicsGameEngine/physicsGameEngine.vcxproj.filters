@@ -192,9 +192,6 @@
     <ClCompile Include="shaderInterface.cpp">
       <Filter>Source Files\Interfaces</Filter>
     </ClCompile>
-    <ClCompile Include="contactGeneration.cpp">
-      <Filter>Source Files\Collision</Filter>
-    </ClCompile>
     <ClCompile Include="contact.cpp">
       <Filter>Source Files\Collision</Filter>
     </ClCompile>
@@ -218,9 +215,6 @@
     </ClCompile>
     <ClCompile Include="particleSpringDamper.cpp">
       <Filter>Source Files\ParticlePhysics</Filter>
-    </ClCompile>
-    <ClCompile Include="blob.cpp">
-      <Filter>Source Files\ParticleMesh</Filter>
     </ClCompile>
     <ClCompile Include="openglUtility.cpp">
       <Filter>Source Files\OpenGL Graphics</Filter>
@@ -365,9 +359,6 @@
     <ClInclude Include="contact.h">
       <Filter>Header Files\Collision</Filter>
     </ClInclude>
-    <ClInclude Include="contactGeneration.h">
-      <Filter>Header Files\Collision</Filter>
-    </ClInclude>
     <ClInclude Include="collisionResolver.h">
       <Filter>Header Files\Collision</Filter>
     </ClInclude>
@@ -466,9 +457,6 @@
     </ClInclude>
     <ClInclude Include="particleCollisionDetection.h">
       <Filter>Header Files\Collision</Filter>
-    </ClInclude>
-    <ClInclude Include="blob.h">
-      <Filter>Header Files\ParticleMesh</Filter>
     </ClInclude>
     <ClInclude Include="mesh.h">
       <Filter>Header Files\ParticleMesh</Filter>

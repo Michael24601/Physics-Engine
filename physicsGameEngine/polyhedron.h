@@ -70,8 +70,11 @@ namespace pe {
 
 	public:
 
+		/*
+			The vertices, faces, edges, bounding volumes... are all in
+			local (relative) coordinates.
+		*/
 		std::vector<Vector3D> localVertices;
-		std::vector<Vector3D> globalVertices;
 		RigidBody* body;
 
 		std::vector<Face*> faces;
@@ -157,14 +160,6 @@ namespace pe {
 
 
 		/*
-			Function used in the GJK collision detection and generation
-			algorithm; it finds the furthest point from a given direction
-			in the Polyhedron.
-		*/
-		Vector3D support(const Vector3D& direction) const;
-
-
-		/*
 			The halfsize of the shape can be used to determine its collision
 			box (the rectangular prism which encompasses it) in case we want
 			to avoid doing detailed collision detection for complex shapes.
@@ -181,9 +176,13 @@ namespace pe {
 		Vector3D getFurthestPoint() const;
 
 
-		Matrix3x4& getTransformMatrix();
+		const Matrix3x4& getTransformMatrix() const;
 
-
+		/*
+			Note that because local coordinates are stored and used in the
+			Polyhedron class, the given point is assumed to be global
+			and is transformed into a local point.
+		*/
 		bool isPointInsidePolyhedron(
 			const Vector3D& point
 		) const ;

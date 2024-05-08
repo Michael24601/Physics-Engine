@@ -77,23 +77,23 @@ std::vector<Edge*> Cloth::calculateEdges() {
 		// Structural links (horizontal and vertical)
 		if (i >= rowSize) {
 			edges.push_back(
-				new Edge(&localVertices, &globalVertices, i, i - rowSize)
+				new Edge(&vertices, i, i - rowSize)
 			);
 		}
 		if (i % rowSize != 0) {
 			edges.push_back(
-				new Edge(&localVertices, &globalVertices, i, i - 1)
+				new Edge(&vertices, i, i - 1)
 			);
 		}
 		// Diagonals (shear)
 		if (i >= rowSize && i % rowSize != 0) {
 			edges.push_back(
-				new Edge(&localVertices, &globalVertices, i, i - rowSize - 1)
+				new Edge(&vertices, i, i - rowSize - 1)
 			);
 		}
 		if (i >= rowSize && (i + 1) % rowSize != 0) {
 			edges.push_back(
-				new Edge(&localVertices, &globalVertices, i, i - rowSize + 1)
+				new Edge(&vertices, i, i - rowSize + 1)
 			);
 		}
 	}
@@ -124,8 +124,7 @@ std::vector<CurvedFace*> Cloth::calculateFaces() {
 			std::vector<Vector3D>faceNormals(indexes.size(), Vector3D());
 
 			CurvedFace* face = new CurvedFace(
-				&localVertices,
-				&globalVertices,
+				&vertices,
 				indexes,
 				faceNormals
 			);
@@ -150,8 +149,8 @@ std::vector<CurvedFace*> Cloth::calculateFaces() {
 void Cloth::setForces() {
 
 	for (Edge* edge : edges) {
-		Vector3D distanceVector = localVertices[edge->getIndex(0)] -
-			localVertices[edge->getIndex(1)];
+		Vector3D distanceVector = vertices[edge->getIndex(0)] -
+			vertices[edge->getIndex(1)];
 		real distance = distanceVector.magnitude();
 
 		// Adds the bungee force for each edge twice (one from each particle)
@@ -177,8 +176,8 @@ void Cloth::setForces() {
 void Cloth::setConstraints() {
 
 	for (Edge* edge : edges) {
-		Vector3D distanceVector = localVertices[edge->getIndex(0)] -
-			localVertices[edge->getIndex(1)];
+		Vector3D distanceVector = vertices[edge->getIndex(0)] -
+			vertices[edge->getIndex(1)];
 		real restLength = distanceVector.magnitude();
 
 		// Adds the distance constraint for each edge as well
@@ -195,7 +194,7 @@ void Cloth::setConstraints() {
 }
 
 
-void Cloth::calculateMeshNormals() {
+std::vector<std::vector<Vector3D>> Cloth::calculateMeshNormals() {
 	
 	std::vector<Vector3D> normals(particles.size());
 
@@ -215,8 +214,6 @@ void Cloth::calculateMeshNormals() {
 			*/
 			normals[face->getIndex(i)] += face->getNormal();
 		}
-
-		face->update();
 	}
 
 	// We then normalize them all
@@ -224,13 +221,20 @@ void Cloth::calculateMeshNormals() {
 		normal.normalize();
 	}
 
-	// We then set the normal for each face based on the particles it contains
-	for (CurvedFace* face : faces) {
-		for (int i = 0; i < face->getVertexNumber(); i++) {
-			face->setNormal(i, normals[face->getIndex(i)]);
+	/*
+		We then associate each particle's normal with vertices in each
+		face it features in so that we can return the normals as a vector
+		where each entry is a vector containing the normals of the vertices
+		of one face.
+	*/
+	std::vector<std::vector<Vector3D>> faceNormals(faces.size());
+	for (int i = 0; i < faces.size(); i++) {
+		for (int j = 0; j < faces[i]->getVertexNumber(); j++) {
+			faceNormals[i].push_back(normals[faces[i]->getIndex(j)]);
 		}
 	}
 
+	return faceNormals;
 }
 
 

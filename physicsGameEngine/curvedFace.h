@@ -13,14 +13,9 @@ namespace pe {
 	class CurvedFace : public Face {
 
 	private:
-
-		std::vector<Vector3D> localVertexNormals;
+		
 		std::vector<Vector3D> vertexNormals;
-
-		std::vector<Vector3D> localVertexTangents;
 		std::vector<Vector3D> vertexTangents;
-
-		std::vector<Vector3D> localVertexBitangents;
 		std::vector<Vector3D> vertexBitangents;
 
 
@@ -31,7 +26,7 @@ namespace pe {
 			index for each tangent (can't just use 0 each time) and we have
 			to use each vertex's unique normal, not the face normal.
 		*/
-		Vector3D calculateTangent(int index, Basis basis) const {
+		Vector3D calculateTangent(int index) const {
 
 			/*
 				We need to find distinct vertices to either side of any
@@ -44,10 +39,10 @@ namespace pe {
 			);
 
 			// Get two edges of the triangle
-			Vector3D edge1 = getVertex(secondIndex, basis) -
-				getVertex(firstIndex, basis);
-			Vector3D edge2 = getVertex(thirdIndex, basis) -
-				getVertex(firstIndex, basis);
+			Vector3D edge1 = getVertex(secondIndex) -
+				getVertex(firstIndex);
+			Vector3D edge2 = getVertex(thirdIndex) -
+				getVertex(firstIndex);
 
 			// Get the corresponding texture coordinate differences
 			Vector2D deltaUV1 = textureCoordinates[secondIndex] -
@@ -65,8 +60,8 @@ namespace pe {
 
 			// Orthogonalize the tangent with respect to the vertex normal
 			tangent = (
-				tangent - (getVertexNormal(firstIndex, basis) * 
-				(getVertexNormal(firstIndex, basis).scalarProduct(tangent)))
+				tangent - (getVertexNormal(firstIndex) * 
+				(getVertexNormal(firstIndex).scalarProduct(tangent)))
 			).normalized();
 
 			return tangent;
@@ -79,7 +74,7 @@ namespace pe {
 			difference is that we have to specify the given vertex index
 			for each bitangent.
 		*/
-		Vector3D calculateBitangent(int index, Basis basis) const {
+		Vector3D calculateBitangent(int index) const {
 
 			/*
 				We need to find distinct vertices to either side of any
@@ -92,10 +87,10 @@ namespace pe {
 			);
 
 			// Get two edges of the triangle
-			Vector3D edge1 = getVertex(secondIndex, basis) -
-				getVertex(firstIndex, basis);
-			Vector3D edge2 = getVertex(thirdIndex, basis) -
-				getVertex(firstIndex, basis);
+			Vector3D edge1 = getVertex(secondIndex) -
+				getVertex(firstIndex);
+			Vector3D edge2 = getVertex(thirdIndex) -
+				getVertex(firstIndex);
 
 			// Get the corresponding texture coordinate differences
 			Vector2D deltaUV1 = textureCoordinates[secondIndex] -
@@ -119,8 +114,8 @@ namespace pe {
 				vertex's normal.
 			*/
 			bitangent = (
-				bitangent - (getVertexNormal(firstIndex, basis) *
-					(getVertexNormal(firstIndex, basis).scalarProduct(bitangent)))
+				bitangent - (getVertexNormal(firstIndex) *
+					(getVertexNormal(firstIndex).scalarProduct(bitangent)))
 			).normalized();
 
 			return bitangent;
@@ -129,95 +124,37 @@ namespace pe {
 	public:
 
 		CurvedFace(
-			std::vector<Vector3D>* localVertices,
-			std::vector<Vector3D>* globalVertices,
+			std::vector<Vector3D>* vertices,
 			std::vector<int>& indices,
-			std::vector<Vector3D>& localVertexNormals
-		) : Face(localVertices, globalVertices, indices),
-			localVertexNormals{localVertexNormals} {
-
-			/* 
-				Initially, the global vertex normals are the same as the
-				local ones.
-			*/
-			vertexNormals = localVertexNormals;
+			std::vector<Vector3D>& vertexNormals
+		) : Face(vertices, indices),
+			vertexNormals{vertexNormals} {
 
 			/* 
 				We then calculate each tangentand bitangent, which are
 				also distinct on a curved surface.
 			*/
-			localVertexTangents.resize(getVertexNumber());
-			localVertexBitangents.resize(getVertexNumber());
+			vertexTangents.resize(getVertexNumber());
+			vertexBitangents.resize(getVertexNumber());
 			for (int i = 0; i < getVertexNumber(); i++) {
-				localVertexTangents[i] = calculateTangent(i, Basis::LOCAL);
-				localVertexBitangents[i] = calculateBitangent(i, Basis::LOCAL);
-			}
-
-			vertexTangents = localVertexTangents;
-			vertexBitangents = localVertexBitangents;
-		}
-
-
-		/*
-			Overrides the update function to update the vertex normals.
-		*/
-		virtual void update(
-			const Matrix3x4& transformMatrix
-		) override {
-
-			Vector3D centre = transformMatrix.transform(Vector3D(0, 0, 0));
-
-			Vector3D transformedNormal = transformMatrix.transform(localNormal);
-			normal = transformedNormal - centre;
-			normal.normalize();
-
-			Vector3D transformedTangent = transformMatrix.transform(localTangent);
-			tangent = transformedTangent - centre;
-			tangent.normalize();
-
-			Vector3D transformedBitangent = transformMatrix.transform(localBitangent);
-			bitangent = transformedBitangent - centre;
-			bitangent.normalize();
-
-			centroid = transformMatrix.transform(localCentroid);
-
-			for (int i = 0; i < getVertexNumber(); i++) {
-
-				Vector3D transformedNormal = transformMatrix.transform(
-					localVertexNormals[i]
-				);
-				vertexNormals[i] = transformedNormal - centre;
-				vertexNormals[i].normalize();
-
-				Vector3D transformedTangent = transformMatrix.transform(
-					localVertexTangents[i]
-				);
-				vertexTangents[i] = transformedTangent - centre;
-				vertexTangents[i].normalize();
-
-				Vector3D transformedBitangent = transformMatrix.transform(
-					localVertexBitangents[i]
-				);
-				vertexBitangents[i] = transformedBitangent - centre;
-				vertexBitangents[i].normalize();
+				vertexTangents[i] = calculateTangent(i);
+				vertexBitangents[i] = calculateBitangent(i);
 			}
 		}
 
+		
 		/*
-			Updates all the values without using the transform matrix.
-			All values but the vertex normals can be updated, so the
-			normals are not updated.
-			The algorithms that calculated the local frame vectors are
-			reused this time with global coordinates.
+			This function is called when the vertices or normals
+			or both change, and the tangents and bitangents need to be
+			recalculated.
+			The vertex normals can't be changed by the face, as they are
+			managed from the outside of this class.
 		*/
-		void update() {
-			centroid = Face::calculateCentroid(Basis::GLOBAL);
-			normal = Face::calculateNormal(Basis::GLOBAL);
-			//tangent = Face::calculateTangent(Basis::GLOBAL);
-			//bitangent = Face::calculateBitangent(Basis::GLOBAL);
+		void recalculateFrameVectors() override {
+			Face::recalculateFrameVectors();
 			for (int i = 0; i < getVertexNumber(); i++) {
-			//	vertexTangents[i] = calculateTangent(i, Basis::GLOBAL);
-			//	vertexBitangents[i] = calculateBitangent(i, Basis::GLOBAL);
+			//	vertexTangents[i] = calculateTangent(i);
+			//	vertexBitangents[i] = calculateBitangent(i);
 			}
 		}
 
@@ -241,39 +178,18 @@ namespace pe {
 			This function is overriden because in a curved face, the normal
 			at each vertex may not be the same as the face's.
 		*/
-		virtual Vector3D getVertexNormal(
-			int index, Basis basis = Basis::GLOBAL
-		) const override {
-			if (basis == Basis::LOCAL) {
-				return localVertexNormals[index];
-			}
-			else if (basis == Basis::GLOBAL) {
-				return vertexNormals[index];
-			}
+		virtual Vector3D getVertexNormal(int index) const override {
+			return vertexNormals[index];
 		}
 
 
-		virtual Vector3D getVertexTangent(
-			int index, Basis basis = Basis::GLOBAL
-		) const override {
-			if (basis == Basis::LOCAL) {
-				return localVertexTangents[index];
-			}
-			else if (basis == Basis::GLOBAL) {
-				return vertexTangents[index];
-			}
+		virtual Vector3D getVertexTangent(int index) const override {
+			return vertexTangents[index];
 		}
 
 
-		virtual Vector3D getVertexBitangent(
-			int index, Basis basis = Basis::GLOBAL
-		) const override {
-			if (basis == Basis::LOCAL) {
-				return localVertexBitangents[index];
-			}
-			else if (basis == Basis::GLOBAL) {
-				return vertexBitangents[index];
-			}
+		virtual Vector3D getVertexBitangent(int index) const override {
+			return vertexBitangents[index];
 		}
 
 
@@ -286,12 +202,12 @@ namespace pe {
 				We then need to recalculate the tangentand bitangents which depend
 				on the texture coordinates.
 			*/
-			localTangent = Face::calculateTangent(Basis::LOCAL);
-			localBitangent = Face::calculateBitangent(Basis::LOCAL);
+			tangent = Face::calculateTangent();
+			bitangent = Face::calculateBitangent();
 
 			for (int i = 0; i < getVertexNumber(); i++) {
-				localVertexTangents[i] = calculateTangent(i, Basis::LOCAL);
-				localVertexBitangents[i] = calculateBitangent(i, Basis::LOCAL);
+				vertexTangents[i] = calculateTangent(i);
+				vertexBitangents[i] = calculateBitangent(i);
 			}
 		}
 

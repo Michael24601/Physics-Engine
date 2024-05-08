@@ -46,10 +46,10 @@ void pe::runFlag() {
         glm::vec4(1.0, 1.0, 1.0, 1.0)
     };
 
-    int size = 21;
+    int size = 18;
     real strength = 0.4;
     real mass = 0.45;
-    real damping = 0.3;
+    real damping = 0.5;
 
     const real height = 400;
     const Vector3D topLeft(-200, height / 2.0, 0);

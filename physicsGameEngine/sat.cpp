@@ -7,15 +7,17 @@ using namespace pe;
 int pe::whichSide(const Polyhedron& C, const Vector3D& P,
 	const Vector3D& D) {
 
+	Matrix3x4 mat = C.getTransformMatrix();
+
 	/*
 		The vertices are projected to the form P + t * D. The return
 		value is +1 if all t > 0, = 1 if all t < 0, but 0 otherwise, in
 		which case the line splits the polygon projection.
 	*/
 	int positive = 0, negative = 0;
-	for (int i = 0; i < C.globalVertices.size(); i++) {
+	for (int i = 0; i < C.localVertices.size(); i++) {
 		// Project a vertex onto the line.
-		real t = D.scalarProduct(C.globalVertices[i] - P);
+		real t = D.scalarProduct(mat.transform(C.localVertices[i]) - P);
 		if (t > 0) {
 			positive++;
 		}
@@ -43,6 +45,9 @@ bool pe::testIntersection(const Polyhedron& C0, const Polyhedron& C1) {
 		Determine whether C1 is on the  positive side of the line.
 	*/
 
+	Matrix3x4 mat0 = C0.getTransformMatrix();
+	Matrix3x4 mat1 = C1.getTransformMatrix();
+
 	/*
 		On the first frame, the face data may not yet have been calculated
 		(it's calculated once per frame, and there's no guarantee the code
@@ -55,8 +60,8 @@ bool pe::testIntersection(const Polyhedron& C0, const Polyhedron& C1) {
 	}
 
 	for (int i = 0; i < C0.faces.size(); i++) {
-		pe::Vector3D P = C0.faces[i]->getVertex(0);
-		pe::Vector3D N = C0.faces[i]->getNormal();
+		Vector3D P = mat0.transform(C0.faces[i]->getVertex(0));
+		Vector3D N = mat0.transform(C0.faces[i]->getNormal());
 		if (whichSide(C1, P, N) > 0) {
 			// C1 is entirely on the positive side of the line P + t * N.
 			return false;
@@ -69,8 +74,8 @@ bool pe::testIntersection(const Polyhedron& C0, const Polyhedron& C1) {
 		Determine whether C0 is on the  positive side of the line.
 	*/
 	for (int i = 0; i < C1.faces.size(); ++i) {
-		pe::Vector3D P = C1.faces[i]->getVertex(0);
-		pe::Vector3D N = C1.faces[i]->getNormal(); // outward pointing
+		Vector3D P = mat1.transform(C1.faces[i]->getVertex(0));
+		Vector3D N = mat1.transform(C1.faces[i]->getNormal()); // outward pointing
 		if (whichSide(C0, P, N) > 0) {
 			// C1 is entirely on the positive side of the line P + t * N.
 			return false;
@@ -81,15 +86,19 @@ bool pe::testIntersection(const Polyhedron& C0, const Polyhedron& C1) {
 		Test cross products of pairs of edge directions, one edge
 		direction from each polyhedron.
 	*/
-	for (int i0 = 0; i0 < C0.globalVertices.size(); ++i0) {
-		pe::Vector3D D0 = C0.edges[i0]->getVertex(1) -
-			C0.edges[i0]->getVertex(0);
-		pe::Vector3D P = C0.edges[i0]->getVertex(0);
-		for (int i1 = 0; i1 < C1.globalVertices.size(); ++i1) {
-			pe::Vector3D D1 = C1.edges[i1]->getVertex(1) -
-				C1.edges[i1]->getVertex(0);
-			pe::Vector3D N = D0.vectorProduct(D1);
-			if (N != pe::Vector3D(0, 0, 0)) {
+	for (int i0 = 0; i0 < C0.localVertices.size(); ++i0) {
+
+		Vector3D D0 = mat0.transform(C0.edges[i0]->getVertex(1)) -
+			mat0.transform(C0.edges[i0]->getVertex(0));
+		Vector3D P = mat0.transform(C0.edges[i0]->getVertex(0));
+
+		for (int i1 = 0; i1 < C1.localVertices.size(); ++i1) {
+
+			Vector3D D1 = mat1.transform(C1.edges[i1]->getVertex(1)) -
+				mat1.transform(C1.edges[i1]->getVertex(0));
+			Vector3D N = mat1.transform(D0.vectorProduct(D1));
+
+			if (N != Vector3D(0, 0, 0)) {
 				int side0 = whichSide(C0, P, N);
 				if (side0 == 0) {
 					continue;

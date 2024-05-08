@@ -12,20 +12,19 @@ namespace pe {
 	private:
 
 		static std::vector<Edge*> generateEdges(
-			std::vector<Vector3D>& localVertices,
-			std::vector<Vector3D>& globalVertices
+			std::vector<Vector3D>& localVertices
 		) {
 			std::vector<Edge*> edges(8);
 
 			// Define the edges of the pyramid
-			edges[0] = new Edge(&localVertices, &globalVertices, 1, 2);
-			edges[1] = new Edge(&localVertices, &globalVertices, 2, 3);
-			edges[2] = new Edge(&localVertices, &globalVertices, 3, 4);
-			edges[3] = new Edge(&localVertices, &globalVertices, 4, 1);
-			edges[4] = new Edge(&localVertices, &globalVertices, 0, 1);
-			edges[5] = new Edge(&localVertices, &globalVertices, 0, 2);
-			edges[6] = new Edge(&localVertices, &globalVertices, 0, 3);
-			edges[7] = new Edge(&localVertices, &globalVertices, 0, 4);
+			edges[0] = new Edge(&localVertices, 1, 2);
+			edges[1] = new Edge(&localVertices, 2, 3);
+			edges[2] = new Edge(&localVertices, 3, 4);
+			edges[3] = new Edge(&localVertices, 4, 1);
+			edges[4] = new Edge(&localVertices, 0, 1);
+			edges[5] = new Edge(&localVertices, 0, 2);
+			edges[6] = new Edge(&localVertices, 0, 3);
+			edges[7] = new Edge(&localVertices, 0, 4);
 
 			return edges;
 		}
@@ -33,8 +32,7 @@ namespace pe {
 
 		// All vertices are in clockwise order
 		static std::vector<Face*> generateFaces(
-			std::vector<Vector3D>& localVertices,
-			std::vector<Vector3D>& globalVertices
+			std::vector<Vector3D>& localVertices
 		) {
 			std::vector<Face*> faces(5);
 
@@ -49,7 +47,6 @@ namespace pe {
 			for (int i = 0; i < indexes.size(); i++) {
 				faces[i] = new Face(
 					&localVertices,
-					&globalVertices,
 					indexes[i]
 				);
 			}
@@ -90,8 +87,8 @@ namespace pe {
 			),
 			side{ side }, height{ height } {
 
-			setFaces(generateFaces(localVertices, globalVertices));
-			setEdges(generateEdges(localVertices, globalVertices));
+			setFaces(generateFaces(localVertices));
+			setEdges(generateEdges(localVertices));
 		}
 		
 		Face* getFace(int index) const {

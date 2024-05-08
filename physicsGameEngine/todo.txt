@@ -296,7 +296,7 @@ isn't the same as its position (which makes the screen black).
 Use the custom core classes for the camera, not the openGL ones
 (DECIDED AGAINST THIS ONE).
 
-Add a first person camera.
+Add a first person camera (DONE).
 
 Calculate the camera position from the view matrix in the vertex,
 not fragment shader, and send it to the fragment shader (DONE).
@@ -311,7 +311,7 @@ Create lighting types for the shadow mapping (DONE).
 Remove global vertices from faces, edges and from the polyhedron
 class; neither the collision nor rendeirng module need them since
 both use the transform matrices. For meshes that don't have a
-transform matrix, we can create a new face each frame.
+transform matrix, we can create a new face each frame (DONE).
 
 Add wind effect (DONE).
 
@@ -331,17 +331,17 @@ while still having alpha value 1).
 
 Add all the types of textures (MORE OR LESS DONE).
 
-Fix arrays sent to shaders.
-
-Fix first person camera (DONE).
+Fix arrays sent to shaders (DONE).
 
 Add image splitter.
-
-Seperate rigid body from polyhedron as classes. Get rid of global
-vertices. Make the faces only have static functions for calculating
-normals and whatnot once. Rectreate faces for cloth each frame.
 
 Add way to resize textures here instead of manually.
 
 Change name fo fragment and vertex shaders from .glsl to .frag
-and .vert.
+and .vert (DONE).
+
+Fix long comment in face and curved face class to remove mention
+of global vertices.
+
+Update SAT and GJK since now all vertices are local (DONE, THOUGH
+SAT IS NOW VERY SLOW).

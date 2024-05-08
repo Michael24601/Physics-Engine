@@ -52,7 +52,6 @@ namespace pe {
 		*/
 		static std::vector<Face*> generateFaces(
 			std::vector<Vector3D>& localVertices,
-			std::vector<Vector3D>& globalVertices,
 			int segments
 		) {
 			std::vector<Face*> faces;
@@ -64,7 +63,6 @@ namespace pe {
 			}
 			Face* baseFace = new Face(
 				&localVertices,
-				&globalVertices,
 				baseFaceIndexes
 			);
 			faces.push_back(baseFace);
@@ -102,7 +100,6 @@ namespace pe {
 
 				CurvedFace* sideFace = new CurvedFace(
 					&localVertices,
-					&globalVertices,
 					sideFaceIndexes,
 					normals
 				);
@@ -115,7 +112,6 @@ namespace pe {
 
 		static std::vector<Edge*> generateEdges(
 			std::vector<Vector3D>& localVertices,
-			std::vector<Vector3D>& globalVertices,
 			int segments
 		) {
 			std::vector<Edge*> edges;
@@ -127,13 +123,13 @@ namespace pe {
 				int v1 = (i % segments) + 1;
 
 				// Connects vertices to form edges based on the side faces
-				Edge* edge = new Edge(&localVertices, &globalVertices, v0, v1);
+				Edge* edge = new Edge(&localVertices, v0, v1);
 				edges.push_back(edge);
 			}
 
 			// Edges from the apex to the base vertices
 			for (int i = 1; i <= segments; ++i) {
-				Edge* edge = new Edge(&localVertices, &globalVertices, 0, i);
+				Edge* edge = new Edge(&localVertices, 0, i);
 				edges.push_back(edge);
 			}
 
@@ -171,8 +167,8 @@ namespace pe {
 				body
 			),
 			radius{ radius }, length{ length }, segments{ segments } {
-			setFaces(generateFaces(localVertices, globalVertices, segments));
-			setEdges(generateEdges(localVertices, globalVertices, segments));
+			setFaces(generateFaces(localVertices, segments));
+			setEdges(generateEdges(localVertices, segments));
 		}
 
 	};

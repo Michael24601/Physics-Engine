@@ -83,7 +83,6 @@ namespace pe {
 
 		static std::vector<Face*> generateFaces(
 			std::vector<Vector3D>& localVertices,
-			std::vector<Vector3D>& globalVertices,
 			int latitudeSegments,
 			int longitudeSegments
 		) {
@@ -128,7 +127,6 @@ namespace pe {
 
 					CurvedFace* face = new CurvedFace(
 						&localVertices,
-						&globalVertices,
 						faceIndexes,
 						normals
 					);
@@ -142,7 +140,6 @@ namespace pe {
 
 		static std::vector<Edge*> generateEdges(
 			std::vector<Vector3D>& localVertices,
-			std::vector<Vector3D>& globalVertices,
 			int latitudeSegments,
 			int longitudeSegments
 		) {
@@ -161,16 +158,16 @@ namespace pe {
 					int v3 = v2 + 1;
 
 					edges.push_back(
-						new Edge(&localVertices, &globalVertices, v0, v2)
+						new Edge(&localVertices, v0, v2)
 					);
 					edges.push_back(
-						new Edge(&localVertices, &globalVertices, v3, v1)
+						new Edge(&localVertices, v3, v1)
 					);
 					edges.push_back(
-						new Edge(&localVertices, &globalVertices, v2, v3)
+						new Edge(&localVertices, v2, v3)
 					);
 					edges.push_back(
-						new Edge(&localVertices, &globalVertices, v1, v0)
+						new Edge(&localVertices, v1, v0)
 					);
 				}
 			}
@@ -214,7 +211,6 @@ namespace pe {
 			setFaces(
 				generateFaces(
 					localVertices,
-					globalVertices,
 					latitudeSegments,
 					longitudeSegments
 				)
@@ -222,7 +218,6 @@ namespace pe {
 			setEdges(
 				generateEdges(
 					localVertices,
-					globalVertices,
 					latitudeSegments,
 					longitudeSegments
 				)

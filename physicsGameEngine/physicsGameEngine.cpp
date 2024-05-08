@@ -2,6 +2,6 @@
 #include "simulations.h"
 
 int main() {
-	pe::runWreckingBall();
+	pe::runFlag();
 	return 0;
 }

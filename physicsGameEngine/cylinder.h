@@ -56,8 +56,8 @@ namespace pe {
 				First we find a reference point on the base faces.
 			*/
 			Vector3D vertices[2];
-			vertices[0] = faces[0]->getVertex(0, Basis::LOCAL);
-			vertices[1] = faces[1]->getVertex(0, Basis::LOCAL);
+			vertices[0] = faces[0]->getVertex(0);
+			vertices[1] = faces[1]->getVertex(0);
 
 			/*
 				We will also need the centroid of each of those base
@@ -89,7 +89,7 @@ namespace pe {
 				*/
 				for (int j = 0; j < faces[i]->getVertexNumber(); j++) {
 
-					Vector3D vertex = faces[i]->getVertex(j, Basis::LOCAL);
+					Vector3D vertex = faces[i]->getVertex(j);
 
 					/*
 						Here we determine wether this vertex is in the top
@@ -130,7 +130,6 @@ namespace pe {
 
 		static std::vector<Face*> generateFaces(
 			std::vector<Vector3D>& localVertices,
-			std::vector<Vector3D>& globalVertices,
 			int segments
 		) {
 
@@ -144,7 +143,6 @@ namespace pe {
 			}
 			Face* topFace = new Face(
 				&localVertices,
-				&globalVertices,
 				topFaceIndexes
 			);
 			faces.push_back(topFace);
@@ -157,7 +155,6 @@ namespace pe {
 			}
 			Face* bottomFace = new Face(
 				&localVertices,
-				&globalVertices,
 				bottomFaceIndexes
 			);
 			faces.push_back(bottomFace);
@@ -207,7 +204,6 @@ namespace pe {
 
 				CurvedFace* sideFace = new CurvedFace(
 					&localVertices,
-					&globalVertices,
 					sideFaceIndexes,
 					normals
 				);
@@ -219,7 +215,6 @@ namespace pe {
 
 		std::vector<Edge*> generateEdges(
 			std::vector<Vector3D>& localVertices,
-			std::vector<Vector3D>& globalVertices,
 			int segments
 		) {
 			std::vector<Edge*> edges;
@@ -243,13 +238,13 @@ namespace pe {
 				*/
 
 				edges.push_back(
-					new Edge(&localVertices, &globalVertices, v0, v1)
+					new Edge(&localVertices, v0, v1)
 				);
 				edges.push_back(
-					new Edge(&localVertices, &globalVertices, v1, v3)
+					new Edge(&localVertices, v1, v3)
 				);
 				edges.push_back(
-					new Edge(&localVertices, &globalVertices, v2, v0)
+					new Edge(&localVertices, v2, v0)
 				);
 			}
 
@@ -291,8 +286,8 @@ namespace pe {
 			),
 			radius{ radius }, length{ length }, segments{ segments } {
 
-			setFaces(generateFaces(localVertices, globalVertices, segments));
-			setEdges(generateEdges(localVertices, globalVertices, segments));
+			setFaces(generateFaces(localVertices, segments));
+			setEdges(generateEdges(localVertices, segments));
 
 			setUVCoordinates();
 		}

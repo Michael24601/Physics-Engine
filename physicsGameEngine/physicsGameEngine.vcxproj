@@ -161,12 +161,10 @@
   <ItemGroup>
     <ClCompile Include="anchoredSpringForce.cpp" />
     <ClCompile Include="ballPit.cpp" />
-    <ClCompile Include="blob.cpp" />
     <ClCompile Include="boundingSphere.cpp" />
     <ClCompile Include="cloth.cpp" />
     <ClCompile Include="collisionResolver.cpp" />
     <ClCompile Include="contact.cpp" />
-    <ClCompile Include="contactGeneration.cpp" />
     <ClCompile Include="customPrimitive.cpp" />
     <ClCompile Include="drawingUtil.cpp" />
     <ClCompile Include="face.cpp" />
@@ -214,7 +212,6 @@
     <ClInclude Include="anisotropicTextureShader.h" />
     <ClInclude Include="anisotropicTextureShader.vert.glsl" />
     <ClInclude Include="ballJoint.h" />
-    <ClInclude Include="blob.h" />
     <ClInclude Include="BVHNode.h" />
     <ClInclude Include="boundingSphere.h" />
     <ClInclude Include="boundingVolumeHierarchy.h" />
@@ -223,7 +220,6 @@
     <ClInclude Include="collisionResolver.h" />
     <ClInclude Include="cone.h" />
     <ClInclude Include="contact.h" />
-    <ClInclude Include="contactGeneration.h" />
     <ClInclude Include="cookTorranceShader.frag.glsl" />
     <ClInclude Include="cookTorranceReflectionShader.h" />
     <ClInclude Include="cookTorranceSkyboxReflectionShader.h" />

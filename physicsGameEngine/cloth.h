@@ -48,7 +48,7 @@ namespace pe {
 		void setConstraints();
 
 
-		void calculateMeshNormals() override;
+		std::vector<std::vector<Vector3D>> calculateMeshNormals() override;
 
 
 	public:

@@ -17,6 +17,12 @@ namespace pe {
     std::tuple<Simplex, Vector3D, bool> NearestSimplex(const Simplex& s);
 
 
+    Vector3D support(
+        const pe::Polyhedron& shape,
+        const Vector3D& direction
+    );
+
+
     Vector3D Support(
         const pe::Polyhedron& shape1,
         const pe::Polyhedron& shape2,

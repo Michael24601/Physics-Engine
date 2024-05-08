@@ -103,7 +103,6 @@ static void pe::extractMeshInformation(
 static void pe::extractMeshFacesAndEdges(
     const std::string& filename,
     std::vector<Vector3D>* localVertices,
-    std::vector<Vector3D>* globalVertices,
     const std::vector<Vector3D>& normals,
     const std::vector<Vector2D>& textures,
     std::vector<Face*>& faces,
@@ -182,7 +181,6 @@ static void pe::extractMeshFacesAndEdges(
                 || faceType == FaceType::VertexOnly) {
                 Face* face = new Face(
                     localVertices,
-                    globalVertices,
                     faceVertexIndeces
                 );
 
@@ -199,7 +197,6 @@ static void pe::extractMeshFacesAndEdges(
 
                 CurvedFace* face = new CurvedFace(
                     localVertices,
-                    globalVertices,
                     faceVertexIndeces,
                     faceNormals
                 );
@@ -225,7 +222,6 @@ static void pe::extractMeshFacesAndEdges(
         for (int i = 0; i < vertexNumber; i++) {
             Edge* edge = new Edge(
                 localVertices,
-                globalVertices,
                 face->getIndex(i),
                 face->getIndex((i + 1) % vertexNumber)
             );
@@ -353,7 +349,6 @@ Polyhedron pe::returnPrimitive(
     extractMeshFacesAndEdges(
         filename,
         &polyhedron.localVertices,
-        &polyhedron.globalVertices,
         normals,
         textures,
         faces,

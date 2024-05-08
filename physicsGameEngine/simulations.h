@@ -31,7 +31,6 @@
 #include "solidSphere.h"
 #include "pyramid.h"
 #include "cylinder.h"
-#include "contactGeneration.h"
 #include "drawingUtil.h"
 #include "cone.h"
 
@@ -46,7 +45,6 @@
 
 #include "sat.h"
 #include "contact.h"
-#include "contactGeneration.h"
 #include "collisionResolver.h"
 
 #include "BVHNode.h"
@@ -75,7 +73,6 @@
 #include "particleCollisionDetection.h"
 #include "particleContactResolver.h"
 
-#include "blob.h"
 #include "skyboxShader.h"
 #include "cookTorranceSkyboxReflectionShader.h"
 #include "shadowMappingShader.h"

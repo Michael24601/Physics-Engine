@@ -78,13 +78,41 @@ std::tuple<Simplex, Vector3D, bool> pe::NearestSimplex(const Simplex& s) {
 }
 
 
+Vector3D pe::support(
+    const pe::Polyhedron& shape,
+    const Vector3D& direction
+) {
+
+    // First the direction is turned into local coordinates
+    Vector3D localDirection = 
+        shape.getTransformMatrix().inverseTransform(direction);
+
+    Vector3D furthestVertex = shape.localVertices[0];
+    real maxDot = furthestVertex.scalarProduct(localDirection);
+
+    // Finding the farthest vertex in the given direction
+    for (size_t i = 1; i < shape.localVertices.size(); ++i) {
+        real dotProduct = shape.localVertices[i].scalarProduct(localDirection);
+        if (dotProduct > maxDot) {
+            maxDot = dotProduct;
+            furthestVertex = shape.localVertices[i];
+        }
+    }
+
+    // The furthest vertex is then turned into global coordinates
+    Vector3D globalFurthestVertex = 
+        shape.getTransformMatrix().transform(furthestVertex);
+    return  globalFurthestVertex;
+}
+
+
 Vector3D pe::Support(
     const pe::Polyhedron& shape1,
     const pe::Polyhedron& shape2, 
     const Vector3D& direction
 ) {
     // Calculate support point in the given direction for both shapes
-    return shape1.support(direction) - shape2.support(-direction);
+    return support(shape1, direction) - support(shape2, -direction);
 }
 
 

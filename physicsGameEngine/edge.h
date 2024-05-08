@@ -17,8 +17,7 @@ namespace pe {
 
 	private:
 
-		std::vector<Vector3D>* localVertices;
-		std::vector<Vector3D>* globalVertices;
+		std::vector<Vector3D>* vertices;
 
 	public:
 
@@ -27,28 +26,14 @@ namespace pe {
 		Edge() {}
 
 		Edge(
-			std::vector<Vector3D>* localVertices,
-			std::vector<Vector3D>* globalVertices,
+			std::vector<Vector3D>* vertices,
 			int index1,
 			int index2
-		) : localVertices{ localVertices },
-			globalVertices{ globalVertices },
+		) : vertices{ vertices },
 			indices{ std::make_pair(index1, index2) } {}
 
 
-		Vector3D getVertex(int index, Basis basis = Basis::GLOBAL) const {
-
-			std::vector<Vector3D>* vertices;
-			if (basis == Basis::GLOBAL) {
-				vertices = globalVertices;
-			}
-			else if (basis == Basis::LOCAL) {
-				vertices = localVertices;
-			}
-			else {
-				return Vector3D();
-			}
-
+		inline Vector3D getVertex(int index) const {
 			if (index == 0) {
 				return (*vertices)[indices.first];
 			}
@@ -63,7 +48,7 @@ namespace pe {
 		}
 
 
-		int getIndex(int index) {
+		inline int getIndex(int index) {
 			if (index == 0) {
 				return indices.first;
 			}
@@ -77,9 +62,11 @@ namespace pe {
 			}
 		}
 
-		Vector3D getMidpoint(Basis basis = Basis::GLOBAL) const {
-			return (getVertex(0, basis) + getVertex(1, basis)) * 0.5;
+
+		Vector3D getMidpoint() const {
+			return (getVertex(0) + getVertex(1)) * 0.5;
 		}
+
 	};
 }
 

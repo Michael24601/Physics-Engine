@@ -13,23 +13,6 @@
 
 namespace pe {
 
-
-	/*
-		Vertices, normals, etc... can be in the global (world) coordinates
-		of the Polyhedron or the local (relative to the body centre of 
-		gravity) coordinates of the Polyhedron.
-		There is technically another basis we may use, which is the Face
-		basis, where the vertices are relative to the centroid, and the
-		normal is the z axis, the tangent is the x axis, and the bitangent
-		is the y axis. However, because of the ease of calculating the
-		vertices in the face basis, we don't include it in the enum.
-	*/
-	enum class Basis {
-		LOCAL,
-		GLOBAL
-	};
-
-
 	/*
 		The face class stores the association between vertices in a
 		polyhedron class that make up face. It also stores basic face
@@ -110,18 +93,12 @@ namespace pe {
 
 	protected:
 
-		std::vector<Vector3D>* localVertices;
-		std::vector<Vector3D>* globalVertices;
+		std::vector<Vector3D>* vertices;
 
 		Vector3D normal;
-		Vector3D localNormal;
 		Vector3D centroid;
-		Vector3D localCentroid;
-
 		Vector3D tangent;
-		Vector3D localTangent;
 		Vector3D bitangent;
-		Vector3D localBitangent;
 
 		/*
 			uv-coordinates: used to map a texture to the face. Each
@@ -146,16 +123,16 @@ namespace pe {
 		) const;
 
 
-		Vector3D calculateNormal(Basis basis) const; 
+		Vector3D calculateNormal() const; 
 
 
-		Vector3D calculateCentroid(Basis basis) const; 
+		Vector3D calculateCentroid() const; 
 
 
-		Vector3D calculateTangent(Basis basis) const;
+		Vector3D calculateTangent() const;
 
 
-		Vector3D calculateBitangent(Basis basis) const;
+		Vector3D calculateBitangent() const;
 
 
 		/*
@@ -199,8 +176,7 @@ namespace pe {
 
 
 		Face(
-			std::vector<Vector3D>* localVertices,
-			std::vector<Vector3D>* globalVertices,
+			std::vector<Vector3D>* vertices,
 			std::vector<int>& indeces
 		);
 
@@ -209,19 +185,27 @@ namespace pe {
 			Returns the local or global vertex at a certain index.
 			The basis is global by default.
 		*/
-		Vector3D getVertex(int index, Basis basis = Basis::GLOBAL) const;
+		Vector3D getVertex(int index) const;
 
 
-		Vector3D getNormal(Basis basis = Basis::GLOBAL) const;
+		Vector3D getNormal() const;
 
 
-		Vector3D getCentroid(Basis basis = Basis::GLOBAL) const;
+		Vector3D getCentroid() const;
 
 
-		Vector3D getTangent(Basis basis = Basis::GLOBAL) const;
+		Vector3D getTangent() const;
 
 
-		Vector3D getBitangent(Basis basis = Basis::GLOBAL) const;
+		Vector3D getBitangent() const;
+
+
+		/*
+			Recalculates the centroid, normal, tangent, and bitangent.
+			This function is called in case the vertices were updated
+			from outside.
+		*/
+		virtual void recalculateFrameVectors();
 
 
 		/*
@@ -231,32 +215,19 @@ namespace pe {
 			in this face, but if the class were to be extended and
 			become curved, the normals wouldn't be uniform.
 		*/
-		virtual Vector3D getVertexNormal(
-			int index, Basis basis = Basis::GLOBAL
-		) const;
+		virtual Vector3D getVertexNormal(int index) const;
 
 
-		virtual Vector3D getVertexTangent(
-			int index, Basis basis = Basis::GLOBAL
-		) const;
+		virtual Vector3D getVertexTangent(int index) const;
 
 
-		virtual Vector3D getVertexBitangent(
-			int index, Basis basis = Basis::GLOBAL
-		) const;
+		virtual Vector3D getVertexBitangent(int index) const;
 
 
 		inline int getVertexNumber() const;
 
 
 		std::vector<Vector3D> getVertices();
-
-
-		/*
-			Transforms values like the local normal and tangent using some
-			transform matrix.
-		*/
-		virtual void update(const Matrix3x4& transformMatrix);
 
 
 		virtual void setTextureCoordinates(
@@ -271,12 +242,18 @@ namespace pe {
 
 
 		/*
-			Check if the point is inside the boundaries of the face using a
+			Checks if the point is inside the boundaries of the face using a
 			winding number algorithm.
 			The winding number algorithm counts how many times a ray starting
 			from the point intersects with the edges of the face.
 			If the number is odd, the point is inside the face; if it's even,
 			the point is outside.
+			Note that depending on wether or not the vertices sent to the
+			face are in local or global coordinates, the point may have to be
+			modified first to be in that basis.
+			So if the face has the local coordinates sent to it, the point may
+			have to be transformed to the local basis using the inverse
+			transform matrix.
 		*/
 		bool containsPoint(const Vector3D& point) const;
 	};

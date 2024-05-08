@@ -13,24 +13,23 @@ namespace pe {
 	private:
 
 		static std::vector<Edge*> generateEdges(
-			std::vector<Vector3D>& localVertices,
-			std::vector<Vector3D>& globalVertices
+			std::vector<Vector3D>& localVertices
 		) {
 			std::vector<Edge*> edges(12);
 
 			// Define the edges of the pyramid
-			edges[0] = new Edge(&localVertices, &globalVertices, 0, 1);
-			edges[1] = new Edge(&localVertices, &globalVertices, 1, 2);
-			edges[2] = new Edge(&localVertices, &globalVertices, 2, 3);
-			edges[3] = new Edge(&localVertices, &globalVertices, 3, 0);
-			edges[4] = new Edge(&localVertices, &globalVertices, 4, 5);
-			edges[5] = new Edge(&localVertices, &globalVertices, 5, 6);
-			edges[6] = new Edge(&localVertices, &globalVertices, 6, 7);
-			edges[7] = new Edge(&localVertices, &globalVertices, 7, 4);
-			edges[8] = new Edge(&localVertices, &globalVertices, 0, 4);
-			edges[9] = new Edge(&localVertices, &globalVertices, 1, 5);
-			edges[10] = new Edge(&localVertices, &globalVertices, 2, 6);
-			edges[11] = new Edge(&localVertices, &globalVertices, 3, 7);
+			edges[0] = new Edge(&localVertices, 0, 1);
+			edges[1] = new Edge(&localVertices, 1, 2);
+			edges[2] = new Edge(&localVertices, 2, 3);
+			edges[3] = new Edge(&localVertices, 3, 0);
+			edges[4] = new Edge(&localVertices, 4, 5);
+			edges[5] = new Edge(&localVertices, 5, 6);
+			edges[6] = new Edge(&localVertices, 6, 7);
+			edges[7] = new Edge(&localVertices, 7, 4);
+			edges[8] = new Edge(&localVertices, 0, 4);
+			edges[9] = new Edge(&localVertices, 1, 5);
+			edges[10] = new Edge(&localVertices, 2, 6);
+			edges[11] = new Edge(&localVertices, 3, 7);
 
 			//std::cout << "a\n";
 
@@ -40,8 +39,7 @@ namespace pe {
 
 		// All vertices are in clockwise order
 		static std::vector<Face*> generateFaces(
-			std::vector<Vector3D>& localVertices,
-			std::vector<Vector3D>& globalVertices
+			std::vector<Vector3D>& localVertices
 		) {
 			std::vector<Face*> faces(6);
 
@@ -57,7 +55,6 @@ namespace pe {
 			for (int i = 0; i < indexes.size(); i++) {
 				faces[i] = new Face(
 					&localVertices,
-					&globalVertices,
 					indexes[i]
 				);
 			}
@@ -100,8 +97,8 @@ namespace pe {
 			),
 			width{ width }, height{ height }, depth{ depth }{
 
-			setFaces(generateFaces(localVertices, globalVertices));
-			setEdges(generateEdges(localVertices, globalVertices));
+			setFaces(generateFaces(localVertices));
+			setEdges(generateEdges(localVertices));
 
 			setUVCoordinates();
 		}
@@ -224,7 +221,6 @@ namespace pe {
 				for (int i = 0; i < 6; i++) {
 					faces.push_back(new Face(
 						&polyhedron->localVertices,
-						&polyhedron->globalVertices,
 						prism->faces[i]->indeces
 					));
 				}
@@ -232,7 +228,6 @@ namespace pe {
 				for (int i = 0; i < 12; i++) {
 					edges.push_back(new Edge(
 						&polyhedron->localVertices,
-						&polyhedron->globalVertices,
 						prism->edges[i]->indices.first,
 						prism->edges[i]->indices.second
 					));

@@ -46,7 +46,6 @@ namespace pe {
     static void extractMeshFacesAndEdges(
         const std::string& filename,
         std::vector<Vector3D>* localVertices,
-        std::vector<Vector3D>* globalVertices,
         const std::vector<Vector3D>& normals,
         const std::vector<Vector2D>& textures,
         std::vector<Face*>& faces,

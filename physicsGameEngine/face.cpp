@@ -16,8 +16,8 @@ void Face::findDistinctVertices(
 		i = (i + 1) % getVertexNumber()
 		) {
 		if (
-			getVertex(i, Basis::LOCAL) !=
-			getVertex(givenIndex, Basis::LOCAL)
+			getVertex(i) !=
+			getVertex(givenIndex)
 			) {
 			firstIndex = i;
 			break;
@@ -39,8 +39,8 @@ void Face::findDistinctVertices(
 		i = (i == 0 ? getVertexNumber() - 1 : (i - 1) % getVertexNumber())
 		) {
 		if (
-			getVertex(i, Basis::LOCAL) !=
-			getVertex(givenIndex, Basis::LOCAL)
+			getVertex(i) !=
+			getVertex(givenIndex)
 			) {
 			secondIndex = i;
 			break;
@@ -58,7 +58,7 @@ void Face::findDistinctVertices(
 }
 
 
-Vector3D Face::calculateNormal(Basis basis) const {
+Vector3D Face::calculateNormal() const {
 
 	/*
 		We need to find distinct vertices to either side of any
@@ -70,10 +70,10 @@ Vector3D Face::calculateNormal(Basis basis) const {
 		firstIndex, secondIndex, thirdIndex
 	);
 
-	Vector3D AB = getVertex(secondIndex, basis) -
-		getVertex(firstIndex, basis);
-	Vector3D AC = getVertex(thirdIndex, basis) -
-		getVertex(firstIndex, basis);
+	Vector3D AB = getVertex(secondIndex) -
+		getVertex(firstIndex);
+	Vector3D AC = getVertex(thirdIndex) -
+		getVertex(firstIndex);
 
 	Vector3D normal = AB.vectorProduct(AC);
 	normal.normalize();
@@ -81,11 +81,11 @@ Vector3D Face::calculateNormal(Basis basis) const {
 }
 
 
-Vector3D Face::calculateCentroid(Basis basis) const {
+Vector3D Face::calculateCentroid() const {
 
 	Vector3D sum;
 	for (int i = 0; i < getVertexNumber(); i++) {
-		sum += getVertex(i, basis);
+		sum += getVertex(i);
 	}
 	Vector3D centroid = sum * (
 		1.0f / static_cast<real>(getVertexNumber())
@@ -94,7 +94,7 @@ Vector3D Face::calculateCentroid(Basis basis) const {
 }
 
 
-Vector3D Face::calculateTangent(Basis basis) const {
+Vector3D Face::calculateTangent() const {
 
 	/*
 		We need to find distinct vertices to either side of any
@@ -107,10 +107,10 @@ Vector3D Face::calculateTangent(Basis basis) const {
 	);
 
 	// Get two edges of the triangle
-	Vector3D edge1 = getVertex(secondIndex, basis) -
-		getVertex(firstIndex, basis);
-	Vector3D edge2 = getVertex(thirdIndex, basis) -
-		getVertex(firstIndex, basis);
+	Vector3D edge1 = getVertex(secondIndex) -
+		getVertex(firstIndex);
+	Vector3D edge2 = getVertex(thirdIndex) -
+		getVertex(firstIndex);
 
 	// Get the corresponding texture coordinate differences
 	Vector2D deltaUV1 = textureCoordinates[secondIndex] -
@@ -132,14 +132,14 @@ Vector3D Face::calculateTangent(Basis basis) const {
 		normal.
 	*/
 	tangent = (tangent - (
-		getNormal(basis) * (getNormal(basis).scalarProduct(tangent))
-		)).normalized();
+		getNormal() * (getNormal().scalarProduct(tangent))
+	)).normalized();
 
 	return tangent;
 }
 
 
-Vector3D Face::calculateBitangent(Basis basis) const {
+Vector3D Face::calculateBitangent() const {
 
 	/*
 		We need to find distinct vertices to either side of any
@@ -152,10 +152,10 @@ Vector3D Face::calculateBitangent(Basis basis) const {
 	);
 
 	// Get two edges of the triangle
-	Vector3D edge1 = getVertex(secondIndex, basis) -
-		getVertex(firstIndex, basis);
-	Vector3D edge2 = getVertex(thirdIndex, basis) -
-		getVertex(firstIndex, basis);
+	Vector3D edge1 = getVertex(secondIndex) -
+		getVertex(firstIndex);
+	Vector3D edge2 = getVertex(thirdIndex) -
+		getVertex(firstIndex);
 
 	// Get the corresponding texture coordinate differences
 	Vector2D deltaUV1 = textureCoordinates[secondIndex] -
@@ -177,8 +177,8 @@ Vector3D Face::calculateBitangent(Basis basis) const {
 		normal.
 	*/
 	bitangent = (bitangent - (
-		getNormal(basis) * (getNormal(basis).scalarProduct(bitangent))
-		)).normalized();
+		getNormal() * (getNormal().scalarProduct(bitangent))
+	)).normalized();
 
 	return bitangent;
 }
@@ -189,7 +189,7 @@ int Face::getFurthestPoint() const {
 	int maxIndex{ 0 };
 	real maxMagnitudeSquared{ 0 };
 	for (int i = 0; i < getVertexNumber(); i++) {
-		Vector3D d = getVertex(i, Basis::LOCAL) - localCentroid;
+		Vector3D d = getVertex(i) - centroid;
 		/*
 			We can use the magnitude squared as we only care about
 			the relative distance, and it is more efficient.
@@ -236,11 +236,11 @@ std::vector<Vector2D> Face::setUvCoordinates() const {
 		at the origin, meaning that we need to first shift
 		all vertices, using the same vector -centroid.
 	*/
-	Vector3D firstShift = localCentroid * -1;
+	Vector3D firstShift = centroid * -1;
 	Matrix3x3 faceToStandard(
-		localBitangent.x, localTangent.x, localNormal.x,
-		localBitangent.y, localTangent.y, localNormal.y,
-		localBitangent.z, localTangent.z, localNormal.z
+		bitangent.x, tangent.x, normal.x,
+		bitangent.y, tangent.y, normal.y,
+		bitangent.z, tangent.z, normal.z
 	);
 	faceToStandard.invert();
 
@@ -256,7 +256,7 @@ std::vector<Vector2D> Face::setUvCoordinates() const {
 		Afterwards, we can shift the whole thing by (0.5, 0.5, 0)
 		in order to place he vertices in the (0, 0) to (1, 1) square.
 	*/
-	Vector3D furthestPoint = getVertex(furthestIndex, Basis::LOCAL);
+	Vector3D furthestPoint = getVertex(furthestIndex);
 	real distance = furthestPoint.magnitude();
 	real scalingFactor = 0.5 / distance;
 
@@ -270,7 +270,7 @@ std::vector<Vector2D> Face::setUvCoordinates() const {
 		means using local normal and tangent etc...).
 	*/
 	for (int i = 0; i < getVertexNumber(); i++) {
-		Vector3D vertex = getVertex(i, Basis::LOCAL);
+		Vector3D vertex = getVertex(i);
 
 		vertex += firstShift;
 		vertex = faceToStandard.transform(vertex);
@@ -287,22 +287,9 @@ std::vector<Vector2D> Face::setUvCoordinates() const {
 
 
 Face::Face(
-	std::vector<Vector3D>* localVertices,
-	std::vector<Vector3D>* globalVertices,
+	std::vector<Vector3D>* vertices,
 	std::vector<int>& indeces
-) : localVertices{ localVertices },
-globalVertices{ globalVertices },
-indeces{ indeces } {
-
-	localNormal = calculateNormal(Basis::LOCAL);
-	localCentroid = calculateCentroid(Basis::LOCAL);
-
-	/*
-		Initially, the normal and centroid are the same as the local
-		ones.
-	*/
-	normal = localNormal;
-	centroid = localCentroid;
+) : vertices{ vertices }, indeces{ indeces } {
 
 	/*
 		By default the texture coordinates are uniform for the face.
@@ -310,102 +297,66 @@ indeces{ indeces } {
 	*/
 	textureCoordinates = setUvCoordinates();
 
+	normal = calculateNormal();
+	centroid = calculateCentroid();
 
-	localTangent = calculateTangent(Basis::LOCAL);
-	localBitangent = calculateBitangent(Basis::LOCAL);
-
-	tangent = localTangent; // Initially
-	bitangent = localBitangent; // Inititally
+	/*
+		Tangents and bitangents need ot be calculated after texture 
+		coordinates have been set.
+	*/
+	tangent = calculateTangent();
+	bitangent = calculateBitangent();
 }
 
+
+void Face::recalculateFrameVectors() {
+	centroid = calculateCentroid();
+	normal = calculateNormal();
+	//tangent = calculateTangent();
+	//bitangent = calculateBitangent();
+}
 
 /*
 	Returns the local or global vertex at a certain index.
 	The basis is global by default.
 */
-Vector3D Face::getVertex(int index, Basis basis) const {
-	if (basis == Basis::LOCAL) {
-		return (*localVertices)[indeces[index]];
-	}
-	else if (basis == Basis::GLOBAL) {
-		return (*globalVertices)[indeces[index]];
-	}
+Vector3D Face::getVertex(int index) const {
+	return (*vertices)[indeces[index]];
 }
 
 
-Vector3D Face::getNormal(Basis basis) const {
-	if (basis == Basis::LOCAL) {
-		return localNormal;
-	}
-	else if (basis == Basis::GLOBAL) {
-		return normal;
-	}
+Vector3D Face::getNormal() const {
+	return normal;
 }
 
 
-Vector3D Face::getCentroid(Basis basis) const {
-	if (basis == Basis::LOCAL) {
-		return localCentroid;
-	}
-	else if (basis == Basis::GLOBAL) {
-		return centroid;
-	}
+Vector3D Face::getCentroid() const {
+	return centroid;
 }
 
 
-Vector3D Face::getTangent(Basis basis) const {
-	if (basis == Basis::LOCAL) {
-		return localTangent;
-	}
-	else if (basis == Basis::GLOBAL) {
-		return tangent;
-	}
+Vector3D Face::getTangent() const {
+	return tangent;
 }
 
 
-Vector3D Face::getBitangent(Basis basis) const {
-	if (basis == Basis::LOCAL) {
-		return localBitangent;
-	}
-	else if (basis == Basis::GLOBAL) {
-		return bitangent;
-	}
+Vector3D Face::getBitangent() const {
+	return bitangent;
 }
 
 
-Vector3D Face::getVertexNormal(
-	int index, Basis basis
-) const {
-	if (basis == Basis::LOCAL) {
-		return localNormal;
-	}
-	else if (basis == Basis::GLOBAL) {
-		return normal;
-	}
+Vector3D Face::getVertexNormal(int index) const {
+	return normal;
 }
 
 
-Vector3D Face::getVertexTangent(
-	int index, Basis basis
-) const {
-	if (basis == Basis::LOCAL) {
-		return localTangent;
-	}
-	else if (basis == Basis::GLOBAL) {
-		return tangent;
-	}
+Vector3D Face::getVertexTangent(int index) const {
+	return tangent;
 }
 
 
-Vector3D Face::getVertexBitangent(
-	int index, Basis basis
-) const {
-	if (basis == Basis::LOCAL) {
-		return localTangent;
-	}
-	else if (basis == Basis::GLOBAL) {
-		return tangent;
-	}
+Vector3D Face::getVertexBitangent(int index) const {
+	return tangent;
 }
 
 
@@ -415,40 +366,11 @@ inline int Face::getVertexNumber() const {
 
 
 std::vector<Vector3D> Face::getVertices() {
-	std::vector<Vector3D> vertices(getVertexNumber());
+	std::vector<Vector3D> faceVertices(getVertexNumber());
 	for (int i = 0; i < getVertexNumber(); i++) {
-		vertices[i] = (*globalVertices)[indeces[i]];
+		faceVertices[i] = (*vertices)[indeces[i]];
 	}
-	return vertices;
-}
-
-
-void Face::update(const Matrix3x4& transformMatrix) {
-
-	/*
-		To transform a normal using a trasnform matrix, it's not
-		enough to just multiply it by the matrix; that just gives
-		us the point in space the normal will point to. To get the
-		normal direction, we need the vector pointing from
-		the transformed origin (center) to the afore mentioned point.
-
-		Same for the tangent and bitangent.
-	*/
-	Vector3D centre = transformMatrix.transform(Vector3D(0, 0, 0));
-
-	Vector3D transformedNormal = transformMatrix.transform(localNormal);
-	normal = transformedNormal - centre;
-	normal.normalize();
-
-	//Vector3D transformedTangent = transformMatrix.transform(localTangent);
-	//tangent = transformedTangent - centre;
-	//tangent.normalize();
-
-	//Vector3D transformedBitangent = transformMatrix.transform(localBitangent);
-	//bitangent = transformedBitangent - centre;
-	//bitangent.normalize();
-
-	centroid = transformMatrix.transform(localCentroid);
+	return faceVertices;
 }
 
 
@@ -458,11 +380,11 @@ void Face::setTextureCoordinates(
 	this->textureCoordinates = textureCoordinates;
 
 	/*
-		We then need to recalculate the tangentand bitangents which depend
+		We then need to recalculate the tangent and bitangents which depend
 		on the texture coordinates.
 	*/
-	localTangent = calculateTangent(Basis::LOCAL);
-	localBitangent = calculateBitangent(Basis::LOCAL);
+	tangent = calculateTangent();
+	bitangent = calculateBitangent();
 }
 
 

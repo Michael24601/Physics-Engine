@@ -97,8 +97,6 @@ Polyhedron::Polyhedron(
 	body->position = position;
 	body->setInertiaTensor(inertiaTensor);
 
-	globalVertices = localVertices;
-
 	body->angularDamping = 1;
 	body->linearDamping = 1;
 	body->calculateDerivedData();
@@ -115,26 +113,6 @@ Polyhedron::~Polyhedron() {
 	}
 	for (int i = 0; i < edges.size(); i++) {
 		delete edges[i];
-	}
-}
-
-
-void Polyhedron::update() {
-	globalVertices.clear();
-	for (const Vector3D& vertex : localVertices) {
-		globalVertices.push_back(
-			body->transformMatrix.transform(vertex)
-		);
-	}
-
-	/*
-		Because we use pointers to the vectors of vertices in the
-		Polyhedron class in the Faces and Edges, we don't need
-		to update them. However, faces also have normals and
-		centroids which need to be updated here.
-	*/
-	for (Face* face : faces) {
-		face->update(body->transformMatrix);
 	}
 }
 
@@ -192,25 +170,6 @@ Vector3D Polyhedron::getFaceNormal(int index) const {
 	return faces[index]->getNormal();
 }
 
-
-Vector3D Polyhedron::support(const Vector3D& direction) const {
-	// Initialize with the first vertex
-	Vector3D furthestVertex = globalVertices[0];
-	real maxDot = furthestVertex.scalarProduct(direction);
-
-	// Iterate through all vertices to find the one farthest in the given direction
-	for (size_t i = 1; i < globalVertices.size(); ++i) {
-		real dotProduct = globalVertices[i].scalarProduct(direction);
-		if (dotProduct > maxDot) {
-			maxDot = dotProduct;
-			furthestVertex = globalVertices[i];
-		}
-	}
-
-	return furthestVertex;
-}
-
-
 Vector3D Polyhedron::getHalfsize() const {
 	return boundingBoxHalfsize;
 }
@@ -225,7 +184,7 @@ Vector3D Polyhedron::getFurthestPoint() const {
 }
 
 
-Matrix3x4& Polyhedron::getTransformMatrix() {
+const Matrix3x4& Polyhedron::getTransformMatrix() const {
 	return this->body->transformMatrix;
 }
 
@@ -286,6 +245,8 @@ bool Polyhedron::isPointInsidePolyhedron(
 	const Vector3D& point
 ) const {
 
+	Vector3D localPoint = getTransformMatrix().inverseTransform(point);
+
 	int intersectionCount = 0;
 
 	/*
@@ -296,13 +257,13 @@ bool Polyhedron::isPointInsidePolyhedron(
 		and project the ray from the point at least that far.
 	*/
 	 real furthestDistance = findFurthestPointFromCoordinate(
-		 point, 
-		 this->globalVertices
+		 localPoint, 
+		 this->localVertices
 	 ).magnitude();
 
 	for (const Face* face : this->faces) {
 		// Here we check if the point is inside the current face
-		if (isPointInsideFace(face, point, furthestDistance)) {
+		if (isPointInsideFace(face, localPoint, furthestDistance)) {
 			++intersectionCount;
 		}
 	}
