@@ -15,8 +15,6 @@ uniform sampler2D opacityTexture;
 
 uniform vec3 lightPos[MAX_LIGHTS];
 
-uniform bool noLight;
-
 uniform int numActiveLights;
 
 out vec4 FragColor;
@@ -28,11 +26,6 @@ void main() {
     vec4 texOpacity = texture(opacityTexture, TexCoord);
     if(texOpacity.r < 0.1){
         discard;
-    }
-
-    if(noLight){  
-        FragColor = texture(objectBaseColorTexture, TexCoord);
-        return;
     }
 
     vec3 finalDiffuse = vec3(0.1);

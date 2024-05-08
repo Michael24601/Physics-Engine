@@ -11,8 +11,8 @@ namespace pe {
     public:
 
         AnisotropicTextureShader() : Shader(
-            "anisotropicTextureVertexShader.glsl",
-            "anisotropicTextureFragmentShader.glsl"
+            "anisotropicTextureShader.vert.glsl",
+            "anisotropicTextureShader.frag.glsl"
         ) {}
 
         void setObjectTexture(const GLuint& textureId) {

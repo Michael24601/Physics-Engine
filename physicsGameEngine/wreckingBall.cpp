@@ -14,8 +14,8 @@ void pe::runWreckingBall() {
         90.0,
         0.1,
         10000,
-        0.001,
-        0.005
+        0.0002,
+        0.001
     );
 
     glm::mat4 identity = glm::mat4(1.0);
@@ -42,7 +42,7 @@ void pe::runWreckingBall() {
     // Shaders
     std::vector<CookTorranceShader> cubeShaders(9);
     CookTorranceShader sphereShader;
-    ShadowMappingShader groundShader;
+    DiffuseLightingShader groundShader;
     SolidColorShader lineShader;
 
     real mass = 1.5;
@@ -73,12 +73,11 @@ void pe::runWreckingBall() {
 
                 cubeShaders[index].sendVaribleData(vertices, GL_STATIC_DRAW);
                 cubeShaders[index].setTrianglesNumber(data.vertices.size());
-                cubeShaders[index].setLightPosition(lightPos);
-                cubeShaders[index].setLightColors(lightColors);
+                cubeShaders[index].setLightPosition(lightPos, 1);
+                cubeShaders[index].setLightColors(lightColors, 1);
                 cubeShaders[index].setFresnel(0.05);
                 cubeShaders[index].setRoughness(0.5);
                 cubeShaders[index].setObjectColor(colorPurple);
-                cubeShaders[index].setActiveLightsCount(1);
             }
         }
     }
@@ -94,10 +93,8 @@ void pe::runWreckingBall() {
     };
     groundShader.sendVaribleData(vertices, GL_STATIC_DRAW);
     groundShader.setTrianglesNumber(data.vertices.size());
-    groundShader.setLightPosition(lightPos[0]);
+    groundShader.setLightPosition(lightPos, 1);
     groundShader.setObjectColor(colorWhite);
-    groundShader.setShadowStrength(1);
-    groundShader.setPCF(true);
 
     // Sphere
 
@@ -112,12 +109,11 @@ void pe::runWreckingBall() {
     };
     sphereShader.sendVaribleData(vertices, GL_STATIC_DRAW);
     sphereShader.setTrianglesNumber(data.vertices.size());
-    sphereShader.setLightPosition(lightPos);
-    sphereShader.setLightColors(lightColors);
+    sphereShader.setLightPosition(lightPos, 1);
+    sphereShader.setLightColors(lightColors, 1);
     sphereShader.setFresnel(0.4);
     sphereShader.setRoughness(0.05);
     sphereShader.setObjectColor(colorRed);
-    sphereShader.setActiveLightsCount(1);
 
     lineShader.setObjectColor(colorWhite);
 
@@ -129,12 +125,7 @@ void pe::runWreckingBall() {
     b.position = Vector3D(800, 700, 0);
     RigidBodySpringForce f(sphere.localVertices[0], &b, Vector3D(), 0.23, 300);
 
-    DepthMapper depthMapper(1024, 1024);
-    DirectionalProjection projection(
-        lightPos[0], 2000.0f, window.getWidth(), window.getHeight(), 0.1f, 5000.0f
-    );
-
-    float deltaT = 0.010;
+    float deltaT = 0.005;
 
     float lastTime = glfwGetTime();
     float deltaTime = 0.0;
@@ -219,17 +210,6 @@ void pe::runWreckingBall() {
         sphereShader.setModelMatrix(convertToGLM(sphere.getTransformMatrix()));
 
 
-        std::vector<Shader*> shaders{
-            &sphereShader
-        };
-        for (int i = 0; i < prisms.size(); i++) {
-            shaders.push_back(&cubeShaders[i]);
-        }
-        depthMapper.captureDepth(
-            projection.getView(), projection.getProjection(), shaders
-        );
-
-
         for (int i = 0; i < prisms.size(); i++) {
             cubeShaders[i].setProjectionMatrix(camera.getProjectionMatrix());
             cubeShaders[i].setViewMatrix(camera.getViewMatrix());
@@ -237,8 +217,6 @@ void pe::runWreckingBall() {
 
         groundShader.setProjectionMatrix(camera.getProjectionMatrix());
         groundShader.setViewMatrix(camera.getViewMatrix());
-        groundShader.setLightSpaceMatrix(projection.getProjectionView());
-        groundShader.setShadowMap(depthMapper.getTexture());
 
         sphereShader.setProjectionMatrix(camera.getProjectionMatrix());
         sphereShader.setViewMatrix(camera.getViewMatrix());

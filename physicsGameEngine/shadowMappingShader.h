@@ -12,8 +12,8 @@ namespace pe {
     public:
 
         ShadowMappingShader() : Shader (
-            "shadowMappingVertexShader.glsl",
-            "shadowMappingFragmentShader.glsl"
+            "shadowMappingShader.vert.glsl",
+            "shadowMappingShader.frag.glsl"
         ) {}
 
         void setShadowMap(const GLuint& textureId) {

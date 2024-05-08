@@ -222,14 +222,15 @@ of the bodies, the second body does not dangle off teh first as there
 is no rotation. Moreover, adding the force at the connection point
 makes it unstable as hell. We need a better hinge.
 
-The other kind of joint, done using contacts, is incredibly unstable.
+The other kind of joint, done using contacts, is incredibly unstable
+(DONE, FIXED).
 
 Spring joints are too weak as stiff springs are an issue.
 
 Fix the the sleep state, which is currently not correct.
 
 The contact joint now only works if the last object in a series
-has negligible weight.
+has negligible weight (DONE, FIXED).
 
 Add an edge to edge in the second collision generation method 
 (DECIDED AGAINST IT).
@@ -305,7 +306,7 @@ into texture coordinates instead of doing it in the shader.
 
 Switch to GLFW (DONE).
 
-Create lighting types for the shadow mapping.
+Create lighting types for the shadow mapping (DONE).
 
 Remove global vertices from faces, edges and from the polyhedron
 class; neither the collision nor rendeirng module need them since
@@ -341,3 +342,6 @@ vertices. Make the faces only have static functions for calculating
 normals and whatnot once. Rectreate faces for cloth each frame.
 
 Add way to resize textures here instead of manually.
+
+Change name fo fragment and vertex shaders from .glsl to .frag
+and .vert.

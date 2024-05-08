@@ -37,7 +37,7 @@
 
 #include "solidColorShader.h"
 #include "diffuseLightingShader.h"
-#include "diffuseSpecularLightingShader.h"
+#include "phongShader.h"
 #include "cookTorranceShader.h"
 #include "shaderInterface.h"
 #include "anisotropicShader.h"
@@ -77,21 +77,21 @@
 
 #include "blob.h"
 #include "skyboxShader.h"
-#include "cookTorranceReflectionShaderWithSkybox.h"
+#include "cookTorranceSkyboxReflectionShader.h"
 #include "shadowMappingShader.h"
 #include "simpleShader.h"
 
 #include "environmentMapper.h"
 #include "depthMapper.h"
 #include "glfwWindowWrapper.h"
-#include "diffuseLightingTextureShader.h"
+#include "diffuseTextureShader.h"
 
 #include "firstPersonCamera.h"
 #include "directionalProjection.h"
 #include "pointProjection.h"
 
 #include "textureShader.h"
-#include "diffuseLightingFourTextureShader.h"
+#include "advancedDiffuseTextureShader.h"
 #include "shadowMappingTextureShader.h"
 
 

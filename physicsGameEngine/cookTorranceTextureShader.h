@@ -12,8 +12,8 @@ namespace pe {
     public:
 
         CookTorranceTextureShader() : Shader(
-            "cookTorranceTextureVertexShader.glsl",
-            "cookTorranceTextureFragmentShader.glsl"
+            "cookTorranceTextureShader.vert.glsl",
+            "cookTorranceTextureShader.frag.glsl"
         ) {}
 
         void setObjectTexture(const GLuint& textureId) {
@@ -25,17 +25,14 @@ namespace pe {
             );
         }
 
-        void setLightPosition(const glm::vec3* positions) {
+        void setLightPosition(const glm::vec3* positions, int size) {
             // Setting an array means sending the first value
-            setUniform("lightPos", positions[0]);
+            setUniform("lightPos", positions, size);
+            setUniform("numActiveLights", size);
         }
 
-        void setLightColors(const glm::vec4* colors) {
-            setUniform("lightColors", colors[0]);
-        }
-
-        void setActiveLightsCount(int count) {
-            setUniform("numActiveLights", count);
+        void setLightColors(const glm::vec4* colors, int size) {
+            setUniform("lightColors", colors, size);
         }
 
         void setRoughness(float roughness) {

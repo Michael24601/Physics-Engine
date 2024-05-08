@@ -7,7 +7,7 @@ using namespace pe;
 
 struct Object {
 
-    DiffuseLightingTextureShader texShader;
+    DiffuseTextureShader texShader;
     SimpleShader shader;
     GLuint texture;
 
@@ -103,7 +103,7 @@ struct Object {
 
 struct LargeObject {
 
-    std::vector<DiffuseLightingTextureShader*> texShaders;
+    std::vector<DiffuseTextureShader*> texShaders;
     std::vector<SimpleShader*> shaders;
     std::vector<GLuint> textures;
 
@@ -136,7 +136,7 @@ struct LargeObject {
                 data.vertices, data.normals, data.uvCoordinates
             };
 
-            DiffuseLightingTextureShader* texShader = new DiffuseLightingTextureShader;
+            DiffuseTextureShader* texShader = new DiffuseTextureShader;
             SimpleShader* shader = new SimpleShader;
 
             texShader->sendVaribleData(d, GL_STATIC_DRAW);

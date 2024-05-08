@@ -1,18 +1,23 @@
+/*
+    Header file for class representing a phong shader.
+    A phong shader is one that combines diffuse lighting with specular
+    lighting to create a shininess effect.
+*/
 
-#ifndef COOK_TORRANCE_SHADER_H
-#define COOK_TORRANCE_SHADER_H
+#ifndef PHONG_SHADER_H
+#define PHONG_SHADER_H
 
 #include "shader.h"
 
 namespace pe {
 
-    class CookTorranceShader : public Shader {
+    class PhongShader : public Shader {
 
     public:
 
-        CookTorranceShader() : Shader(
-            "cookTorranceShader.vert.glsl",
-            "cookTorranceShader.frag.glsl"
+       PhongShader() : Shader(
+            "phongShader.vert.glsl",
+            "phongShader.frag.glsl"
         ) {}
 
         void setObjectColor(const glm::vec4& color) {
@@ -29,13 +34,10 @@ namespace pe {
             setUniform("lightColors", colors, size);
         }
 
-        void setRoughness(float roughness) {
-            setUniform("roughness", roughness);
+        void setShininess(float shininess) {
+            setUniform("shininess", shininess);
         }
 
-        void setFresnel(float fresnel) {
-            setUniform("fresnel", fresnel);
-        }
     };
 }
 

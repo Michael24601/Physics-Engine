@@ -1,6 +1,6 @@
 
-#ifndef NEW_ANISOTROPIC_SHADER_H
-#define NEW_ANISOTROPIC_SHADER_H
+#ifndef ANISOTROPIC_SHADER_H
+#define ANISOTROPIC_SHADER_H
 
 #include "shader.h"
 
@@ -11,8 +11,8 @@ namespace pe {
     public:
 
         AnisotropicShader() : Shader(
-            "anisotropicVertexShader.glsl",
-            "anisotropicFragmentShader.glsl"
+            "anisotropicShader.vert.glsl",
+            "anisotropicShader.frag.glsl"
         ) {}
 
         void setObjectColor(const glm::vec4& color) {

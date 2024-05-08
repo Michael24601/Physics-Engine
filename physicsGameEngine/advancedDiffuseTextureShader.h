@@ -1,19 +1,19 @@
 
 
-#ifndef DIFFUSE_LIGHTING_FOUR_TEXTURE_SHADER_H
-#define DIFFUSE_LIGHTING_FOUR_TEXTURE_SHADER_H
+#ifndef ADVANCED_DIFFUSE_TEXTURE_SHADER_H
+#define ADVANCED_DIFFUSE_TEXTURE_SHADER_H
 
 #include "shader.h"
 
 namespace pe {
 
-    class DiffuseLightingFourTextureShader : public Shader {
+    class AdvancedDiffuseTextureShader : public Shader {
 
     public:
 
-        DiffuseLightingFourTextureShader() : Shader(
-            "diffuseLightingTextureVertexShader.glsl",
-            "diffuseLightingFourTextureFragmentShader.glsl"
+        AdvancedDiffuseTextureShader() : Shader(
+            "diffuseTextureShader.vert.glsl",
+            "advancedDiffuseTextureShader.frag.glsl"
         ) {}
 
         void setObjectTexture(const GLuint& textureId) {
@@ -76,11 +76,6 @@ namespace pe {
             // Setting an array means sending the first value
             setUniform("lightPos", positions, size);
             setUniform("numActiveLights", size);
-        }
-
-
-        void setNoLight(bool noLight) {
-            setUniform("noLight", noLight);
         }
 
     };

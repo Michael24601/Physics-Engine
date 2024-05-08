@@ -21,8 +21,8 @@ void pe::runFlag() {
     );
 
     // Shaders
-    DiffuseLightingTextureShader poleShader;
-    DiffuseLightingTextureShader lightShader;
+    DiffuseTextureShader poleShader;
+    DiffuseTextureShader lightShader;
 
     GLuint texture1 = loadTexture(
         "C:\\Users\\msaba\\Documents\\physen\\textureMaps\\leb.png"

@@ -81,8 +81,8 @@ namespace pe {
     public:
 
         SkyboxShader() : Shader(
-            "skyboxVertexShader.glsl",
-            "skyboxFragmentShader.glsl"
+            "skyboxShader.vert.glsl",
+            "skyboxShader.frag.glsl"
         ) {
             /*
                 Because the skybox vertices are always those of the cube,

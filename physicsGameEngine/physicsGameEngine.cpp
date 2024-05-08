@@ -2,6 +2,6 @@
 #include "simulations.h"
 
 int main() {
-	pe::runVideoGameLevel();
+	pe::runWreckingBall();
 	return 0;
 }

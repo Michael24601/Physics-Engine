@@ -106,9 +106,6 @@
     <Filter Include="Source Files\GLSL Shaders\Texture Shader">
       <UniqueIdentifier>{a6a5dfe1-0aec-4964-b4f3-94b506591bf5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\GLSL Shaders\Shadow Shader\Skybox Shader">
-      <UniqueIdentifier>{dc65b283-ab1e-4a96-a8ae-daddc63bf1c2}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Simulations">
       <UniqueIdentifier>{cdd87a84-6bbd-4319-88df-7a57008b66a2}</UniqueIdentifier>
     </Filter>
@@ -117,6 +114,9 @@
     </Filter>
     <Filter Include="Source Files\Polyhedron">
       <UniqueIdentifier>{d72b1258-bfa2-4a0f-b0b0-372dc4cb6957}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\GLSL Shaders\Skybox Shader">
+      <UniqueIdentifier>{dc65b283-ab1e-4a96-a8ae-daddc63bf1c2}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -473,34 +473,34 @@
     <ClInclude Include="mesh.h">
       <Filter>Header Files\ParticleMesh</Filter>
     </ClInclude>
-    <ClInclude Include="anisotropicFragmentShader.glsl">
+    <ClInclude Include="anisotropicShader.frag.glsl">
       <Filter>Source Files\GLSL Shaders\Anisotropic Shader</Filter>
     </ClInclude>
-    <ClInclude Include="anisotropicTextureVertexShader.glsl">
+    <ClInclude Include="anisotropicTextureShader.vert.glsl">
       <Filter>Source Files\GLSL Shaders\Anisotropic Shader</Filter>
     </ClInclude>
-    <ClInclude Include="anisotropicTextureFragmentShader.glsl">
+    <ClInclude Include="anisotropicTextureShader.frag.glsl">
       <Filter>Source Files\GLSL Shaders\Anisotropic Shader</Filter>
     </ClInclude>
-    <ClInclude Include="cookTorranceVertexShader.glsl">
+    <ClInclude Include="cookTorranceShader.vert.glsl">
       <Filter>Source Files\GLSL Shaders\Cook Torrance Shader</Filter>
     </ClInclude>
-    <ClInclude Include="cookTorranceFragmentShader.glsl">
+    <ClInclude Include="cookTorranceShader.frag.glsl">
       <Filter>Source Files\GLSL Shaders\Cook Torrance Shader</Filter>
     </ClInclude>
-    <ClInclude Include="cookTorranceTextureVertexShader.glsl">
+    <ClInclude Include="cookTorranceTextureShader.vert.glsl">
       <Filter>Source Files\GLSL Shaders\Cook Torrance Shader</Filter>
     </ClInclude>
-    <ClInclude Include="cookTorranceTextureFragmentShader.glsl">
+    <ClInclude Include="cookTorranceTextureShader.frag.glsl">
       <Filter>Source Files\GLSL Shaders\Cook Torrance Shader</Filter>
     </ClInclude>
-    <ClInclude Include="phongVertexShader.glsl">
+    <ClInclude Include="phongShader.vert.glsl">
       <Filter>Source Files\GLSL Shaders\Phong Shader</Filter>
     </ClInclude>
-    <ClInclude Include="phongFragmentShader.glsl">
+    <ClInclude Include="phongShader.frag.glsl">
       <Filter>Source Files\GLSL Shaders\Phong Shader</Filter>
     </ClInclude>
-    <ClInclude Include="diffuseLightingTextureVertexShader.glsl">
+    <ClInclude Include="diffuseTextureShader.vert.glsl">
       <Filter>Source Files\GLSL Shaders\Diffuse Lighting Shader</Filter>
     </ClInclude>
     <ClInclude Include="anisotropicShader.h">
@@ -512,7 +512,7 @@
     <ClInclude Include="cookTorranceReflectionShader.h">
       <Filter>Header Files\OpenGL Shaders</Filter>
     </ClInclude>
-    <ClInclude Include="cookTorranceReflectionShaderWithSkybox.h">
+    <ClInclude Include="cookTorranceSkyboxReflectionShader.h">
       <Filter>Header Files\OpenGL Shaders</Filter>
     </ClInclude>
     <ClInclude Include="cookTorranceShader.h">
@@ -524,10 +524,10 @@
     <ClInclude Include="diffuseLightingShader.h">
       <Filter>Header Files\OpenGL Shaders</Filter>
     </ClInclude>
-    <ClInclude Include="diffuseLightingTextureShader.h">
+    <ClInclude Include="diffuseTextureShader.h">
       <Filter>Header Files\OpenGL Shaders</Filter>
     </ClInclude>
-    <ClInclude Include="diffuseSpecularLightingShader.h">
+    <ClInclude Include="phongShader.h">
       <Filter>Header Files\OpenGL Shaders</Filter>
     </ClInclude>
     <ClInclude Include="shader.h">
@@ -566,13 +566,13 @@
     <ClInclude Include="textureShader.h">
       <Filter>Header Files\OpenGL Shaders</Filter>
     </ClInclude>
-    <ClInclude Include="diffuseLightingFourTextureShader.h">
+    <ClInclude Include="advancedDiffuseTextureShader.h">
       <Filter>Header Files\OpenGL Shaders</Filter>
     </ClInclude>
     <ClInclude Include="shadowMappingTextureShader.h">
       <Filter>Header Files\OpenGL Shaders</Filter>
     </ClInclude>
-    <ClInclude Include="ShadowMappingTextureFragmentShader.glsl">
+    <ClInclude Include="ShadowMappingTextureShader.frag.glsl">
       <Filter>Source Files\GLSL Shaders\Shadow Shader</Filter>
     </ClInclude>
     <ClInclude Include="simulations.h">
@@ -583,61 +583,61 @@
     <Text Include="todo.txt" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="anisotropicVertexShader.glsl">
+    <None Include="anisotropicShader.vert.glsl">
       <Filter>Source Files\GLSL Shaders\Anisotropic Shader</Filter>
     </None>
-    <None Include="diffuseLightingVertexShader.glsl">
+    <None Include="diffuseLightingShader.vert.glsl">
       <Filter>Source Files\GLSL Shaders\Diffuse Lighting Shader</Filter>
     </None>
-    <None Include="diffuseLightingFragmentShader.glsl">
+    <None Include="diffuseLightingShader.frag.glsl">
       <Filter>Source Files\GLSL Shaders\Diffuse Lighting Shader</Filter>
     </None>
-    <None Include="diffuseLightingTextureFragmentShader.glsl">
+    <None Include="diffuseTextureShader.frag.glsl">
       <Filter>Source Files\GLSL Shaders\Diffuse Lighting Shader</Filter>
     </None>
-    <None Include="solidColorVertexShader.glsl">
+    <None Include="solidColorShader.vert.glsl">
       <Filter>Source Files\GLSL Shaders\Solid Color Shader</Filter>
     </None>
-    <None Include="solidColorFragmentShader.glsl">
+    <None Include="solidColorShader.frag.glsl">
       <Filter>Source Files\GLSL Shaders\Solid Color Shader</Filter>
     </None>
-    <None Include="skyboxFragmentShader.glsl">
-      <Filter>Source Files\GLSL Shaders\Shadow Shader\Skybox Shader</Filter>
+    <None Include="skyboxShader.frag.glsl">
+      <Filter>Source Files\GLSL Shaders\Skybox Shader</Filter>
     </None>
-    <None Include="skyboxVertexShader.glsl">
-      <Filter>Source Files\GLSL Shaders\Shadow Shader\Skybox Shader</Filter>
+    <None Include="skyboxShader.vert.glsl">
+      <Filter>Source Files\GLSL Shaders\Skybox Shader</Filter>
     </None>
-    <None Include="cookTorranceReflectionFragmentShader.glsl">
+    <None Include="cookTorranceReflectionShader.frag.glsl">
       <Filter>Source Files\GLSL Shaders\Reflection Shader</Filter>
     </None>
-    <None Include="cookTorranceReflectionVertexShader.glsl">
+    <None Include="cookTorranceReflectionShader.vert.glsl">
       <Filter>Source Files\GLSL Shaders\Reflection Shader</Filter>
     </None>
-    <None Include="cookTorranceReflectionFragmentShaderWithSkybox.glsl">
+    <None Include="cookTorranceSkyboxReflectionShader.frag.glsl">
       <Filter>Source Files\GLSL Shaders\Reflection Shader</Filter>
     </None>
-    <None Include="shadowMappingFragmentShader.glsl">
+    <None Include="shadowMappingShader.frag.glsl">
       <Filter>Source Files\GLSL Shaders\Shadow Shader</Filter>
     </None>
-    <None Include="simpleVertexShader.glsl">
+    <None Include="simpleShader.vert.glsl">
       <Filter>Source Files\GLSL Shaders\Simple Shader</Filter>
     </None>
-    <None Include="simpleFragmentShader.glsl">
+    <None Include="simpleShader.frag.glsl">
       <Filter>Source Files\GLSL Shaders\Simple Shader</Filter>
     </None>
-    <None Include="shadowMappingVertexShader.glsl">
+    <None Include="shadowMappingShader.vert.glsl">
       <Filter>Source Files\GLSL Shaders\Shadow Shader</Filter>
     </None>
-    <None Include="textureVertexShader.glsl">
+    <None Include="textureShader.vert.glsl">
       <Filter>Source Files\GLSL Shaders\Texture Shader</Filter>
     </None>
-    <None Include="textureFragmentShader.glsl">
+    <None Include="textureShader.frag.glsl">
       <Filter>Source Files\GLSL Shaders\Texture Shader</Filter>
     </None>
-    <None Include="diffuseLightingFourTextureFragmentShader.glsl">
+    <None Include="advancedDiffuseTextureShader.frag.glsl">
       <Filter>Source Files\GLSL Shaders\Diffuse Lighting Shader</Filter>
     </None>
-    <None Include="shadowMappingTextureVertexShader.glsl">
+    <None Include="shadowMappingTextureShader.vert.glsl">
       <Filter>Source Files\GLSL Shaders\Shadow Shader</Filter>
     </None>
   </ItemGroup>

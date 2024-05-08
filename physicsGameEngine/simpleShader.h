@@ -21,8 +21,8 @@ namespace pe {
     public:
 
         SimpleShader() : Shader(
-            "simpleVertexShader.glsl",
-            "simpleFragmentShader.glsl"
+            "simpleShader.vert.glsl",
+            "simpleShader.frag.glsl"
         ) {}
 
     };

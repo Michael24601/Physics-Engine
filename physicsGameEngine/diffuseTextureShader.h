@@ -1,18 +1,18 @@
 
-#ifndef DIFFUSE_LIGHTING_TEXTURE_SHADER_H
-#define DIFFUSE_LIGHTING_TEXTURE_SHADER_H
+#ifndef DIFFUSE_TEXTURE_SHADER_H
+#define DIFFUSE_TEXTURE_SHADER_H
 
 #include "shader.h"
 
 namespace pe {
 
-    class DiffuseLightingTextureShader : public Shader{
+    class DiffuseTextureShader : public Shader{
 
     public:
 
-        DiffuseLightingTextureShader() : Shader(
-            "diffuseLightingTextureVertexShader.glsl",
-            "diffuseLightingTextureFragmentShader.glsl"
+        DiffuseTextureShader() : Shader(
+            "diffuseTextureShader.vert.glsl",
+            "diffuseTextureShader.frag.glsl"
         ) {}
 
         void setObjectTexture(const GLuint& textureId) {

@@ -1,3 +1,4 @@
+
 #ifndef COOK_TORRANCE_REFLECTION_SHADER_H
 #define COOK_TORRANCE_REFLECTION_SHADER_H
 
@@ -10,8 +11,8 @@ namespace pe {
     public:
 
         CookTorranceReflectionShader() : Shader(
-            "cookTorranceReflectionVertexShader.glsl",
-            "cookTorranceReflectionFragmentShader.glsl"
+            "cookTorranceReflectionShader.vert.glsl",
+            "cookTorranceReflectionShader.frag.glsl"
         ) {}
 
         void setEnvironmentMap(GLuint environmentMapTextureId) {
@@ -23,20 +24,18 @@ namespace pe {
             );
         }
 
-        void setLightPosition(const glm::vec3* positions) {
-            setUniform("lightPos", positions[0]);
+        void setLightPosition(const glm::vec3* positions, int size) {
+            // Setting an array means sending the first value
+            setUniform("lightPos", positions, size);
+            setUniform("numActiveLights", size);
+        }
+
+        void setLightColors(const glm::vec4* colors, int size) {
+            setUniform("lightColors", colors, size);
         }
 
         void setBaseColor(const glm::vec4& baseColor) {
             setUniform("objectColor", baseColor);
-        }
-
-        void setLightColors(const glm::vec4* colors) {
-            setUniform("lightColors", colors[0]);
-        }
-
-        void setNumActiveLights(int numActiveLights) {
-            setUniform("numActiveLights", numActiveLights);
         }
 
         void setRoughness(float roughness) {

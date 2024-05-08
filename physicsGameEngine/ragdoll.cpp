@@ -40,7 +40,7 @@ void pe::runRagdoll() {
     );
 
     // Shaders
-    std::vector<DiffuseLightingTextureShader*> phongShaders;
+    std::vector<DiffuseTextureShader*> phongShaders;
     SolidColorShader shader;
     shader.setObjectColor(colorWhite);
 
@@ -184,7 +184,7 @@ void pe::runRagdoll() {
 
     for (int i = 0; i < prisms.size(); i++) {
 
-        DiffuseLightingTextureShader* shader = new   DiffuseLightingTextureShader;
+        DiffuseTextureShader* shader = new   DiffuseTextureShader;
 
         FaceData data = getFaceData(*prisms[i]);
         std::vector<std::vector<glm::vec3>> d = {

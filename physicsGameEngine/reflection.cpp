@@ -23,7 +23,7 @@ void pe::runReflection() {
     SolidColorShader shader;
     CookTorranceShader cookShader;
     SkyboxShader skyboxShader;
-    CookTorranceReflectionShaderWithSkybox refShader2;
+    CookTorranceSkyboxReflectionShader refShader2;
 
     GLuint skybox = loadCubemap(std::vector<std::string>{
         "C:\\Users\\msaba\\Documents\\physen\\cubemaps\\right.jpg",
@@ -63,9 +63,8 @@ void pe::runReflection() {
     };
     refShader2.sendVaribleData(d, GL_STATIC_DRAW);
     refShader2.setTrianglesNumber(data.vertices.size());
-    refShader2.setActiveLightsCount(1);
-    refShader2.setLightPosition(lightPos);
-    refShader2.setLightColors(lightColor);
+    refShader2.setLightPosition(lightPos, 1);
+    refShader2.setLightColors(lightColor, 1);
     refShader2.setBaseColor(colorRed);
     refShader2.setRoughness(0.05);
     refShader2.setFresnel(0.5);
@@ -79,9 +78,8 @@ void pe::runReflection() {
     };
     cookShader.sendVaribleData(d, GL_STATIC_DRAW);
     cookShader.setTrianglesNumber(data.vertices.size());
-    cookShader.setActiveLightsCount(1);
-    cookShader.setLightPosition(lightPos);
-    cookShader.setLightColors(lightColor);
+    cookShader.setLightPosition(lightPos, 1);
+    cookShader.setLightColors(lightColor, 1);
     cookShader.setObjectColor(colorRed);
     cookShader.setRoughness(0.05);
     cookShader.setFresnel(0.5);

@@ -120,12 +120,11 @@ void pe::runBallPit() {
 
         cubeShaders[i].sendVaribleData(vertices, GL_STATIC_DRAW);
         cubeShaders[i].setTrianglesNumber(data.vertices.size());
-        cubeShaders[i].setLightPosition(lightPos);
-        cubeShaders[i].setLightColors(lightColors);
+        cubeShaders[i].setLightPosition(lightPos, 1);
+        cubeShaders[i].setLightColors(lightColors, 1);
         cubeShaders[i].setFresnel(0.05);
         cubeShaders[i].setRoughness(0.5);
         cubeShaders[i].setObjectColor(colorWhite);
-        cubeShaders[i].setActiveLightsCount(1);
     }
 
     // Sphere
@@ -138,13 +137,11 @@ void pe::runBallPit() {
     };
     sphereShader.sendVaribleData(vertices, GL_STATIC_DRAW);
     sphereShader.setTrianglesNumber(data.vertices.size());
-    sphereShader.setLightPosition(lightPos);
-    sphereShader.setLightColors(lightColors);
+    sphereShader.setLightPosition(lightPos, 1);
+    sphereShader.setLightColors(lightColors, 1);
     sphereShader.setFresnel(0.1);
     sphereShader.setRoughness(0.05);
     sphereShader.setObjectColor(colorBlue);
-    sphereShader.setActiveLightsCount(1);
-
 
     // Forces
 

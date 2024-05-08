@@ -11,8 +11,8 @@ namespace pe {
 	public:
 
         SolidColorShader() : Shader(
-            "solidColorVertexShader.glsl",
-            "solidColorFragmentShader.glsl"
+            "solidColorShader.vert.glsl",
+            "solidColorShader.frag.glsl"
         ) {}
 
         void setObjectColor(const glm::vec4& color) {

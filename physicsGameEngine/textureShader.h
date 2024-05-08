@@ -11,8 +11,8 @@ namespace pe {
     public:
 
         TextureShader() : Shader(
-            "textureVertexShader.glsl",
-            "textureFragmentShader.glsl"
+            "textureShader.vert.glsl",
+            "textureShader.frag.glsl"
         ) {}
 
         void setObjectTexture(const GLuint& textureId) {
