@@ -3,7 +3,6 @@
 
 in vec3 FragPos;
 in vec3 Normal;
-in vec2 TexCoord;
 
 uniform vec4 objectColor;
 uniform samplerCube skybox;

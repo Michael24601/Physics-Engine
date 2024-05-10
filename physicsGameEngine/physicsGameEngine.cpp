@@ -1,7 +1,11 @@
 
 #include "simulations.h"
 
+using namespace pe;
+
 int main() {
-	pe::runFlag();
+
+	runMirrors();
+
 	return 0;
 }

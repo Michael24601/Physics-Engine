@@ -3,7 +3,6 @@
 
 in vec3 FragPos;
 in vec3 Normal;
-in vec2 TexCoord;
 
 uniform vec4 objectColor;
 uniform samplerCube environmentMap;
@@ -69,7 +68,9 @@ void main() {
 
     vec3 scaledEnvReflection = envReflection * reflectionStrength;
 
-    vec3 resultColor = finalDiffuse + finalSpecular + ambientColor + scaledEnvReflection;
+    vec3 resultColor = finalSpecular + 
+        (finalDiffuse + ambientColor) * (1-reflectionStrength) 
+        + scaledEnvReflection;
 
     FragColor = vec4(resultColor, objectColor.a);
 }

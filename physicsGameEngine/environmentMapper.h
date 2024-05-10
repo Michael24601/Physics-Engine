@@ -19,6 +19,8 @@ namespace pe {
 
 	private:
 
+        int activeTexture;
+
         // The resolution of the cubemap textures 
         float width;
         float height;
@@ -31,11 +33,10 @@ namespace pe {
 
 	public:
 
-        EnvironmentMapper(float width, float height) : 
-            width{ width }, height{height} {
+        EnvironmentMapper(float width, float height, int activeTexture = 1) :
+            width{ width }, height{ height }, activeTexture{ activeTexture } {
 
-            // We have a cubemap texture so we use the first index
-            glActiveTexture(GL_TEXTURE1);
+            glActiveTexture(GL_TEXTURE0 + activeTexture);
             glGenTextures(1, &cubeMapTexture);
             glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMapTexture);
 
@@ -55,14 +56,31 @@ namespace pe {
             }
 
             glGenFramebuffers(1, &framebuffer);
+            glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
 
             /*
-                When we are done, we set the active texture back to the one at
-                index 0.
+                Creating and attaching a depth buffer to allow the cubemap
+                to do depth testing when rendering the environment in order
+                to capture it.
             */
-            glActiveTexture(GL_TEXTURE0);
+            GLuint depthBuffer;
+            glGenRenderbuffers(1, &depthBuffer);
+            glBindRenderbuffer(GL_RENDERBUFFER, depthBuffer);
+            glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
+            glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBuffer);
 
-		}
+            // Check framebuffer completeness
+            GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+            if (status != GL_FRAMEBUFFER_COMPLETE) {
+                std::cerr << "Incomplete Framebuffer.\n";
+            }
+
+            // Unbind framebuffer
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+            // When we are done, we set the active texture back to the one at index 0
+            glActiveTexture(GL_TEXTURE0);
+        }
 
 
         // Deletes the buffer and texture
@@ -99,7 +117,11 @@ namespace pe {
             // Binds the buffer
             glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
 
-            glActiveTexture(GL_TEXTURE1);
+            glActiveTexture(GL_TEXTURE0 + activeTexture);
+
+            glm::mat4 projection = glm::perspective(
+                glm::radians(105.0f), 1.0f, 0.1f, 1000.0f
+            );
 
             for (GLuint face = 0; face < 6; face++) {
 
@@ -119,12 +141,12 @@ namespace pe {
 
                 // We have to set the viewport for the current cubemap face
                 glViewport(0, 0, width, height);
-                glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
                 // We then clear the framebuffer
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
                 // Uses each shader to render the scene from this perspective
                 for (Shader* shader : shaders) {
+                    shader->setProjectionMatrix(projection);
                     shader->setViewMatrix(view);
                     shader->drawFaces();
                 }
@@ -139,7 +161,7 @@ namespace pe {
         
         /*
             This function here returns the cube map texture
-            (should be used after capturing the depth).
+            (should be used after capturing the envrionment).
         */
         GLuint getTexture() const {
             return cubeMapTexture;

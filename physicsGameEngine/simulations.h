@@ -106,6 +106,8 @@ namespace pe {
 
 	void runReflection();
 
+	void runMirrors();
+
 	void runVideoGameLevel();
 
 }

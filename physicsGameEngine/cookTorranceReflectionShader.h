@@ -15,12 +15,12 @@ namespace pe {
             "cookTorranceReflectionShader.frag.glsl"
         ) {}
 
-        void setEnvironmentMap(GLuint environmentMapTextureId) {
+        void setEnvironmentMap(GLuint environmentMapTextureId, int activeTexture = 1) {
             setTextureUniform(
                 "environmentMap",
                 environmentMapTextureId, 
                 GL_TEXTURE_CUBE_MAP, 
-                1
+                activeTexture
             );
         }
 

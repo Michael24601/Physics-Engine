@@ -255,6 +255,9 @@
     <ClCompile Include="polyhedron.cpp">
       <Filter>Source Files\Polyhedron</Filter>
     </ClCompile>
+    <ClCompile Include="mirrors.cpp">
+      <Filter>Source Files\Simulations</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="accuracy.h">

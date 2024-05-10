@@ -171,6 +171,7 @@
     <ClCompile Include="fineCollisionDetection.cpp" />
     <ClCompile Include="flag.cpp" />
     <ClCompile Include="gjk.cpp" />
+    <ClCompile Include="mirrors.cpp" />
     <ClCompile Include="openglUtility.cpp" />
     <ClCompile Include="particle.cpp" />
     <ClCompile Include="particleBungeeForce.cpp" />

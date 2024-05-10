@@ -203,7 +203,7 @@ void pe::saveCubemapFaces(
 ) {
     std::vector<unsigned char> pixels(width * height * 4);  // RGBA pixel buffer
 
-    std::string folderName = folder + "\\frame_" + getUniqueDate();
+    std::string folderName = folder;
 
     if (!createDirectory(folderName)) {
         return;
