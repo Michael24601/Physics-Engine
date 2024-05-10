@@ -163,6 +163,7 @@
     <ClCompile Include="ballPit.cpp" />
     <ClCompile Include="boundingSphere.cpp" />
     <ClCompile Include="cloth.cpp" />
+    <ClCompile Include="clothCollision.cpp" />
     <ClCompile Include="collisionResolver.cpp" />
     <ClCompile Include="contact.cpp" />
     <ClCompile Include="customPrimitive.cpp" />

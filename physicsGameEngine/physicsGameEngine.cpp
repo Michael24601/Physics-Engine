@@ -5,7 +5,7 @@ using namespace pe;
 
 int main() {
 
-	runMirrors();
+	runFlag();
 
 	return 0;
 }

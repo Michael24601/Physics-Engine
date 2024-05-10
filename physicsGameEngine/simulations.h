@@ -108,6 +108,8 @@ namespace pe {
 
 	void runMirrors();
 
+	void runClothCollision();
+
 	void runVideoGameLevel();
 
 }

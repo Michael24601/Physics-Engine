@@ -88,6 +88,19 @@ namespace pe {
 			z *= scalar;
 		}
 
+
+		// Division by a scalar (scaling the vector)
+		Vector3D operator/(const real scalar) const {
+			return Vector3D(x / scalar, y / scalar, z / scalar);
+		}
+
+		void operator/=(const real scalar) {
+			x /= scalar;
+			y /= scalar;
+			z /= scalar;
+		}
+
+
 		// Addition of two vectors (component-wise)
 		Vector3D operator+(const Vector3D& vector) const {
 			return Vector3D(x + vector.x, y + vector.y, z + vector.z);
@@ -213,6 +226,21 @@ namespace pe {
 			x = y = z = 0;
 		}
 
+		// Angle between two vectors
+		static real angleBetween(const Vector3D& v1, const Vector3D& v2) {
+			real dotProduct = v1.scalarProduct(v2);
+
+			real magV1 = v1.magnitude();
+			real magV2 = v2.magnitude();
+
+			if (magV1 == 0 || magV2 == 0) {
+				return 0;
+			}
+
+			real cosAngle = dotProduct / (magV1 * magV2);
+			cosAngle = std::max(-1.0f, std::min(1.0f, cosAngle));
+			return std::acos(cosAngle);
+		}
 
 		void rotate90Degrees() {
 			int temp = x;

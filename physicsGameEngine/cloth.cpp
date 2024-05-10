@@ -11,7 +11,8 @@ Cloth::Cloth(
 	int columnSize,
 	real mass,
 	real damping,
-	real ropeStrength
+	real ropeStrength,
+	real dampingConstant
 ) : 
 	Mesh(
 		returnParticleGrid(
@@ -25,13 +26,29 @@ Cloth::Cloth(
 	),
 	rowSize{ rowSize },
 	columnSize{ columnSize },
-	ropeStrength{ ropeStrength } {
+	ropeStrength{ ropeStrength },
+	dampingConstant{dampingConstant} {
 
 	setFaces(calculateFaces());
 	setEdges(calculateEdges());
 
 	setForces();
 	setConstraints();
+}
+
+
+real Cloth::calculateTriangleArea(
+	const Vector3D& v0, 
+	const Vector3D& v1, 
+	const Vector3D& v2
+) {
+	real a = (v1 - v0).magnitude();
+	real b = (v2 - v1).magnitude();
+	real c = (v0 - v2).magnitude();
+	// Semiperimeter
+	real s = (a + b + c) / 2.0;
+	// Heron's formula
+	return realSqrt(s * (s - a) * (s - b) * (s - c));
 }
 
 
@@ -110,35 +127,50 @@ std::vector<CurvedFace*> Cloth::calculateFaces() {
 		for (int j = 0; j < rowSize - 1; j++) {
 
 			/*
-				The square faces are defined by 2 columns and 2 rows,
-				in counter-clockwise order.
+				The faces are triangles which make up the squares
+				connecting 4 vertices nect to each other in the mesh.
 			*/
-			std::vector<int> indexes{
-				i * rowSize + j,
-				(i + 1) * rowSize + j,
-				(i + 1) * rowSize + (j + 1),
-				i * rowSize + (j + 1)
-			};
-
-			// The normals are not initially set, but will be calculated each frame
-			std::vector<Vector3D>faceNormals(indexes.size(), Vector3D());
-
-			CurvedFace* face = new CurvedFace(
-				&vertices,
-				indexes,
-				faceNormals
-			);
-
-			std::vector<Vector2D> uv{
-				Vector2D(i * (1.0 / rowSize), j * (1.0 / columnSize)),
-				Vector2D((i + 1) * (1.0 / rowSize), j * (1.0 / columnSize)),
-				Vector2D((i + 1) * (1.0 / rowSize), (j + 1) * (1.0 / columnSize)),
-				Vector2D(i * (1.0 / rowSize), (j + 1) * (1.0 / columnSize)),
+			std::vector<int> indexes[2]{
+				{
+					i * rowSize + j,
+					(i + 1) * rowSize + j,
+					(i + 1) * rowSize + (j + 1)
+				},
+				{
+					(i + 1) * rowSize + (j + 1),
+					i * rowSize + (j + 1),
+					i * rowSize + j
+				}
 			};
 
 
-			face->setTextureCoordinates(uv);
-			faces.push_back(face);
+			std::vector<Vector2D> uv[2]{
+				{
+					Vector2D(i * (1.0 / rowSize), j * (1.0 / columnSize)),
+					Vector2D((i + 1) * (1.0 / rowSize), j * (1.0 / columnSize)),
+					Vector2D((i + 1) * (1.0 / rowSize), (j + 1) * (1.0 / columnSize))
+				},
+				{
+					Vector2D((i + 1) * (1.0 / rowSize), (j + 1) * (1.0 / columnSize)),
+					Vector2D(i * (1.0 / rowSize), (j + 1) * (1.0 / columnSize)),
+					Vector2D(i * (1.0 / rowSize), j * (1.0 / columnSize))
+				}
+			};
+
+			for (int i = 0; i < 2; i++) {
+
+				// The normals are not initially set, but will be calculated each frame
+				std::vector<Vector3D>faceNormals(indexes[i].size(), Vector3D());
+
+				CurvedFace* face = new CurvedFace(
+					&vertices,
+					indexes[i],
+					faceNormals
+				);
+
+				face->setTextureCoordinates(uv[i]);
+				faces.push_back(face);
+			}
 		}
 	}
 
@@ -158,13 +190,13 @@ void Cloth::setForces() {
 			ParticleSpringDamper(
 				particles[edge->getIndex(1)],
 				ropeStrength,
-				0.2,
+				dampingConstant,
 				distance
 			),
 			ParticleSpringDamper(
 				particles[edge->getIndex(0)],
 				ropeStrength,
-				0.2,
+				dampingConstant,
 				distance
 			),
 		};
@@ -194,12 +226,19 @@ void Cloth::setConstraints() {
 }
 
 
-std::vector<std::vector<Vector3D>> Cloth::calculateMeshNormals() {
-	
-	std::vector<Vector3D> normals(particles.size());
+void Cloth::calculateMeshNormals() {
+
+	// Return their values to the 0 vector
+	particleNormals = std::vector<Vector3D>(particles.size());
 
 	// First we calculate the normal of each particle
 	for (CurvedFace* face : faces) {
+
+		real area = calculateTriangleArea(
+			face->getVertex(0), 
+			face->getVertex(1), 
+			face->getVertex(2)
+		);
 
 		/*
 			Since we don't have a transform matrix, we recalculate the
@@ -212,29 +251,15 @@ std::vector<std::vector<Vector3D>> Cloth::calculateMeshNormals() {
 				the face (recall that mist vertices are shared among
 				several faces).
 			*/
-			normals[face->getIndex(i)] += face->getNormal();
+			particleNormals[face->getIndex(i)] += face->getNormal() * area;
 		}
 	}
+
 
 	// We then normalize them all
-	for (Vector3D& normal : normals) {
+	for (Vector3D& normal : particleNormals) {
 		normal.normalize();
 	}
-
-	/*
-		We then associate each particle's normal with vertices in each
-		face it features in so that we can return the normals as a vector
-		where each entry is a vector containing the normals of the vertices
-		of one face.
-	*/
-	std::vector<std::vector<Vector3D>> faceNormals(faces.size());
-	for (int i = 0; i < faces.size(); i++) {
-		for (int j = 0; j < faces[i]->getVertexNumber(); j++) {
-			faceNormals[i].push_back(normals[faces[i]->getIndex(j)]);
-		}
-	}
-
-	return faceNormals;
 }
 
 
@@ -242,5 +267,46 @@ void Cloth::applyConstraints() {
 	// Applies distance constraints
 	for (ParticleDistanceConstraint& constraint : distanceConstraints) {
 		constraint.applyConstraint();
+	}
+}
+
+
+void Cloth::laplacianSmoothing(int iterations, real factor) {
+
+	for (int iteration = 0; iteration < iterations; iteration++) {
+
+		std::vector<Vector3D> sumNeighbors(particles.size());
+		std::vector<int> countNeighbors(particles.size(), 0);
+
+		for (Edge* edge : edges) {
+			int index0 = edge->getIndex(0);
+			int index1 = edge->getIndex(1);
+
+			countNeighbors[index0]++;
+			countNeighbors[index1]++;
+
+			sumNeighbors[index0] += edge->getVertex(1);
+			sumNeighbors[index1] += edge->getVertex(0);
+		}
+
+		for (int i = 0; i < particles.size(); ++i) {
+
+			if (!particles[i]->isAwake) {
+				continue;
+			}
+
+			Vector3D smoothedPosition;
+			if (countNeighbors[i] > 0) {
+				smoothedPosition = particles[i]->position + (
+					(sumNeighbors[i] / countNeighbors[i]) - particles[i]->position
+				) * factor;
+			}
+			else {
+				// If the particle has no neighbors, we keep its position unchanged
+				smoothedPosition = particles[i]->position;
+			}
+
+			particles[i]->position = smoothedPosition;
+		}
 	}
 }

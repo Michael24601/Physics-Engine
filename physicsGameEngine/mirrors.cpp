@@ -163,7 +163,7 @@ void pe::runMirrors() {
             cubeShaders[i]->setViewMatrix(camera.getViewMatrix());
         }
 
-        // Clear default framebuffer (window)
+        // Clears default framebuffer (window)
         if (deltaTime >= frameRate) {
 
             // Unbind framebuffer to render to default framebuffer (window)

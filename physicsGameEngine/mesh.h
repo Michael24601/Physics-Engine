@@ -30,7 +30,7 @@ namespace pe {
 			normals of the vertices of each face of the mesh in order.
 			Should be overriden by subclasses.
 		*/
-		virtual std::vector<std::vector<Vector3D>> calculateMeshNormals() = 0;
+		virtual void calculateMeshNormals() = 0;
 
 		void clearFacesAndEdges() {
 			for (int i = 0; i < edges.size(); i++) {
@@ -44,6 +44,7 @@ namespace pe {
 	public:
 
 		std::vector<Particle*> particles;
+		std::vector<Vector3D> particleNormals;
 
 		/*
 			The vertices, faces, and edges are given in global coordinates
@@ -61,6 +62,7 @@ namespace pe {
 		) {
 			particles.resize(initialParticlePositions.size());
 			vertices.resize(particles.size());
+			particleNormals.resize(particles.size());
 
 			// The initial values of the particles
 			for (int i = 0; i < initialParticlePositions.size(); i++) {
@@ -117,15 +119,28 @@ namespace pe {
 				mesh we have (cloth, blob...).
 			*/
 
-			std::vector<std::vector<Vector3D>> normals = calculateMeshNormals();
+			calculateMeshNormals();
+
+			/*
+				We then associate each particle's normal with vertices in each
+				face it features in so that we can return the normals as a vector
+				where each entry is a vector containing the normals of the vertices
+				of one face.
+			*/
+			std::vector<std::vector<Vector3D>> faceNormals(faces.size());
+			for (int i = 0; i < faces.size(); i++) {
+				for (int j = 0; j < faces[i]->getVertexNumber(); j++) {
+					faceNormals[i].push_back(particleNormals[faces[i]->getIndex(j)]);
+				}
+			}
 
 			for (int i = 0; i < particles.size(); i++) {
 				vertices[i] = particles[i]->position;
 			}
 
 			for (int i = 0; i < faces.size(); i++) {
-				for (int j = 0; j < normals[i].size(); j++) {
-					faces[i]->setNormal(j, normals[i][j]);
+				for (int j = 0; j < faceNormals[i].size(); j++) {
+					faces[i]->setNormal(j, faceNormals[i][j]);
 				}
 				faces[i]->recalculateFrameVectors();
 			}

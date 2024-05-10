@@ -46,10 +46,13 @@ void pe::runFlag() {
         glm::vec4(1.0, 1.0, 1.0, 1.0)
     };
 
-    int size = 18;
-    real strength = 0.4;
-    real mass = 0.45;
+    int size = 20;
+    real strength = 0.5;
+    real mass = 0.4;
     real damping = 0.5;
+    real dk = 0.20;
+    int laplacianIterations = 1;
+    real laplacianFactor = 0.08;
 
     const real height = 400;
     const Vector3D topLeft(-200, height / 2.0, 0);
@@ -58,7 +61,7 @@ void pe::runFlag() {
         topLeft,
         Vector3D(300, -height / 2.0, 0),
         size, size,
-        mass, damping, strength
+        mass, damping, strength, dk
     );
 
     Cylinder cylinder(10, 800, 10, 20, Vector3D(-205, -200, 0), new RigidBody());
@@ -83,8 +86,6 @@ void pe::runFlag() {
 
     ParticleGravity g(Vector3D(0, -10, 0));
 
-    bool isPressed{ false };
-
     float deltaT = 0.13;
 
     float lastTime = glfwGetTime();
@@ -107,16 +108,38 @@ void pe::runFlag() {
         glfwPollEvents();
         window.processInput();
         camera.processInput(frameRate);
+
         if (glfwGetKey(window.getWindow(), GLFW_KEY_A) == GLFW_PRESS) {
-            isPressed = true;
+            glm::vec2 mouse = window.getCursorPosition();
+            Vector3D pos = Vector3D(
+                mouse.x,
+                mouse.y,
+                cylinder.body->position.z
+            );
+            cylinder.body->position = pos;
+            for (int i = 0; i < size; i++) {
+                mesh.particles[i * size]->position = pos +
+                    Vector3D(0, ((size - i) * height / size), 0);
+            }
         }
-        else if (glfwGetKey(window.getWindow(), GLFW_KEY_A) == GLFW_RELEASE) {
-            isPressed = false;
+        else if (glfwGetKey(window.getWindow(), GLFW_KEY_B) == GLFW_PRESS) {
+            glm::vec2 mouse = window.getCursorPosition();
+            Vector3D pos = Vector3D(
+                mouse.x,
+                cylinder.body->position.y,
+                -mouse.y
+            );
+            for (int i = 0; i < size; i++) {
+                mesh.particles[(i+1) * size - 1]->position = pos +
+                    Vector3D(0, ((size - i) * height / size), 0);
+                mesh.particles[(i + 1) * size - 2]->position = pos +
+                    Vector3D(0, ((size - i) * height / size), 0);
+            }
         }
-        if (glfwGetKey(window.getWindow(), GLFW_KEY_X) == GLFW_PRESS) {
+        else if (glfwGetKey(window.getWindow(), GLFW_KEY_X) == GLFW_PRESS) {
             windMultiplier *= 1.0002;
         }
-        if (glfwGetKey(window.getWindow(), GLFW_KEY_Z) == GLFW_PRESS) {
+        else if (glfwGetKey(window.getWindow(), GLFW_KEY_Z) == GLFW_PRESS) {
             windMultiplier *= 0.9998;
         }
 
@@ -124,24 +147,6 @@ void pe::runFlag() {
         real substep = deltaT / numSteps;
 
         while (numSteps--) {
-
-            if (isPressed) {
-
-                glm::vec2 mouse = window.getCursorPosition();
-
-                Vector3D pos = Vector3D(
-                    mouse.x,
-                    mouse.y,
-                    cylinder.body->position.z
-                );
-
-                cylinder.body->position = pos;
-
-                for (int i = 0; i < size; i++) {
-                    mesh.particles[i * size]->position = pos +
-                        Vector3D(0, ((size - i) * height / size), 0);
-                }
-            }
 
             cylinder.body->calculateDerivedData();
 
@@ -152,18 +157,14 @@ void pe::runFlag() {
             for (int i = 0; i < mesh.particles.size(); i++) {
 
                 if (i < size) {
-                    mesh.particles[i]->addForce(Vector3D(2, 7, 0) * windMultiplier);
-                    continue;
-                }
-                else if (i >= (size - 1) * size) {
-                    mesh.particles[i]->addForce(Vector3D(1, 4, 0) * windMultiplier);
+                    mesh.particles[i]->addForce(Vector3D(2, 8, 0) * windMultiplier);
                     continue;
                 }
 
                 int enter = generateRandomNumber(0, 5);
                 if (enter <= 3) {
                     real x = generateRandomNumber(1.0f, 4.0f);
-                    real y = generateRandomNumber(2.0f, 8.0f);
+                    real y = generateRandomNumber(4.0f, 8.0f);
                     real z = generateRandomNumber(0.0f, 2.0f);
                     mesh.particles[i]->addForce(Vector3D(x, y, z) * windMultiplier);
                 }
@@ -174,13 +175,14 @@ void pe::runFlag() {
                 force.force2.updateForce(force.force1.otherParticle, substep);
             }
 
-            mesh.applyConstraints();
-
             for (int i = 0; i < size * size; i++) {
                 if (mesh.particles[i]->isAwake) {
                     mesh.particles[i]->verletIntegrate(substep);
                 }
             }
+
+            mesh.laplacianSmoothing(laplacianIterations, laplacianFactor);
+            mesh.applyConstraints();
 
             mesh.update();
         }

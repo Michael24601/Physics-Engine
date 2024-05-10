@@ -258,6 +258,9 @@
     <ClCompile Include="mirrors.cpp">
       <Filter>Source Files\Simulations</Filter>
     </ClCompile>
+    <ClCompile Include="clothCollision.cpp">
+      <Filter>Source Files\Simulations</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="accuracy.h">

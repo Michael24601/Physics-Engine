@@ -48,7 +48,14 @@ namespace pe {
 		void setConstraints();
 
 
-		std::vector<std::vector<Vector3D>> calculateMeshNormals() override;
+		virtual void calculateMeshNormals() override;
+
+
+		static real calculateTriangleArea(
+			const Vector3D& v0,
+			const Vector3D& v1,
+			const Vector3D& v2
+		);
 
 
 	public:
@@ -71,6 +78,7 @@ namespace pe {
 
 		std::vector<SpringForce> forces;
 		real ropeStrength;
+		real dampingConstant;
 
 		/*
 			If the mesh needs to be connected with forces like spring
@@ -84,7 +92,8 @@ namespace pe {
 			int columnSize,
 			real mass,
 			real damping,
-			real ropeStrength
+			real ropeStrength,
+			real dampingConstant
 		);
 
 
@@ -94,6 +103,9 @@ namespace pe {
 			the cloth from being too deformed.
 		*/
 		void applyConstraints();
+
+
+		void laplacianSmoothing(int iterations, real factor);
 
 	};
 }
