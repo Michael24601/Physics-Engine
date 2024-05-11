@@ -183,6 +183,30 @@ namespace pe {
 
 	FaceData getUniformFaceData(const Mesh& mesh);
 
+	/*
+		Checks if the given object is visible to the given projection
+		view matrix (projection * view) by checking if the bounding box
+		of the object is within or intersects the frustum of the matrix.
+
+		This is done to cull objects not visible to the camera, improving
+		performance.
+	*/
+	bool isBoundingBoxInFrustum(
+		const Polyhedron& p, const glm::mat4& projectionViewMatrix
+	);
+
+	/*
+		Checks if the given object is visible to the given projection
+		view matrix (projection * view) by checking if the bounding sphere
+		of the object is within or intersects the frustum of the matrix.
+
+		This is done to cull objects not visible to the camera, improving
+		performance.
+	*/
+	bool isBoundingSphereInFrustum(
+		const Polyhedron& p, const glm::mat4& projectionViewMatrix
+	);
+
 }
 
 #endif

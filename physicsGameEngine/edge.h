@@ -25,6 +25,7 @@ namespace pe {
 
 		Edge() {}
 
+
 		Edge(
 			std::vector<Vector3D>* vertices,
 			int index1,

@@ -175,9 +175,20 @@ Vector3D Polyhedron::getHalfsize() const {
 }
 
 
-Vector3D Polyhedron::getOffset() const {
+real Polyhedron::getBoundingSphereRadius() const {
+	return boundingSphereRadius;
+}
+
+
+Vector3D Polyhedron::getBoxOffset() const {
 	return boundingBoxOffset;
 }
+
+
+Vector3D Polyhedron::getSphereOffset() const {
+	return boundingSphereOffset;
+}
+
 
 Vector3D Polyhedron::getFurthestPoint() const {
 	return furthestPoint;

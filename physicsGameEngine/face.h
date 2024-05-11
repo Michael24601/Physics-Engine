@@ -23,22 +23,18 @@ namespace pe {
 
 			- One tradeoff is about the way we store the vertex association
 			in the face. We assume there exists a Polyhedron object with
-			all of its vertices in two vectors: local and global vertices.
+			all of its vertices in a vector (local coordinates).
 			In the first method, we store copies of the vertices associated
-			with the face in the class; this won't work as it is too slow,
-			requiring us to copy the vertices each frame (as the global
-			vertices change each frame). This also requires that the
+			with the face in the class; this won't work as it requires that the
 			Polyhedron class carry the information of which vertices belong
 			to which faces, which really should be Face information.
 			We can direguard this function. The second method is to store
-			vectors of pointers to the (local and global) vertices
-			associated with a face in the Face class. This approach is fast,
-			but not memory efficient, as storing many 8-byte pointers can be
-			expensive, and volatile, as we can't know that when the global
-			vertices are updated each frame, the vector isn't cleared and
-			filled again, changing the memory addresses.
-			The third method is to store pointers to the global and local
-			vertex vectors directly, which should be cheap, as well as a
+			vectors of pointers to the vertices associated with a face in the 
+			Face class. This approach is fast, but not memory efficient, 
+			as storing many 8-byte pointers can be expensive, and volatile, 
+			as we can't know that when the vertices change addresses.
+			The third method is to store pointers to the vector of 
+			vertices directly, which should be cheap, as well as a
 			vector of integers for the indexes of the vectors that are
 			associated with the face. This is memory efficient, as storing
 			integers is cheap, and is more robust, but it also requires
@@ -86,7 +82,7 @@ namespace pe {
 			instead by a deformable object like cloth, then we wouldn't
 			have a transform matrix anymore to use.
 
-		Also note that we assume the face is convex, as many formulas and
+		Also note that we assume the face is convex, as many formulae and
 		functions only work with that assumption.
 	*/
 	class Face {

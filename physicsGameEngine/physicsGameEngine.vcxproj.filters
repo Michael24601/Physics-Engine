@@ -261,6 +261,9 @@
     <ClCompile Include="clothCollision.cpp">
       <Filter>Source Files\Simulations</Filter>
     </ClCompile>
+    <ClCompile Include="curvedFace.cpp">
+      <Filter>Source Files\Primitive</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="accuracy.h">

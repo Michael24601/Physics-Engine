@@ -166,6 +166,7 @@
     <ClCompile Include="clothCollision.cpp" />
     <ClCompile Include="collisionResolver.cpp" />
     <ClCompile Include="contact.cpp" />
+    <ClCompile Include="curvedFace.cpp" />
     <ClCompile Include="customPrimitive.cpp" />
     <ClCompile Include="drawingUtil.cpp" />
     <ClCompile Include="face.cpp" />

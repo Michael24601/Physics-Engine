@@ -175,11 +175,13 @@ void pe::runBallPit() {
         else if (glfwGetKey(window.getWindow(), GLFW_KEY_A) == GLFW_RELEASE) {
 
             if (isPressed) {
-                int n = generateRandomNumber(-300, 300);
-                int m = generateRandomNumber(-500, 500);
+                int n = generateRandomNumber(-400, 400);
+                int m = generateRandomNumber(-400, 400);
                 // We can generate only 1 vertex for
                     // these spheres as they will be shaded later
-                SolidSphere* v = new SolidSphere(60, 0.1, 1, 1, Vector3D(n, 1000, m), new RigidBody);
+                SolidSphere* v = new SolidSphere(
+                    60, 0.1, 1, 1, Vector3D(n, 1000, m), new RigidBody
+                );
                 v->body->angularDamping = 0.3;
                 v->body->linearDamping = 0.95;
                 v->body->canSleep = true;
@@ -206,7 +208,7 @@ void pe::runBallPit() {
             std::vector<Contact> contacts;
             for (int i = 0; i < walls.size(); i++) {
                 for (SolidSphere* s : spheres) {
-                    generateContactBoxAndSphere(*(walls[i]), *s, contacts, 1.0, 0.0);
+                    generateContactBoxAndSphere(*(walls[i]), *s, contacts, 1.0, 0.5);
                 }
             }
             for (SolidSphere* s : spheres) {

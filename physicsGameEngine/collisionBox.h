@@ -33,7 +33,7 @@ namespace pe {
         */
         Box(const Polyhedron& polyhedron) {
             halfSize = polyhedron.getHalfsize();
-            offset = polyhedron.getOffset();
+            offset = polyhedron.getBoxOffset();
             body = polyhedron.body;
 
             /*
@@ -78,7 +78,6 @@ namespace pe {
    */
     struct Ball {
 
-        // No arg constructor
         Ball (RigidBody* body, real radius) :
             body{ body }, radius{ radius } {}
 
@@ -87,7 +86,8 @@ namespace pe {
         */
         Ball(const Polyhedron& polyhedron) {
             body = polyhedron.body;
-            radius = polyhedron.boundingSphereRadius;
+            radius = polyhedron.getBoundingSphereRadius();
+            offset = polyhedron.getSphereOffset();
             transformMatrix = polyhedron.body->transformMatrix;
 
             /*

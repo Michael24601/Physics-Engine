@@ -22,8 +22,8 @@ namespace pe {
     private:
 
         // The resolution of the depth texture 
-        float width;
-        float height;
+        int width;
+        int height;
 
         // Texture that will contain the cubemap 
         GLuint depthMap;
@@ -33,7 +33,7 @@ namespace pe {
 
     public:
 
-        DepthMapper(float width, float height) :
+        DepthMapper(int width, int height) :
             width{ width }, height{ height } {
 
             glGenFramebuffers(1, &framebuffer);
@@ -110,6 +110,16 @@ namespace pe {
         */
         GLuint getTexture() const {
             return depthMap;
+        }
+
+
+        int getWidth() const {
+            return width;
+        }
+
+
+        int getHeight() const {
+            return height;
         }
 
     };

@@ -40,7 +40,7 @@ void pe::runWreckingBall() {
     };
 
     // Shaders
-    std::vector<CookTorranceShader> cubeShaders(9);
+    std::vector<CookTorranceShader> cubeShaders(27);
     CookTorranceShader sphereShader;
     DiffuseLightingShader groundShader;
     SolidColorShader lineShader;
@@ -48,21 +48,22 @@ void pe::runWreckingBall() {
     real mass = 1.5;
 
     std::vector<RectangularPrism*> prisms;
-    for (int i = 0; i < 1; i++) {
+    for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 3; j++) {
             for (int k = 0; k < 3; k++) {
 
                 int index = i * 9 + j * 3 + k;
 
-                real x = i * 200 - 200;
+                real x = i * 200 - 400;
                 real y = j * 200 - 200;
-                real z = k * 200 - 200;
+                real z = k * 200 - 400;
 
                 RectangularPrism* prism = new RectangularPrism(
                     200, 200, 200, mass, Vector3D(x, y, z), new RigidBody
                 );
                 prism->body->angularDamping = 0.8;
                 prism->body->linearDamping = 0.95;
+                prism->body->canSleep = true;
 
                 prisms.push_back(prism);
 
@@ -125,7 +126,7 @@ void pe::runWreckingBall() {
     b.position = Vector3D(800, 700, 0);
     RigidBodySpringForce f(sphere.localVertices[0], &b, Vector3D(), 0.23, 300);
 
-    float deltaT = 0.005;
+    float deltaT = 0.004;
 
     float lastTime = glfwGetTime();
     float deltaTime = 0.0;
@@ -146,7 +147,7 @@ void pe::runWreckingBall() {
 
         glfwPollEvents();
         window.processInput();
-        camera.processInput(frameRate);
+        camera.processInput(deltaT);
         if (glfwGetKey(window.getWindow(), GLFW_KEY_A) == GLFW_PRESS) {
             isPressed = true;
         }
@@ -161,7 +162,7 @@ void pe::runWreckingBall() {
             sphere.body->setAwake(true);
         }
 
-        int numSteps = 10;
+        int numSteps = 2;
         real substep = deltaT / numSteps;
 
         while (numSteps--) {
@@ -185,14 +186,17 @@ void pe::runWreckingBall() {
                 generateContactBoxAndBox(*(prisms[i]), ground, contacts, 0.25, 0.0);
                 generateContactBoxAndSphere(*(prisms[i]), sphere, contacts, 0.25, 0.0);
                 for (int j = 0; j < prisms.size(); j++) {
-                    if (i != j) {
+                    if (i != j && (
+                        (prisms[i]->body->position - prisms[j]->body->position)
+                        .magnitudeSquared() < 350*350
+                    )) {
                         generateContactBoxAndBox(*(prisms[i]), *(prisms[j]), contacts, 0.25, 0.0);
                     }
                 }
             }
             generateContactBoxAndSphere(ground, sphere, contacts, 0.25, 0.0);
 
-            CollisionResolver resolver(10, 0);
+            CollisionResolver resolver(10, 1);
             resolver.resolveContacts(contacts.data(), contacts.size(), substep);
 
             for (RectangularPrism* prism : prisms) {

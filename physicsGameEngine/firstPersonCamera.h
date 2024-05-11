@@ -81,22 +81,22 @@ namespace pe {
                 }
             }
 
-            // Rotate the forward vector around the up vector
-            glm::mat4 horizontalRotationMatrix = glm::rotate(glm::mat4(1.0f), rSpeed, upVector);
-            glm::vec3 newForward = glm::normalize(glm::vec3(horizontalRotationMatrix * glm::vec4(forward, 0.0f)));
+            glm::mat4 horizontalRotationMatrix = glm::rotate(
+                glm::mat4(1.0f), rSpeed, upVector
+            );
+            glm::vec3 newForward = glm::normalize(
+                glm::vec3(horizontalRotationMatrix * glm::vec4(forward, 0.0f))
+            );
 
-            // Calculate new right vector based on new forward vector
             glm::vec3 newRight = glm::normalize(glm::cross(newForward, upVector));
 
-            // Calculate new camera target position
             glm::vec3 offset = cameraTarget - cameraPosition;
             glm::vec3 newOffset = glm::normalize(newForward) * glm::length(offset);
 
-            // Update camera target based on horizontal rotation
             cameraTarget = cameraPosition + newOffset;
 
 
-            // Update view matrix
+            // Here we update the view matrix
             viewMatrix = calculateViewMatrix(
                 cameraPosition,
                 cameraTarget,

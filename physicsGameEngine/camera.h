@@ -126,6 +126,32 @@ namespace pe {
         void setPosition(glm::vec3& cameraPosition) {
             this->cameraPosition = cameraPosition;
         }
+
+
+        glm::vec3 getForwarDirection() const {
+            return glm::normalize(cameraTarget - cameraPosition);
+        }
+
+
+        float getFov() const {
+            return fov;
+        }
+
+
+        float getFarPlane() const {
+            return farPlane;
+        }
+
+
+        float getNearPlane() const {
+            return nearPlane;
+        }
+
+
+        glm::vec3 getCameraTraget() const {
+            return cameraTarget;
+        }
+
 	};
 }
 

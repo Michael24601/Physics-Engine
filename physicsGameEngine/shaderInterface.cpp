@@ -345,3 +345,82 @@ FaceData pe::getUniformFaceData(const Mesh& mesh) {
 	}
 	return data;
 }
+
+
+bool pe::isBoundingBoxInFrustum(
+	const Polyhedron& p, const glm::mat4& projectionViewMatrix
+) {
+	glm::mat4 modelMatrix = convertToGLM(p.getTransformMatrix());
+	glm::vec3 localOffset = convertToGLM(p.getBoxOffset());
+	glm::vec3 halfSize = convertToGLM(p.getHalfsize());
+
+	glm::vec3 worldOffset = glm::vec3(modelMatrix * glm::vec4(localOffset, 1.0));
+
+	glm::vec3 xAxis = glm::normalize(
+		glm::vec3(modelMatrix * glm::vec4(1.0, 0.0, 0.0, 0.0))
+	);
+	glm::vec3 yAxis = glm::normalize(
+		glm::vec3(modelMatrix * glm::vec4(0.0, 1.0, 0.0, 0.0))
+	);
+	glm::vec3 zAxis = glm::normalize(
+		glm::vec3(modelMatrix * glm::vec4(0.0, 0.0, 1.0, 0.0))
+	);
+
+	glm::vec3 worldHalfSize(
+		glm::length(xAxis * halfSize.x),
+		glm::length(yAxis * halfSize.y),
+		glm::length(zAxis * halfSize.z)
+	);
+
+	glm::vec4 centerClip = projectionViewMatrix * glm::vec4(worldOffset, 1.0f);
+
+	glm::vec3 boxExtents(
+		abs(centerClip.x) + worldHalfSize.x,
+		abs(centerClip.y) + worldHalfSize.y,
+		abs(centerClip.z) + worldHalfSize.z
+	);
+
+	if (centerClip.x - boxExtents.x > centerClip.w ||    // Right plane
+		centerClip.x + boxExtents.x < -centerClip.w ||   // Left plane
+		centerClip.y - boxExtents.y > centerClip.w ||    // Top plane
+		centerClip.y + boxExtents.y < -centerClip.w ||   // Bottom plane
+		centerClip.z - boxExtents.z > centerClip.w ||    // Near plane
+		centerClip.z + boxExtents.z < -centerClip.w) {   // Far plane
+
+		// Box is outside frustum
+		return false;
+	}
+
+	// Box is inside or intersects frustum
+	return true;
+}
+
+
+bool pe::isBoundingSphereInFrustum(
+	const Polyhedron& p, const glm::mat4& projectionViewMatrix
+) {
+
+	glm::vec3 worldCentre = convertToGLM(
+		p.getTransformMatrix().transform(p.getSphereOffset())
+	);
+	float radius = p.getBoundingSphereRadius();
+
+	glm::vec4 centerClip = projectionViewMatrix * glm::vec4(worldCentre, 1.0f);
+
+	float distanceToNearPlane = centerClip.z - centerClip.w;
+	float distanceToFarPlane = centerClip.z + centerClip.w;
+
+	if (centerClip.x - radius > centerClip.w ||  // Right plane
+		centerClip.x + radius < -centerClip.w || // Left plane
+		centerClip.y - radius > centerClip.w ||  // Top plane
+		centerClip.y + radius < -centerClip.w || // Bottom plane
+		distanceToNearPlane > radius ||          // Near plane
+		distanceToFarPlane < -radius) {          // Far plane
+
+		// Sphere is outside frustum
+		return false;
+	}
+
+	// Sphere is inside or intersects frustum
+	return true;
+}

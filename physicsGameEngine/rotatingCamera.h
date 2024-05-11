@@ -60,8 +60,7 @@ namespace pe {
 				viewMatrix = glm::lookAt(cameraPosition, cameraTarget, upVector);
 			}
 
-			// Moves camera
-			// Rotates camera (only x and z are moved, y stays in place)
+			// Rotating camera (only x and z are moved, y stays in place)
 			if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
 				distanceFromCentre *= (1 - movementSpeed);
 				cameraPosition.x *= (1 - movementSpeed);

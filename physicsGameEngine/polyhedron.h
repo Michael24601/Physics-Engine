@@ -169,8 +169,14 @@ namespace pe {
 		Vector3D getHalfsize() const;
 
 
+		real getBoundingSphereRadius() const;
+
+
 		// Returns the offset of the collision box
-		Vector3D getOffset() const;
+		Vector3D getBoxOffset() const;
+
+		// Returns the offset of the collision sphere
+		Vector3D getSphereOffset() const;
 
 
 		Vector3D getFurthestPoint() const;

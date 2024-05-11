@@ -10,6 +10,7 @@ struct Object {
     DiffuseTextureShader texShader;
     SimpleShader shader;
     GLuint texture;
+    Polyhedron p;
 
     Object(
         std::string object,
@@ -20,11 +21,14 @@ struct Object {
         const glm::vec3* lightPos,
         int lightNumber,
         GLuint texture
-    ) : texture{ texture } {
+    ) : texture{ texture },
+        p(returnPrimitive("C:\\Users\\msaba\\Documents\\physen\\" + object,
+            1, position, new RigidBody(), scale)
+    ) {
 
         std::string filename =
             "C:\\Users\\msaba\\Documents\\physen\\" + object;
-        Polyhedron p = (returnPrimitive(filename, 1,
+        p = (returnPrimitive(filename, 1,
             position, new RigidBody(), scale));
 
         if (rotationAxis != Vector3D::ZERO) {
@@ -60,12 +64,10 @@ struct Object {
         const glm::vec3* lightPos,
         int lightNumber,
         GLuint texture
-    ) : texture{ texture } {
-
-        std::string filename =
-            "C:\\Users\\msaba\\Documents\\physen\\" + object;
-        Polyhedron p = (returnPrimitive(filename, 1,
-            position, new RigidBody(), scale));
+    ) : texture{ texture },
+        p(returnPrimitive("C:\\Users\\msaba\\Documents\\physen\\" + object,
+            1, position, new RigidBody(), scale)
+    ) {
 
         p.body->orientation = q;
         p.body->calculateDerivedData();
@@ -106,7 +108,7 @@ struct LargeObject {
     std::vector<DiffuseTextureShader*> texShaders;
     std::vector<SimpleShader*> shaders;
     std::vector<GLuint> textures;
-
+    Polyhedron p;
 
     LargeObject(
         std::string object,
@@ -116,12 +118,10 @@ struct LargeObject {
         const glm::vec3* lightPos,
         int lightNumber,
         std::vector<GLuint> textures
-    ) : textures{ textures } {
-
-        std::string filename =
-            "C:\\Users\\msaba\\Documents\\physen\\" + object;
-        Polyhedron p = (returnPrimitive(filename, 1,
-            position, new RigidBody(), scale));
+    ) : textures{ textures }, 
+        p(returnPrimitive("C:\\Users\\msaba\\Documents\\physen\\" + object,
+        1, position, new RigidBody(), scale)
+    ){
 
         p.body->orientation = q;
         p.body->calculateDerivedData();
@@ -175,6 +175,18 @@ struct LargeObject {
 };
 
 
+glm::vec3 rotateAroundPoint(
+    const glm::vec3& pointA, 
+    const glm::vec3& pointB, 
+    float angle
+) {
+    glm::vec3 translatedPointA = pointA - pointB;
+    glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f), angle, glm::vec3(0.0f, 1.0f, 0.0f));
+    glm::vec4 rotatedPoint = rotationMatrix * glm::vec4(translatedPointA, 1.0f);
+    return glm::vec3(rotatedPoint) + pointB;
+}
+
+
 void pe::runVideoGameLevel() {
 
     GlfwWindowWrapper window(1920, 1080, 6, "window", false);
@@ -194,7 +206,7 @@ void pe::runVideoGameLevel() {
 
     // Shape
     glm::vec3 lightPos[]{
-        glm::vec3(0.0f, 500.0f, 0.0f)
+        glm::vec3(0.1f, 1000.0f, 0.1f)
     };
     glm::vec4 lightColors[]{
         glm::vec4(1.0f, 1.0f, 1.0f, 0.6f),
@@ -401,6 +413,11 @@ void pe::runVideoGameLevel() {
     skyShader.setSkybox(skybox);
     skyShader.setModelScaleAndTranslate(3000, glm::vec3(0, -40, 0));
 
+
+    SolidColorShader frustumShader;
+    frustumShader.setObjectColor(glm::vec4(1.0, 0.0, 0.0, 0.4));
+    frustumShader.setModelMatrix(identity);
+
     float deltaT = 0.001;
 
     float lastTime = glfwGetTime();
@@ -411,7 +428,10 @@ void pe::runVideoGameLevel() {
     bool isPressed = false;
 
     DirectionalProjection projection(lightPos[0], 2000, 1920, 1080, 0.1, 5000);
+    projection.setLightPosition(lightPos[0]);
     DepthMapper mapper(2048, 2048);
+
+    bool view = false;
 
     glfwSetFramebufferSizeCallback(
         window.getWindow(),
@@ -427,8 +447,8 @@ void pe::runVideoGameLevel() {
         window.processInput();
         camera.processInput(frameRate);
         if (glfwGetKey(window.getWindow(), GLFW_KEY_A) == GLFW_PRESS) {
-            lightPos[0].z += 0.5;
-            lightPos[0].x += 0.5;
+            lightPos[0].z += 0.3;
+            lightPos[0].x += 0.3;
             for (Object* o : objects) {
                 o->texShader.setLightPosition(lightPos, 1);
             }
@@ -441,8 +461,8 @@ void pe::runVideoGameLevel() {
             projection.setLightPosition(lightPos[0]);
         }
         if (glfwGetKey(window.getWindow(), GLFW_KEY_S) == GLFW_PRESS) {
-            lightPos[0].z -= 0.5;
-            lightPos[0].x -= 0.5;
+            lightPos[0].z -= 0.3;
+            lightPos[0].x -= 0.3;
             for (Object* o : objects) {
                 o->texShader.setLightPosition(lightPos, 1);
             }
@@ -453,6 +473,12 @@ void pe::runVideoGameLevel() {
             }
             groundShader.setLightPosition(lightPos[0]);
             projection.setLightPosition(lightPos[0]);
+        }
+        if (glfwGetKey(window.getWindow(), GLFW_KEY_V) == GLFW_PRESS) {
+            view = true;
+        }
+        if (glfwGetKey(window.getWindow(), GLFW_KEY_F) == GLFW_PRESS) {
+            view = false;
         }
 
 
@@ -467,11 +493,39 @@ void pe::runVideoGameLevel() {
         }
         mapper.captureDepth(projection.getView(), projection.getProjection(), shaders);
 
-        //saveDepthMap(mapper.getTexture(), projection.getWidth(), 
-        //    projection.getHeight(), "C:\\Users\\msaba\\Desktop\\p.png");
+        //saveDepthMap(mapper.getTexture(), mapper.getWidth(), 
+        //    mapper.getHeight(), "C:\\Users\\msaba\\Desktop\\p.png");
+
+        glm::mat4 projectionViewMatrix = camera.getProjectionMatrix() * camera.getViewMatrix();
 
         glm::mat4 vm = camera.getViewMatrix();
         glm::mat4 pm = camera.getProjectionMatrix();
+        if (view) {
+            vm = projection.getView();
+            pm = projection.getProjection();
+
+            glm::vec3 cameraPosition = camera.getPosition();
+            float fov = camera.getFov();
+            glm::vec3 point1 = camera.getCameraTraget();
+            glm::vec3 point2 = camera.getCameraTraget();
+            glm::vec3 result = point1;
+            point1.y = cameraPosition.y;
+            point2.y = cameraPosition.y;
+            point1 = rotateAroundPoint(point1, cameraPosition, fov);
+            point2 = rotateAroundPoint(point2, cameraPosition, -fov);
+            float distance = camera.getFarPlane();
+            glm::vec3 vector1 = normalize(cameraPosition - point1) * distance;
+            glm::vec3 vector2 = normalize(cameraPosition - point2) * distance;
+            point1 = vector1 + cameraPosition;
+            point2 = vector2 + cameraPosition;
+            std::vector<std::vector<glm::vec3>> d{
+                {cameraPosition, point1, point2}
+            };
+            frustumShader.setTrianglesNumber(3);
+            frustumShader.sendVaribleData(d, GL_DYNAMIC_DRAW);
+            frustumShader.setProjectionMatrix(pm);
+            frustumShader.setViewMatrix(vm);
+        }
 
         if (deltaTime >= frameRate) {
 
@@ -489,18 +543,31 @@ void pe::runVideoGameLevel() {
             groundShader.drawFaces();
 
             for (Object* o : objects) {
-                o->setVP(vm, pm);
-                o->render();
+                if (isBoundingBoxInFrustum(
+                    o->p, projectionViewMatrix
+                )) {
+                    o->setVP(vm, pm);
+                    o->render();
+                }
             }
 
             for (auto& lo : largeObjects) {
-                lo->setVP(vm, pm);
-                lo->render();
+                if (isBoundingBoxInFrustum(
+                    lo->p, projectionViewMatrix
+                )) {
+                    lo->setVP(vm, pm);
+                    lo->render();
+                }
             }
 
-            skyShader.setViewMatrix(vm);
-            skyShader.setProjectionMatrix(pm);
-            skyShader.drawFaces();
+            if (view) {
+                frustumShader.drawFaces();
+            }
+            else {
+                skyShader.setViewMatrix(vm);
+                skyShader.setProjectionMatrix(pm);
+                skyShader.drawFaces();
+            }
 
             glfwSwapBuffers(window.getWindow());
 

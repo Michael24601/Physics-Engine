@@ -184,7 +184,7 @@ void pe::runRagdoll() {
 
     for (int i = 0; i < prisms.size(); i++) {
 
-        DiffuseTextureShader* shader = new   DiffuseTextureShader;
+        DiffuseTextureShader* shader = new DiffuseTextureShader;
 
         FaceData data = getFaceData(*prisms[i]);
         std::vector<std::vector<glm::vec3>> d = {
