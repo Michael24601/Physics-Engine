@@ -349,3 +349,6 @@ SAT IS NOW VERY SLOW).
 Implement the Eigen functions (Jacobi method).
 
 Fix the the AABB frustum culling as it is not working yet.
+
+Fix the OBB calculation and use the OBB instead of a transformed
+AABB.

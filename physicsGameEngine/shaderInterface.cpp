@@ -285,7 +285,7 @@ FrameVectors pe::getFrameVectors(
 EdgeData pe::getOBBData(const Polyhedron& polyhedron) {
 
 	EdgeData data;
-	Vector3D halfsize = polyhedron.getHalfsize();
+	Vector3D halfsize = polyhedron.getOBBHalfsize();
 	Vector3D vertices[8]{
 		halfsize.componentProduct(Vector3D(-1,-1, -1)),
 		halfsize.componentProduct(Vector3D(1, -1, -1)),
@@ -315,20 +315,10 @@ EdgeData pe::getOBBData(const Polyhedron& polyhedron) {
 }
 
 
-
 EdgeData pe::getAABBData(const Polyhedron& polyhedron) {
 
-	std::vector<Vector3D> globalVertices(polyhedron.localVertices.size());
-	Matrix3x4 transform = polyhedron.getTransformMatrix();
-	for (int i = 0; i < polyhedron.localVertices.size(); i++) {
-		globalVertices[i] = transform.transform(polyhedron.localVertices[i]);
-	}
-
-	Vector3D halfsize;
-	Vector3D offset;
-	Polyhedron::calculateAxisAlignedBoundingBox(globalVertices, halfsize, offset);
-
 	EdgeData data;
+	Vector3D halfsize = polyhedron.getAABBHalfsize();
 	Vector3D vertices[8]{
 		halfsize.componentProduct(Vector3D(-1,-1, -1)),
 		halfsize.componentProduct(Vector3D(1, -1, -1)),
@@ -339,10 +329,6 @@ EdgeData pe::getAABBData(const Polyhedron& polyhedron) {
 		halfsize.componentProduct(Vector3D(1, 1, 1)),
 		halfsize.componentProduct(Vector3D(-1, 1, 1)),
 	};
-
-	for (Vector3D& vertex : vertices) {
-		vertex += offset;
-	}
 
 	const std::vector<std::pair<int, int>> edges{
 		{0, 1}, {1, 2}, {2, 3}, {3, 0}, // Front face

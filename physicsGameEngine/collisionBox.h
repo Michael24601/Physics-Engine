@@ -30,18 +30,31 @@ namespace pe {
             (the geometric centre may not be the centre of gravity,
             which will be closer to areas of the shape with more vertices.
             This is why we need an offset.
+
+            We can use an OBB, which is calculated once and can be
+            transformed each frame using a modified transform matrix of the
+            original body.
+
+            We can use an AABB, which recalculated each frame as to remain
+            axis aligned.
+
+            We opt to use a mix of the two; we generate an AABB originally,
+            such that it is axis aligned, but then we freely trasnform it;
+            AABB is easier to initially calculate, but since our collision
+            resolution system can handle non axis aligned boxes, we can
+            transform it instead of recalculating it, effectively making it
+            an OBB (that may not be as tight of a fit an OBB since it initially
+            was calculated to be axis aligned).
         */
         Box(const Polyhedron& polyhedron) {
-            halfSize = polyhedron.getHalfsize();
-            offset = polyhedron.getBoxOffset();
+            halfSize = polyhedron.getAABBHalfsize();
             body = polyhedron.body;
 
-            transformMatrix = polyhedron.getOBBTransformMatrix();
+            transformMatrix = polyhedron.getAABBTransformMatrix();
         }
 
         Matrix3x4 transformMatrix;
         Vector3D halfSize;
-        Vector3D offset;
         RigidBody* body;
 
         Vector3D getAxis(int index) const {

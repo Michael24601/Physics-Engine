@@ -57,8 +57,9 @@ void Polyhedron::calculateOrientedBoundingBox(
 		return;
 	}
 
+	// Convert input vertices to Eigen vectors
 	std::vector<Eigen::Vector3d> vertices;
-	for (const Vector3D vertex : verticesInput) {
+	for (const Vector3D& vertex : verticesInput) {
 		vertices.push_back(Eigen::Vector3d(vertex.x, vertex.y, vertex.z));
 	}
 
@@ -78,17 +79,26 @@ void Polyhedron::calculateOrientedBoundingBox(
 	covarianceMatrix /= vertices.size();
 
 	// Compute the eigenvectors of the covariance matrix
-	Eigen::EigenSolver<Eigen::Matrix3d> solver(covarianceMatrix);
-	Eigen::Matrix3d eigenVectors = solver.eigenvectors().real();
+	Eigen::SelfAdjointEigenSolver<Eigen::Matrix3d> solver(covarianceMatrix);
+	Eigen::Matrix3d eigenVectors = solver.eigenvectors();
 	Eigen::Vector3d eigenValues = solver.eigenvalues().real();
 
-	// The orientation quaternion is constructed from the eigenvectors
-	Eigen::Quaterniond orientation(eigenVectors);
+	// Find the major axis (eigenvector with largest eigenvalue)
+	int majorAxisIndex;
+	eigenValues.maxCoeff(&majorAxisIndex);
+	Eigen::Vector3d majorAxis = eigenVectors.col(majorAxisIndex);
+
+	// Construct the orientation quaternion from the major axis
+	orientationOutput = Quaternion(1.0 + majorAxis.dot(Eigen::Vector3d::UnitX()),
+		majorAxis.y() - majorAxis.z(),
+		majorAxis.z() - majorAxis.x(),
+		majorAxis.x() - majorAxis.y());
+	orientationOutput.normalize();
 
 	// Transform vertices to the local space of the OBB
 	std::vector<Eigen::Vector3d> localVertices;
 	for (const auto& vertex : vertices) {
-		Eigen::Vector3d localVertex = orientation * (vertex - centroid);
+		Eigen::Vector3d localVertex = orientationOutput.r * (vertex - centroid);
 		localVertices.push_back(localVertex);
 	}
 
@@ -101,13 +111,11 @@ void Polyhedron::calculateOrientedBoundingBox(
 	}
 
 	Eigen::Vector3d halfsize = (maxBound - minBound) / 2.0;
-	Eigen::Vector3d offset = minBound + halfsize;
+	Eigen::Vector3d offset = centroid + orientationOutput.r * minBound + halfsize;
 
+	// Convert results back to output types
 	halfsizeOutput = Vector3D(halfsize.x(), halfsize.y(), halfsize.z());
 	offsetOutput = Vector3D(offset.x(), offset.y(), offset.z());
-	orientationOutput = Quaternion(
-		orientation.w(), orientation.x(), orientation.y(), orientation.z()
-	);
 }
 
 
@@ -174,9 +182,13 @@ Polyhedron::Polyhedron(
 	body->calculateDerivedData();
 
 	calculateOrientedBoundingBox(
-		localVertices, boundingBoxHalfsize, 
-		boundingBoxOffset, boundingBoxOrientation
+		localVertices, OBBHalfsize,OBBOffset, OBBOrientation
 	);
+
+	calculateAxisAlignedBoundingBox(
+		localVertices, AABBHalfsize, AABBOffset
+	);
+
 	calculateBoundingSphere(
 		localVertices, boundingSphereRadius, boundingSphereOffset
 	);
@@ -247,18 +259,19 @@ Vector3D Polyhedron::getFaceNormal(int index) const {
 	return faces[index]->getNormal();
 }
 
-Vector3D Polyhedron::getHalfsize() const {
-	return boundingBoxHalfsize;
+
+Vector3D Polyhedron::getOBBHalfsize() const {
+	return OBBHalfsize;
+}
+
+
+Vector3D Polyhedron::getAABBHalfsize() const {
+	return AABBHalfsize;
 }
 
 
 real Polyhedron::getBoundingSphereRadius() const {
 	return boundingSphereRadius;
-}
-
-
-Vector3D Polyhedron::getBoxOffset() const {
-	return boundingBoxOffset;
 }
 
 
@@ -288,12 +301,27 @@ Matrix3x4 Polyhedron::getOBBTransformMatrix() const {
 		position to it to translate it.
 	*/
 	Quaternion bodyOrientation = body->orientation;
-	Quaternion rotation = bodyOrientation * boundingBoxOrientation;
+	Quaternion rotation = bodyOrientation * OBBOrientation;
 	Matrix3x3 matrixRotation(rotation);
-	Vector3D offset = matrixRotation.transform(boundingBoxOffset);
+	Vector3D offset = matrixRotation.transform(OBBOffset);
 	Vector3D worldOffset = body->position + offset;
 
 	Matrix3x4 matrix(rotation, worldOffset);
+	return matrix;
+}
+
+
+Matrix3x4 Polyhedron::getAABBTransformMatrix() const {
+
+	/*
+		We just rotate the offset and add the offset to the original
+		transform matrix.
+	*/
+	Matrix3x3 matrixRotation(body->orientation);
+	Vector3D offset = matrixRotation.transform(AABBOffset);
+	Vector3D worldOffset = body->position + offset;
+
+	Matrix3x4 matrix(matrixRotation, worldOffset);
 	return matrix;
 }
 

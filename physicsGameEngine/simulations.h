@@ -100,6 +100,8 @@ namespace pe {
 
 	void runBallPit();
 
+	void runFracture();
+
 	void runRagdoll();
 
 	void runFlag();

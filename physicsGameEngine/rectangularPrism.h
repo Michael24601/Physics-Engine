@@ -242,8 +242,8 @@ namespace pe {
 				polyhedron->body->angularVelocity = this->body->angularVelocity;
 				polyhedron->body->linearDamping = this->body->linearDamping;
 				polyhedron->body->angularDamping = this->body->angularDamping;
-				// polyhedron->body->forceAccumulator = this->body->forceAccumulator;
-				// polyhedron->body->torqueAccumulator = this->body->torqueAccumulator;
+				polyhedron->body->forceAccumulator = this->body->forceAccumulator;
+				polyhedron->body->torqueAccumulator = this->body->torqueAccumulator;
 
 				// We can add for each fracture a force in its direction
 				

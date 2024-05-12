@@ -112,9 +112,20 @@ namespace pe {
 		Vector3D furthestPoint;
 
 		// Bounding box information
-		Vector3D boundingBoxHalfsize;
-		Vector3D boundingBoxOffset;
-		Quaternion boundingBoxOrientation;
+		Vector3D OBBHalfsize;
+		Vector3D OBBOffset;
+		Quaternion OBBOrientation;
+
+		/*
+			The AABB is technically meant to be recalculated each frame
+			(since the AABB can't be transformed lest it no longer is axis
+			aligned). However, in this case, it can be useful to save the
+			local AABB information (the AABB in local coordinates)
+			as we may want to convert it to an OBB later on by applying
+			transformations on it.
+		*/
+		Vector3D AABBHalfsize;
+		Vector3D AABBOffset;
 
 		// Bounding sphere information
 		real boundingSphereRadius;
@@ -196,14 +207,14 @@ namespace pe {
 			The same applies for collision spheres, which will have
 			the radius as the magnitude of the halfsize.
 		*/
-		Vector3D getHalfsize() const;
+		Vector3D getOBBHalfsize() const;
+
+
+		Vector3D getAABBHalfsize() const;
 
 
 		real getBoundingSphereRadius() const;
 
-
-		// Returns the offset of the collision box
-		Vector3D getBoxOffset() const;
 
 		// Returns the offset of the collision sphere
 		Vector3D getSphereOffset() const;
@@ -211,8 +222,20 @@ namespace pe {
 
 		Vector3D getFurthestPoint() const;
 
-
+		/*
+			Transform matrix of the OBB, which adds the offset to the body
+			transform matrix and the initial OBB orientation.
+		*/
 		Matrix3x4 getOBBTransformMatrix() const;
+
+		/*
+			While the AABB is supposed to be calculated each frame in order
+			for it to remain axis aligned, we can calculate the AABB once
+			and then transform it, effectively making it an OBB, though
+			the original algorithm that calculates it is different
+			(where the initial local coordinate bounding box is axis aligned).
+		*/
+		Matrix3x4 getAABBTransformMatrix() const;
 
 
 		Matrix3x4 getBoundingSphereTransformMatrix() const;

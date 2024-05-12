@@ -262,8 +262,8 @@ void pe::centerOfGravityToOrigin(std::vector<Vector3D>& vectors) {
 
 
 Matrix3x3 pe::approximateInertiaTensor(const Polyhedron& polyhedron) {
-    Vector3D offset = polyhedron.boundingBoxOffset;
-    Vector3D halfsize = polyhedron.boundingBoxHalfsize;
+    Vector3D offset = polyhedron.AABBOffset;
+    Vector3D halfsize = polyhedron.AABBHalfsize;
 
     // Minimum and maximum bounds
     real minX = offset.x - halfsize.x;

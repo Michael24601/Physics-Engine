@@ -172,6 +172,7 @@
     <ClCompile Include="face.cpp" />
     <ClCompile Include="fineCollisionDetection.cpp" />
     <ClCompile Include="flag.cpp" />
+    <ClCompile Include="fracture.cpp" />
     <ClCompile Include="gjk.cpp" />
     <ClCompile Include="mirrors.cpp" />
     <ClCompile Include="openglUtility.cpp" />
