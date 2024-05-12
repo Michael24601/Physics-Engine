@@ -259,6 +259,10 @@ namespace pe {
 		// Sets the wake status
 		void setAwake(bool isAwake);
 
+
+		static inline void calculateTransformMatrix(Matrix3x4& transformMatrix,
+			const Vector3D& position, const Quaternion& orientation);
+
 	};
 }
 

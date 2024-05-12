@@ -2,6 +2,7 @@
 
 #include "vector3D.h"
 #include "matrix3x4.h"
+#include "matrix3x3.h"
 
 using namespace pe;
 
@@ -9,6 +10,26 @@ const Vector3D Vector3D::ZERO(0, 0, 0);
 const Vector3D Vector3D::RIGHT(1, 0, 0);
 const Vector3D Vector3D::UP(0, 1, 0);
 const Vector3D Vector3D::FORWARD(0, 0, 1);
+
+
+
+Matrix3x3 Vector3D::outerProduct(const Vector3D& rhs) const {
+	Matrix3x3 result;
+	result.data[0] = x * rhs.x;
+	result.data[1] = x * rhs.y;
+	result.data[2] = x * rhs.z;
+
+	result.data[3] = y * rhs.x;
+	result.data[4] = y * rhs.y;
+	result.data[5] = y * rhs.z;
+
+	result.data[6] = z * rhs.x;
+	result.data[7] = z * rhs.y;
+	result.data[8] = z * rhs.z;
+
+	return result;
+}
+
 
 Vector3D pe::localToWorld(const Vector3D& relativePosition, const
 	Matrix3x4& transformation) {

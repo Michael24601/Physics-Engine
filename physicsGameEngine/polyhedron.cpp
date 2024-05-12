@@ -3,7 +3,7 @@
 
 using namespace pe;
 
-void  pe::Polyhedron::calculateBoundingBox(
+void  Polyhedron::calculateAxisAlignedBoundingBox(
 	const std::vector<Vector3D>& vertices,
 	Vector3D& halfsize,
 	Vector3D& offset
@@ -18,6 +18,8 @@ void  pe::Polyhedron::calculateBoundingBox(
 
 	// Iterate through all vertices to find the minimum and maximum coordinates
 	for (const Vector3D& vertex : vertices) {
+
+		// The vertices are assumed to be in global coordinates
 		minCoord.x = std::min(minCoord.x, vertex.x);
 		minCoord.y = std::min(minCoord.y, vertex.y);
 		minCoord.z = std::min(minCoord.z, vertex.z);
@@ -38,6 +40,76 @@ void  pe::Polyhedron::calculateBoundingBox(
 	*/
 	offset = (maxCoord + minCoord) * 0.5;
 }
+
+
+void Polyhedron::calculateOrientedBoundingBox(
+	const std::vector<Vector3D>& verticesInput,
+	Vector3D& halfsizeOutput,
+	Vector3D& offsetOutput,
+	Quaternion& orientationOutput
+) {
+
+	if (verticesInput.empty()) {
+		// Handle empty vertices vector
+		halfsizeOutput = Vector3D::ZERO;
+		offsetOutput = Vector3D::ZERO;
+		orientationOutput = Quaternion();
+		return;
+	}
+
+	std::vector<Eigen::Vector3d> vertices;
+	for (const Vector3D vertex : verticesInput) {
+		vertices.push_back(Eigen::Vector3d(vertex.x, vertex.y, vertex.z));
+	}
+
+	// Calculate the centroid
+	Eigen::Vector3d centroid = Eigen::Vector3d::Zero();
+	for (const auto& vertex : vertices) {
+		centroid += vertex;
+	}
+	centroid /= vertices.size();
+
+	// Calculate the covariance matrix to find the orientation
+	Eigen::Matrix3d covarianceMatrix = Eigen::Matrix3d::Zero();
+	for (const auto& vertex : vertices) {
+		Eigen::Vector3d diff = vertex - centroid;
+		covarianceMatrix += diff * diff.transpose();
+	}
+	covarianceMatrix /= vertices.size();
+
+	// Compute the eigenvectors of the covariance matrix
+	Eigen::EigenSolver<Eigen::Matrix3d> solver(covarianceMatrix);
+	Eigen::Matrix3d eigenVectors = solver.eigenvectors().real();
+	Eigen::Vector3d eigenValues = solver.eigenvalues().real();
+
+	// The orientation quaternion is constructed from the eigenvectors
+	Eigen::Quaterniond orientation(eigenVectors);
+
+	// Transform vertices to the local space of the OBB
+	std::vector<Eigen::Vector3d> localVertices;
+	for (const auto& vertex : vertices) {
+		Eigen::Vector3d localVertex = orientation * (vertex - centroid);
+		localVertices.push_back(localVertex);
+	}
+
+	// Calculate the AABB of the vertices in the local space
+	Eigen::Vector3d minBound = localVertices[0];
+	Eigen::Vector3d maxBound = localVertices[0];
+	for (const auto& vertex : localVertices) {
+		minBound = minBound.cwiseMin(vertex);
+		maxBound = maxBound.cwiseMax(vertex);
+	}
+
+	Eigen::Vector3d halfsize = (maxBound - minBound) / 2.0;
+	Eigen::Vector3d offset = minBound + halfsize;
+
+	halfsizeOutput = Vector3D(halfsize.x(), halfsize.y(), halfsize.z());
+	offsetOutput = Vector3D(offset.x(), offset.y(), offset.z());
+	orientationOutput = Quaternion(
+		orientation.w(), orientation.x(), orientation.y(), orientation.z()
+	);
+}
+
 
 
 void Polyhedron::calculateBoundingSphere(
@@ -101,8 +173,13 @@ Polyhedron::Polyhedron(
 	body->linearDamping = 1;
 	body->calculateDerivedData();
 
-	calculateBoundingBox(localVertices, boundingBoxHalfsize, boundingBoxOffset);
-	calculateBoundingSphere(localVertices, boundingSphereRadius, boundingSphereOffset);
+	calculateOrientedBoundingBox(
+		localVertices, boundingBoxHalfsize, 
+		boundingBoxOffset, boundingBoxOrientation
+	);
+	calculateBoundingSphere(
+		localVertices, boundingSphereRadius, boundingSphereOffset
+	);
 }
 
 
@@ -197,6 +274,40 @@ Vector3D Polyhedron::getFurthestPoint() const {
 
 const Matrix3x4& Polyhedron::getTransformMatrix() const {
 	return this->body->transformMatrix;
+}
+
+
+Matrix3x4 Polyhedron::getOBBTransformMatrix() const {
+
+	/*
+		We combine the rotation of the transform matrix and the
+		initial orinetation of the oriented bounding box.
+
+		We also rotate the offset of the OBB by the resulting rotation
+		matrix to ensure it's place correctly. We then add the body's
+		position to it to translate it.
+	*/
+	Quaternion bodyOrientation = body->orientation;
+	Quaternion rotation = bodyOrientation * boundingBoxOrientation;
+	Matrix3x3 matrixRotation(rotation);
+	Vector3D offset = matrixRotation.transform(boundingBoxOffset);
+	Vector3D worldOffset = body->position + offset;
+
+	Matrix3x4 matrix(rotation, worldOffset);
+	return matrix;
+}
+
+
+Matrix3x4 Polyhedron::getBoundingSphereTransformMatrix() const {
+
+	/*
+		The sphere only has the translation component.
+	*/
+	Matrix3x4 matrix = getTransformMatrix();
+	matrix.data[3] += boundingSphereOffset.x;
+	matrix.data[7] += boundingSphereOffset.y;
+	matrix.data[11] += boundingSphereOffset.z;
+	return matrix;
 }
 
 

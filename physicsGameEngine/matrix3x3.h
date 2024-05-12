@@ -29,6 +29,7 @@ namespace pe {
 
 	class Matrix3x3 {
 
+
 	public:
 
 		/*
@@ -50,6 +51,34 @@ namespace pe {
 			data[0] = d0;	data[1] = d1;	data[2] = d2;
 			data[3] = d3;	data[4] = d4;	data[5] = d5;
 			data[6] = d6;	data[7] = d7;	data[8] = d8;
+		}
+
+		Matrix3x3(const Quaternion& q) {
+			real sqw = q.r * q.r;
+			real sqx = q.i * q.i;
+			real sqy = q.j * q.j;
+			real sqz = q.k * q.k;
+
+			// Compute rotation matrix coefficients
+			real invs = 1 / (sqx + sqy + sqz + sqw);
+			data[0] = (sqx - sqy - sqz + sqw) * invs;
+			data[4] = (-sqx + sqy - sqz + sqw) * invs;
+			data[8] = (-sqx - sqy + sqz + sqw) * invs;
+
+			real tmp1 = q.i * q.j;
+			real tmp2 = q.k * q.r;
+			data[3] = 2.0 * (tmp1 + tmp2) * invs;
+			data[1] = 2.0 * (tmp1 - tmp2) * invs;
+
+			tmp1 = q.i * q.k;
+			tmp2 = q.j * q.r;
+			data[6] = 2.0 * (tmp1 - tmp2) * invs;
+			data[2] = 2.0 * (tmp1 + tmp2) * invs;
+
+			tmp1 = q.j * q.k;
+			tmp2 = q.i * q.r;
+			data[7] = 2.0 * (tmp1 + tmp2) * invs;
+			data[5] = 2.0 * (tmp1 - tmp2) * invs;
 		}
 
 		// Copy constructor
@@ -292,6 +321,15 @@ namespace pe {
 			// Applies the rotation by multiplying the vector by the matrix
 			return (*this) * vector;
 		}
+
+
+
+		void display() const {
+			std::cout << data[0] << " " << data[1] << " " << data[2] << "\n";
+			std::cout << data[3] << " " << data[4] << " " << data[5] << "\n";
+			std::cout << data[6] << " " << data[7] << " " << data[8] << "\n\n";
+		}
+
 	};
 }
 

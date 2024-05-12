@@ -282,7 +282,7 @@ FrameVectors pe::getFrameVectors(
 	return data;
 }
 
-EdgeData pe::getCollisionBoxData(const Polyhedron& polyhedron) {
+EdgeData pe::getOBBData(const Polyhedron& polyhedron) {
 
 	EdgeData data;
 	Vector3D halfsize = polyhedron.getHalfsize();
@@ -297,19 +297,51 @@ EdgeData pe::getCollisionBoxData(const Polyhedron& polyhedron) {
 		halfsize.componentProduct(Vector3D(-1, 1, 1)),
 	};
 
-	Box box(polyhedron);
+	const std::vector<std::pair<int, int>> edges{
+		{0, 1}, {1, 2}, {2, 3}, {3, 0}, // Front face
+		{4, 5}, {5, 6}, {6, 7}, {7, 4}, // Back face
+		{0, 4}, {1, 5}, {2, 6}, {3, 7}  // Edges between front and back faces
+	};
 
-	for (Vector3D& vector : vertices) {
-		/*
-			As mentioned earlier, the smallest box that contains a polyhedron
-			may not be centred (the halfsize may not come out) of the
-			centre of gravity of the polyhedron, as it may not be the
-			geometric centre of the polyhedron.
-			As such, we can't use the transform matrix of the polyhedron,
-			but of the box, which is the same as the polyhedron but adds
-			the offset to the translation.
-		*/
-		vector = box.transformMatrix.transform(vector);
+	// Populate edge data with actual vertices
+	for (const auto& edge : edges) {
+		Vector3D start = vertices[edge.first];
+		Vector3D end = vertices[edge.second];
+		data.vertices.push_back(convertToGLM(start));
+		data.vertices.push_back(convertToGLM(end));
+	}
+
+	return data;
+}
+
+
+
+EdgeData pe::getAABBData(const Polyhedron& polyhedron) {
+
+	std::vector<Vector3D> globalVertices(polyhedron.localVertices.size());
+	Matrix3x4 transform = polyhedron.getTransformMatrix();
+	for (int i = 0; i < polyhedron.localVertices.size(); i++) {
+		globalVertices[i] = transform.transform(polyhedron.localVertices[i]);
+	}
+
+	Vector3D halfsize;
+	Vector3D offset;
+	Polyhedron::calculateAxisAlignedBoundingBox(globalVertices, halfsize, offset);
+
+	EdgeData data;
+	Vector3D vertices[8]{
+		halfsize.componentProduct(Vector3D(-1,-1, -1)),
+		halfsize.componentProduct(Vector3D(1, -1, -1)),
+		halfsize.componentProduct(Vector3D(1, -1, 1)),
+		halfsize.componentProduct(Vector3D(-1, -1, 1)),
+		halfsize.componentProduct(Vector3D(-1, 1, -1)),
+		halfsize.componentProduct(Vector3D(1, 1, -1)),
+		halfsize.componentProduct(Vector3D(1, 1, 1)),
+		halfsize.componentProduct(Vector3D(-1, 1, 1)),
+	};
+
+	for (Vector3D& vertex : vertices) {
+		vertex += offset;
 	}
 
 	const std::vector<std::pair<int, int>> edges{
@@ -329,6 +361,7 @@ EdgeData pe::getCollisionBoxData(const Polyhedron& polyhedron) {
 	return data;
 }
 
+
 FaceData pe::getFaceData(const Mesh& mesh) {
 	FaceData data;
 	for (Face* face : mesh.faces) {
@@ -347,51 +380,44 @@ FaceData pe::getUniformFaceData(const Mesh& mesh) {
 }
 
 
-bool pe::isBoundingBoxInFrustum(
+bool pe::isAABBInFrustum(
 	const Polyhedron& p, const glm::mat4& projectionViewMatrix
 ) {
-	glm::mat4 modelMatrix = convertToGLM(p.getTransformMatrix());
-	glm::vec3 localOffset = convertToGLM(p.getBoxOffset());
-	glm::vec3 halfSize = convertToGLM(p.getHalfsize());
 
-	glm::vec3 worldOffset = glm::vec3(modelMatrix * glm::vec4(localOffset, 1.0));
+	std::vector<Vector3D> globalVertices(p.localVertices.size());
+	Matrix3x4 transform = p.getTransformMatrix();
+	for (int i = 0; i < p.localVertices.size(); i++) {
+		globalVertices[i] = transform.transform(p.localVertices[i]);
+	}
 
-	glm::vec3 xAxis = glm::normalize(
-		glm::vec3(modelMatrix * glm::vec4(1.0, 0.0, 0.0, 0.0))
-	);
-	glm::vec3 yAxis = glm::normalize(
-		glm::vec3(modelMatrix * glm::vec4(0.0, 1.0, 0.0, 0.0))
-	);
-	glm::vec3 zAxis = glm::normalize(
-		glm::vec3(modelMatrix * glm::vec4(0.0, 0.0, 1.0, 0.0))
-	);
+	Vector3D aabbHalfSize;
+	Vector3D aabbCentre;
+	Polyhedron::calculateAxisAlignedBoundingBox(globalVertices, aabbHalfSize, aabbCentre);
 
-	glm::vec3 worldHalfSize(
-		glm::length(xAxis * halfSize.x),
-		glm::length(yAxis * halfSize.y),
-		glm::length(zAxis * halfSize.z)
-	);
+	glm::vec4 centerClip = projectionViewMatrix * glm::vec4(
+		convertToGLM(aabbCentre), 1.0f);
 
-	glm::vec4 centerClip = projectionViewMatrix * glm::vec4(worldOffset, 1.0f);
+	float distanceToNearPlane = centerClip.z - centerClip.w;
+	float distanceToFarPlane = centerClip.z + centerClip.w;
 
-	glm::vec3 boxExtents(
-		abs(centerClip.x) + worldHalfSize.x,
-		abs(centerClip.y) + worldHalfSize.y,
-		abs(centerClip.z) + worldHalfSize.z
-	);
+	glm::vec3 aabbExtents(
+		aabbHalfSize.x * abs(projectionViewMatrix[0][0]),
+		aabbHalfSize.y * abs(projectionViewMatrix[1][1]),
+		aabbHalfSize.z * abs(projectionViewMatrix[2][2]));
 
-	if (centerClip.x - boxExtents.x > centerClip.w ||    // Right plane
-		centerClip.x + boxExtents.x < -centerClip.w ||   // Left plane
-		centerClip.y - boxExtents.y > centerClip.w ||    // Top plane
-		centerClip.y + boxExtents.y < -centerClip.w ||   // Bottom plane
-		centerClip.z - boxExtents.z > centerClip.w ||    // Near plane
-		centerClip.z + boxExtents.z < -centerClip.w) {   // Far plane
-
-		// Box is outside frustum
+	if (centerClip.x + aabbExtents.x < -centerClip.w || // Left plane
+		centerClip.x - aabbExtents.x > centerClip.w ||  // Right plane
+		centerClip.y + aabbExtents.y < -centerClip.w || // Bottom plane
+		centerClip.y - aabbExtents.y > centerClip.w ||  // Top plane
+		distanceToNearPlane > glm::max(aabbExtents.x, 
+			glm::max(aabbExtents.y, aabbExtents.z)) || // Near plane
+		distanceToFarPlane < -glm::max(aabbExtents.x, 
+			glm::max(aabbExtents.y, aabbExtents.z))) { // Far plane
+		// AABB is outside frustum
 		return false;
 	}
 
-	// Box is inside or intersects frustum
+	// AABB is inside or intersects frustum
 	return true;
 }
 

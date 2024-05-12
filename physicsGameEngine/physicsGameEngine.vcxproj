@@ -92,7 +92,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>GLEW_STATIC;_CRT_SECURE_NO_WARNINGS;STB_IMAGE_IMPLEMENTATION;STB_IMAGE_WRITE_IMPLEMENTATION;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>glm-master\glm;glfw-3.3.8.bin.WIN32\include;glew-2.2.0\include;stb</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>glm-master\glm;glfw-3.3.8.bin.WIN32\include;glew-2.2.0\include;stb;eigen-3.4.0</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -110,7 +110,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>GLEW_STATIC;_CRT_SECURE_NO_WARNINGS;STB_IMAGE_IMPLEMENTATION;STB_IMAGE_WRITE_IMPLEMENTATION;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>glm-master\glm;glfw-3.3.8.bin.WIN32\include;glew-2.2.0\include;stb</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>glm-master\glm;glfw-3.3.8.bin.WIN32\include;glew-2.2.0\include;stb;eigen-3.4.0</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -128,7 +128,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>GLEW_STATIC;_CRT_SECURE_NO_WARNINGS;STB_IMAGE_IMPLEMENTATION;STB_IMAGE_WRITE_IMPLEMENTATION;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>glm-master\glm;glfw-3.3.8.bin.WIN32\include;glew-2.2.0\include;stb</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>glm-master\glm;glfw-3.3.8.bin.WIN32\include;glew-2.2.0\include;stb;eigen-3.4.0</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -146,7 +146,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>GLEW_STATIC;_CRT_SECURE_NO_WARNINGS;STB_IMAGE_IMPLEMENTATION;STB_IMAGE_WRITE_IMPLEMENTATION;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>glm-master\glm;glfw-3.3.8.bin.WIN32\include;glew-2.2.0\include;stb</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>glm-master\glm;glfw-3.3.8.bin.WIN32\include;glew-2.2.0\include;stb;eigen-3.4.0</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -192,6 +192,7 @@
     <ClCompile Include="physicsGameEngine.cpp" />
     <ClCompile Include="particleContact.cpp" />
     <ClCompile Include="polyhedron.cpp" />
+    <ClCompile Include="quaternion.cpp" />
     <ClCompile Include="ragdoll.cpp" />
     <ClCompile Include="reflection.cpp" />
     <ClCompile Include="rigidBodyBungeeForce.cpp" />

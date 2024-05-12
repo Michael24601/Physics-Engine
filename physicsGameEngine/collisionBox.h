@@ -36,24 +36,7 @@ namespace pe {
             offset = polyhedron.getBoxOffset();
             body = polyhedron.body;
 
-            /*
-                The transform matrix will be the transform matrix of the
-                polyhedron plus the offset,
-                since the centre of the collision box is shifted from
-                the centre of the polyhedron.
-                We can do that by adding the offset to the offset part
-                of the transform matrix.
-            */
-            transformMatrix = polyhedron.body->transformMatrix;
-            /*
-                However, note that that we have to transform the offset first
-                in order to rotate it. So we transform the offset by the
-                rotation part of the transformation matrix of the polyhedron.
-            */
-            offset = transformMatrix.getRotation().transform(offset);
-            transformMatrix.setTranslation(
-                transformMatrix.getTranslation() + offset
-            );
+            transformMatrix = polyhedron.getOBBTransformMatrix();
         }
 
         Matrix3x4 transformMatrix;
@@ -90,13 +73,7 @@ namespace pe {
             offset = polyhedron.getSphereOffset();
             transformMatrix = polyhedron.body->transformMatrix;
 
-            /*
-                We use the same method here that we used 
-            */
-            offset = transformMatrix.getRotation().transform(offset);
-            transformMatrix.setTranslation(
-                transformMatrix.getTranslation() + offset
-            );
+            transformMatrix = polyhedron.getBoundingSphereTransformMatrix();
         }
 
         Matrix3x4 transformMatrix;

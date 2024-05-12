@@ -345,3 +345,7 @@ of global vertices.
 
 Update SAT and GJK since now all vertices are local (DONE, THOUGH
 SAT IS NOW VERY SLOW).
+
+Implement the Eigen functions (Jacobi method).
+
+Fix the the AABB frustum culling as it is not working yet.

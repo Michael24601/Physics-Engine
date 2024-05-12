@@ -13,7 +13,7 @@ const real RigidBody::SLEEP_EPSILON = 0.5f;
 	object.
 	The value transformMatrix is sent and filled with the result.
 */
-static inline void calculateTransformMatrix(Matrix3x4& transformMatrix,
+void RigidBody::calculateTransformMatrix(Matrix3x4& transformMatrix,
 	const Vector3D& position, const Quaternion& orientation) {
 	transformMatrix.data[0] = 1 - 2 * orientation.j * orientation.j -
 		2 * orientation.k * orientation.k;

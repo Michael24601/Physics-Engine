@@ -418,6 +418,7 @@ void pe::runVideoGameLevel() {
     frustumShader.setObjectColor(glm::vec4(1.0, 0.0, 0.0, 0.4));
     frustumShader.setModelMatrix(identity);
 
+
     float deltaT = 0.001;
 
     float lastTime = glfwGetTime();
@@ -543,7 +544,7 @@ void pe::runVideoGameLevel() {
             groundShader.drawFaces();
 
             for (Object* o : objects) {
-                if (isBoundingBoxInFrustum(
+                if (isBoundingSphereInFrustum(
                     o->p, projectionViewMatrix
                 )) {
                     o->setVP(vm, pm);
@@ -552,7 +553,7 @@ void pe::runVideoGameLevel() {
             }
 
             for (auto& lo : largeObjects) {
-                if (isBoundingBoxInFrustum(
+                if (isBoundingSphereInFrustum(
                     lo->p, projectionViewMatrix
                 )) {
                     lo->setVP(vm, pm);

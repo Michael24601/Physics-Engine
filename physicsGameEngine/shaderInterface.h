@@ -146,8 +146,9 @@ namespace pe {
 		real length
 	);
 
+	EdgeData getAABBData(const Polyhedron& polyhedron);
 
-	EdgeData getCollisionBoxData(const Polyhedron& polyhedron);
+	EdgeData getOBBData(const Polyhedron& polyhedron);
 
 	FaceData getFaceData(const Polyhedron& polyhedron);
 
@@ -191,7 +192,7 @@ namespace pe {
 		This is done to cull objects not visible to the camera, improving
 		performance.
 	*/
-	bool isBoundingBoxInFrustum(
+	bool isAABBInFrustum(
 		const Polyhedron& p, const glm::mat4& projectionViewMatrix
 	);
 

@@ -10,7 +10,10 @@
 #include "accuracy.h"
 #include "vector3D.h"
 
+
 namespace pe {
+
+	class Matrix3x3;
 
 	class Quaternion {
 
@@ -44,14 +47,20 @@ namespace pe {
 			real data[4];
 		};
 
+
 		/*
 			Default constructor creates the quaternion of the zero rotation.
 		*/
 		Quaternion() : r(1), i(0), j(0), k(0) {}
 
+
 		// Argumented constructor
 		Quaternion(real r, real i, real j, real k) : r{ r }, i{ i }, j{ j },
 			k{ k } {}
+
+
+		Quaternion(const Matrix3x3& m);
+
 
 		/*
 			Normalizes the quaternion to unit length, a requirement for it
@@ -89,7 +98,7 @@ namespace pe {
 		}
 
 
-		Quaternion operator*(const Quaternion& right) {
+		Quaternion operator*(const Quaternion& right) const {
 			Quaternion q(
 				r * right.r - i * right.i - j * right.j - k * right.k,
 				r * right.i + i * right.r + j * right.k - k * right.j,

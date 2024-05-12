@@ -5,7 +5,7 @@ using namespace pe;
 
 int main() {
 
-	runVideoGameLevel();
+	runReflection();
 
 	return 0;
 }

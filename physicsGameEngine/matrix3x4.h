@@ -73,6 +73,25 @@ namespace pe {
 			data[9] = d9;	data[10] = d10;	data[11] = d11;
 		}
 
+		Matrix3x4(const Matrix3x3& rotation, const Vector3D& translation) {
+
+			// Rotation
+			data[0] = rotation.data[0];
+			data[1] = rotation.data[1];	
+			data[2] = rotation.data[2];
+			data[4] = rotation.data[3];
+			data[5] = rotation.data[4];	
+			data[6] = rotation.data[5];
+			data[8] = rotation.data[6];
+			data[9] = rotation.data[7];	
+			data[10] = rotation.data[8];
+
+			// Translation
+			data[3] = translation.x;	
+			data[7] = translation.y;	
+			data[11] = translation.z;
+		}
+
 		// Copy constructor
 		Matrix3x4(const Matrix3x4& matrix) {
 			// Uses overloaded = operator

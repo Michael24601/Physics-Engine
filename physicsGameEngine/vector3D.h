@@ -10,6 +10,7 @@
 namespace pe {
 
 	class Matrix3x4;
+	class Matrix3x3;
 
 	class Vector3D {
 
@@ -261,6 +262,9 @@ namespace pe {
 			if (i == 1) return y;
 			return z;
 		}
+
+
+		Matrix3x3 outerProduct(const Vector3D& rhs) const;
 
 
 		void display() const {

@@ -264,6 +264,9 @@
     <ClCompile Include="curvedFace.cpp">
       <Filter>Source Files\Primitive</Filter>
     </ClCompile>
+    <ClCompile Include="quaternion.cpp">
+      <Filter>Source Files\Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="accuracy.h">

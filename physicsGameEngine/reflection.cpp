@@ -51,8 +51,9 @@ void pe::runReflection() {
 
     real radius = 150;
     std::string filename = "C:\\Users\\msaba\\Documents\\physen\\textureMaps\\moai.obj";
-    Polyhedron c2 = returnPrimitive(filename, 1, Vector3D::ZERO, new RigidBody(), 2);
-    c2.body->orientation = Quaternion::rotatedByAxisAngle(Vector3D(0, 0, 1), PI / 2.0);
+    Polyhedron c2 = returnPrimitive(filename, 1, Vector3D(0, 300, 0), new RigidBody(), 2);
+    c2.body->orientation = Quaternion::rotatedByAxisAngle(Vector3D(1, 0, 0), PI / 3);
+    c2.body->calculateDerivedData();
 
     skyboxShader.setSkybox(skybox);
     skyboxShader.setModelScaleAndTranslate(2000, glm::vec3(0));
@@ -83,6 +84,17 @@ void pe::runReflection() {
     cookShader.setObjectColor(colorRed);
     cookShader.setRoughness(0.05);
     cookShader.setFresnel(0.5);
+
+
+    shader.setObjectColor(glm::vec4(1.0, 1.0, 1.0, 1.0));
+    shader.setModelMatrix(identity);
+    d = { {} };
+    EdgeData data1 = getAABBData(c2);
+    for (auto& v : data1.vertices) {
+        d[0].push_back(v);
+    }
+    shader.setEdgeNumber(d[0].size());
+    shader.sendVaribleData(d, GL_STATIC_DRAW);
 
     EnvironmentMapper mapper(512, 512);
 
@@ -142,6 +154,9 @@ void pe::runReflection() {
         skyboxShader.setViewMatrix(camera.getViewMatrix());
         skyboxShader.setProjectionMatrix(camera.getProjectionMatrix());
 
+        shader.setViewMatrix(camera.getViewMatrix());
+        shader.setProjectionMatrix(camera.getProjectionMatrix());
+
         // Unbind framebuffer to render to default framebuffer (window)
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
@@ -151,12 +166,14 @@ void pe::runReflection() {
             // Unbind framebuffer to render to default framebuffer (window)
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
             glViewport(0, 0, window.getWidth(), window.getHeight());
-            glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+            glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             cookShader.drawFaces();
             skyboxShader.drawFaces();
             refShader2.drawFaces();
+
+            shader.drawEdges();
 
             glfwSwapBuffers(window.getWindow());
             glfwPollEvents();

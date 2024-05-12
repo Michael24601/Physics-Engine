@@ -10,6 +10,7 @@
 #include "boundingSphere.h"
 #include <vector>
 #include <algorithm>
+#include <eigen/dense>
 
 #include "face.h"
 #include "curvedFace.h"
@@ -19,12 +20,12 @@ namespace pe {
 
 	class Polyhedron {
 
-	private:
+	public:
 
 		/*
 			For any shape, there will be a smallest collision box that can
-			contain the entire shape. This shape may not be centred at the
-			centre of gravity however
+			contain the entire shape and is aligned with the coordinate system
+			axes. This shape may not be centred at the centre of gravity however
 			(the geometric centre may not be the centre of gravity,
 			which will be closer to areas of the shape with more vertices.
 			This is why we need an offset.
@@ -36,11 +37,38 @@ namespace pe {
 			so if the halfsize were to be calculated from the centre of
 			gravity, the box would not be minimal. There would be a large
 			gap below the base of the pyramid).
+
+			This type of bounding box is called an AABB, and because it is
+			axis aligned, it needs to be recalculated from the global
+			vertices each frame, since it can't be rotated by the transform
+			matrix lest it no longer is axis aligned.
+
+			So this function expects the global coordinates if we need the
+			AABB to be relevant to the object this frame.
 		*/
-		static void calculateBoundingBox(
+		static void calculateAxisAlignedBoundingBox(
 			const std::vector<Vector3D>& vertices,
 			Vector3D& halfsize,
 			Vector3D& offset
+		);
+
+
+		/*
+			The same applies here, but the bounding box can be oriented.
+			This makes it more flexible. It also means that because there's
+			no fixed orientation, it doesn't have to be recalculated each
+			frame, and can instead be recalculated using the transform matrix,
+			of the rigid body, applied to its local position and orientation.
+
+			The vertices sent need to be in local coordinates, so the
+			transform matrix of the OBB can be extracted from that of the
+			rigid body it encapsulates.
+		*/
+		static void calculateOrientedBoundingBox(
+			const std::vector<Vector3D>& vertices,
+			Vector3D& halfsize,
+			Vector3D& offset,
+			Quaternion& orientation
 		);
 
 
@@ -50,6 +78,10 @@ namespace pe {
 			polyhedron, even if it means the centre of the sphere is not
 			the same as the centre of gravity (which means we will have an
 			offset). 
+
+			Like the OBB, the bounding sphere is calculated once from local
+			vertices and then transformed each frame (translated, since
+			there is no need for rotation).
 		*/
 		static void calculateBoundingSphere(
 			const std::vector<Vector3D>& points,
@@ -67,9 +99,6 @@ namespace pe {
 			real rayLength
 		);
 
-
-	public:
-
 		/*
 			The vertices, faces, edges, bounding volumes... are all in
 			local (relative) coordinates.
@@ -85,6 +114,7 @@ namespace pe {
 		// Bounding box information
 		Vector3D boundingBoxHalfsize;
 		Vector3D boundingBoxOffset;
+		Quaternion boundingBoxOrientation;
 
 		// Bounding sphere information
 		real boundingSphereRadius;
@@ -180,6 +210,12 @@ namespace pe {
 
 
 		Vector3D getFurthestPoint() const;
+
+
+		Matrix3x4 getOBBTransformMatrix() const;
+
+
+		Matrix3x4 getBoundingSphereTransformMatrix() const;
 
 
 		const Matrix3x4& getTransformMatrix() const;
