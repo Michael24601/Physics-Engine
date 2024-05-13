@@ -38,6 +38,11 @@ namespace pe {
             setUniform("lightPos", position);
         }
 
+        void setLightColor(const glm::vec4& color) {
+            // Setting an array means sending the first value
+            setUniform("lightColor", color);
+        }
+
         void setShadowStrength(float strength) {
             setUniform("shadowStrength", strength);
         }

@@ -248,14 +248,18 @@ namespace pe {
 				// We can add for each fracture a force in its direction
 				
 				
-				Vector3D force = offset.normalized() * strength * (1/(deltaT));
+				Vector3D force = offset.normalized() * strength ;
 				polyhedron->body->addForce(
 					force, 
 					pointGlobal
 				);
 				
-				
-				force = contact.contactNormal * (1 / (deltaT));
+				/*
+					The contact normal is always in the direction of the first body,
+					and opposite the second.
+				*/
+				int factor = (contact.body[0] == this->body ? 1 : -1);
+				force = contact.contactNormal * strength * factor;
 				polyhedron->body->addForce(
 					force,
 					contact.contactPoint

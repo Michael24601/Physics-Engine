@@ -1,4 +1,3 @@
-
 #version 330 core
 
 in vec3 FragPos;
@@ -11,18 +10,18 @@ uniform sampler2D objectTexture;
 
 uniform vec3 lightPos[MAX_LIGHTS];
 uniform vec4 lightColors[MAX_LIGHTS];
-
 uniform int numActiveLights;
 
 out vec4 FragColor;
 
 void main(){
     vec3 finalDiffuse = vec3(0.1);
+    vec3 ambient = vec3(0.2);
 
     for (int i = 0; i < numActiveLights; ++i) {
         vec3 lightDir = normalize(lightPos[i] - FragPos);
-        float diff =  max(dot(Normal, lightDir), 0.0);
-        finalDiffuse += diff;
+        float diff = max(dot(Normal, lightDir), 0.0);
+        finalDiffuse += diff * lightColors[i].rgb;
     }
 
     vec4 texColor = texture(objectTexture, TexCoord);
@@ -32,5 +31,5 @@ void main(){
     if(texColor.a < 0.2)
         discard;
 
-    FragColor = texColor * vec4(finalDiffuse, texColor.a);
+    FragColor = vec4(texColor.rgb * (finalDiffuse + ambient), texColor.a);
 }

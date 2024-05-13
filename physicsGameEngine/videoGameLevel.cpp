@@ -7,7 +7,7 @@ using namespace pe;
 
 struct Object {
 
-    DiffuseTextureShader texShader;
+    ShadowMappingTextureShader texShader;
     SimpleShader shader;
     GLuint texture;
     Polyhedron p;
@@ -44,7 +44,9 @@ struct Object {
         };
         texShader.sendVaribleData(d, GL_STATIC_DRAW);
         texShader.setTrianglesNumber(data.vertices.size());
-        texShader.setLightPosition(lightPos, lightNumber);
+        texShader.setLightPosition(lightPos[0]);
+        texShader.setPCF(true);
+        texShader.setShadowStrength(0.9);
 
         shader.sendVaribleData(d, GL_STATIC_DRAW);
         shader.setTrianglesNumber(data.vertices.size());
@@ -78,7 +80,9 @@ struct Object {
         };
         texShader.sendVaribleData(d, GL_STATIC_DRAW);
         texShader.setTrianglesNumber(data.vertices.size());
-        texShader.setLightPosition(lightPos, lightNumber);
+        texShader.setLightPosition(lightPos[0]);
+        texShader.setPCF(true);
+        texShader.setShadowStrength(0.9);
 
         shader.sendVaribleData(d, GL_STATIC_DRAW);
         shader.setTrianglesNumber(data.vertices.size());
@@ -105,7 +109,7 @@ struct Object {
 
 struct LargeObject {
 
-    std::vector<DiffuseTextureShader*> texShaders;
+    std::vector<ShadowMappingTextureShader*> texShaders;
     std::vector<SimpleShader*> shaders;
     std::vector<GLuint> textures;
     Polyhedron p;
@@ -136,12 +140,14 @@ struct LargeObject {
                 data.vertices, data.normals, data.uvCoordinates
             };
 
-            DiffuseTextureShader* texShader = new DiffuseTextureShader;
+            ShadowMappingTextureShader* texShader = new ShadowMappingTextureShader;
             SimpleShader* shader = new SimpleShader;
 
             texShader->sendVaribleData(d, GL_STATIC_DRAW);
             texShader->setTrianglesNumber(data.vertices.size());
-            texShader->setLightPosition(lightPos, lightNumber);
+            texShader->setLightPosition(lightPos[0]);
+            texShader->setPCF(true);
+            texShader->setShadowStrength(0.9);
 
             shader->sendVaribleData(d, GL_STATIC_DRAW);
             shader->setTrianglesNumber(data.vertices.size());
@@ -412,11 +418,25 @@ void pe::runVideoGameLevel() {
     SkyboxShader skyShader;
     skyShader.setSkybox(skybox);
     skyShader.setModelScaleAndTranslate(3000, glm::vec3(0, -40, 0));
-
+    skyShader.setDarknessLevel(0.0);
 
     SolidColorShader frustumShader;
     frustumShader.setObjectColor(glm::vec4(1.0, 0.0, 0.0, 0.4));
     frustumShader.setModelMatrix(identity);
+
+    /*
+        This function controls the darkness level; it is an inverted
+        normal distribution function, which has the light steadily grow
+        darker the further away it is (x), where the magnitude (a) is
+        the maximum level it can have, and where (b) controls the speed
+        at which maximum darkness is reached based on the distance of
+        the light.
+    */
+    auto darknessFunction = [](double a, double b, float x) -> float {
+        float r = (- a * std::exp(-b * (x * x)) + 0.75 * a);
+        if (r < 0) return 0;
+        return r;
+    };
 
 
     float deltaT = 0.001;
@@ -450,30 +470,26 @@ void pe::runVideoGameLevel() {
         if (glfwGetKey(window.getWindow(), GLFW_KEY_A) == GLFW_PRESS) {
             lightPos[0].z += 0.3;
             lightPos[0].x += 0.3;
-            for (Object* o : objects) {
-                o->texShader.setLightPosition(lightPos, 1);
-            }
-            for (auto& lo : largeObjects) {
-                for (auto s : lo->texShaders) {
-                    s->setLightPosition(lightPos, 1);
-                }
-            }
             groundShader.setLightPosition(lightPos[0]);
             projection.setLightPosition(lightPos[0]);
+            
+            float darkness = darknessFunction(0.8, 0.001, length(
+                glm::vec3(lightPos[0].x, 0, lightPos[0].z)
+            ) / 50.0);
+            lightColors[0].x = lightColors[0].y = lightColors[0].z = 1-darkness;
+            skyShader.setDarknessLevel(darkness);
         }
         if (glfwGetKey(window.getWindow(), GLFW_KEY_S) == GLFW_PRESS) {
             lightPos[0].z -= 0.3;
             lightPos[0].x -= 0.3;
-            for (Object* o : objects) {
-                o->texShader.setLightPosition(lightPos, 1);
-            }
-            for (auto& lo : largeObjects) {
-                for (auto s : lo->texShaders) {
-                    s->setLightPosition(lightPos, 1);
-                }
-            }
             groundShader.setLightPosition(lightPos[0]);
             projection.setLightPosition(lightPos[0]);
+
+            float darkness = darknessFunction(0.8, 0.001, length(
+                glm::vec3(lightPos[0].x, 0, lightPos[0].z)
+            ) / 50.0);
+            lightColors[0].x = lightColors[0].y = lightColors[0].z = 1-darkness;
+            skyShader.setDarknessLevel(darkness);
         }
         if (glfwGetKey(window.getWindow(), GLFW_KEY_V) == GLFW_PRESS) {
             view = true;
@@ -536,6 +552,8 @@ void pe::runVideoGameLevel() {
             glClearColor(0.1f, 0.15f, 0.15f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+            groundShader.setLightPosition(lightPos[0]);
+            groundShader.setLightColor(lightColors[0]);
             groundShader.setViewMatrix(vm);
             groundShader.setProjectionMatrix(pm);
             groundShader.setObjectTexture(textureGrass);
@@ -547,15 +565,27 @@ void pe::runVideoGameLevel() {
                 if (isBoundingSphereInFrustum(
                     o->p, projectionViewMatrix
                 )) {
+                    o->texShader.setLightPosition(lightPos[0]);
+                    o->texShader.setLightColor(lightColors[0]);
+                    o->texShader.setShadowMap(mapper.getTexture());
+                    o->texShader.setLightSpaceMatrix(projection.getProjectionView());
                     o->setVP(vm, pm);
                     o->render();
                 }
             }
 
             for (auto& lo : largeObjects) {
+               
                 if (isBoundingSphereInFrustum(
                     lo->p, projectionViewMatrix
-                )) {
+                )) { 
+                
+                for (int i = 0; i < lo->texShaders.size(); i++) {
+                    lo->texShaders[i]->setLightPosition(lightPos[0]);
+                    lo->texShaders[i]->setLightColor(lightColors[0]);
+                    lo->texShaders[i]->setShadowMap(mapper.getTexture());
+                    lo->texShaders[i]->setLightSpaceMatrix(projection.getProjectionView());
+                }
                     lo->setVP(vm, pm);
                     lo->render();
                 }

@@ -30,6 +30,11 @@ namespace pe {
             setUniform("numActiveLights", size);
         }
 
+        void setLightColor(const glm::vec4* colors, int size) {
+            // Setting an array means sending the first value
+            setUniform("lightColors", colors, size);
+        }
+
     };
 }
 

@@ -50,8 +50,8 @@ void pe::runFracture() {
         90.0,
         0.1,
         10000,
-        0.01,
-        0.01
+        0.00003,
+        0.00003
     );
 
     // Shaders
@@ -62,8 +62,8 @@ void pe::runFracture() {
     RectangularPrism* prism = new RectangularPrism(
         200, 200, 200, 10, Vector3D(0, 600, 0), new RigidBody
     );
-    prism->body->angularDamping = 0.97;
-    prism->body->linearDamping = 0.97;
+    prism->body->angularDamping = 0.95;
+    prism->body->linearDamping = 0.95;
     prisms.push_back(prism);
 
     RectangularPrism ground(10000, 100, 10000, 0, Vector3D(0, -350, -0), new RigidBody);
@@ -95,11 +95,11 @@ void pe::runFracture() {
     bool contact = false;
     bool drop = false;
 
-    float deltaT = 0.025;
+    float deltaT = 0.0002;
 
     float lastTime = glfwGetTime();
     float deltaTime = 0.0;
-    float framesPerSecond = 120;
+    float framesPerSecond = 60;
     float frameRate = 1.0 / framesPerSecond;
 
     glfwSetFramebufferSizeCallback(
@@ -119,7 +119,7 @@ void pe::runFracture() {
             drop = true;
         }
 
-        int numSteps = 10;
+        int numSteps = 1;
         real substep = deltaT / numSteps;
         
         while (numSteps--) {
@@ -151,7 +151,7 @@ void pe::runFracture() {
                 // We use deltaT even when substepping
                 Vector3D dimensionPoint(p->width / 8.0, -p->height / 10.0, p->depth / 16.0);
                 Vector3D point(-p->width / 5.0, -p->height/7.0, p->depth / 8.0);
-                p->breakObject(prisms, contacts[0], deltaT, 1000, dimensionPoint, point);
+                p->breakObject(prisms, contacts[0], substep, 8000, dimensionPoint, point);
 
                 for (int i = 0; i < prisms.size(); i++) {
                     FaceData data = getFaceData(*prisms[i]);

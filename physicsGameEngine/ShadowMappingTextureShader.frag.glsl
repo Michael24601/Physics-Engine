@@ -8,6 +8,7 @@ in vec4 FragPosLightSpace;
 in vec3 ViewPos;
 
 uniform vec3 lightPos;
+uniform vec4 lightColor;
 
 uniform bool PCF;
 
@@ -80,21 +81,27 @@ float PCFShadowCalculation(vec4 fragPosLightSpace, vec3 lightDir){
 
 
 void main(){
-    vec3 color = texture(objectTexture, TexCoord).rgb;
+    vec4 texColor = texture(objectTexture, TexCoord);
+
+    // This just ensures that when the texture is transparent
+    // no color is rendered
+    if(texColor.a < 0.2)
+        discard;
+
+    vec3 color = texColor.rgb;
     vec3 normal = normalize(Normal);
-    vec3 lightColor = vec3(1.0);
     // ambient
-    vec3 ambient = 0.15 * lightColor;
+    vec3 ambient = 0.15 * lightColor.rgb;
     // diffuse
     vec3 lightDir = normalize(lightPos - FragPos);
     float diff = max(dot(lightDir, normal), 0.0);
-    vec3 diffuse = diff * lightColor;
+    vec3 diffuse = diff * lightColor.rgb;
     // specular
     vec3 viewDir = normalize(ViewPos - FragPos);
     float spec = 0.0;
     vec3 halfwayDir = normalize(lightDir + viewDir);  
     spec = pow(max(dot(normal, halfwayDir), 0.0), 64.0);
-    vec3 specular = spec * lightColor;  
+    vec3 specular = spec * lightColor.rgb;  
     
     // The shadow component
     float shadow = (PCF ? 

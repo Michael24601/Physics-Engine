@@ -120,13 +120,21 @@ namespace pe {
             setModelMatrix(model);
         }
 
+
         void setViewMatrix(const glm::mat4& view) {
             setUniform("view", view);
         }
 
+
         void setProjectionMatrix(const glm::mat4& projection) {
             setUniform("projection", projection);
         }
+
+
+        void setDarknessLevel(float darkness) {
+            setUniform("darkness", darkness);
+        }
+
 
         /*
             When we have a shader responsible for drawing a skybox, we
