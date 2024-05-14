@@ -352,3 +352,8 @@ Fix the the AABB frustum culling as it is not working yet.
 
 Fix the OBB calculation and use the OBB instead of a transformed
 AABB.
+
+Test bounding volume hierarchy.
+
+After seperating the farcture from applying forces on fractures,
+the latter functionality needs its own function.

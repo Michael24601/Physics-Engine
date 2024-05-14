@@ -99,7 +99,7 @@ void pe::runWreckingBall() {
 
     // Sphere
 
-    SolidSphere sphere(200, 5, 20, 20, Vector3D(800, 400, 0), new RigidBody);
+    SolidSphere sphere(200, 2, 20, 20, Vector3D(800, 400, 0), new RigidBody);
     sphere.body->canSleep = false;
     sphere.body->angularDamping = 0.8;
     sphere.body->linearDamping = 0.95;
@@ -124,9 +124,9 @@ void pe::runWreckingBall() {
 
     RigidBody b;
     b.position = Vector3D(800, 700, 0);
-    RigidBodySpringForce f(sphere.localVertices[0], &b, Vector3D(), 0.23, 300);
+    RigidBodySpringForce f(sphere.localVertices[0], &b, Vector3D(), 0.09, 300);
 
-    float deltaT = 0.004;
+    float deltaT = 0.0035;
 
     float lastTime = glfwGetTime();
     float deltaTime = 0.0;

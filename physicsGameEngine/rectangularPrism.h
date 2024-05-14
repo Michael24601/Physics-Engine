@@ -122,9 +122,6 @@ namespace pe {
 
 		void breakObject(
 			std::vector<Polyhedron*>& polyhedra,
-			const Contact& contact,
-			real deltaT,
-			real strength,
 			Vector3D dimensionPoint,
 			Vector3D breakingPoint
 		) {
@@ -177,10 +174,8 @@ namespace pe {
 				real mass = (width * height * depth * this->body->getMass()) /
 					(this->width * this->height * this->depth);
 
-				Vector3D position = this->body->transformMatrix.transform(offset);
-
 				RectangularPrism* prism = new RectangularPrism(
-					width, height, depth, mass, position, new RigidBody()
+					width, height, depth, mass, offset, new RigidBody()
 				);
 
 				/*
@@ -207,7 +202,7 @@ namespace pe {
 				
 				Polyhedron* polyhedron = new Polyhedron(
 					mass, 
-					position, 
+					offset, 
 					Matrix3x3(
 						(mass / 12.0) * (height * height + depth * depth), 0, 0,
 						0, (mass / 12.0) * (width * width + depth * depth), 0,
@@ -236,35 +231,6 @@ namespace pe {
 				polyhedron->setEdges(edges);
 
 				delete prism;
-
-				polyhedron->body->orientation = this->body->orientation;
-				polyhedron->body->linearVelocity = this->body->linearVelocity;
-				polyhedron->body->angularVelocity = this->body->angularVelocity;
-				polyhedron->body->linearDamping = this->body->linearDamping;
-				polyhedron->body->angularDamping = this->body->angularDamping;
-				polyhedron->body->forceAccumulator = this->body->forceAccumulator;
-				polyhedron->body->torqueAccumulator = this->body->torqueAccumulator;
-
-				// We can add for each fracture a force in its direction
-				
-				
-				Vector3D force = offset.normalized() * strength ;
-				polyhedron->body->addForce(
-					force, 
-					pointGlobal
-				);
-				
-				/*
-					The contact normal is always in the direction of the first body,
-					and opposite the second.
-				*/
-				int factor = (contact.body[0] == this->body ? 1 : -1);
-				force = contact.contactNormal * strength * factor;
-				polyhedron->body->addForce(
-					force,
-					contact.contactPoint
-				);
-				
 
 				polyhedra.push_back(polyhedron);
 			}

@@ -95,6 +95,29 @@ void pe::runFracture() {
     bool contact = false;
     bool drop = false;
 
+
+    // Pre computing fracture data for when needed
+    std::vector<DiffuseLightingShader*> pre_shaders;
+    std::vector<Polyhedron*> pre_prisms;
+    RectangularPrism* p = ((RectangularPrism*)prisms[0]);
+    Vector3D dimensionPoint(p->width / 8.0, -p->height / 10.0, p->depth / 16.0);
+    Vector3D point(-p->width / 5.0, -p->height / 7.0, p->depth / 8.0);
+    p->breakObject(pre_prisms, dimensionPoint, point);
+
+    for (int i = 0; i < pre_prisms.size(); i++) {
+        FaceData data = getFaceData(*pre_prisms[i]);
+        std::vector<std::vector<glm::vec3>> d = {
+            data.vertices, data.normals
+        };
+        DiffuseLightingShader* shader = new DiffuseLightingShader;
+        shader->sendVaribleData(d, GL_STATIC_DRAW);
+        shader->setTrianglesNumber(data.vertices.size());
+        shader->setLightPosition(lightPos, 1);
+        shader->setObjectColor(colorRed);
+        pre_shaders.push_back(shader);
+    }
+
+
     float deltaT = 0.0002;
 
     float lastTime = glfwGetTime();
@@ -135,52 +158,61 @@ void pe::runFracture() {
             std::vector<Contact> contacts;
 
             for (int i = 0; i < prisms.size(); i++) {
-                generateContactBoxAndBox(*(prisms[i]), ground, contacts, 0.0, 0.0);
+                generateContactBoxAndBox(*(prisms[i]), ground, contacts, 0.7, 0.0);
                 for (int j = 0; j < prisms.size(); j++) {
                     if (i != j) {
-                        generateContactBoxAndBox(*(prisms[i]), *(prisms[j]), contacts, 0.0, 0.0);
+                        generateContactBoxAndBox(*(prisms[i]), *(prisms[j]), contacts, 0.7, 0.0);
                     }
                 }
             }
 
             if (contacts.size() > 0 && !contact) {
-                RectangularPrism* p = ((RectangularPrism*)prisms[0]);
+                Polyhedron* p = prisms[0];
                 prisms.clear();
                 prismShaders.clear();
 
-                // We use deltaT even when substepping
-                Vector3D dimensionPoint(p->width / 8.0, -p->height / 10.0, p->depth / 16.0);
-                Vector3D point(-p->width / 5.0, -p->height/7.0, p->depth / 8.0);
-                p->breakObject(prisms, contacts[0], substep, 8000, dimensionPoint, point);
+                for (int i = 0; i < pre_prisms.size(); i++) {
+                    Polyhedron* polyhedron = pre_prisms[i];
 
-                for (int i = 0; i < prisms.size(); i++) {
-                    FaceData data = getFaceData(*prisms[i]);
-                    std::vector<std::vector<glm::vec3>> d = {
-                        data.vertices, data.normals
-                    };
-                    DiffuseLightingShader* shader = new DiffuseLightingShader;
-                    shader->sendVaribleData(d, GL_STATIC_DRAW);
-                    shader->setTrianglesNumber(data.vertices.size());
-                    shader->setLightPosition(lightPos, 1);
-                    shader->setObjectColor(colorRed);
-                    prismShaders.push_back(shader);
+                    // We can do this in order to combine the transform matrices
+                    polyhedron->body->position += p->body->position;
+                    polyhedron->body->orientation = p->body->orientation;
+
+                    polyhedron->body->linearVelocity = p->body->linearVelocity;
+                    polyhedron->body->angularVelocity = p->body->angularVelocity;
+                    polyhedron->body->linearDamping = p->body->linearDamping;
+                    polyhedron->body->angularDamping = p->body->angularDamping;
+                    polyhedron->body->forceAccumulator = p->body->forceAccumulator;
+                    polyhedron->body->torqueAccumulator = p->body->torqueAccumulator;
+
+                    /*
+                        The contact normal is always in the direction of the first body,
+                        and opposite the second.
+                    */
+                    int factor = (contacts[0].body[0] == p->body ? 1 : -1);
+                    Vector3D force = contacts[0].contactNormal * 2500 * factor * contacts[0].restitution;
+                    polyhedron->body->addForce(
+                        force,
+                        contacts[0].contactPoint
+                    );
+
+                    prisms.push_back(polyhedron);
+                    prismShaders.push_back(pre_shaders[i]);
                 }
-                std::cout << prisms.size();
 
                 contact = true;
             }
-
-            CollisionResolver resolver(1, 1);
-            resolver.resolveContacts(contacts.data(), contacts.size(), substep);
+            else {
+                CollisionResolver resolver(1, 1);
+                resolver.resolveContacts(contacts.data(), contacts.size(), substep);
+            }
 
             for (Polyhedron* prism : prisms) {
                 prism->body->integrate(substep);
             }
-           // ground.body->integrate(substep);
 
         }
-
-        for (int i = 0; i < prisms.size(); i++) {
+        for (int i = 0; i < prismShaders.size(); i++) {
             prismShaders[i]->setProjectionMatrix(camera.getProjectionMatrix());
             prismShaders[i]->setViewMatrix(camera.getViewMatrix());
             prismShaders[i]->setModelMatrix(convertToGLM(prisms[i]->getTransformMatrix()));
@@ -202,7 +234,7 @@ void pe::runFracture() {
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             groundShader.drawFaces();
-            for (int i = 0; i < prisms.size(); i++) {
+            for (int i = 0; i < prismShaders.size(); i++) {
                 prismShaders[i]->drawFaces();
             }
 
@@ -211,6 +243,6 @@ void pe::runFracture() {
 
             deltaTime = 0.0f;
         }
-       
+
     }
 }

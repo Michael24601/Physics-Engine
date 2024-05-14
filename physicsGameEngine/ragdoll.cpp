@@ -195,6 +195,7 @@ void pe::runRagdoll() {
         shader->setTrianglesNumber(data.vertices.size());
         shader->setLightPosition(lightPos, 1);
         shader->setObjectTexture(texture);
+        shader->setLightColor(lightColors, 1);
 
         phongShaders.push_back(shader);
     }

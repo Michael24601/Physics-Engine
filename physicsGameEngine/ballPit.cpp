@@ -129,7 +129,7 @@ void pe::runBallPit() {
 
     // Sphere
 
-    SolidSphere sphere(60, 5, 20, 20, Vector3D(0, 0, 0), new RigidBody);
+    SolidSphere sphere(70, 5, 20, 20, Vector3D(0, 0, 0), new RigidBody);
 
     FaceData data = getFaceData(sphere);
     std::vector<std::vector<glm::vec3>>vertices = {
@@ -180,7 +180,7 @@ void pe::runBallPit() {
                 // We can generate only 1 vertex for
                     // these spheres as they will be shaded later
                 SolidSphere* v = new SolidSphere(
-                    60, 0.1, 1, 1, Vector3D(n, 1000, m), new RigidBody
+                    70, 0.1, 1, 1, Vector3D(n, 1000, m), new RigidBody
                 );
                 v->body->angularDamping = 0.3;
                 v->body->linearDamping = 0.95;
@@ -223,7 +223,7 @@ void pe::runBallPit() {
             }
 
 
-            CollisionResolver resolver(2, 0);
+            CollisionResolver resolver(1, 0);
             resolver.resolveContacts(contacts.data(), contacts.size(), substep);
 
             for (SolidSphere* s : spheres) {

@@ -14,9 +14,6 @@ namespace pe {
 
 		virtual void breakObject(
 			std::vector<Polyhedron*>& polyhedra, 
-			const Contact& contact, 
-			real deltaT,
-			real strength,
 			Vector3D dimensionPoint,
 			Vector3D breakingPoint
 		) = 0;

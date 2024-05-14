@@ -218,7 +218,7 @@ void RigidBody::addForceAtLocalPoint(const Vector3D& force,
 
 
 void RigidBody::setMass(real mass) {
-	assert(mass > 0.0);
+	assert(mass >= 0.0);
 	inverseMass = ((real)1.0) / mass;
 }
 

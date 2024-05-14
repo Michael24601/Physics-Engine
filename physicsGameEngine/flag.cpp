@@ -1,5 +1,4 @@
 
-
 #include "simulations.h"
 
 using namespace pe;
@@ -75,6 +74,9 @@ void pe::runFlag() {
     };
     poleShader.sendVaribleData(d, GL_DYNAMIC_DRAW);
     poleShader.setTrianglesNumber(data.vertices.size());
+
+    poleShader.setLightColor(lightColor, 1);
+    lightShader.setLightColor(lightColor, 1);
 
 
     // The first row of particles is suspended

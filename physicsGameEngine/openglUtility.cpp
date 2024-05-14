@@ -146,7 +146,7 @@ std::string pe::readFileToString(const std::string& filePath) {
     }
     else {
         std::cerr << "Error: Unable to open file " << filePath << "\n";
-        return "";
+        exit(1);
     }
 }
 
