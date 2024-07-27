@@ -126,7 +126,7 @@ void pe::runWreckingBall() {
     b.position = Vector3D(800, 700, 0);
     RigidBodySpringForce f(sphere.localVertices[0], &b, Vector3D(), 0.09, 300);
 
-    float deltaT = 0.0035;
+    float deltaT = 0.0038;
 
     float lastTime = glfwGetTime();
     float deltaTime = 0.0;

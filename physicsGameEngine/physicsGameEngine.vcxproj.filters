@@ -118,6 +118,9 @@
     <Filter Include="Source Files\GLSL Shaders\Skybox Shader">
       <UniqueIdentifier>{dc65b283-ab1e-4a96-a8ae-daddc63bf1c2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\BoundingVolumes">
+      <UniqueIdentifier>{fd493833-b574-4e4c-aef0-1c6c59a9dde1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="physicsGameEngine.cpp">
@@ -270,6 +273,12 @@
     <ClCompile Include="fracture.cpp">
       <Filter>Source Files\Simulations</Filter>
     </ClCompile>
+    <ClCompile Include="matrix3x3.cpp">
+      <Filter>Source Files\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Matrix3x4.cpp">
+      <Filter>Source Files\Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="accuracy.h">
@@ -287,7 +296,7 @@
     <ClInclude Include="anchoredSpringForce.h">
       <Filter>Header Files\ParticlePhysics</Filter>
     </ClInclude>
-    <ClInclude Include="boundingSphere.h">
+    <ClInclude Include="BHVSphere.h">
       <Filter>Header Files\Collision</Filter>
     </ClInclude>
     <ClInclude Include="boundingVolumeHierarchy.h">
@@ -580,6 +589,24 @@
     </ClInclude>
     <ClInclude Include="simulations.h">
       <Filter>Header Files\Simulations</Filter>
+    </ClInclude>
+    <ClInclude Include="boundingVolume.h">
+      <Filter>Header Files\BoundingVolumes</Filter>
+    </ClInclude>
+    <ClInclude Include="axisAlignedBoundingBox.h">
+      <Filter>Header Files\BoundingVolumes</Filter>
+    </ClInclude>
+    <ClInclude Include="orientedBoundingBox.h">
+      <Filter>Header Files\BoundingVolumes</Filter>
+    </ClInclude>
+    <ClInclude Include="boundingBox.h">
+      <Filter>Header Files\BoundingVolumes</Filter>
+    </ClInclude>
+    <ClInclude Include="boundingSphere.h">
+      <Filter>Header Files\BoundingVolumes</Filter>
+    </ClInclude>
+    <ClInclude Include="resizable.h">
+      <Filter>Header Files\Collision</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

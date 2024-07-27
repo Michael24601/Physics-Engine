@@ -175,10 +175,21 @@ void pe::runBallPit() {
         else if (glfwGetKey(window.getWindow(), GLFW_KEY_A) == GLFW_RELEASE) {
 
             if (isPressed) {
-                int n = generateRandomNumber(-400, 400);
-                int m = generateRandomNumber(-400, 400);
+
+                int r = generateRandomNumber(0, 4);
+                int l1 = 0, g1 = 0, l2 = 0, g2 = 0;
+                switch (r) {
+                case 0: l1 = -500; g1 = -200; l2 = -200; g2 = 200; break;
+                case 1: l1 = -200; g1 = 200; l2 = -200; g2 = 200; break;
+                case 2: l1 = 200; g1 = 500; l2 = -200; g2 = 200; break;
+                case 3: l1 = -200; g1 = 200; l2 = -500; g2 = -200; break;
+                case 4: l1 = -200; g1 = 200; l2 = 200; g2 = 500; break;
+                }
+
+                int n = generateRandomNumber(l1, g1);
+                int m = generateRandomNumber(l2, g2);
                 // We can generate only 1 vertex for
-                    // these spheres as they will be shaded later
+                // these spheres as they will be shaded later
                 SolidSphere* v = new SolidSphere(
                     70, 0.1, 1, 1, Vector3D(n, 1000, m), new RigidBody
                 );
@@ -190,6 +201,7 @@ void pe::runBallPit() {
 
             isPressed = false;
         }
+
 
         int numSteps = 1;
         real substep = deltaT / numSteps;

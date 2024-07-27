@@ -95,7 +95,7 @@ void pe::runFlag() {
     float framesPerSecond = 30;
     float frameRate = 1.0 / framesPerSecond;
 
-    real windMultiplier = 0.7;
+    real windMultiplier = 0.8;
 
     glfwSetFramebufferSizeCallback(
         window.getWindow(),

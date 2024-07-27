@@ -1,16 +1,16 @@
 
-#include "boundingSphere.h"
+#include "BHVSphere.h"
 
 using namespace pe;
 
 
-BoundingSphere::BoundingSphere(const Vector3D& centre, real radius) :
+BHVSphere::BHVSphere(const Vector3D& centre, real radius) :
     radius{ radius }, centre{ centre } {}
 
 
-BoundingSphere::BoundingSphere(
-    const BoundingSphere& sphere1,
-    const BoundingSphere& sphere2
+BHVSphere::BHVSphere(
+    const BHVSphere& sphere1,
+    const BHVSphere& sphere2
 ) {
     Vector3D centreTocentre = sphere2.centre - sphere1.centre;
     // We use the square of the distance to save on performance
@@ -64,7 +64,7 @@ BoundingSphere::BoundingSphere(
 }
 
 
-bool BoundingSphere::overlaps(const BoundingSphere* sphere) const {
+bool BHVSphere::overlaps(const BHVSphere* sphere) const {
 	/*
 		In order to determine that spheres intersect, all we need to do is
 		establish that the distance between the two centers is smaller 
@@ -77,12 +77,12 @@ bool BoundingSphere::overlaps(const BoundingSphere* sphere) const {
 }
 
 
-real BoundingSphere::getNewGrowth(const BoundingSphere& newSphere) const {
+real BHVSphere::getNewGrowth(const BHVSphere& newSphere) const {
     /*
         To calculate the new growth, we can just create a new bounding
         sphere encompassing the calling object sphere new bounding sphere.
     */
-    BoundingSphere encompassingSphere(*this, newSphere);
+    BHVSphere encompassingSphere(*this, newSphere);
 
     /*
         We then return the difference in size between the calling object

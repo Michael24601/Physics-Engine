@@ -101,7 +101,7 @@ struct Object {
     }
 
     void render() {
-        texShader.setObjectTexture(texture);
+        texShader.setObjectTexture(texture, 0);
         texShader.drawFaces();
     }
 };
@@ -174,7 +174,7 @@ struct LargeObject {
 
     void render() {
         for (int i = 0; i < textures.size(); i++) {
-            texShaders[i]->setObjectTexture(textures[i]);
+            texShaders[i]->setObjectTexture(textures[i], 0);
             texShaders[i]->drawFaces();
         }
     }
@@ -195,7 +195,7 @@ glm::vec3 rotateAroundPoint(
 
 void pe::runVideoGameLevel() {
 
-    GlfwWindowWrapper window(1920, 1080, 6, "window", false);
+    GlfwWindowWrapper window(1600, 920, 6, "window", true);
 
     glm::mat4 identity = glm::mat4(1.0);
     glm::vec4 colorWhite(1.0, 1.0, 1.0, 1.0);
@@ -284,8 +284,8 @@ void pe::runVideoGameLevel() {
         90.0,
         0.1,
         10000,
-        15,
-        0.08
+        200,
+        1.5
     );
 
     std::vector<Object*> objects{
@@ -301,24 +301,18 @@ void pe::runVideoGameLevel() {
 
         // Houses front
 
-        new Object("grey_house\\object.obj", 1.3, Vector3D(340, 50, -750), Quaternion(0.5, 0, 0.5, 0), lightPos, 1, textureGrey),
-
         new Object("cart\\object.obj", 30, Vector3D(110, -70, -1000), Quaternion(0.8, 0, 0.2, 0), lightPos, 1, textureCart),
-
-        new Object("long_house\\object.obj", 40, Vector3D(610, 130, -450), Quaternion(0.6, 0, -0.3, 0), lightPos, 1, textureLong),
+        new Object("cart\\object.obj", 30, Vector3D(-500, -70, -290), Quaternion(0.8, 0, 0.2, 0), lightPos, 1, textureCart),
 
         // Houses 
 
         new Object("barrel\\object.obj", 2, Vector3D(-370, -65, -635), Quaternion(0.7, 0, 0.3, 0), lightPos, 1, textureBarrel),
-        new Object("black_smith\\object.obj", 140, Vector3D(-450, -30, -450), Quaternion(0.7, 0, 0.3, 0), lightPos, 1, textureBlack),
+        //new Object("black_smith\\object.obj", 140, Vector3D(550, -30, 130), Quaternion(-0.3, 0, 0.7, 0), lightPos, 1, textureBlack),
+        //new Object("black_smith\\object.obj", 140, Vector3D(-450, -30, -450), Quaternion(0.7, 0, 0.3, 0), lightPos, 1, textureBlack),
         new Object("grey_house\\object.obj", 1.3, Vector3D(-650, 50, -100), Quaternion(-0.5, 0, -0.5, 0), lightPos, 1, textureGrey),
+        new Object("grey_house\\object.obj", 1.3, Vector3D(340, 50, -750), Quaternion(0.5, 0, 0.5, 0), lightPos, 1, textureGrey),
         new Object("windmill\\object.obj", 8, Vector3D(-540, 230, 250), Quaternion(0.7, 0, 0.3, 0), lightPos, 1, textureWindmill),
 
-        new Object("cart\\object.obj", 30, Vector3D(-500, -70, -290), Quaternion(0.8, 0, 0.2, 0), lightPos, 1, textureCart),
-
-        // Opposite side
-
-        new Object("black_smith\\object.obj", 140, Vector3D(550, -30, 130), Quaternion(-0.3, 0, 0.7, 0), lightPos, 1, textureBlack),
 
         // Back 
 
@@ -326,6 +320,7 @@ void pe::runVideoGameLevel() {
         new Object("long_house\\object.obj", 40, Vector3D(1050, 90, 200), Quaternion(0.2, 0, 0.7, 0), lightPos, 1, textureLong),
         new Object("long_house\\object.obj", 60, Vector3D(-450, 190, 900), Quaternion(0.5, 0, 0.4, 0), lightPos, 1, textureLong),
         new Object("long_house\\object.obj", 70, Vector3D(-1210, 290, 50), Quaternion(0.5, 0, 0.5, 0), lightPos, 1, textureLong),
+        new Object("long_house\\object.obj", 40, Vector3D(610, 130, -450), Quaternion(0.6, 0, -0.3, 0), lightPos, 1, textureLong),
 
         new Object("well\\object.obj", 60, Vector3D(0, -10, -250), Quaternion(1, 0, 0, 0), lightPos, 1, textureWell),
     };
@@ -448,9 +443,11 @@ void pe::runVideoGameLevel() {
 
     bool isPressed = false;
 
+    float speed = 0.9;
+
     DirectionalProjection projection(lightPos[0], 2000, 1920, 1080, 0.1, 5000);
     projection.setLightPosition(lightPos[0]);
-    DepthMapper mapper(2048, 2048);
+    DepthMapper mapper(1024, 1024);
 
     bool view = false;
 
@@ -466,10 +463,10 @@ void pe::runVideoGameLevel() {
 
         glfwPollEvents();
         window.processInput();
-        camera.processInput(frameRate);
+        camera.processInput(deltaT);
         if (glfwGetKey(window.getWindow(), GLFW_KEY_A) == GLFW_PRESS) {
-            lightPos[0].z += 0.3;
-            lightPos[0].x += 0.3;
+            lightPos[0].z += speed;
+            lightPos[0].x += speed;
             groundShader.setLightPosition(lightPos[0]);
             projection.setLightPosition(lightPos[0]);
             
@@ -480,8 +477,8 @@ void pe::runVideoGameLevel() {
             skyShader.setDarknessLevel(darkness);
         }
         if (glfwGetKey(window.getWindow(), GLFW_KEY_S) == GLFW_PRESS) {
-            lightPos[0].z -= 0.3;
-            lightPos[0].x -= 0.3;
+            lightPos[0].z -= speed;
+            lightPos[0].x -= speed;
             groundShader.setLightPosition(lightPos[0]);
             projection.setLightPosition(lightPos[0]);
 
@@ -556,23 +553,10 @@ void pe::runVideoGameLevel() {
             groundShader.setLightColor(lightColors[0]);
             groundShader.setViewMatrix(vm);
             groundShader.setProjectionMatrix(pm);
-            groundShader.setObjectTexture(textureGrass);
+            groundShader.setObjectTexture(textureGrass, 0);
             groundShader.setShadowMap(mapper.getTexture());
             groundShader.setLightSpaceMatrix(projection.getProjectionView());
             groundShader.drawFaces();
-
-            for (Object* o : objects) {
-                if (isBoundingSphereInFrustum(
-                    o->p, projectionViewMatrix
-                )) {
-                    o->texShader.setLightPosition(lightPos[0]);
-                    o->texShader.setLightColor(lightColors[0]);
-                    o->texShader.setShadowMap(mapper.getTexture());
-                    o->texShader.setLightSpaceMatrix(projection.getProjectionView());
-                    o->setVP(vm, pm);
-                    o->render();
-                }
-            }
 
             for (auto& lo : largeObjects) {
                
@@ -588,6 +572,19 @@ void pe::runVideoGameLevel() {
                 }
                     lo->setVP(vm, pm);
                     lo->render();
+                }
+            }
+
+            for (Object* o : objects) {
+                if (isBoundingSphereInFrustum(
+                    o->p, projectionViewMatrix
+                )) {
+                    o->texShader.setLightPosition(lightPos[0]);
+                    o->texShader.setLightColor(lightColors[0]);
+                    o->texShader.setShadowMap(mapper.getTexture());
+                    o->texShader.setLightSpaceMatrix(projection.getProjectionView());
+                    o->setVP(vm, pm);
+                    o->render();
                 }
             }
 

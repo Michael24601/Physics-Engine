@@ -24,12 +24,12 @@ namespace pe {
             );
         }
 
-        void setObjectTexture(const GLuint& textureId) {
+        void setObjectTexture(const GLuint& textureId, int index) {
             setTextureUniform(
                 "objectTexture",
                 textureId,
                 GL_TEXTURE_2D,
-                0
+                index
             );
         }
 

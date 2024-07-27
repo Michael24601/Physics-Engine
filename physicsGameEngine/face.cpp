@@ -312,8 +312,8 @@ Face::Face(
 void Face::recalculateFrameVectors() {
 	centroid = calculateCentroid();
 	normal = calculateNormal();
-	//tangent = calculateTangent();
-	//bitangent = calculateBitangent();
+	tangent = calculateTangent();
+	bitangent = calculateBitangent();
 }
 
 /*

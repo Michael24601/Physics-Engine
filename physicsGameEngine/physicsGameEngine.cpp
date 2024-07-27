@@ -5,7 +5,7 @@ using namespace pe;
 
 int main() {
 
-	runFracture();
+	runFlag();
 
 	return 0;
 }

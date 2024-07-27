@@ -117,8 +117,8 @@ CurvedFace::CurvedFace(
 void CurvedFace::recalculateFrameVectors() {
 	Face::recalculateFrameVectors();
 	for (int i = 0; i < getVertexNumber(); i++) {
-		//	vertexTangents[i] = calculateTangent(i);
-		//	vertexBitangents[i] = calculateBitangent(i);
+		vertexTangents[i] = calculateTangent(i);
+		vertexBitangents[i] = calculateBitangent(i);
 	}
 }
 

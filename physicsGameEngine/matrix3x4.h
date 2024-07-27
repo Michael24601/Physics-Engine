@@ -57,6 +57,9 @@ namespace pe {
 		*/
 		real data[12];
 
+		// The identity of the matrix (no transformation)
+		static const Matrix3x4 IDENTITY;
+
 		// No-arg constructor
 		Matrix3x4() {
 			data[0] = data[1] = data[2] = data[3] = data[4] = data[5]
@@ -375,11 +378,58 @@ namespace pe {
 			);
 		}
 
+		/*
+			Adds a rotation to the rotation matrix part of the homogeneous
+			matrix.
+		*/
+		Matrix3x3 addRotation(const Matrix3x3& rotation) {
+			setRotation(getRotation() * rotation);
+		}
+
+
+		Matrix3x3 addTranslation(const Vector3D& translation) {
+			setTranslation(getTranslation() + translation);
+		}
+
+
 		// Function that sets the translation part of the matrix
 		void setTranslation(const Vector3D& translation) {
 			data[3] = translation.x;
 			data[7] = translation.y;
 			data[11] = translation.z;
+		}
+
+
+		// Function that sets the rotation part of the matrix
+		void setRotation(const Matrix3x3& rotation) {
+			data[0] = rotation.data[0];
+			data[1] = rotation.data[1];
+			data[2] = rotation.data[2];
+			data[4] = rotation.data[3];
+			data[5] = rotation.data[5];
+			data[6] = rotation.data[6];
+			data[8] = rotation.data[7];
+			data[9] = rotation.data[8];
+			data[10] = rotation.data[9];
+		}
+
+
+		/*
+			Function that combines the effects of two 3 by 4 matrices.
+			The way to transform a Matrix3x4 B by another Matrix3x4 A is to
+			first rotate the translation aspect of B by A's rotation, then
+			add B's translation to it. The rotation of B is also multiplied
+			by that of A.
+			This is the equivalent of multiplying two homogeneous Matrix4x4
+			where the last row is [0 0 0 1]. It achieves the effect of
+			combining their transformations.
+		*/
+		void combineMatrix(const Matrix3x4& newMatrix) {
+			setTranslation(
+				newMatrix.getRotation().transform(getTranslation())
+			);
+			addTranslation(newMatrix.getTranslation());
+			addRotation(newMatrix.getRotation());
 		}
 	};
 }
