@@ -38,19 +38,16 @@ namespace pe {
             We can use an AABB, which recalculated each frame as to remain
             axis aligned.
 
-            We opt to use a mix of the two; we generate an AABB originally,
-            such that it is axis aligned, but then we freely trasnform it;
-            AABB is easier to initially calculate, but since our collision
-            resolution system can handle non axis aligned boxes, we can
-            transform it instead of recalculating it, effectively making it
-            an OBB (that may not be as tight of a fit an OBB since it initially
-            was calculated to be axis aligned).
-        */
-        Box(const Polyhedron& polyhedron) {
-            halfSize = polyhedron.getAABBHalfsize();
-            body = polyhedron.body;
+            We choose an OBB.
 
-            transformMatrix = polyhedron.getAABBTransformMatrix();
+            We also send the body of the cuboidal polyhedron as it is not 
+            in the Cauboidal interface.
+        */
+        Box(const Cuboidal& cuboid, RigidBody* body) {
+            halfSize = cuboid.boundingBox.getHalfsize();
+            this->body = body;
+
+            transformMatrix = cuboid.boundingBox.getTransformMatrix();
         }
 
         Matrix3x4 transformMatrix;
@@ -74,24 +71,17 @@ namespace pe {
    */
     struct Ball {
 
-        Ball (RigidBody* body, real radius) :
-            body{ body }, radius{ radius } {}
-
         /*
-            Constructs a sphere from a general polyhedron.
+            Constructs a sphere from a spherical polyhedron.
         */
-        Ball(const Polyhedron& polyhedron) {
-            body = polyhedron.body;
-            radius = polyhedron.getBoundingSphereRadius();
-            offset = polyhedron.getSphereOffset();
-            transformMatrix = polyhedron.body->transformMatrix;
-
-            transformMatrix = polyhedron.getBoundingSphereTransformMatrix();
+        Ball(const Spherical& sphere, RigidBody* body) {
+            this->body = body;
+            radius = sphere.boundingSphere.getRadius();
+            transformMatrix = sphere.boundingSphere.getTransformMatrix();
         }
 
         Matrix3x4 transformMatrix;
         RigidBody* body;
-        Vector3D offset;
         real radius;
 
         Vector3D getAxis(int index) const {

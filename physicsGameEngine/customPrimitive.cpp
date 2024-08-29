@@ -261,9 +261,11 @@ void pe::centerOfGravityToOrigin(std::vector<Vector3D>& vectors) {
 }
 
 
-Matrix3x3 pe::approximateInertiaTensor(const Polyhedron& polyhedron) {
-    Vector3D offset = polyhedron.AABBOffset;
-    Vector3D halfsize = polyhedron.AABBHalfsize;
+Matrix3x3 pe::approximateInertiaTensor(Polyhedron* polyhedron) {
+
+    AxisAlignedBoundingBox boundingBox(polyhedron);
+    Vector3D offset = boundingBox.getPosition();
+    Vector3D halfsize = boundingBox.getHalfsize();
 
     // Minimum and maximum bounds
     real minX = offset.x - halfsize.x;
@@ -283,12 +285,12 @@ Matrix3x3 pe::approximateInertiaTensor(const Polyhedron& polyhedron) {
         real randZ = generateRandomNumber(minZ, maxZ);
 
         Vector3D randomPoint(randX, randY, randZ);
-        if (polyhedron.isPointInsidePolyhedron(randomPoint)) {
+        if (polyhedron->isPointInsidePolyhedron(randomPoint)) {
             points.push_back(randomPoint);
         }
     }
 
-    real pointMass = polyhedron.body->getMass() / (real)numPoints;
+    real pointMass = polyhedron->body->getMass() / (real)numPoints;
 
     real matrixEntry[3][3]{ {0, 0, 0}, {0, 0, 0}, {0, 0, 0} };
     real sum{ 0 };
@@ -340,7 +342,7 @@ Polyhedron pe::returnPrimitive(
         mass, position, Matrix3x3(), localVertices, body
     );
 
-    Matrix3x3 inertiaTensor = approximateInertiaTensor(polyhedron);
+    Matrix3x3 inertiaTensor = approximateInertiaTensor(&polyhedron);
     polyhedron.body->setInertiaTensor(inertiaTensor);
 
     std::vector<Face*> faces;

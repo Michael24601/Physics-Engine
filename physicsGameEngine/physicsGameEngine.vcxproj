@@ -161,7 +161,7 @@
   <ItemGroup>
     <ClCompile Include="anchoredSpringForce.cpp" />
     <ClCompile Include="ballPit.cpp" />
-    <ClCompile Include="boundingSphere.cpp" />
+    <ClCompile Include="BVHSphere.cpp" />
     <ClCompile Include="cloth.cpp" />
     <ClCompile Include="clothCollision.cpp" />
     <ClCompile Include="collisionResolver.cpp" />
@@ -224,10 +224,10 @@
     <ClInclude Include="boundingSphere.h" />
     <ClInclude Include="boundingVolume.h" />
     <ClInclude Include="BVHNode.h" />
-    <ClInclude Include="BHVSphere.h" />
+    <ClInclude Include="BVHSphere.h" />
     <ClInclude Include="boundingVolumeHierarchy.h" />
     <ClInclude Include="camera.h" />
-    <ClInclude Include="collisionBox.h" />
+    <ClInclude Include="collisionVolume.h" />
     <ClInclude Include="collisionResolver.h" />
     <ClInclude Include="cone.h" />
     <ClInclude Include="contact.h" />
@@ -235,6 +235,7 @@
     <ClInclude Include="cookTorranceReflectionShader.h" />
     <ClInclude Include="cookTorranceSkyboxReflectionShader.h" />
     <ClInclude Include="cookTorranceShader.h" />
+    <ClInclude Include="cuboidal.h" />
     <ClInclude Include="depthMapper.h" />
     <ClInclude Include="advancedDiffuseTextureShader.h" />
     <ClInclude Include="directionalProjection.h" />
@@ -313,6 +314,7 @@
     <ClInclude Include="skyboxShader.h" />
     <ClInclude Include="solidColorShader.h" />
     <ClInclude Include="solidSphere.h" />
+    <ClInclude Include="spherical.h" />
     <ClInclude Include="sphericalJoint.h" />
     <ClInclude Include="particleSpringDamper.h" />
     <ClInclude Include="springJoint.h" />

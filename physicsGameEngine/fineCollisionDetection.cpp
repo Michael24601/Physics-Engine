@@ -383,8 +383,10 @@ unsigned int pe::boxAndSphere(
 
 
 void pe::generateContactBoxAndBox(
-    const Polyhedron& one,
-    const Polyhedron& two,
+    const Cuboidal& one,
+    RigidBody* body1,
+    const Cuboidal& two,
+    RigidBody* body2,
     std::vector<Contact>& contacts,
     real restitution,
     real friction
@@ -392,8 +394,8 @@ void pe::generateContactBoxAndBox(
 
     std::vector<Contact> contactsGenerated;
 
-    Box boxOne(one);
-    Box boxTwo(two);
+    Box boxOne(one, body1);
+    Box boxTwo(two, body2);
     boxAndBox(boxOne, boxTwo, contactsGenerated);
 
     for (Contact& contact : contactsGenerated) {
@@ -406,8 +408,10 @@ void pe::generateContactBoxAndBox(
 
 
 void pe::generateContactBoxAndSphere(
-    const Polyhedron& one,
-    const Polyhedron& two,
+    const Cuboidal& one,
+    RigidBody* body1,
+    const Spherical& two,
+    RigidBody* body2,
     std::vector<Contact>& contacts,
     real restitution,
     real friction
@@ -415,8 +419,8 @@ void pe::generateContactBoxAndSphere(
 
     std::vector<Contact> contactsGenerated;
 
-    Box box(one);
-    Ball sphere(two);
+    Box box(one, body1);
+    Ball sphere(two, body2);
     boxAndSphere(box, sphere, contactsGenerated);
 
     for (Contact& contact : contactsGenerated) {
@@ -429,8 +433,10 @@ void pe::generateContactBoxAndSphere(
 
 
 void pe::generateContactSphereAndSphere(
-    const Polyhedron& one,
-    const Polyhedron& two,
+    const Spherical& one,
+    RigidBody* body1,
+    const Spherical& two,
+    RigidBody* body2,
     std::vector<Contact>& contacts,
     real restitution,
     real friction
@@ -438,8 +444,8 @@ void pe::generateContactSphereAndSphere(
 
     std::vector<Contact> contactsGenerated;
 
-    Ball sphereOne(one);
-    Ball sphereTwo(two);
+    Ball sphereOne(one, body1);
+    Ball sphereTwo(two, body2);
     sphereAndSphere(sphereOne, sphereTwo, contactsGenerated);
 
     for (Contact& contact : contactsGenerated) {

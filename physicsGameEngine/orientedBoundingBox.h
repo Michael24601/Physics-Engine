@@ -14,9 +14,8 @@ namespace pe {
 
 	public:
 
-		OrientedBoundingBox(
-			Polyhedron* polyhedron
-		) : BoundingBox(polyhedron) {
+		OrientedBoundingBox(Polyhedron* polyhedron) :
+			BoundingBox(polyhedron) {
 
 			/*
 				Calculates the offset, halfsize, and initial orientation (needs
@@ -28,6 +27,8 @@ namespace pe {
 				This method (using Principal Component Analysis), is an
 				approximation, but can be calculated quite fast.
 			*/
+
+			std::vector<Vector3D>& vertices = polyhedron->localVertices;
 
 			if (vertices.empty()) {
 				return;
@@ -79,11 +80,11 @@ namespace pe {
 			halfsize = Vector3D(hs.x(), hs.y(), hs.z());
 
 			// We call the update function to initialize the transform matrix
-			update();
+			update(polyhedron);
 		}
 
 
-		void update() override {
+		void update(Polyhedron* polyhedron) override {
 			/*
 				Because it can be oriented, the OBB transform matrix can be
 				updated by simply combining its base parameters with the

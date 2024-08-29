@@ -3,7 +3,7 @@
 #define PARTICLE_COLLISION_DETECTION_H
 
 #include "fineCollisionDetection.h"
-#include "collisionBox.h"
+#include "collisionVolume.h"
 #include "particleContact.h"
 
 namespace pe {

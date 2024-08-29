@@ -6,7 +6,7 @@
 #include "mesh.h"
 #include <vector>
 #include <map>
-#include "collisionBox.h"
+#include "collisionVolume.h"
 
 namespace pe {
 

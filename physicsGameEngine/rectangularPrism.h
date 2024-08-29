@@ -4,11 +4,12 @@
 
 #include "polyhedron.h"
 #include "breakable.h"
+#include "cuboidal.h"
 #include "util.h"
 
 namespace pe {
 
-	class RectangularPrism : public Polyhedron, public Breakable {
+	class RectangularPrism : public Polyhedron, public Cuboidal, public Breakable {
 
 	private:
 
@@ -95,6 +96,7 @@ namespace pe {
 				},
 				body
 			),
+			Cuboidal(this),
 			width{ width }, height{ height }, depth{ depth }{
 
 			setFaces(generateFaces(localVertices));

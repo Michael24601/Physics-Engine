@@ -3,10 +3,11 @@
 #define CYLINDER_H
 
 #include "polyhedron.h"
+#include "cuboidal.h"
 
 namespace pe {
 
-	class Cylinder : public Polyhedron {
+	class Cylinder : public Polyhedron, public Cuboidal {
 
 	private:
 
@@ -284,6 +285,7 @@ namespace pe {
 				),
 				body
 			),
+			Cuboidal(this),
 			radius{ radius }, length{ length }, segments{ segments } {
 
 			setFaces(generateFaces(localVertices, segments));

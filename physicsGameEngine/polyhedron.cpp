@@ -3,165 +3,6 @@
 
 using namespace pe;
 
-void  Polyhedron::calculateAxisAlignedBoundingBox(
-	const std::vector<Vector3D>& vertices,
-	Vector3D& halfsize,
-	Vector3D& offset
-) {
-	if (vertices.empty()) {
-		return;
-	}
-
-	// Initialize min and max coordinates with the first vertex
-	Vector3D minCoord = vertices[0];
-	Vector3D maxCoord = vertices[0];
-
-	// Iterate through all vertices to find the minimum and maximum coordinates
-	for (const Vector3D& vertex : vertices) {
-
-		// The vertices are assumed to be in global coordinates
-		minCoord.x = std::min(minCoord.x, vertex.x);
-		minCoord.y = std::min(minCoord.y, vertex.y);
-		minCoord.z = std::min(minCoord.z, vertex.z);
-
-		maxCoord.x = std::max(maxCoord.x, vertex.x);
-		maxCoord.y = std::max(maxCoord.y, vertex.y);
-		maxCoord.z = std::max(maxCoord.z, vertex.z);
-	}
-
-	// Calculate halfsize by taking half of the distance between min and max coordinates
-	halfsize = (maxCoord - minCoord) * 0.5;
-
-	/*
-		The bounding box centre may not be the same as the centre of gravity
-		of the shape; so we need an offset to the centre of the box.
-		The offset will be equal to offset - centre of gravity = offset - 0
-		as the centre of gravity is 0 in local coordinates.
-	*/
-	offset = (maxCoord + minCoord) * 0.5;
-}
-
-
-void Polyhedron::calculateOrientedBoundingBox(
-	const std::vector<Vector3D>& verticesInput,
-	Vector3D& halfsizeOutput,
-	Vector3D& offsetOutput,
-	Quaternion& orientationOutput
-) {
-
-	if (verticesInput.empty()) {
-		// Handle empty vertices vector
-		halfsizeOutput = Vector3D::ZERO;
-		offsetOutput = Vector3D::ZERO;
-		orientationOutput = Quaternion();
-		return;
-	}
-
-	// Convert input vertices to Eigen vectors
-	std::vector<Eigen::Vector3d> vertices;
-	for (const Vector3D& vertex : verticesInput) {
-		vertices.push_back(Eigen::Vector3d(vertex.x, vertex.y, vertex.z));
-	}
-
-	// Calculate the centroid
-	Eigen::Vector3d centroid = Eigen::Vector3d::Zero();
-	for (const auto& vertex : vertices) {
-		centroid += vertex;
-	}
-	centroid /= vertices.size();
-
-	// Calculate the covariance matrix to find the orientation
-	Eigen::Matrix3d covarianceMatrix = Eigen::Matrix3d::Zero();
-	for (const auto& vertex : vertices) {
-		Eigen::Vector3d diff = vertex - centroid;
-		covarianceMatrix += diff * diff.transpose();
-	}
-	covarianceMatrix /= vertices.size();
-
-	// Compute the eigenvectors of the covariance matrix
-	Eigen::SelfAdjointEigenSolver<Eigen::Matrix3d> solver(covarianceMatrix);
-	Eigen::Matrix3d eigenVectors = solver.eigenvectors();
-	Eigen::Vector3d eigenValues = solver.eigenvalues().real();
-
-	// Find the major axis (eigenvector with largest eigenvalue)
-	int majorAxisIndex;
-	eigenValues.maxCoeff(&majorAxisIndex);
-	Eigen::Vector3d majorAxis = eigenVectors.col(majorAxisIndex);
-
-	// Construct the orientation quaternion from the major axis
-	orientationOutput = Quaternion(1.0 + majorAxis.dot(Eigen::Vector3d::UnitX()),
-		majorAxis.y() - majorAxis.z(),
-		majorAxis.z() - majorAxis.x(),
-		majorAxis.x() - majorAxis.y());
-	orientationOutput.normalize();
-
-	// Transform vertices to the local space of the OBB
-	std::vector<Eigen::Vector3d> localVertices;
-	for (const auto& vertex : vertices) {
-		Eigen::Vector3d localVertex = orientationOutput.r * (vertex - centroid);
-		localVertices.push_back(localVertex);
-	}
-
-	// Calculate the AABB of the vertices in the local space
-	Eigen::Vector3d minBound = localVertices[0];
-	Eigen::Vector3d maxBound = localVertices[0];
-	for (const auto& vertex : localVertices) {
-		minBound = minBound.cwiseMin(vertex);
-		maxBound = maxBound.cwiseMax(vertex);
-	}
-
-	Eigen::Vector3d halfsize = (maxBound - minBound) / 2.0;
-	Eigen::Vector3d offset = centroid + orientationOutput.r * minBound + halfsize;
-
-	// Convert results back to output types
-	halfsizeOutput = Vector3D(halfsize.x(), halfsize.y(), halfsize.z());
-	offsetOutput = Vector3D(offset.x(), offset.y(), offset.z());
-}
-
-
-
-void Polyhedron::calculateBoundingSphere(
-	const std::vector<Vector3D>& points,
-	real& radius,
-	Vector3D& offset
-) {
-	if (points.empty()) {
-		return;
-	}
-
-	// Initializes the center to the first point
-	Vector3D center = points[0];
-
-	/*
-		First we find the center of the bounding sphere which
-		may differ from the centre of gravity if we wish the bounding
-		sphere to be minimal.
-	*/
-	for (const Vector3D& point : points) {
-		center.x += point.x;
-		center.y += point.y;
-		center.z += point.z;
-	}
-	center.x /= points.size();
-	center.y /= points.size();
-	center.z /= points.size();
-
-	// We then calculates its radius
-	radius = (real)0.0;
-	for (const Vector3D& point : points) {
-		float distance = std::sqrt(
-			(point.x - center.x) * (point.x - center.x) +
-			(point.y - center.y) * (point.y - center.y) +
-			(point.z - center.z) * (point.z - center.z)
-		);
-		if (distance > radius) {
-			radius = distance;
-		}
-	}
-
-	offset = center;
-}
-
 
 Polyhedron::Polyhedron(
 	real mass,
@@ -170,9 +11,8 @@ Polyhedron::Polyhedron(
 	const std::vector<Vector3D>& localVertices,
 	RigidBody* body
 ) : body{ body },
-	localVertices{ localVertices },
-	furthestPoint(findFurthestPoint())
-{
+	localVertices{ localVertices } {
+
 	body->setMass(mass);
 	body->position = position;
 	body->setInertiaTensor(inertiaTensor);
@@ -180,18 +20,6 @@ Polyhedron::Polyhedron(
 	body->angularDamping = 1;
 	body->linearDamping = 1;
 	body->calculateDerivedData();
-
-	calculateOrientedBoundingBox(
-		localVertices, OBBHalfsize,OBBOffset, OBBOrientation
-	);
-
-	calculateAxisAlignedBoundingBox(
-		localVertices, AABBHalfsize, AABBOffset
-	);
-
-	calculateBoundingSphere(
-		localVertices, boundingSphereRadius, boundingSphereOffset
-	);
 }
 
 
@@ -203,20 +31,6 @@ Polyhedron::~Polyhedron() {
 	for (int i = 0; i < edges.size(); i++) {
 		delete edges[i];
 	}
-}
-
-
-Vector3D Polyhedron::findFurthestPoint() const {
-
-	Vector3D furthestPoint = *std::max_element(
-		localVertices.begin(),
-		localVertices.end(),
-		[](const Vector3D& first, const Vector3D& second) -> bool {
-			return first.magnitudeSquared()
-				< second.magnitudeSquared();
-		}
-	);
-	return furthestPoint;
 }
 
 
@@ -257,85 +71,6 @@ Vector3D Polyhedron::getCentre() const {
 
 Vector3D Polyhedron::getFaceNormal(int index) const {
 	return faces[index]->getNormal();
-}
-
-
-Vector3D Polyhedron::getOBBHalfsize() const {
-	return OBBHalfsize;
-}
-
-
-Vector3D Polyhedron::getAABBHalfsize() const {
-	return AABBHalfsize;
-}
-
-
-real Polyhedron::getBoundingSphereRadius() const {
-	return boundingSphereRadius;
-}
-
-
-Vector3D Polyhedron::getSphereOffset() const {
-	return boundingSphereOffset;
-}
-
-
-Vector3D Polyhedron::getFurthestPoint() const {
-	return furthestPoint;
-}
-
-
-const Matrix3x4& Polyhedron::getTransformMatrix() const {
-	return this->body->transformMatrix;
-}
-
-
-Matrix3x4 Polyhedron::getOBBTransformMatrix() const {
-
-	/*
-		We combine the rotation of the transform matrix and the
-		initial orinetation of the oriented bounding box.
-
-		We also rotate the offset of the OBB by the resulting rotation
-		matrix to ensure it's place correctly. We then add the body's
-		position to it to translate it.
-	*/
-	Quaternion bodyOrientation = body->orientation;
-	Quaternion rotation = bodyOrientation * OBBOrientation;
-	Matrix3x3 matrixRotation(rotation);
-	Vector3D offset = matrixRotation.transform(OBBOffset);
-	Vector3D worldOffset = body->position + offset;
-
-	Matrix3x4 matrix(rotation, worldOffset);
-	return matrix;
-}
-
-
-Matrix3x4 Polyhedron::getAABBTransformMatrix() const {
-
-	/*
-		We just rotate the offset and add the offset to the original
-		transform matrix.
-	*/
-	Matrix3x3 matrixRotation(body->orientation);
-	Vector3D offset = matrixRotation.transform(AABBOffset);
-	Vector3D worldOffset = body->position + offset;
-
-	Matrix3x4 matrix(matrixRotation, worldOffset);
-	return matrix;
-}
-
-
-Matrix3x4 Polyhedron::getBoundingSphereTransformMatrix() const {
-
-	/*
-		The sphere only has the translation component.
-	*/
-	Matrix3x4 matrix = getTransformMatrix();
-	matrix.data[3] += boundingSphereOffset.x;
-	matrix.data[7] += boundingSphereOffset.y;
-	matrix.data[11] += boundingSphereOffset.z;
-	return matrix;
 }
 
 

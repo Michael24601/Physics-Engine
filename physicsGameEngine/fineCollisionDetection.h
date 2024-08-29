@@ -4,7 +4,7 @@
 
 #include "contact.h"
 #include "solidSphere.h"
-#include "collisionBox.h"
+#include "collisionVolume.h"
 
 namespace pe {
 
@@ -110,8 +110,10 @@ namespace pe {
 
 
     void generateContactBoxAndBox(
-        const Polyhedron& one,
-        const Polyhedron& two,
+        const Cuboidal& one,
+        RigidBody* body1,
+        const Cuboidal& two,
+        RigidBody* body2,
         std::vector<Contact>& contacts,
         real restitution,
         real friction
@@ -119,8 +121,10 @@ namespace pe {
 
 
     void generateContactBoxAndSphere(
-        const Polyhedron& one,
-        const Polyhedron& two,
+        const Cuboidal& one,
+        RigidBody* body1,
+        const Spherical& two,
+        RigidBody* body2,
         std::vector<Contact>& contacts,
         real restitution,
         real friction
@@ -128,8 +132,10 @@ namespace pe {
 
 
     void generateContactSphereAndSphere(
-        const Polyhedron& one,
-        const Polyhedron& two,
+        const Spherical& one,
+        RigidBody* body1,
+        const Spherical& two,
+        RigidBody* body2,
         std::vector<Contact>& contacts,
         real restitution,
         real friction

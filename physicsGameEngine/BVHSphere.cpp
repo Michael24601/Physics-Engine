@@ -1,5 +1,5 @@
 
-#include "BHVSphere.h"
+#include "BVHSphere.h"
 
 using namespace pe;
 

@@ -3,10 +3,11 @@
 #define SOLID_SPHERE_H
 
 #include "polyhedron.h"
+#include "spherical.h"
 
 namespace pe {
 
-	class SolidSphere : public Polyhedron {
+	class SolidSphere : public Polyhedron, public Spherical {
 
 	private:
 
@@ -205,6 +206,7 @@ namespace pe {
 				),
 				body
 			),
+			Spherical(this),
 			radius{ radius }, latitudeSegments{ latitudeSegments },
 			longitudeSegments{ longtitudeSegments } {
 

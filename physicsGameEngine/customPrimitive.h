@@ -3,6 +3,7 @@
 #define CUSTOM_PRIMITIVE_H
 
 #include "polyhedron.h"
+#include "axisAlignedBoundingBox.h"
 #include "util.h"
 #include <string>
 
@@ -85,7 +86,7 @@ namespace pe {
         (checking if they are in the polyhedron using the monte carlo
         apporach). This works even for convex shapes.
     */
-    Matrix3x3 approximateInertiaTensor(const Polyhedron& polyhedron);
+    Matrix3x3 approximateInertiaTensor(Polyhedron* polyhedron);
 
 
     Polyhedron returnPrimitive(

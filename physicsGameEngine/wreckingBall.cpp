@@ -183,18 +183,18 @@ void pe::runWreckingBall() {
             std::vector<Contact> contacts;
 
             for (int i = 0; i < prisms.size(); i++) {
-                generateContactBoxAndBox(*(prisms[i]), ground, contacts, 0.25, 0.0);
-                generateContactBoxAndSphere(*(prisms[i]), sphere, contacts, 0.25, 0.0);
+                generateContactBoxAndBox(*(prisms[i]), prisms[i]->body, ground, ground.body, contacts, 0.25, 0.0);
+                generateContactBoxAndSphere(*(prisms[i]), prisms[i]->body, sphere, sphere.body, contacts, 0.25, 0.0);
                 for (int j = 0; j < prisms.size(); j++) {
                     if (i != j && (
                         (prisms[i]->body->position - prisms[j]->body->position)
                         .magnitudeSquared() < 350*350
                     )) {
-                        generateContactBoxAndBox(*(prisms[i]), *(prisms[j]), contacts, 0.25, 0.0);
+                        generateContactBoxAndBox(*(prisms[i]), prisms[i]->body, *(prisms[j]), prisms[i]->body, contacts, 0.25, 0.0);
                     }
                 }
             }
-            generateContactBoxAndSphere(ground, sphere, contacts, 0.25, 0.0);
+            generateContactBoxAndSphere(ground, ground.body, sphere, sphere.body, contacts, 0.25, 0.0);
 
             CollisionResolver resolver(10, 1);
             resolver.resolveContacts(contacts.data(), contacts.size(), substep);

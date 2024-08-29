@@ -132,7 +132,7 @@
     <ClCompile Include="anchoredSpringForce.cpp">
       <Filter>Source Files\ParticlePhysics</Filter>
     </ClCompile>
-    <ClCompile Include="boundingSphere.cpp">
+    <ClCompile Include="BVHSphere.cpp">
       <Filter>Source Files\Collision</Filter>
     </ClCompile>
     <ClCompile Include="drawingUtil.cpp">
@@ -296,7 +296,7 @@
     <ClInclude Include="anchoredSpringForce.h">
       <Filter>Header Files\ParticlePhysics</Filter>
     </ClInclude>
-    <ClInclude Include="BHVSphere.h">
+    <ClInclude Include="BVHSphere.h">
       <Filter>Header Files\Collision</Filter>
     </ClInclude>
     <ClInclude Include="boundingVolumeHierarchy.h">
@@ -461,7 +461,7 @@
     <ClInclude Include="customPrimitive.h">
       <Filter>Header Files\Polyhedron</Filter>
     </ClInclude>
-    <ClInclude Include="collisionBox.h">
+    <ClInclude Include="collisionVolume.h">
       <Filter>Header Files\Collision</Filter>
     </ClInclude>
     <ClInclude Include="util.h">
@@ -607,6 +607,12 @@
     </ClInclude>
     <ClInclude Include="resizable.h">
       <Filter>Header Files\Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="spherical.h">
+      <Filter>Header Files\BoundingVolumes</Filter>
+    </ClInclude>
+    <ClInclude Include="cuboidal.h">
+      <Filter>Header Files\BoundingVolumes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

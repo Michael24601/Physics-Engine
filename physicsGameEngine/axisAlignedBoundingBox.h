@@ -64,11 +64,11 @@ namespace pe {
 		AxisAlignedBoundingBox(
 			Polyhedron* polyhedron
 		) : BoundingBox(polyhedron) {
-			
+			update(polyhedron);
 		}
 
 
-		void update() override {
+		void update(Polyhedron* polyhedron) override {
 			/*
 				First we transform all the points we have ito world coordinates.
 				Because the AABB must remain aligned to the world coordinate

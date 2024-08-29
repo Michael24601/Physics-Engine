@@ -220,7 +220,7 @@ void pe::runBallPit() {
             std::vector<Contact> contacts;
             for (int i = 0; i < walls.size(); i++) {
                 for (SolidSphere* s : spheres) {
-                    generateContactBoxAndSphere(*(walls[i]), *s, contacts, 1.0, 0.5);
+                    generateContactBoxAndSphere(*(walls[i]), walls[i]->body, *s, s->body, contacts, 1.0, 0.5);
                 }
             }
             for (SolidSphere* s : spheres) {
@@ -229,7 +229,7 @@ void pe::runBallPit() {
                         (s2->getCentre() - s->getCentre()).magnitudeSquared() <
                         (s2->radius + s->radius) * (s2->radius + s->radius)
                         ) {
-                        generateContactSphereAndSphere(*s2, *s, contacts, 0.5, 0.0);
+                        generateContactSphereAndSphere(*s2, s2->body, *s, s->body, contacts, 0.5, 0.0);
                     }
                 }
             }

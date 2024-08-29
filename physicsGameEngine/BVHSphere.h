@@ -17,8 +17,8 @@
 	its original purpose as a fast but innacurate detection system.
 */
 
-#ifndef BHV_SPHERE_H
-#define BHV_SPHERE_H
+#ifndef BVH_SPHERE_H
+#define BVH_SPHERE_H
 
 #include "vector3D.h"
 

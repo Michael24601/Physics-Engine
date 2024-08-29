@@ -98,7 +98,7 @@ void pe::runFracture() {
 
     // Pre computing fracture data for when needed
     std::vector<DiffuseLightingShader*> pre_shaders;
-    std::vector<Polyhedron*> pre_prisms;
+    std::vector<Cuboidal*> pre_prisms;
     RectangularPrism* p = ((RectangularPrism*)prisms[0]);
     Vector3D dimensionPoint(p->width / 8.0, -p->height / 10.0, p->depth / 16.0);
     Vector3D point(-p->width / 5.0, -p->height / 7.0, p->depth / 8.0);
@@ -158,10 +158,10 @@ void pe::runFracture() {
             std::vector<Contact> contacts;
 
             for (int i = 0; i < prisms.size(); i++) {
-                generateContactBoxAndBox(*(prisms[i]), ground, contacts, 0.7, 0.0);
+                generateContactBoxAndBox(*(prisms[i]), prisms[i]->body, ground, ground.body, contacts, 0.7, 0.0);
                 for (int j = 0; j < prisms.size(); j++) {
                     if (i != j) {
-                        generateContactBoxAndBox(*(prisms[i]), *(prisms[j]), contacts, 0.7, 0.0);
+                        generateContactBoxAndBox(*(prisms[i]), prisms[i]->body, *(prisms[j]), prisms[j]->body, contacts, 0.7, 0.0);
                     }
                 }
             }

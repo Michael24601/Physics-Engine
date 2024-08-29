@@ -4,10 +4,11 @@
 #define CONE_H
 
 #include "polyhedron.h"
+#include "cuboidal.h"
 
 namespace pe {
 
-	class Cone : public Polyhedron {
+	class Cone : public Polyhedron, public Cuboidal {
 
 	private:
 
@@ -166,6 +167,7 @@ namespace pe {
 				),
 				body
 			),
+			Cuboidal(this),
 			radius{ radius }, length{ length }, segments{ segments } {
 			setFaces(generateFaces(localVertices, segments));
 			setEdges(generateEdges(localVertices, segments));

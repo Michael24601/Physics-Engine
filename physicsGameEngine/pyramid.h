@@ -7,7 +7,7 @@
 
 namespace pe {
 
-	class Pyramid : public Polyhedron {
+	class Pyramid : public Polyhedron, public Cuboidal {
 
 	private:
 
@@ -85,6 +85,7 @@ namespace pe {
 				},
 				body	
 			),
+			Cuboidal(this),
 			side{ side }, height{ height } {
 
 			setFaces(generateFaces(localVertices));

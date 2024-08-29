@@ -23,9 +23,7 @@ namespace pe{
 
 	public:
 
-		BoundingBox(
-			Polyhedron* polyhedron
-		) : BoundingVolume(polyhedron) {}
+		BoundingBox(Polyhedron* polyhedron) : BoundingVolume(polyhedron) {}
 
 
 		Vector3D getHalfsize() const {

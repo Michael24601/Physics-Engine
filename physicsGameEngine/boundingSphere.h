@@ -78,7 +78,7 @@ namespace pe {
 		}
 
 
-		void update() override {
+		void update(Polyhedron* polyhedron) override {
 			/*
 				Because the sphere does not change radius regardless of
 				how the polyhedron rotates or moves, we can update the
