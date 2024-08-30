@@ -5,7 +5,7 @@ using namespace pe;
 
 int main() {
 
-	runBallPit();
+	runReflection();
 
 	return 0;
 }

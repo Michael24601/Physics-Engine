@@ -51,7 +51,7 @@ void pe::runReflection() {
     real radius = 150;
     std::string filename = "C:\\Users\\msaba\\Documents\\physen\\textureMaps\\moai.obj";
     Polyhedron c2 = returnPrimitive(filename, 1, Vector3D::ZERO, new RigidBody(), 2);
-    c2.body->orientation = Quaternion::rotatedByAxisAngle(Vector3D(0, 0, 1), PI / 2);
+    // c2.body->orientation = Quaternion::rotatedByAxisAngle(Vector3D(0, 0, 1), PI / 2);
     c2.body->calculateDerivedData();
 
     skyboxShader.setSkybox(skybox);
@@ -83,6 +83,17 @@ void pe::runReflection() {
     cookShader.setObjectColor(colorRed);
     cookShader.setRoughness(0.05);
     cookShader.setFresnel(0.5);
+
+    OrientedBoundingBox b(&c2);
+    SolidColorShader s;
+    EdgeData ds = getBoxData(b);
+    std::vector<std::vector<glm::vec3>> v = { ds.vertices };
+    s.sendVaribleData(v, GL_STATIC_DRAW);
+    s.setEdgeNumber(ds.vertices.size());
+    s.setObjectColor(colorRed);
+    glm::mat4 m = convertToGLM(b.getTransformMatrix());
+    s.setModelMatrix(m);
+    s.setProjectionMatrix(camera.getProjectionMatrix());
 
     EnvironmentMapper mapper(512, 512);
 
@@ -157,6 +168,9 @@ void pe::runReflection() {
             cookShader.drawFaces();
             skyboxShader.drawFaces();
             refShader2.drawFaces();
+
+            s.setViewMatrix(camera.getViewMatrix());
+            s.drawEdges();
 
             glfwSwapBuffers(window.getWindow());
             glfwPollEvents();

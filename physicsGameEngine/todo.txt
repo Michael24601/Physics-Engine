@@ -15,7 +15,7 @@ two when converting world to local coordinates (DONE).
 Get rid of preprocessor macros (except for header guards), use
 global variables or typedef instead (DONE).
 
-Include H in header guards.
+Include H in header guards (DONE).
 
 Fix the tetrahedron inertia tensor, which is wobbly now (DONE).
 
@@ -351,7 +351,7 @@ Implement the Eigen functions (Jacobi method).
 Fix the the AABB frustum culling as it is not working yet.
 
 Fix the OBB calculation and use the OBB instead of a transformed
-AABB.
+AABB (DONE).
 
 Test bounding volume hierarchy.
 
@@ -360,3 +360,7 @@ the latter functionality needs its own function.
 
 Fix texture units.
 
+Consider making the bounding volumes take vertices instead of
+polyhedron.
+
+Add a scale to the bounding volumes.

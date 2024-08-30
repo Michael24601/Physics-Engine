@@ -137,7 +137,6 @@ void pe::runBallPit() {
     s.setEdgeNumber(d.vertices.size());
     s.setObjectColor(colorRed);
     glm::mat4 m = convertToGLM(walls[j]->boundingBox.getTransformMatrix());
-    // m = glm::translate(m, glm::vec3(0, 500, 0));
     s.setModelMatrix(m);
     s.setProjectionMatrix(camera.getProjectionMatrix());
 
