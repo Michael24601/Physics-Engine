@@ -5,6 +5,7 @@
 
 // For GLEW static version (no dlls) and stb library
 // Note that they also need to be included in the preprocessor definitions
+// (We can also define these in the makefile)
 #define GLEW_STATIC
 #define _CRT_SECURE_NO_WARNINGS
 #define STB_IMAGE_IMPLEMENTATION

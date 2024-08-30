@@ -608,9 +608,6 @@
     <ClInclude Include="boundingSphere.h">
       <Filter>Header Files\BoundingVolumes</Filter>
     </ClInclude>
-    <ClInclude Include="resizable.h">
-      <Filter>Header Files\Collision</Filter>
-    </ClInclude>
     <ClInclude Include="spherical.h">
       <Filter>Header Files\BoundingVolumes</Filter>
     </ClInclude>

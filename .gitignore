@@ -369,4 +369,8 @@ FodyWeavers.xsd
 **/glew-2.2.0/
 **/eigen-3.4.0/
 
+# Ignore the build file for the object files 
+**/build/
+*.o
+
 *.exe

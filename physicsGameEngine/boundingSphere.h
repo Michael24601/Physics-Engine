@@ -9,7 +9,6 @@
 #define BOUNDING_SPHERE_H
 
 #include "boundingVolume.h"
-#include "resizable.h"
 
 namespace pe {
 

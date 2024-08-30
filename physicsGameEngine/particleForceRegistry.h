@@ -4,6 +4,7 @@
 #define PARTICLE_FORCE_REGISTRY_H
 
 #include <vector>
+#include <algorithm>
 #include "particleForceGenerator.h"
 #include "particle.h"
 #include "accuracy.h"
