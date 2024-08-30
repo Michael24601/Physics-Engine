@@ -27,7 +27,7 @@ namespace pe {
 
     void generateContactParticleAndBox(
         Particle* particle,
-        const Polyhedron& one,
+        const Cuboidal& one,
         std::vector<ParticleContact>& contacts,
         real restitution
     );
@@ -35,7 +35,7 @@ namespace pe {
 
     void generateContactParticleAndSphere(
         Particle* particle,
-        const SolidSphere& one,
+        const Spherical &one,
         std::vector<ParticleContact>& contacts,
         real restitution
     );

@@ -282,10 +282,10 @@ FrameVectors pe::getFrameVectors(
 	return data;
 }
 
-EdgeData pe::getOBBData(const Polyhedron& polyhedron) {
+EdgeData pe::getBoxData(const BoundingBox& box) {
 
 	EdgeData data;
-	Vector3D halfsize = polyhedron.getOBBHalfsize();
+	Vector3D halfsize = box.getHalfsize();
 	Vector3D vertices[8]{
 		halfsize.componentProduct(Vector3D(-1,-1, -1)),
 		halfsize.componentProduct(Vector3D(1, -1, -1)),
@@ -303,40 +303,7 @@ EdgeData pe::getOBBData(const Polyhedron& polyhedron) {
 		{0, 4}, {1, 5}, {2, 6}, {3, 7}  // Edges between front and back faces
 	};
 
-	// Populate edge data with actual vertices
-	for (const auto& edge : edges) {
-		Vector3D start = vertices[edge.first];
-		Vector3D end = vertices[edge.second];
-		data.vertices.push_back(convertToGLM(start));
-		data.vertices.push_back(convertToGLM(end));
-	}
-
-	return data;
-}
-
-
-EdgeData pe::getAABBData(const Polyhedron& polyhedron) {
-
-	EdgeData data;
-	Vector3D halfsize = polyhedron.getAABBHalfsize();
-	Vector3D vertices[8]{
-		halfsize.componentProduct(Vector3D(-1,-1, -1)),
-		halfsize.componentProduct(Vector3D(1, -1, -1)),
-		halfsize.componentProduct(Vector3D(1, -1, 1)),
-		halfsize.componentProduct(Vector3D(-1, -1, 1)),
-		halfsize.componentProduct(Vector3D(-1, 1, -1)),
-		halfsize.componentProduct(Vector3D(1, 1, -1)),
-		halfsize.componentProduct(Vector3D(1, 1, 1)),
-		halfsize.componentProduct(Vector3D(-1, 1, 1)),
-	};
-
-	const std::vector<std::pair<int, int>> edges{
-		{0, 1}, {1, 2}, {2, 3}, {3, 0}, // Front face
-		{4, 5}, {5, 6}, {6, 7}, {7, 4}, // Back face
-		{0, 4}, {1, 5}, {2, 6}, {3, 7}  // Edges between front and back faces
-	};
-
-	// Populate edge data with actual vertices
+	// Populating the edge data with the vertices
 	for (const auto& edge : edges) {
 		Vector3D start = vertices[edge.first];
 		Vector3D end = vertices[edge.second];
@@ -367,21 +334,14 @@ FaceData pe::getUniformFaceData(const Mesh& mesh) {
 
 
 bool pe::isAABBInFrustum(
-	const Polyhedron& p, const glm::mat4& projectionViewMatrix
+	const AxisAlignedBoundingBox& b, 
+	const glm::mat4& projectionViewMatrix
 ) {
 
-	std::vector<Vector3D> globalVertices(p.localVertices.size());
-	Matrix3x4 transform = p.getTransformMatrix();
-	for (int i = 0; i < p.localVertices.size(); i++) {
-		globalVertices[i] = transform.transform(p.localVertices[i]);
-	}
-
-	Vector3D aabbHalfSize;
-	Vector3D aabbCentre;
-	Polyhedron::calculateAxisAlignedBoundingBox(globalVertices, aabbHalfSize, aabbCentre);
-
 	glm::vec4 centerClip = projectionViewMatrix * glm::vec4(
-		convertToGLM(aabbCentre), 1.0f);
+		convertToGLM(b.getPosition()), 1.0f);
+
+	Vector3D aabbHalfSize = b.getHalfsize();
 
 	float distanceToNearPlane = centerClip.z - centerClip.w;
 	float distanceToFarPlane = centerClip.z + centerClip.w;
@@ -409,13 +369,12 @@ bool pe::isAABBInFrustum(
 
 
 bool pe::isBoundingSphereInFrustum(
-	const Polyhedron& p, const glm::mat4& projectionViewMatrix
+	const BoundingSphere& s,
+	const glm::mat4& projectionViewMatrix
 ) {
 
-	glm::vec3 worldCentre = convertToGLM(
-		p.getTransformMatrix().transform(p.getSphereOffset())
-	);
-	float radius = p.getBoundingSphereRadius();
+	glm::vec3 worldCentre = convertToGLM(s.getPosition());
+	float radius = s.getRadius();
 
 	glm::vec4 centerClip = projectionViewMatrix * glm::vec4(worldCentre, 1.0f);
 

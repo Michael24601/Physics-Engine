@@ -9,7 +9,7 @@
 
 namespace pe {
 
-	class RectangularPrism : public Polyhedron, public Cuboidal, public Breakable {
+	class RectangularPrism : public Cuboidal, public Breakable {
 
 	private:
 
@@ -75,8 +75,9 @@ namespace pe {
 			real depth,
 			real mass,
 			Vector3D position,
-			RigidBody* body) :
-			Polyhedron(
+			RigidBody* body
+		) :
+			Cuboidal(
 				mass,
 				position,
 				Matrix3x3(
@@ -96,7 +97,6 @@ namespace pe {
 				},
 				body
 			),
-			Cuboidal(this),
 			width{ width }, height{ height }, depth{ depth }{
 
 			setFaces(generateFaces(localVertices));

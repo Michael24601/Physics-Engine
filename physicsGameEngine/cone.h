@@ -8,7 +8,7 @@
 
 namespace pe {
 
-	class Cone : public Polyhedron, public Cuboidal {
+	class Cone : public Cuboidal {
 
 	private:
 
@@ -151,7 +151,7 @@ namespace pe {
 			Vector3D position,
 			RigidBody* body
 		) :
-			Polyhedron(
+			Cuboidal(
 				mass,
 				position,
 				Matrix3x3(
@@ -167,7 +167,6 @@ namespace pe {
 				),
 				body
 			),
-			Cuboidal(this),
 			radius{ radius }, length{ length }, segments{ segments } {
 			setFaces(generateFaces(localVertices, segments));
 			setEdges(generateEdges(localVertices, segments));

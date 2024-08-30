@@ -126,6 +126,12 @@ bool Polyhedron::isPointInsideFace(
 }
 
 
+const Matrix3x4& Polyhedron::getTransformMatrix() const {
+	return body->transformMatrix;
+}
+
+
+
 bool Polyhedron::isPointInsidePolyhedron(
 	const Vector3D& point
 ) const {

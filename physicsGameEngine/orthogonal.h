@@ -1,21 +1,22 @@
 /*
 	Interface for shapes that are almost cuboidal, meaning they benefit from
-	having a box bounding volume.
+	having a box bounding volume. In this case the bounding box is axis
+	aligned.
 */
 
-#ifndef CUBOIDAL_H
-#define CUBOIDAL_H
+#ifndef ORTHOGONAL_H
+#define ORTHOGONAL_H
 
-#include "orientedBoundingBox.h"
+#include "axisAlignedBoundingBox.h"
 
 namespace pe {
 
-	class Cuboidal: public Polyhedron {
+	class Orthogonal : public Polyhedron {
 	public:
 
-		OrientedBoundingBox boundingBox;
+		AxisAlignedBoundingBox boundingBox;
 
-		Cuboidal(
+		Orthogonal(
 			real mass,
 			const Vector3D& position,
 			const Matrix3x3& inertiaTensor,

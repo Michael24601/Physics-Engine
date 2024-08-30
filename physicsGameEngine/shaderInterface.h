@@ -7,6 +7,9 @@
 #include <vector>
 #include <map>
 #include "collisionVolume.h"
+#include "axisAlignedBoundingBox.h"
+#include "boundingSphere.h"
+#include "orthogonal.h"
 
 namespace pe {
 
@@ -146,9 +149,12 @@ namespace pe {
 		real length
 	);
 
-	EdgeData getAABBData(const Polyhedron& polyhedron);
-
-	EdgeData getOBBData(const Polyhedron& polyhedron);
+	/*
+		Returns the box data but does not transform it.
+		So when drawn, if not a AABB, the Bounding Box will need to
+		send its transform matrix as the model.
+	*/
+	EdgeData getBoxData(const BoundingBox& box);
 
 	FaceData getFaceData(const Polyhedron& polyhedron);
 
@@ -193,7 +199,8 @@ namespace pe {
 		performance.
 	*/
 	bool isAABBInFrustum(
-		const Polyhedron& p, const glm::mat4& projectionViewMatrix
+		const AxisAlignedBoundingBox& b,
+		const glm::mat4& projectionViewMatrix
 	);
 
 	/*
@@ -205,7 +212,8 @@ namespace pe {
 		performance.
 	*/
 	bool isBoundingSphereInFrustum(
-		const Polyhedron& p, const glm::mat4& projectionViewMatrix
+		const BoundingSphere& s,
+		const glm::mat4& projectionViewMatrix
 	);
 
 }

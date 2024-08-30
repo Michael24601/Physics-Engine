@@ -43,9 +43,9 @@ namespace pe {
             We also send the body of the cuboidal polyhedron as it is not 
             in the Cauboidal interface.
         */
-        Box(const Cuboidal& cuboid, RigidBody* body) {
+        Box(const Cuboidal& cuboid) {
             halfSize = cuboid.boundingBox.getHalfsize();
-            this->body = body;
+            this->body = cuboid.body;
 
             transformMatrix = cuboid.boundingBox.getTransformMatrix();
         }
@@ -74,8 +74,8 @@ namespace pe {
         /*
             Constructs a sphere from a spherical polyhedron.
         */
-        Ball(const Spherical& sphere, RigidBody* body) {
-            this->body = body;
+        Ball(const Spherical& sphere) {
+            this->body = sphere.body;
             radius = sphere.boundingSphere.getRadius();
             transformMatrix = sphere.boundingSphere.getTransformMatrix();
         }

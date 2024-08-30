@@ -5,7 +5,7 @@ using namespace pe;
 
 
 void pe::runBallPit() {
-
+    
     GlfwWindowWrapper window(1200, 800, 6, "window", true);
 
     RotatingCamera camera(
@@ -110,6 +110,8 @@ void pe::runBallPit() {
 
     for (int i = 0; i < walls.size(); i++) {
 
+        walls[i]->update();
+
         walls[i]->body->inverseMass = 0;
         walls[i]->body->canSleep = true;
 
@@ -126,6 +128,18 @@ void pe::runBallPit() {
         cubeShaders[i].setRoughness(0.5);
         cubeShaders[i].setObjectColor(colorWhite);
     }
+
+    SolidColorShader s;
+    int j = 9;
+    EdgeData d = getBoxData(walls[j]->boundingBox);
+    std::vector<std::vector<glm::vec3>> v = { d.vertices };
+    s.sendVaribleData(v, GL_STATIC_DRAW);
+    s.setEdgeNumber(d.vertices.size());
+    s.setObjectColor(colorRed);
+    glm::mat4 m = convertToGLM(walls[j]->boundingBox.getTransformMatrix());
+    // m = glm::translate(m, glm::vec3(0, 500, 0));
+    s.setModelMatrix(m);
+    s.setProjectionMatrix(camera.getProjectionMatrix());
 
     // Sphere
 
@@ -210,6 +224,7 @@ void pe::runBallPit() {
 
             for (SolidSphere* s : spheres) {
                 s->body->calculateDerivedData();
+                s->update();
             }
 
             for (SolidSphere* s : spheres) {
@@ -220,7 +235,7 @@ void pe::runBallPit() {
             std::vector<Contact> contacts;
             for (int i = 0; i < walls.size(); i++) {
                 for (SolidSphere* s : spheres) {
-                    generateContactBoxAndSphere(*(walls[i]), walls[i]->body, *s, s->body, contacts, 1.0, 0.5);
+                    generateContactBoxAndSphere(*(walls[i]), *s, contacts, 1.0, 0.5);
                 }
             }
             for (SolidSphere* s : spheres) {
@@ -229,7 +244,7 @@ void pe::runBallPit() {
                         (s2->getCentre() - s->getCentre()).magnitudeSquared() <
                         (s2->radius + s->radius) * (s2->radius + s->radius)
                         ) {
-                        generateContactSphereAndSphere(*s2, s2->body, *s, s->body, contacts, 0.5, 0.0);
+                        generateContactSphereAndSphere(*s2, *s, contacts, 0.5, 0.0);
                     }
                 }
             }
@@ -269,6 +284,9 @@ void pe::runBallPit() {
                 sphereShader.setModelMatrix(convertToGLM(s->getTransformMatrix()));
                 sphereShader.drawFaces();
             }
+
+            s.setViewMatrix(camera.getViewMatrix());
+            s.drawEdges();
 
 
             glfwSwapBuffers(window.getWindow());

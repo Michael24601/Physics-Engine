@@ -73,7 +73,7 @@ unsigned int pe::sphereAndPoint(
 
 void pe::generateContactParticleAndBox(
     Particle* particle,
-    const Polyhedron& one,
+    const Cuboidal& one,
     std::vector<ParticleContact>& contacts,
     real restitution
 ) {
@@ -95,7 +95,7 @@ void pe::generateContactParticleAndBox(
 
 void pe::generateContactParticleAndSphere(
     Particle* particle,
-    const SolidSphere& one,
+    const Spherical& one,
     std::vector<ParticleContact>& contacts,
     real restitution
 ) {

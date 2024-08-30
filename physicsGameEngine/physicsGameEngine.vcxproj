@@ -178,6 +178,7 @@
     <ClCompile Include="Matrix3x4.cpp" />
     <ClCompile Include="mirrors.cpp" />
     <ClCompile Include="openglUtility.cpp" />
+    <ClCompile Include="orientedBoundingBox.cpp" />
     <ClCompile Include="particle.cpp" />
     <ClCompile Include="particleBungeeForce.cpp" />
     <ClCompile Include="particleBuoyancy.cpp" />
@@ -243,6 +244,7 @@
     <ClInclude Include="firstPersonCamera.h" />
     <ClInclude Include="glfwWindowWrapper.h" />
     <ClInclude Include="orientedBoundingBox.h" />
+    <ClInclude Include="orthogonal.h" />
     <ClInclude Include="pointProjection.h" />
     <ClInclude Include="resizable.h" />
     <ClInclude Include="shadowMappingShader.h" />

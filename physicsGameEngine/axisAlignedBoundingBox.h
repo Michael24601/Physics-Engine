@@ -11,7 +11,7 @@ namespace pe {
 
 	class AxisAlignedBoundingBox: public BoundingBox {
 
-	private:
+	public:
 
 		/*
 			Function that creates an AABB given a vector of points.
@@ -59,7 +59,6 @@ namespace pe {
 			offset = (maxCoord + minCoord) * 0.5;
 		}
 
-	public:
 
 		AxisAlignedBoundingBox(
 			Polyhedron* polyhedron

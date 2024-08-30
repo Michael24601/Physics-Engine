@@ -7,7 +7,7 @@
 
 namespace pe {
 
-	class Pyramid : public Polyhedron, public Cuboidal {
+	class Pyramid : public Cuboidal {
 
 	private:
 
@@ -68,7 +68,7 @@ namespace pe {
 			Vector3D position,
 			RigidBody* body
 		) : 
-			Polyhedron(
+			Cuboidal(
 				mass,
 				position,
 				Matrix3x3(
@@ -85,7 +85,6 @@ namespace pe {
 				},
 				body	
 			),
-			Cuboidal(this),
 			side{ side }, height{ height } {
 
 			setFaces(generateFaces(localVertices));

@@ -7,7 +7,7 @@
 
 namespace pe {
 
-	class SolidSphere : public Polyhedron, public Spherical {
+	class SolidSphere : public Spherical {
 
 	private:
 
@@ -190,7 +190,7 @@ namespace pe {
 			Vector3D position,
 			RigidBody* body
 		) :
-			Polyhedron(
+			Spherical(
 				mass,
 				position,
 				Matrix3x3(
@@ -206,7 +206,6 @@ namespace pe {
 				),
 				body
 			),
-			Spherical(this),
 			radius{ radius }, latitudeSegments{ latitudeSegments },
 			longitudeSegments{ longtitudeSegments } {
 

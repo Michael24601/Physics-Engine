@@ -47,6 +47,7 @@ namespace pe {
 			real data[4];
 		};
 
+		const static Quaternion IDENTITY;
 
 		/*
 			Default constructor creates the quaternion of the zero rotation.

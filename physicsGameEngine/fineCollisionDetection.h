@@ -111,9 +111,7 @@ namespace pe {
 
     void generateContactBoxAndBox(
         const Cuboidal& one,
-        RigidBody* body1,
         const Cuboidal& two,
-        RigidBody* body2,
         std::vector<Contact>& contacts,
         real restitution,
         real friction
@@ -122,9 +120,7 @@ namespace pe {
 
     void generateContactBoxAndSphere(
         const Cuboidal& one,
-        RigidBody* body1,
         const Spherical& two,
-        RigidBody* body2,
         std::vector<Contact>& contacts,
         real restitution,
         real friction
@@ -133,9 +129,7 @@ namespace pe {
 
     void generateContactSphereAndSphere(
         const Spherical& one,
-        RigidBody* body1,
         const Spherical& two,
-        RigidBody* body2,
         std::vector<Contact>& contacts,
         real restitution,
         real friction

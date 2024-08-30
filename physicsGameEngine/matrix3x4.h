@@ -382,13 +382,13 @@ namespace pe {
 			Adds a rotation to the rotation matrix part of the homogeneous
 			matrix.
 		*/
-		Matrix3x3 addRotation(const Matrix3x3& rotation) {
-			setRotation(getRotation() * rotation);
+		void addRotation(const Matrix3x3& rotation) {
+			setRotation(rotation * getRotation());
 		}
 
 
-		Matrix3x3 addTranslation(const Vector3D& translation) {
-			setTranslation(getTranslation() + translation);
+		void addTranslation(const Vector3D& translation) {
+			setTranslation(translation + getTranslation());
 		}
 
 
@@ -406,11 +406,11 @@ namespace pe {
 			data[1] = rotation.data[1];
 			data[2] = rotation.data[2];
 			data[4] = rotation.data[3];
-			data[5] = rotation.data[5];
-			data[6] = rotation.data[6];
-			data[8] = rotation.data[7];
-			data[9] = rotation.data[8];
-			data[10] = rotation.data[9];
+			data[5] = rotation.data[4];
+			data[6] = rotation.data[5];
+			data[8] = rotation.data[6];
+			data[9] = rotation.data[7];
+			data[10] = rotation.data[8];
 		}
 
 

@@ -434,6 +434,17 @@ void pe::runVideoGameLevel() {
     };
 
 
+    // The AABB
+    std::vector<BoundingSphere> objectSphere;
+    for (Object* object : objects) {
+        objectSphere.push_back(BoundingSphere(&object->p));
+    }
+    std::vector<BoundingSphere> largeObjectSphere;
+    for (LargeObject* object : largeObjects) {
+        largeObjectSphere.push_back(BoundingSphere(&object->p));
+    }
+
+
     float deltaT = 0.001;
 
     float lastTime = glfwGetTime();
@@ -558,33 +569,33 @@ void pe::runVideoGameLevel() {
             groundShader.setLightSpaceMatrix(projection.getProjectionView());
             groundShader.drawFaces();
 
-            for (auto& lo : largeObjects) {
+            for (int k = 0; k < largeObjects.size(); k++) {
                
                 if (isBoundingSphereInFrustum(
-                    lo->p, projectionViewMatrix
+                    largeObjectSphere[k], projectionViewMatrix
                 )) { 
                 
-                for (int i = 0; i < lo->texShaders.size(); i++) {
-                    lo->texShaders[i]->setLightPosition(lightPos[0]);
-                    lo->texShaders[i]->setLightColor(lightColors[0]);
-                    lo->texShaders[i]->setShadowMap(mapper.getTexture());
-                    lo->texShaders[i]->setLightSpaceMatrix(projection.getProjectionView());
-                }
-                    lo->setVP(vm, pm);
-                    lo->render();
+                    for (int i = 0; i < largeObjects[k]->texShaders.size(); i++) {
+                        largeObjects[k]->texShaders[i]->setLightPosition(lightPos[0]);
+                        largeObjects[k]->texShaders[i]->setLightColor(lightColors[0]);
+                        largeObjects[k]->texShaders[i]->setShadowMap(mapper.getTexture());
+                        largeObjects[k]->texShaders[i]->setLightSpaceMatrix(projection.getProjectionView());
+                    }
+                    largeObjects[k]->setVP(vm, pm);
+                    largeObjects[k]->render();
                 }
             }
 
-            for (Object* o : objects) {
+            for (int k = 0; k < objects.size(); k++) {
                 if (isBoundingSphereInFrustum(
-                    o->p, projectionViewMatrix
+                    objectSphere[k], projectionViewMatrix
                 )) {
-                    o->texShader.setLightPosition(lightPos[0]);
-                    o->texShader.setLightColor(lightColors[0]);
-                    o->texShader.setShadowMap(mapper.getTexture());
-                    o->texShader.setLightSpaceMatrix(projection.getProjectionView());
-                    o->setVP(vm, pm);
-                    o->render();
+                    objects[k]->texShader.setLightPosition(lightPos[0]);
+                    objects[k]->texShader.setLightColor(lightColors[0]);
+                    objects[k]->texShader.setShadowMap(mapper.getTexture());
+                    objects[k]->texShader.setLightSpaceMatrix(projection.getProjectionView());
+                    objects[k]->setVP(vm, pm);
+                    objects[k]->render();
                 }
             }
 

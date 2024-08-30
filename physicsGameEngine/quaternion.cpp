@@ -4,6 +4,10 @@
 
 using namespace pe;
 
+
+const Quaternion Quaternion::IDENTITY(1, 0, 0, 0);
+
+
 Quaternion::Quaternion(const Matrix3x3& m){
 	real trace = m.data[0] + m.data[4] + m.data[8];
 
