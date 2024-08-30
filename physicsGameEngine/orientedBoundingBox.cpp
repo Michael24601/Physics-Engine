@@ -26,7 +26,7 @@ BoundingBox(polyhedron) {
 
 	int size = vertices.size();
 
-	// Convert vector of points to Eigen matrix
+	// Converting vector of points to Eigen matrix
 	Eigen::MatrixXd data(size, 3);
 	for (size_t i = 0; i < size; ++i) {
 		data.row(i) = Eigen::Vector3d(
@@ -36,51 +36,49 @@ BoundingBox(polyhedron) {
 		);
 	}
 
-	// Mean of the points
-	Eigen::Vector3d mean = data.colwise().mean();
-	// Center the data
-	Eigen::MatrixXd centered = data.rowwise() - mean.transpose();
-	// Covariance matrix of the points
-	Eigen::Matrix3d covariance = (centered.transpose() * centered)
-		/ double(size - 1);
+	Eigen::MatrixXd centered = data.rowwise() - data.colwise().mean();
+	Eigen::MatrixXd covariance = (centered.transpose() * centered) / double(size);
 
-	// Eigen decomposition
-	Eigen::SelfAdjointEigenSolver<Eigen::Matrix3d> solver(covariance);
-	if (solver.info() != Eigen::Success) {
-		throw std::runtime_error("Eigen decomposition failed");
+	// Computing eigenvalues and eigenvectors
+	Eigen::SelfAdjointEigenSolver<Eigen::MatrixXd> eigensolver(covariance);
+	if (eigensolver.info() != Eigen::Success) {
+		std::cerr << "Eigen decomposition failed." << std::endl;
+		return;
 	}
 
-	// Extract eigenvalues and eigenvectors
-	Eigen::Vector3d eigenValues = solver.eigenvalues();
-	Eigen::Matrix3d eigenVectors = solver.eigenvectors();
+	Eigen::VectorXd eigenvalues = eigensolver.eigenvalues();
+	Eigen::MatrixXd eigenvectors = eigensolver.eigenvectors();
 
-	// Pair the eigenvalues with their corresponding eigenvectors
-	std::vector<std::pair<double, Eigen::Vector3d>> eigenPairs;
-	for (int i = 0; i < 3; ++i) {
-		eigenPairs.emplace_back(eigenValues[i], eigenVectors.col(i));
-	}
-
-	// Sort pairs by eigenvalue in descending order to match expected axis order
-	std::sort(eigenPairs.begin(), eigenPairs.end(), [](const auto& a, const auto& b) {
-		return a.first > b.first;  // Descending order
-		});
-
-	// Construct the orientation matrix and halfsize vector
-	Eigen::Matrix3d orientationMatrix;
-	Eigen::Vector3d halfsizeVector;
-	for (int i = 0; i < 3; ++i) {
-		orientationMatrix.col(i) = eigenPairs[i].second;
-		halfsizeVector[i] = std::sqrt(std::abs(eigenPairs[i].first));
-	}
-
-	// Set the base orientation and halfsize
+	/*
+		We can then use the eigenvectors to find the base orientation of
+		the OBB (the orientation of the OBB when the object is still in
+		local coordinates.
+	*/
 	baseOrientation = Matrix3x3(
-		orientationMatrix(0, 0), orientationMatrix(0, 1), orientationMatrix(0, 2),
-		orientationMatrix(1, 0), orientationMatrix(1, 1), orientationMatrix(1, 2),
-		orientationMatrix(2, 0), orientationMatrix(2, 1), orientationMatrix(2, 2)
+		eigenvectors(0, 0), eigenvectors(0, 1), eigenvectors(0, 2),
+		eigenvectors(1, 0), eigenvectors(1, 1), eigenvectors(1, 2),
+		eigenvectors(2, 0), eigenvectors(2, 1), eigenvectors(2, 2)
 	);
 
-	halfsize = Vector3D(halfsizeVector.x(), halfsizeVector.y(), halfsizeVector.z());
+	// Centroid of the bounding box
+	Eigen::Vector3d center = data.colwise().mean();
+
+	/*
+		Here we rotate data to align with the coordinate axes and then
+		get the min.max values.
+	*/
+	Eigen::MatrixXd alignedData = (data.rowwise() - center.transpose()) *
+		eigenvectors;
+	Eigen::Vector3d minValues = alignedData.colwise().minCoeff();
+	Eigen::Vector3d maxValues = alignedData.colwise().maxCoeff();
+
+	// The half-size calculation
+	Eigen::Vector3d hs = (maxValues - minValues) * 0.5;
+	halfsize = Vector3D(hs.x(), hs.y(), hs.z());
+
+	// The offset from the object's local origin (centroid)
+	Eigen::Vector3d o = eigenvectors * center;
+	baseOffset = Vector3D(o.x(), o.y(), o.z());
 
 	// We call the update function to initialize the transform matrix
 	update(polyhedron);
