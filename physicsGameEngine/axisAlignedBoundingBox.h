@@ -1,5 +1,9 @@
 /*
 	Header file for class representing an axis-aligned bounding box.
+
+	The box can't be transformed using a transform matrix because it
+	is meant to remain axis aligned, and must be recalculated if used
+	on a moving, rotating rigid body.
 */
 
 #ifndef AXIS_ALIGNED_BOUNDING_BOX_H
@@ -13,6 +17,18 @@ namespace pe {
 
 	public:
 
+
+		AxisAlignedBoundingBox() :
+			BoundingBox(Vector3D::ZERO, Matrix3x3::IDENTITY, Vector3D::ZERO) {}
+
+
+		AxisAlignedBoundingBox(
+			const Vector3D& position,
+			const Matrix3x3& orientation,
+			const Vector3D& halfsize
+		) : BoundingBox(position, orientation, halfsize) {}
+
+
 		/*
 			Function that creates an AABB given a vector of points.
 			The offset that is output is the centroid of the AABB
@@ -20,11 +36,7 @@ namespace pe {
 			centroid or the origin of the world coordinate space in case
 			the points are given in world coordinates).
 		*/
-		static void calculateAABB(
-			const std::vector<Vector3D>& vertices,
-			Vector3D& offset,
-			Vector3D& halfsize
-		) {
+		void fit(const std::vector<Vector3D>& vertices) {
 
 			if (vertices.empty()) {
 				return;
@@ -56,41 +68,11 @@ namespace pe {
 				The offset will be equal to offset - centre of gravity = offset - 0
 				as the centre of gravity is 0 in local coordinates.
 			*/
-			offset = (maxCoord + minCoord) * 0.5;
+			position = (maxCoord + minCoord) * 0.5;
+
+			// The AABB is always orthogonal
+			orientation = Matrix3x3::IDENTITY;
 		}
-
-
-		AxisAlignedBoundingBox(
-			Polyhedron* polyhedron
-		) : BoundingBox(polyhedron) {
-			update(polyhedron);
-		}
-
-
-		void update(Polyhedron* polyhedron) override {
-			/*
-				First we transform all the points we have ito world coordinates.
-				Because the AABB must remain aligned to the world coordinate
-				system, we can't calculate it once and transform it along with
-				the polyhedron it encompasses.
-				Instead, we are forced to calculate the AABB each frame, using
-				the world coordinates of the polyhedron vertices. This means the
-				offset we get each time is an offset from the world origin,
-				meaning it is itself the centroid position of the AABB in world
-				coordinates. The orientation of the AABB is always the identity
-				as it is axis-aligned.
-			*/
-			std::vector<Vector3D> transformed(polyhedron->localVertices.size());
-			for (int i = 0; i < transformed.size(); i++) {
-				transformed[i] = polyhedron->getTransformMatrix().transform(
-					polyhedron->localVertices[i]
-				);
-			}
-			calculateAABB(transformed, baseOffset, halfsize);
-
-			transformMatrix = Matrix3x4(Matrix3x3::IDENTITY, baseOffset);
-		}
-
 	};
 }
 

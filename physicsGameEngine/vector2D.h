@@ -14,6 +14,8 @@ namespace pe {
 		real x;
 		real y;
 
+		// Static constants
+		static const Vector2D ZERO;
 
 		// No arg constructor
 		Vector2D() : x{ 0.0f }, y{ 0.0f } {}

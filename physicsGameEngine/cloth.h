@@ -2,110 +2,65 @@
 #ifndef CLOTH_H
 #define CLOTH_H
 
-#include "mesh.h"
-#include "particleBungeeForce.h"
-#include "particleSpringForce.h"
-#include "particleSpringDamper.h"
+#include "softObject.h"
 #include "particleDistanceConstraint.h"
-#include <vector>
 
 namespace pe {
 
-	class Cloth: public Mesh {
+	class Cloth: public SoftObject {
 
 	private:
 
-		// Distance constraints to maintain resting lengths
-		std::vector<ParticleDistanceConstraint> distanceConstraints;
 
-		/*
-			Returns a grid of particles between the top left and bottom
-			right corners, such as there are the specified number of
-			particles per column and row.
-		*/
-		static std::vector<Vector3D> returnParticleGrid(
-			int columnSize,
-			int rowSize,
-			Vector3D topLeft,
-			Vector3D bottomRight
-		);
-
-
-		// The egdes just correspond to the associations
-		std::vector<Edge*> calculateEdges();
-
-
-		std::vector<CurvedFace*> calculateFaces();
-
-
-		/*
-			Creates the forces and constraints.
-			Called in the subclass when the edges and faces have been set.
-		*/
-		void setForces();
-
-
-		void setConstraints();
-
-
-		virtual void calculateMeshNormals() override;
-
-
-		static real calculateTriangleArea(
-			const Vector3D& v0,
-			const Vector3D& v1,
-			const Vector3D& v2
+		static SoftObject generateSoftObject(
+			const std::pair<int, int>& sideDensity,
+			const std::pair<real, real>& sideLength,
+			const std::pair<Vector3D, Vector3D>& sideDirection,
+			const Vector3D& origin,
+			real mass,
+			real damping,
+			real structuralStifness,
+			real shearStifness,
+			real bendStiffness
 		);
 
 
 	public:
 
-		/*
-			Number of particles in the columns and rows.
-			Their product will be the total number of particles.
-		*/
-		int columnSize;
-		int rowSize;
+		// Number of particles in each row and column
+		std::pair<int, int> sideDensity;
+		
+		// The length of each row and column
+		std::pair<real, real> sideLength;
 
 		/*
-			Bungee force, where each force applies from one particle onto
-			the other (two sided).
+			The direction vector of each row and column
+			(must not be colinear).
+			They must also be normalized, but the
+			constructor normalizes them anyway.
 		*/
-		struct SpringForce {
-			ParticleSpringDamper force1;
-			ParticleSpringDamper force2;
-		};
+		std::pair<Vector3D, Vector3D> sideDirection;
 
-		std::vector<SpringForce> forces;
-		real ropeStrength;
-		real dampingConstant;
+		// The origin, kind of the lower left corner
+		Vector3D origin;
 
-		/*
-			If the mesh needs to be connected with forces like spring
-			forces, or cables, or rods, this needs to be initialized
-			in the constructor of the class extending this one.
-		*/
+		// Map that quickly returns the neighbors of a particle in the grid
+		std::vector<std::vector<int>> particleNeighbors;
+
 		Cloth(
-			Vector3D topLeft,
-			Vector3D bottomRight,
-			int rowSize,
-			int columnSize,
+			const std::pair<int, int>& sideDensity,
+			const std::pair<real, real>& sideLength,
+			const std::pair<Vector3D, Vector3D>& sideDirection,
+			const Vector3D& origin,
 			real mass,
 			real damping,
-			real ropeStrength,
-			real dampingConstant
+			real structuralStifness,
+			real shearStifness,
+			real bendStiffness
 		);
 
 
-		/*
-			Applies angle and distance constraints on the particles of the
-			mesh in order to add stability to the structure by preventing
-			the cloth from being too deformed.
-		*/
-		void applyConstraints();
-
-
-		void laplacianSmoothing(int iterations, real factor);
+		void applyLaplacianSmoothing(int iterations, real factor);
 
 	};
 }

@@ -23,7 +23,7 @@ namespace pe {
 			include the duration parameter in case the frame size affects
 			how the force affects the body.
 		*/
-		virtual void updateForce(RigidBody* body, real duration) = 0;
+		virtual void updateForce(RigidBody* body, real duration) const = 0;
 	};
 }
 

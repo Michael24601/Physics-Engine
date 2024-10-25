@@ -54,7 +54,7 @@ namespace pe {
 			Follows the formula of force = -k * (| d | -l0) * d where d is 
 			the vector (position - otherObjecsPosition)
 		*/
-		virtual void updateForce(Particle* particle, real duration);
+		void updateForce(Particle* particle, real duration) const override ;
 	};
 }
 

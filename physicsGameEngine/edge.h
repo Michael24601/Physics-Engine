@@ -1,5 +1,5 @@
 /*
-	Header file for class representing an edge in a Polyhedron.
+	Header file for class representing an edge in a mesh.
 */
 
 #ifndef EDGE_H
@@ -7,7 +7,6 @@
 
 #include "vector3D.h"
 #include "vector2D.h"
-#include "matrix3x4.h"
 #include "face.h"
 #include <vector>
 
@@ -17,29 +16,25 @@ namespace pe {
 
 	private:
 
-		std::vector<Vector3D>* vertices;
+		Mesh* mesh;
 
 	public:
 
-		std::pair<int, int> indices;
+		std::pair<int, int> indexes;
 
 		Edge() {}
 
 
-		Edge(
-			std::vector<Vector3D>* vertices,
-			int index1,
-			int index2
-		) : vertices{ vertices },
-			indices{ std::make_pair(index1, index2) } {}
+		Edge(Mesh* mesh, int index1, int index2) : 
+			mesh{ mesh }, indexes{ std::make_pair(index1, index2) } {}
 
 
-		inline Vector3D getVertex(int index) const {
+		inline const Vector3D& getVertex(const Mesh* mesh, int index) const {
 			if (index == 0) {
-				return (*vertices)[indices.first];
+				return mesh->getVertex(indexes.first);
 			}
 			else if (index == 1) {
-				return (*vertices)[indices.second];
+				return mesh->getVertex(indexes.second);
 			}
 			else {
 				throw new std::invalid_argument(
@@ -49,12 +44,12 @@ namespace pe {
 		}
 
 
-		inline int getIndex(int index) {
+		inline int getIndex(int index) const {
 			if (index == 0) {
-				return indices.first;
+				return indexes.first;
 			}
 			else if (index == 1) {
-				return indices.second;
+				return indexes.second;
 			}
 			else {
 				throw new std::invalid_argument(
@@ -64,8 +59,8 @@ namespace pe {
 		}
 
 
-		Vector3D getMidpoint() const {
-			return (getVertex(0) + getVertex(1)) * 0.5;
+		Vector3D getMidpoint(Mesh* mesh) const {
+			return (getVertex(mesh, 0) + getVertex(mesh, 1)) * 0.5;
 		}
 
 	};

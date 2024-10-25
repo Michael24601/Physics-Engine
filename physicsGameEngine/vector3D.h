@@ -71,12 +71,18 @@ namespace pe {
 		}
 
 		// Retunrs normalized vector without modifying the object
-				// Turn non-zero vector into one with unit length (1)
 		Vector3D normalized() const {
 			Vector3D newVector = *this;
 			newVector.normalize();
 			return newVector;
 		}
+
+
+		bool isColinear(const Vector3D& vector) const {
+			// We can use the magnitude squared as it is more efficient
+			return vectorProduct(vector).magnitudeSquared() == 0;
+		}
+
 
 		// Multiplication by a scalar (scaling the vector)
 		Vector3D operator*(const real scalar) const {

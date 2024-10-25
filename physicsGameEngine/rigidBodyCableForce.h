@@ -52,7 +52,7 @@ namespace pe {
 			RigidBody* otherBody, const Vector3D& otherConnectionPoint,
 			real length, real restitutionCoefficient);
 
-		virtual void updateForce(RigidBody* body, real duration);
+		virtual void updateForce(RigidBody* body, real duration) const override;
 	};
 }
 

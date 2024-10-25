@@ -53,7 +53,7 @@ namespace pe {
 			for other objects. When fully submerged (y < maxDepth), the
 			force is dv, where the proportion is 1.
 		*/
-		virtual void updateForce(Particle* particle, real duration);
+		virtual void updateForce(Particle* particle, real duration) const;
 	};
 }
 

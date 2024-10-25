@@ -26,7 +26,7 @@ namespace pe {
 
 		ParticleGravity(const Vector3D& gravity) : gravity{ gravity } {};
 
-		virtual void updateForce(Particle* particle, real duration);
+		void updateForce(Particle* particle, real duration) const override;
 	};
 }
 

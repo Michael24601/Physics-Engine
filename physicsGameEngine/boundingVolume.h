@@ -6,7 +6,8 @@
 #ifndef BOUNDING_VOLUME_H
 #define BOUNDING_VOLUME_H
 
-#include "polyhedron.h"
+#include "mesh.h"
+#include <vector>
 
 namespace pe {
 
@@ -15,61 +16,75 @@ namespace pe {
 	protected:
 
 		/*
-			Similar to the polyhedron, the bounding volume will have its own
-			transformation parameters that incorporates its orientation and
-			position in relation to the local coordinates of the polyhedron
-			(relative to the centroid of the polyhedron its axes).
-			This is because the centroid of the bounding volume may not be
-			at the centroid of the polyhedron (collection of vertices) it
-			encompasses. Likewise, the bounding volume might not initially
-			be aligned with the object's axes. This is because certain
-			bounding volumes may end up off centre and rotated in a bid to
-			be the best fit possible.
-			These parameters, the initial offset and rotation, tell us where
-			the bounding box is in relation to the centroid of the vertices
-			that were sent.
+			The orientation of the bounding volume.
+			Note that if the object being fit is in local coordinates,
+			we will get the bounding volume orientation in local coordinates,
+			which can then be transformed with the object's transform matrix.
 		*/
-		Matrix3x3 baseOrientation;
-
-		// The original offset (relative to the object's centroid)
-		Vector3D baseOffset;
+		Matrix3x3 orientation;
 
 		/*
-			The offset and orientation are relative to the polyhedron
-			the volumes are bound to. In order to know the position and
-			orientation of the objects in world coordinates, we may
-			however need to combine these with the transform matrix of
-			the polyhedron itself. This is the case with bounding volumes
-			such as oriented bounding boxes, but is not the case with
-			others, such as axis-aligned bounding boxes, which need to be
-			recalculated each frame.
-			Either way, the true orientation and position are stored in
-			this 3 by 4 matrix, which is updated each frame.
+			The position of the bounding volume.
+			Note that if the object being fit is in local coordinates,
+			we will get the bounding volume position in local coordinates,
+			which can then be transformed with the object's transform matrix.
 		*/
-		Matrix3x4 transformMatrix;
+		Vector3D position;
 
 	public:
 
-		// The vertices are expected to be in relative coordinates
-		BoundingVolume(Polyhedron* polyhedron) :
-			baseOrientation(Matrix3x3::IDENTITY),
-			baseOffset(Vector3D::ZERO),
-			transformMatrix(Matrix3x4::IDENTITY) {}
+		BoundingVolume() :
+			position{ Vector3D::ZERO }, 
+			orientation{ Matrix3x3::IDENTITY } {}
+
+
+		BoundingVolume(const Vector3D& position, const Matrix3x3& orientation) :
+			position{ position }, orientation{ orientation } {}
+
 
 		/*
-			Updates the bounding volume and its transform matrix
-			(possibly using the polyhedron's transform matrix).
+			Fits the volume to a mesh.
+			Note that if we already had a position and orientation and size
+			set, this function overrides them.
+
+			Note that depending on the bounding volume and shape we have,
+			it may be best to only call fit at the start, when the object
+			is in local coordinates, and keep the bounding volume in the
+			relative local basis. We can then use the transform matrix of
+			the object and combine it with the position and orientation of
+			the bounding volume to get the bounding volume location. This
+			is best done since the fit method is usually very slow, and can't
+			be called each frame.
+			The only exception is shapes that can't be transformed, such as
+			AABB, which must remain axis aligned.
 		*/
-		virtual void update(Polyhedron* polyhedron) = 0;
+		virtual void fit(const std::vector<Vector3D>& vertices) = 0;
 
 
+		/*
+			Returns the radius of the smallest sphere centered at
+			the same cooardinate as the volume, containing the volume.
+
+			Because the bounding volume hierarchy uses the sphere as a 
+			simple shape through which the coarse collision detection
+			phase can be done, all bounding volumes must be able to
+			return the smallest bounding sphere containing them, so that
+			the coarse collision detection phase can be done regardless
+			of what bounding volume an object has.
+			This won't necessarily be the smallest sphere containing the
+			object, but it will be the smallest sphere containing the
+			bounding volume.
+
+			This is close enough to what we need and very fast to calculate.
+		*/
+		virtual real getBVHSphereRadius() const = 0;
+
+
+		/*
+			Returns the position and orientation as a homogeneous matrix.
+		*/
 		Matrix3x4 getTransformMatrix() const {
-			return transformMatrix;
-		}
-
-
-		Vector3D getPosition() const {
-			return transformMatrix.getTranslation();
+			return Matrix3x4(orientation, position);
 		}
 
 	};

@@ -4,7 +4,7 @@
 
 using namespace pe;
 
-void ParticleDrag::updateForce(Particle* particle, real duration) {
+void ParticleDrag::updateForce(Particle* particle, real duration) const {
 	// Uses the formula defined in the header class file
 	Vector3D force = particle->velocity;
 	real dragCoefficient = force.magnitude();

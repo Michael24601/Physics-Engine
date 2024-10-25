@@ -5,7 +5,7 @@
 using namespace pe;
 
 // updateForce definition for the normal spring force class
-void ParticleBungeeForce::updateForce(Particle* particle, real duration) {
+void ParticleBungeeForce::updateForce(Particle* particle, real duration) const {
     // According to the formula defined in the header
     Vector3D force = particle->position;
     force -= otherParticle->position;

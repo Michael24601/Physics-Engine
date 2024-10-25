@@ -1,151 +1,231 @@
-/*
-	This is the header file for a Mesh class, which includes all
-	functionality related to keeping track of and updating the
-	particles, and the faces and edges they form.
-	It does not however, include any variables or functions related
-	to the forces or constraints that would typically be used to keep
-	the particles in a mesh connected. This is because the details
-	of how the particles are connected is left up to the subclasses.
-*/
 
 #ifndef MESH_H
 #define MESH_H
 
-#include "curvedFace.h"
+#include "vector3D.h"
+#include "face.h"
 #include "edge.h"
-#include "particle.h"
-#include <vector>
+#include "curvature.h"
+#include <numeric>
+#include "util.h"
+#include "renderer.h"
 
 namespace pe {
 
 	class Mesh {
 
-	protected:
+	private:
 
 		/*
-			Defines how the normals of the vertices should be calculated
-			(because the faces are all curved on a mesh, the faces need to
-			be told each frame what the vertex normals are).
-			It returns a vector where each entry is a vector containing the
-			normals of the vertices of each face of the mesh in order.
-			Should be overriden by subclasses.
+			If the mesh has a curvature, then we need to store the
+			vertex normals of each individual vertex in a face in this
+			vector.
+			Otherwise, it is left empty.
 		*/
-		virtual void calculateMeshNormals() = 0;
+		std::vector<std::vector<Vector3D>> vertexNormals;		
+		
+		// Vertices in local coordinates
+		std::vector<Vector3D> vertices;
 
-		void clearFacesAndEdges() {
-			for (int i = 0; i < edges.size(); i++) {
-				delete edges[i];
-			}
-			for (int i = 0; i < faces.size(); i++) {
-				delete faces[i];
-			}
-		}
+
+		// Indexes of the faces and edges
+		std::vector<Face> faces;
+		std::vector<Edge> edges;
+
 
 	public:
 
-		std::vector<Particle*> particles;
-		std::vector<Vector3D> particleNormals;
-
-		/*
-			The vertices, faces, and edges are given in global coordinates
-			because soft bodies like cloth have no transform matrix.
-			Note that the vertices are just the positions of the particles.
-		*/
-		std::vector<Vector3D> vertices;
-		std::vector<CurvedFace*> faces;
-		std::vector<Edge*> edges;
-
 		Mesh(
-			const std::vector<Vector3D> initialParticlePositions,
-			real mass,
-			real damping
-		) {
-			particles.resize(initialParticlePositions.size());
-			vertices.resize(particles.size());
-			particleNormals.resize(particles.size());
+			const std::vector<Vector3D>& vertices,
+			const std::vector<std::vector<int>>& faceIndexes,
+			const std::vector<std::pair<int, int>>& edgeIndexes
+		) : vertices{ vertices }, vertexNormals{ vertexNormals } {
 
-			// The initial values of the particles
-			for (int i = 0; i < initialParticlePositions.size(); i++) {
-				Particle* p = new Particle();
-				p->position = initialParticlePositions[i];
-				p->setMass(mass);
-				p->damping = damping;
-				particles[i] = p;
+			faces.resize(faceIndexes.size());
+			for (int i = 0; i < faces.size(); i++) {
+				faces[i] = Face(this, faceIndexes[i]);
+			}
 
-				vertices[i] = p->position;
+			edges.resize(edgeIndexes.size());
+			for (int i = 0; i < edges.size(); i++) {
+				edges[i] =Edge(
+					this, 
+					edgeIndexes[i].first, 
+					edgeIndexes[i].second
+				);
 			}
 		}
 
 
-		~Mesh() {
-			for (int i = 0; i < particles.size(); i++) {
-				delete particles[i];
-			}
-			clearFacesAndEdges();
-		}
-
-
-		void setFaces(std::vector<CurvedFace*> faces) {
-			this->faces = faces;
-		}
-
-
-		void setEdges(std::vector<Edge*> edges) {
-			this->edges = edges;
+		inline bool isCurved() const {
+			return vertexNormals.size() > 0;
 		}
 
 
 		/*
-			Updates the mesh each frame, by setting the position of the
-			global vertices as those of the particles, and updating the
-			vertex normals of each face using the function defined by the
-			subclass.
-			This should be called after integrating the particles (moving
-			them).
+			We can change the default vertex normals such that they are
+			distinct from the face normals; this is the case when we we have
+			a curved object we want to look smooth.
+			Ensures the dimentionality of the sent vertex normals matches the
+			number of faces and vertices in the faces.
 		*/
-		void update() {
-
-			/*
-				Then we need to recreate the Face and Edge objects. Because
-				we don't have a transform matrix, the faces and edes can't
-				hold the local vertices, but have to hold the global ones,
-				meaning they have to be recreated each frame as it is the
-				simplest way to recalculate the tangents and bitangents and
-				other values. This is done by using the formulas of these
-				values with the new vertices (if we had a transform matrix,
-				we could have also used it on these values).
-				The only excpetion is the vertex normals which need to be
-				calculated by the subclass of mesh, based on the particle
-				mesh we have (cloth, blob...).
-			*/
-
-			calculateMeshNormals();
-
-			/*
-				We then associate each particle's normal with vertices in each
-				face it features in so that we can return the normals as a vector
-				where each entry is a vector containing the normals of the vertices
-				of one face.
-			*/
-			std::vector<std::vector<Vector3D>> faceNormals(faces.size());
-			for (int i = 0; i < faces.size(); i++) {
-				for (int j = 0; j < faces[i]->getVertexNumber(); j++) {
-					faceNormals[i].push_back(particleNormals[faces[i]->getIndex(j)]);
-				}
+		void setVertexNormals(
+			const std::vector<std::vector<Vector3D>>& vertexNormals
+		) {
+			if (vertexNormals.size() != faces.size()) {
+				throw std::invalid_argument(
+					"The vertex normals must match the number of faces\n"
+				);
+				return;
 			}
 
-			for (int i = 0; i < particles.size(); i++) {
-				vertices[i] = particles[i]->position;
-			}
+			this->vertexNormals.clear();
+			this->vertexNormals.resize(faces.size());
 
 			for (int i = 0; i < faces.size(); i++) {
-				for (int j = 0; j < faceNormals[i].size(); j++) {
-					faces[i]->setNormal(j, faceNormals[i][j]);
+				if (faces[i].getVertexCount() != vertexNormals[i].size()) {
+					throw std::invalid_argument(
+						"The vertex normals must match the number of faces\n"
+					);
+					return;
 				}
-				faces[i]->recalculateFrameVectors();
+				this->vertexNormals[i] = vertexNormals[i];
 			}
 		}
+
+
+		/*
+			Returns the appropriate vertex normals based on whether the shape
+			is curved or not.
+		*/
+		Vector3D getVertexNormal(int faceIndex, int vertexIndex) const {
+			return vertexNormals[faceIndex][vertexIndex];
+		}
+
+
+		Vector3D getFaceVertex(int faceIndex, int vertexIndex) const {
+			return faces[faceIndex].getVertex(this, vertexIndex);
+		}
+
+
+		Vector3D getEdgeVertex(int edgeIndex, int vertexIndex) const {
+			return edges[edgeIndex].getVertex(this, vertexIndex);
+		}
+
+		const Face& getFace(int index) const {
+			return faces[index];
+		}
+
+		const Edge& getEdge(int index) const {
+			return edges[index];
+		}
+
+		const Vector3D& getVertex(int index) const {
+			return vertices[index];
+		}
+
+		const std::vector<Vector3D>& getVertices() const {
+			return vertices;
+		}
+
+		void setFaceTextureCoordinates(
+			int index, 
+			const std::vector<Vector2D>& uv
+		) {
+			faces[index].setTextureCoordinates(uv);
+		}
+		
+		/*
+			Setter for the vertices of the mesh.
+			The number of vertices sent must match the number of
+			vertices in the mesh (e.g. this function updates all the
+			vertexes, it does not set them.
+		*/
+		void updateVertices(const std::vector<Vector3D>& vertices) {
+			if (vertices.size() == this->vertices.size()) {
+				this->vertices = vertices;
+				for (Face& face : faces) {
+					// Updates the normals and centroids
+					face.update(this);
+				}
+			}
+			else {
+				throw std::invalid_argument(
+					"Vertex count must match the mesh"
+				);
+			}
+		}
+
+
+		int getFaceCount() const { 
+			return faces.size(); 
+		}
+
+		int getEdgeCount() const { 
+			return edges.size(); 
+		}
+
+		int getVertexCount() const {
+			return vertices.size();
+		}
+
+		/*
+			The given point is assumed to be in the same basis of coordinates
+			as the vertices. For instance, if the mesh is in its local coordinates
+			but the point is in global coordinates, we need to use the inverse
+			transform to get the point to the local basis.
+		*/
+		bool isPointInsideMesh(const Vector3D& point) const {
+
+			int intersectionCount = 0;
+
+			/*
+				We then need to construct a ray from the point to a point outside
+				the polyhedron. This was described as projecting the ray to
+				infinity. Parctically, what we do to ensure the point ends up
+				outside the polyhedron, is find the vertex furthest to the point
+				and project the ray from the point at least that far.
+			*/
+			real furthestDistance = findFurthestPointFromCoordinate(
+				point, this->vertices
+			).magnitude();
+
+			for (const Face& face : this->faces) {
+				// Here we check if the point is inside the current face
+				if (face.containsPoint(this, point, furthestDistance)) {
+					++intersectionCount;
+				}
+			}
+
+			/*
+				If the number of intersections is odd, the point is inside the
+				polyhedron.
+			*/
+			return (intersectionCount % 2) == 1;
+		}
+
+
+		/*
+			This function just ensures a curvature object matches the mesh
+			in terms of dimensionality (same number of faces, etc...).
+		*/
+		bool isValidCurvature(const Curvature& curvature) const {
+			if (curvature.curvatureMap.size() != getFaceCount()) {
+				return false;
+			}
+
+			for (int i = 0; i < getFaceCount(); i++) {
+				if (curvature.curvatureMap[i].size() != getFace(i).getVertexCount()) {
+					return false;
+				}
+			}
+
+			return true;
+		}
+
 	};
+
 }
+
 
 #endif

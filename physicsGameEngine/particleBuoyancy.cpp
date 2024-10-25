@@ -4,7 +4,7 @@
 
 using namespace pe;
 
-void ParticleBuoyancy::updateForce(Particle* particle, real duration) {
+void ParticleBuoyancy::updateForce(Particle* particle, real duration) const {
 
 	real particleDepth = particle->position.y;
 

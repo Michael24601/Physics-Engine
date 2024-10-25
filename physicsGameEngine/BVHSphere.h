@@ -1,4 +1,3 @@
-
 /*
 	Header file for a bounding volume hierarchy sphere.
 	The bounding volume type specifies the simple shape
@@ -22,9 +21,9 @@
 
 #include "vector3D.h"
 
-namespace pe{
+namespace pe {
 
-	class BHVSphere {
+	class BVHSphere {
 
 	public:
 
@@ -35,7 +34,7 @@ namespace pe{
 	public:
 
 		// Constructs a bounding volume sphere with a centre and radius
-        BHVSphere(const Vector3D& centre, real radius);
+		BVHSphere(const Vector3D& centre, real radius);
 
 		/*
 			Creates a bounding sphere that just barily contains two other
@@ -46,29 +45,29 @@ namespace pe{
 			bounding spheres, which wastes more space but is better
 			performance-wise.
 		*/
-		BHVSphere(
-			const BHVSphere& sphere1,
-			const BHVSphere& sphere2
+		BVHSphere(
+			const BVHSphere& sphere1,
+			const BVHSphere& sphere2
 		);
 
 		/*
 			Returns the volume of the bounding volume sphere.
 		*/
-		real getSize() const{
+		real getSize() const {
 			return ((real)1.333333) * PI * radius * radius * radius;
 		}
 
 		// Returns true if the calling object overlaps with 
-		bool overlaps(const BHVSphere* sphere) const;
+		bool overlaps(const BVHSphere* sphere) const;
 
 		/*
 			Returns how much the bounding volume sphere would have to grow
 			in order to encompass a new bounding sphere given as a parameter.
 			Used in order to determine where to insert a new body in the
 			BVH tree. Note that the new growth is given in terms of area, not
-			volume, as that is what the insertion algorithm needs to check. 
+			volume, as that is what the insertion algorithm needs to check.
 		*/
-		real getNewGrowth(const BHVSphere& newSphere) const;
+		real getNewGrowth(const BVHSphere& newSphere) const;
 	};
 }
 

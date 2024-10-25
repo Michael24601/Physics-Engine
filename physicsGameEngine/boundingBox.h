@@ -23,7 +23,16 @@ namespace pe{
 
 	public:
 
-		BoundingBox(Polyhedron* polyhedron) : BoundingVolume(polyhedron) {}
+		BoundingBox() :
+			BoundingVolume(Vector3D::ZERO, Matrix3x3::IDENTITY),
+			halfsize{ Vector3D::ZERO } {}
+
+
+		BoundingBox(
+			const Vector3D& position, 
+			const Matrix3x3& orientation,
+			const Vector3D& halfsize
+		) : BoundingVolume(position, orientation), halfsize{halfsize} {}
 
 
 		Vector3D getHalfsize() const {
@@ -31,9 +40,14 @@ namespace pe{
 		}
 
 
-		Vector3D getAxis(int index) const {
-			return transformMatrix.getColumnVector(index);
+		/*
+			The smallest sphere encompassing a box (centered at the
+			same place) is the one with the halfsize as its radius.
+		*/
+		real getBVHSphereRadius() const override {
+			return halfsize.magnitude();
 		}
+
 	};
 }
 

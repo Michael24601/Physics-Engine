@@ -34,7 +34,7 @@ namespace pe {
 			Follows the formula of force = -k * (| d | -l0) * d where d is
 			the vector (position - anchorPosition)
 		*/
-		virtual void updateForce(Particle* particle, real duration);
+		virtual void updateForce(Particle* particle, real duration) const;
 	};
 }
 

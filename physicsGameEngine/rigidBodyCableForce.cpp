@@ -12,7 +12,7 @@ RigidBodyCableForce::RigidBodyCableForce(const Vector3D& connectionPoint,
 	restitutionCoefficient{restitutionCoefficient} {}
 
 
-void RigidBodyCableForce::updateForce(RigidBody* body, real duration) {
+void RigidBodyCableForce::updateForce(RigidBody* body, real duration) const {
 	// Calculates the two ends in world space.
 	/*
 		UNCLEAR WHY BUT USING body->getPointInWorldCoordinates(connectionPoint)

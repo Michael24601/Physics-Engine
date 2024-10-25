@@ -35,13 +35,6 @@ namespace pe {
     // Function that returns true if the two primitives intersect
     bool testIntersection(const Polyhedron& C0, const Polyhedron& C1);
 
-
-    // Function that returns true if the two primitives intersect
-    bool testIntersection(
-        const Polyhedron& C0,
-        const Polyhedron& C1,
-        std::vector<Contact>& contacts
-    );
 }
 
 #endif

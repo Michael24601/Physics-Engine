@@ -382,9 +382,9 @@ unsigned int pe::boxAndSphere(
 }
 
 
-void pe::generateContactBoxAndBox(
-    const Cuboidal& one,
-    const Cuboidal& two,
+void pe::generateContacts(
+    const RigidObject& one,
+    const RigidObject& two,
     std::vector<Contact>& contacts,
     real restitution,
     real friction
@@ -392,55 +392,34 @@ void pe::generateContactBoxAndBox(
 
     std::vector<Contact> contactsGenerated;
 
-    Box boxOne(one);
-    Box boxTwo(two);
-    boxAndBox(boxOne, boxTwo, contactsGenerated);
+    if (one.boundingVolumeType == BOUNDING_VOLUME::BOX &&
+        two.boundingVolumeType == BOUNDING_VOLUME::BOX) {
 
-    for (Contact& contact : contactsGenerated) {
-        contact.restitution = restitution;
-        contact.friction = friction;
-
-        contacts.push_back(contact);
+        Box boxOne(one.boundingBox, one.body);
+        Box boxTwo(two.boundingBox, two.body);
+        boxAndBox(boxOne, boxTwo, contactsGenerated);
     }
-}
+    else if (one.boundingVolumeType == BOUNDING_VOLUME::SPHERE &&
+        two.boundingVolumeType == BOUNDING_VOLUME::SPHERE) {
 
-
-void pe::generateContactBoxAndSphere(
-    const Cuboidal& one,
-    const Spherical& two,
-    std::vector<Contact>& contacts,
-    real restitution,
-    real friction
-) {
-
-    std::vector<Contact> contactsGenerated;
-
-    Box box(one);
-    Ball sphere(two);
-    boxAndSphere(box, sphere, contactsGenerated);
-
-    for (Contact& contact : contactsGenerated) {
-        contact.restitution = restitution;
-        contact.friction = friction;
-
-        contacts.push_back(contact);
+        Ball ballOne(one.boundingSphere, one.body);
+        Ball ballTwo(two.boundingSphere, two.body);
+        sphereAndSphere(ballOne, ballTwo, contactsGenerated);
     }
-}
+    else if (one.boundingVolumeType == BOUNDING_VOLUME::BOX &&
+        two.boundingVolumeType == BOUNDING_VOLUME::SPHERE) {
 
+        Box boxOne(one.boundingBox, one.body);
+        Ball ballTwo(two.boundingSphere, two.body);
+        boxAndSphere(boxOne, ballTwo, contactsGenerated);
+    }
+    else if (one.boundingVolumeType == BOUNDING_VOLUME::SPHERE &&
+        two.boundingVolumeType == BOUNDING_VOLUME::BOX) {
 
-void pe::generateContactSphereAndSphere(
-    const Spherical& one,
-    const Spherical& two,
-    std::vector<Contact>& contacts,
-    real restitution,
-    real friction
-) {
-
-    std::vector<Contact> contactsGenerated;
-
-    Ball sphereOne(one);
-    Ball sphereTwo(two);
-    sphereAndSphere(sphereOne, sphereTwo, contactsGenerated);
+        Ball ballOne(one.boundingSphere, one.body);
+        Box boxTwo(two.boundingBox, two.body);
+        boxAndSphere(boxTwo, ballOne, contactsGenerated);
+    }
 
     for (Contact& contact : contactsGenerated) {
         contact.restitution = restitution;

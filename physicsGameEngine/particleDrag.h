@@ -26,7 +26,7 @@ namespace pe {
 
 		ParticleDrag(real k1, real k2) : k1{ k1 }, k2{ k2 }{}
 
-		virtual void updateForce(Particle* particle, real duration);
+		virtual void updateForce(Particle* particle, real duration) const;
 	};
 }
 

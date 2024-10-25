@@ -11,7 +11,7 @@ RigidBodySpringForce::RigidBodySpringForce(const Vector3D& connectionPoint,
 	springConstant{ springConstant }, restLength{restLength} {}
 
 
-void RigidBodySpringForce::updateForce(RigidBody* body, real duration) {
+void RigidBodySpringForce::updateForce(RigidBody* body, real duration) const {
 	// Calculate the two ends in world space.
 	/*
 		UNCLEAR WHY BUT USING body->getPointInWorldCoordinates(connectionPoint)

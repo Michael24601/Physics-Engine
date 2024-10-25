@@ -124,6 +124,27 @@ void RigidBody::calculateDerivedData() {
 
 }
 
+
+void RigidBody::setAngularDamping(real damping) {
+	if (damping > 1 || damping < 0) {
+		std::cerr << "The angular damping coefficient must be between 0.0 and 1.0\n";
+	}
+	else {
+		angularDamping = damping;
+	}
+}
+
+
+void RigidBody::setLinearDamping(real damping) {
+	if (damping > 1 || damping < 0) {
+		std::cerr << "The linear damping coefficient must be between 0.0 and 1.0\n";
+	}
+	else {
+		linearDamping = damping;
+	}
+}
+
+
 void RigidBody::setInertiaTensor(const Matrix3x3& inertiaTensor) {
 	inverseInertiaTensor.setInverse(inertiaTensor);
 }
@@ -249,10 +270,5 @@ Vector3D RigidBody::getPointInLocalCoordinates(const Vector3D& point) const {
 
 
 void RigidBody::setAwake(bool isAwake){
-	if (canSleep && !isAwake) {
-		this->isAwake = false;
-	}
-	else {
-		this->isAwake = true;
-	}
+	this->isAwake = isAwake;
 }

@@ -3,40 +3,43 @@
 #ifndef PYRAMID_H
 #define PYRAMID_H
 
-#include "polyhedron.h"
+#include "rigidObject.h"
+#include "orientedBoundingBox.h"
 
 namespace pe {
 
-	class Pyramid : public Cuboidal {
+	class Pyramid : public RigidObject<OrientedBoundingBox> {
 
 	private:
 
-		static std::vector<Edge*> generateEdges(
-			std::vector<Vector3D>& localVertices
-		) {
-			std::vector<Edge*> edges(8);
+		// Side length
+		real side;
+		real height;
 
-			// Define the edges of the pyramid
-			edges[0] = new Edge(&localVertices, 1, 2);
-			edges[1] = new Edge(&localVertices, 2, 3);
-			edges[2] = new Edge(&localVertices, 3, 4);
-			edges[3] = new Edge(&localVertices, 4, 1);
-			edges[4] = new Edge(&localVertices, 0, 1);
-			edges[5] = new Edge(&localVertices, 0, 2);
-			edges[6] = new Edge(&localVertices, 0, 3);
-			edges[7] = new Edge(&localVertices, 0, 4);
+	public:
 
-			return edges;
-		}
+		static Mesh* generateMesh(real side, real height) {
 
+			std::vector<Vector3D> vertices {
+				Vector3D(0, 3 * height / 4.0, 0),
+				Vector3D(-side / 2, -height / 4.0, -side / 2),
+				Vector3D(side / 2, -height / 4.0, -side / 2),
+				Vector3D(side / 2, -height / 4.0, side / 2),
+				Vector3D(-side / 2, -height / 4.0, side / 2),
+			};
 
-		// All vertices are in clockwise order
-		static std::vector<Face*> generateFaces(
-			std::vector<Vector3D>& localVertices
-		) {
-			std::vector<Face*> faces(5);
+			std::vector<std::pair<int, int>> edges{
+				std::make_pair(1, 2),
+				std::make_pair(2, 3),
+				std::make_pair(3, 4),
+				std::make_pair(4, 1),
+				std::make_pair(0, 1),
+				std::make_pair(0, 2),
+				std::make_pair(0, 3),
+				std::make_pair(0, 4)
+			};
 
-			std::vector<std::vector<int>> indexes{
+			std::vector<std::vector<int>> faces{
 				std::vector<int>{ 1, 2, 3, 4 },
 				std::vector<int>{0, 1, 4},
 				std::vector<int>{0, 4, 3},
@@ -44,60 +47,47 @@ namespace pe {
 				std::vector<int>{0, 2, 1}
 			};
 
-			for (int i = 0; i < indexes.size(); i++) {
-				faces[i] = new Face(
-					&localVertices,
-					indexes[i]
-				);
-			}
+			Mesh* mesh = new Mesh(vertices, faces, edges);
 
-			return faces;
+			return mesh;
 		}
 
-
-	public:
-
-		// Side length
-		real side;
-		real height;
 
 		Pyramid(
-			real side, 
-			real height, 
-			real mass,
-			Vector3D position,
-			RigidBody* body
-		) : 
-			Cuboidal(
-				mass,
-				position,
-				Matrix3x3(
-					(mass / 10.0)* (3 * side * side + height * height), 0, 0,
-					0, (mass / 10.0)* (3 * side * side + height * height), 0,
-					0, 0, (mass / 5.0)* side* side
-				),
-				std::vector<Vector3D>{
-					Vector3D(0, 3 * height / 4.0, 0),
-					Vector3D(-side / 2, -height / 4.0, -side / 2),
-					Vector3D(side / 2, -height / 4.0, -side / 2),
-					Vector3D(side / 2, -height / 4.0, side / 2),
-					Vector3D(-side / 2, -height / 4.0, side / 2),
-				},
-				body	
+			real side, real height,
+			const Vector3D& position,
+			const Quaternion& orientation,
+			real mass
+		) : RigidObject<OrientedBoundingBox>(
+			generateMesh(side, height),
+			new Renderer(mesh, GL_STATIC_DRAW, false),
+			/*
+				The centroid of the pyramid is one fourth of the way
+				up from the base. The bounding box is centred halfway
+				between the base and apex of the pyramid, so we have
+				to shift it by a quarter of the height.
+				The halfsize of the bounding box is half the side,
+				half the height, then half a side.
+			*/
+			new OrientedBoundingBox(
+				Vector3D(side/2.0, height/2.0, side/2.0), 
+				Vector3D(0, height/4.0, 0)
 			),
-			side{ side }, height{ height } {
+			position,
+			orientation,
+			mass,
+			Matrix3x3(
+				(mass / 10.0)* (3 * side * side + height * height), 0, 0,
+				0, (mass / 10.0)* (3 * side * side + height * height), 0,
+				0, 0, (mass / 5.0)* side* side
+			)
+		), side{ side }, height{ height} {}
 
-			setFaces(generateFaces(localVertices));
-			setEdges(generateEdges(localVertices));
-		}
-		
-		Face* getFace(int index) const {
-			return faces[index];
-		}
 
-
-		Edge* getEdge(int index) const {
-			return edges[index];
+		~Pyramid() {
+			delete mesh;
+			delete renderer;
+			delete boundingVolume;
 		}
 
 	};

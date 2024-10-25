@@ -4,7 +4,9 @@ in vec3 FragPos;
 in vec3 Normal;
 in vec2 TexCoord;
 
+uniform vec4 color;
 uniform sampler2D objectTexture;
+uniform bool useTexture;
 
 #define MAX_LIGHTS 10
 
@@ -24,12 +26,16 @@ void main(){
         finalDiffuse += diff * lightColors[i].rgb;
     }
 
-    vec4 texColor = texture(objectTexture, TexCoord);
+    vec4 objColor;
+    if(useTexture)
+        objColor = texture(objectTexture, TexCoord);
+    else
+        objColor = color;
 
     // This just ensures that when the texture is transparent
     // no color is rendered
-    if(texColor.a < 0.2)
+    if(objColor.a < 0.2)
         discard;
 
-    FragColor = vec4(texColor.rgb * (finalDiffuse + ambient), texColor.a);
+    FragColor = vec4(objColor.rgb * (finalDiffuse + ambient), objColor.a);
 }

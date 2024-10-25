@@ -37,17 +37,11 @@
     <Filter Include="Source Files\Collision">
       <UniqueIdentifier>{daf10cc5-698b-46c7-b412-42350ceef7af}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\ParticleMesh">
-      <UniqueIdentifier>{1aa70bbb-545d-4597-8b7f-bec87747f6db}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\Interfaces">
       <UniqueIdentifier>{7022ec70-1863-4c8a-8abd-87020da1f78d}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\Interfaces">
       <UniqueIdentifier>{52cde102-5ed5-42d9-b616-32e02268d7fd}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Polyhedron">
-      <UniqueIdentifier>{e5aad90b-164c-4750-bd25-a7f3e7990117}</UniqueIdentifier>
     </Filter>
     <Filter Include="Header Files\Primitive">
       <UniqueIdentifier>{49246ebe-a3d8-4983-ab6f-2430c2a94f09}</UniqueIdentifier>
@@ -57,12 +51,6 @@
     </Filter>
     <Filter Include="Header Files\Joint">
       <UniqueIdentifier>{9dd99029-89c0-4de7-809e-06ff8b7b4ae9}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Fracture">
-      <UniqueIdentifier>{713972cc-8650-433c-a957-7f4373e592ed}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\ParticleMesh">
-      <UniqueIdentifier>{b9331864-0fb9-464d-a0f9-2b07e6fbc5b6}</UniqueIdentifier>
     </Filter>
     <Filter Include="Header Files\Camera">
       <UniqueIdentifier>{c4df5a88-896d-4375-a291-d1a520f21bb8}</UniqueIdentifier>
@@ -75,9 +63,6 @@
     </Filter>
     <Filter Include="Source Files\GLSL Shaders">
       <UniqueIdentifier>{747ca941-f6c3-4729-a4c4-0f6692aa8f2d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\GLSL Shaders\Anisotropic Shader">
-      <UniqueIdentifier>{2c1decbb-25f5-41ec-b507-431d733994cf}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\GLSL Shaders\Cook Torrance Shader">
       <UniqueIdentifier>{40fdc51a-8e96-4e98-b8e8-6bf005f744cc}</UniqueIdentifier>
@@ -121,6 +106,18 @@
     <Filter Include="Header Files\BoundingVolumes">
       <UniqueIdentifier>{fd493833-b574-4e4c-aef0-1c6c59a9dde1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\BoundingVolumes">
+      <UniqueIdentifier>{1ac92eaf-c4ea-47ec-ad4e-97e0c5ecadd7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\SoftBodyPhysics">
+      <UniqueIdentifier>{1aa70bbb-545d-4597-8b7f-bec87747f6db}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\SoftBody.h">
+      <UniqueIdentifier>{b9331864-0fb9-464d-a0f9-2b07e6fbc5b6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\RigidObjects">
+      <UniqueIdentifier>{e5aad90b-164c-4750-bd25-a7f3e7990117}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="physicsGameEngine.cpp">
@@ -131,9 +128,6 @@
     </ClCompile>
     <ClCompile Include="anchoredSpringForce.cpp">
       <Filter>Source Files\ParticlePhysics</Filter>
-    </ClCompile>
-    <ClCompile Include="BVHSphere.cpp">
-      <Filter>Source Files\Collision</Filter>
     </ClCompile>
     <ClCompile Include="drawingUtil.cpp">
       <Filter>Source Files\OpenGL Graphics</Filter>
@@ -214,7 +208,7 @@
       <Filter>Source Files\Core</Filter>
     </ClCompile>
     <ClCompile Include="cloth.cpp">
-      <Filter>Source Files\ParticleMesh</Filter>
+      <Filter>Source Files\SoftBody.h</Filter>
     </ClCompile>
     <ClCompile Include="particleSpringDamper.cpp">
       <Filter>Source Files\ParticlePhysics</Filter>
@@ -252,10 +246,7 @@
     <ClCompile Include="gjk.cpp">
       <Filter>Source Files\Collision</Filter>
     </ClCompile>
-    <ClCompile Include="customPrimitive.cpp">
-      <Filter>Source Files\Polyhedron</Filter>
-    </ClCompile>
-    <ClCompile Include="polyhedron.cpp">
+    <ClCompile Include="importedMesh.cpp">
       <Filter>Source Files\Polyhedron</Filter>
     </ClCompile>
     <ClCompile Include="mirrors.cpp">
@@ -263,9 +254,6 @@
     </ClCompile>
     <ClCompile Include="clothCollision.cpp">
       <Filter>Source Files\Simulations</Filter>
-    </ClCompile>
-    <ClCompile Include="curvedFace.cpp">
-      <Filter>Source Files\Primitive</Filter>
     </ClCompile>
     <ClCompile Include="quaternion.cpp">
       <Filter>Source Files\Core</Filter>
@@ -279,8 +267,14 @@
     <ClCompile Include="Matrix3x4.cpp">
       <Filter>Source Files\Core</Filter>
     </ClCompile>
-    <ClCompile Include="orientedBoundingBox.cpp">
+    <ClCompile Include="BVHSphere.h">
+      <Filter>Header Files\Collision</Filter>
+    </ClCompile>
+    <ClCompile Include="BVHSphere.cpp">
       <Filter>Source Files\Collision</Filter>
+    </ClCompile>
+    <ClCompile Include="vector2D.cpp">
+      <Filter>Source Files\Core</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -298,9 +292,6 @@
     </ClInclude>
     <ClInclude Include="anchoredSpringForce.h">
       <Filter>Header Files\ParticlePhysics</Filter>
-    </ClInclude>
-    <ClInclude Include="BVHSphere.h">
-      <Filter>Header Files\Collision</Filter>
     </ClInclude>
     <ClInclude Include="boundingVolumeHierarchy.h">
       <Filter>Header Files\Collision</Filter>
@@ -375,10 +366,7 @@
       <Filter>Header Files\OpenGL Utilities</Filter>
     </ClInclude>
     <ClInclude Include="cloth.h">
-      <Filter>Header Files\ParticleMesh</Filter>
-    </ClInclude>
-    <ClInclude Include="vector3DAdapter.h">
-      <Filter>Header Files\ParticlePhysics</Filter>
+      <Filter>Header Files\SoftBodyPhysics</Filter>
     </ClInclude>
     <ClInclude Include="shaderInterface.h">
       <Filter>Header Files\Interfaces</Filter>
@@ -393,34 +381,13 @@
       <Filter>Header Files\Core</Filter>
     </ClInclude>
     <ClInclude Include="particleDistanceConstraint.h">
-      <Filter>Header Files\ParticleMesh</Filter>
+      <Filter>Header Files\SoftBodyPhysics</Filter>
     </ClInclude>
     <ClInclude Include="particleAngleConstraint.h">
-      <Filter>Header Files\ParticleMesh</Filter>
-    </ClInclude>
-    <ClInclude Include="cone.h">
-      <Filter>Header Files\Polyhedron</Filter>
-    </ClInclude>
-    <ClInclude Include="cylinder.h">
-      <Filter>Header Files\Polyhedron</Filter>
-    </ClInclude>
-    <ClInclude Include="polyhedron.h">
-      <Filter>Header Files\Polyhedron</Filter>
-    </ClInclude>
-    <ClInclude Include="pyramid.h">
-      <Filter>Header Files\Polyhedron</Filter>
-    </ClInclude>
-    <ClInclude Include="rectangularPrism.h">
-      <Filter>Header Files\Polyhedron</Filter>
-    </ClInclude>
-    <ClInclude Include="solidSphere.h">
-      <Filter>Header Files\Polyhedron</Filter>
+      <Filter>Header Files\SoftBodyPhysics</Filter>
     </ClInclude>
     <ClInclude Include="openglUtility.h">
       <Filter>Header Files\OpenGL Utilities</Filter>
-    </ClInclude>
-    <ClInclude Include="curvedFace.h">
-      <Filter>Header Files\Primitive</Filter>
     </ClInclude>
     <ClInclude Include="edge.h">
       <Filter>Header Files\Primitive</Filter>
@@ -455,16 +422,7 @@
     <ClInclude Include="fineCollisionDetection.h">
       <Filter>Header Files\Collision</Filter>
     </ClInclude>
-    <ClInclude Include="breakable.h">
-      <Filter>Header Files\Fracture</Filter>
-    </ClInclude>
     <ClInclude Include="gjk.h">
-      <Filter>Header Files\Collision</Filter>
-    </ClInclude>
-    <ClInclude Include="customPrimitive.h">
-      <Filter>Header Files\Polyhedron</Filter>
-    </ClInclude>
-    <ClInclude Include="collisionVolume.h">
       <Filter>Header Files\Collision</Filter>
     </ClInclude>
     <ClInclude Include="util.h">
@@ -484,18 +442,6 @@
     </ClInclude>
     <ClInclude Include="particleCollisionDetection.h">
       <Filter>Header Files\Collision</Filter>
-    </ClInclude>
-    <ClInclude Include="mesh.h">
-      <Filter>Header Files\ParticleMesh</Filter>
-    </ClInclude>
-    <ClInclude Include="anisotropicShader.frag.glsl">
-      <Filter>Source Files\GLSL Shaders\Anisotropic Shader</Filter>
-    </ClInclude>
-    <ClInclude Include="anisotropicTextureShader.vert.glsl">
-      <Filter>Source Files\GLSL Shaders\Anisotropic Shader</Filter>
-    </ClInclude>
-    <ClInclude Include="anisotropicTextureShader.frag.glsl">
-      <Filter>Source Files\GLSL Shaders\Anisotropic Shader</Filter>
     </ClInclude>
     <ClInclude Include="cookTorranceShader.vert.glsl">
       <Filter>Source Files\GLSL Shaders\Cook Torrance Shader</Filter>
@@ -608,29 +554,53 @@
     <ClInclude Include="boundingSphere.h">
       <Filter>Header Files\BoundingVolumes</Filter>
     </ClInclude>
-    <ClInclude Include="spherical.h">
-      <Filter>Header Files\BoundingVolumes</Filter>
+    <ClInclude Include="mesh.h">
+      <Filter>Header Files\Primitive</Filter>
     </ClInclude>
-    <ClInclude Include="cuboidal.h">
-      <Filter>Header Files\BoundingVolumes</Filter>
+    <ClInclude Include="curvature.h">
+      <Filter>Header Files\Primitive</Filter>
     </ClInclude>
-    <ClInclude Include="orthogonal.h">
-      <Filter>Header Files\BoundingVolumes</Filter>
+    <ClInclude Include="cone.h">
+      <Filter>Header Files\RigidObjects</Filter>
+    </ClInclude>
+    <ClInclude Include="cylinder.h">
+      <Filter>Header Files\RigidObjects</Filter>
+    </ClInclude>
+    <ClInclude Include="pyramid.h">
+      <Filter>Header Files\RigidObjects</Filter>
+    </ClInclude>
+    <ClInclude Include="cuboid.h">
+      <Filter>Header Files\RigidObjects</Filter>
+    </ClInclude>
+    <ClInclude Include="sphere.h">
+      <Filter>Header Files\RigidObjects</Filter>
+    </ClInclude>
+    <ClInclude Include="importedMesh.h">
+      <Filter>Header Files\RigidObjects</Filter>
+    </ClInclude>
+    <ClInclude Include="vertexBuffer.h">
+      <Filter>Header Files\OpenGL Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="softBody.h">
+      <Filter>Header Files\SoftBodyPhysics</Filter>
+    </ClInclude>
+    <ClInclude Include="inertiaTensorUtil.h">
+      <Filter>Header Files\RigidBodyPhysics</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer.h">
+      <Filter>Header Files\Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="softObject.h">
+      <Filter>Header Files\SoftBodyPhysics</Filter>
+    </ClInclude>
+    <ClInclude Include="rigidObject.h">
+      <Filter>Header Files\RigidObjects</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="todo.txt" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="anisotropicShader.vert.glsl">
-      <Filter>Source Files\GLSL Shaders\Anisotropic Shader</Filter>
-    </None>
-    <None Include="diffuseLightingShader.vert.glsl">
-      <Filter>Source Files\GLSL Shaders\Diffuse Lighting Shader</Filter>
-    </None>
-    <None Include="diffuseLightingShader.frag.glsl">
-      <Filter>Source Files\GLSL Shaders\Diffuse Lighting Shader</Filter>
-    </None>
     <None Include="diffuseTextureShader.frag.glsl">
       <Filter>Source Files\GLSL Shaders\Diffuse Lighting Shader</Filter>
     </None>
@@ -672,9 +642,6 @@
     </None>
     <None Include="textureShader.frag.glsl">
       <Filter>Source Files\GLSL Shaders\Texture Shader</Filter>
-    </None>
-    <None Include="advancedDiffuseTextureShader.frag.glsl">
-      <Filter>Source Files\GLSL Shaders\Diffuse Lighting Shader</Filter>
     </None>
     <None Include="shadowMappingTextureShader.vert.glsl">
       <Filter>Source Files\GLSL Shaders\Shadow Shader</Filter>

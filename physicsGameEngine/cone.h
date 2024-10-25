@@ -1,33 +1,28 @@
 
-
 #ifndef CONE_H
 #define CONE_H
 
-#include "polyhedron.h"
-#include "cuboidal.h"
+#include "rigidObject.h"
+#include "orientedBoundingBox.h"
 
 namespace pe {
 
-	class Cone : public Cuboidal {
+	class Cone : public RigidObject<OrientedBoundingBox> {
 
 	private:
 
-		/*
-			Defines the vertices of a tessalated cone with a certain radius,
-			height, and a number of segments (the more segments the more
-			it will look like a cone). 
-		*/
-		static std::vector<Vector3D> generateVertices(
-			const Vector3D& center,
-			real radius, 
-			real height, 
-			int segments
-		) {
+		real radius;
+		real height;
+		int segments;
+
+	public:
+
+		static Mesh* generateMesh(real radius, real height, int segments) {
 
 			std::vector<Vector3D> vertices;
 
 			// Adds the apex of the cone at the top
-			vertices.push_back(center + Vector3D(0.0f, height / 2.0f, 0.0f));
+			vertices.push_back(Vector3D(0.0f, 3 * height / 4.0f, 0.0f));
 
 			for (int i = 0; i <= segments; ++i) {
 				// Calculate the angle for each segment
@@ -35,87 +30,35 @@ namespace pe {
 					static_cast<real>(segments);
 
 				// Vertices of the current point on the base of the cone
-				Vector3D v_base = center + Vector3D(
+				Vector3D v_base = Vector3D(
 					radius * cos(theta),
-					-height / 2.0f,
+					-height / 4.0f,
 					radius * sin(theta)
 				);
 
 				vertices.push_back(v_base);
 			}
 
-			return vertices;
-		}
 
-
-		/*
-			Assumes the vertices and segment length have been set.
-		*/
-		static std::vector<Face*> generateFaces(
-			std::vector<Vector3D>& localVertices,
-			int segments
-		) {
-			std::vector<Face*> faces;
-
-			// Base face
-			std::vector<int> baseFaceIndexes;
-			for (int i = 1; i <= segments; i++) {
-				baseFaceIndexes.push_back(i);
-			}
-			Face* baseFace = new Face(
-				&localVertices,
-				baseFaceIndexes
-			);
-			faces.push_back(baseFace);
+			std::vector<std::vector<int>> faces;
 
 			// Side faces
 			for (int i = 1; i <= segments; ++i) {
 				int v0 = i;
 				int v1 = (i % segments) + 1;
 
-				std::vector<int> sideFaceIndexes = {
-					0, // Apex
-					v1,
-					v0
-				};
-
-				/*
-					Note that all the side faces are curved, unlike the base.
-					The normals of the two bottom vertices can be calculated
-					as the normal vector from the centroid of the base to
-					each of the vertices, and the normal at the apex of the
-					side face is the one between the two.
-
-					The normals are sent to the face in the same order as
-					the vertex indexes: counter-clockwise.
-				*/
-				Vector3D normalBase0 = localVertices[v0] - baseFace->getCentroid();
-				Vector3D normalBase1 = localVertices[v1] - baseFace->getCentroid();
-				Vector3D normalApex = normalBase0 + normalBase1;
-
-				std::vector<Vector3D> normals{
-					normalApex.normalized(),
-					normalBase1.normalized(),
-					normalBase0.normalized()
-				};
-
-				CurvedFace* sideFace = new CurvedFace(
-					&localVertices,
-					sideFaceIndexes,
-					normals
-				);
-				faces.push_back(sideFace);
+				faces.push_back(std::vector<int>{ 0, v1, v0 });
 			}
 
-			return faces;
-		}
+			// Base face
+			std::vector<int> baseFaceIndexes;
+			for (int i = 1; i <= segments; i++) {
+				baseFaceIndexes.push_back(i);
+			}
+			faces.push_back(baseFaceIndexes);
 
 
-		static std::vector<Edge*> generateEdges(
-			std::vector<Vector3D>& localVertices,
-			int segments
-		) {
-			std::vector<Edge*> edges;
+			std::vector<std::pair<int, int>> edges;
 
 			// Base edges
 			for (int i = 1; i <= segments; ++i) {
@@ -124,52 +67,90 @@ namespace pe {
 				int v1 = (i % segments) + 1;
 
 				// Connects vertices to form edges based on the side faces
-				Edge* edge = new Edge(&localVertices, v0, v1);
-				edges.push_back(edge);
+				edges.push_back(std::make_pair(v0, v1));
 			}
 
 			// Edges from the apex to the base vertices
 			for (int i = 1; i <= segments; ++i) {
-				Edge* edge = new Edge(&localVertices, 0, i);
-				edges.push_back(edge);
+				edges.push_back(std::make_pair(0, i));
 			}
 
-			return edges;
+			Mesh* mesh = new Mesh(vertices, faces, edges);
+			
+			// Vertex normals
+			std::vector<std::vector<Vector3D>> vertexNormals(mesh->getFaceCount());
+
+			for (int i = 0; i < mesh->getFaceCount(); i++) {
+
+				vertexNormals[i].resize(mesh->getFace(i).getVertexCount());
+
+				// Flat base
+				if (i == mesh->getFaceCount() - 1) {
+					for (int j = 0; j < mesh->getFace(i).getVertexCount(); j++) {
+						vertexNormals[i][j] = mesh->getFace(i).getNormal();
+					}
+				}
+				// For side faces, there are 3 vertices
+				else {
+					// Apex, has the reverse of the base
+					vertexNormals[i][0] = 
+						mesh->getFace(mesh->getFaceCount() - 1).getNormal().inverse();
+					/*
+						The normal of the side vertices is the normalized position
+						vector of the vertices relative to the centre of the cone,
+						but with a flat y-component.
+					*/
+					vertexNormals[i][1] = mesh->getFace(i).getVertex(mesh, 1);
+					vertexNormals[i][1].y = 0;
+					vertexNormals[i][1].normalize();
+					vertexNormals[i][2] = mesh->getFace(i).getVertex(mesh, 2);
+					vertexNormals[i][2].y = 0;
+					vertexNormals[i][2].normalize();
+				}
+			}
+
+			mesh->setVertexNormals(vertexNormals);
+			
+			return mesh;
 		}
 
-	public:
-
-		real radius;
-		real length;
-		int segments;
 
 		Cone(
-			real radius,
-			real length,
+			real radius, real height, int segments,
+			const Vector3D& position,
+			const Quaternion& orientation,
 			real mass,
-			int segments,
-			Vector3D position,
-			RigidBody* body
-		) :
-			Cuboidal(
-				mass,
-				position,
-				Matrix3x3(
-					(3.0 / 80.0)* mass* (radius* radius + 4.0 * length * length), 0, 0,
-					0, (3.0 / 80.0)* mass* (radius* radius + 4.0 * length * length), 0,
-					0, 0, (3.0 / 40.0)* mass* radius* radius
-				),
-				generateVertices(
-					Vector3D(0, 0, 0),
-					radius,
-					length,
-					segments
-				),
-				body
+			bool smooth
+		) : RigidObject<OrientedBoundingBox>(
+			generateMesh(radius, height, segments),
+			new Renderer(mesh, GL_STATIC_DRAW, smooth),
+			/*
+				The centroid of the cone is one fourth of the way
+				up from the base. The bounding box is centred halfway
+				between the base and apex of the pyramid, so we have
+				to shift it by a quarter of the height.
+				The halfsize of the bounding box is the radius,
+				half the height, then the radius.
+			*/
+			new OrientedBoundingBox(
+				Vector3D(radius, height / 2.0, radius),
+				Vector3D(0, height / 4.0, 0)
 			),
-			radius{ radius }, length{ length }, segments{ segments } {
-			setFaces(generateFaces(localVertices, segments));
-			setEdges(generateEdges(localVertices, segments));
+			position,
+			orientation,
+			mass,
+			Matrix3x3(
+				(3.0 / 80.0)* mass* (radius* radius + 4.0 * height * height), 0, 0,
+				0, (3.0 / 80.0)* mass* (radius* radius + 4.0 * height * height), 0,
+				0, 0, (3.0 / 40.0)* mass* radius* radius
+			)
+		), radius{ radius }, height{ height }, segments{segments} {}
+
+
+		~Cone() {
+			delete mesh;
+			delete renderer;
+			delete boundingVolume;
 		}
 
 	};

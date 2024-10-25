@@ -4,13 +4,13 @@
 using namespace pe;
 
 
-BHVSphere::BHVSphere(const Vector3D& centre, real radius) :
+BVHSphere::BVHSphere(const Vector3D& centre, real radius) :
     radius{ radius }, centre{ centre } {}
 
 
-BHVSphere::BHVSphere(
-    const BHVSphere& sphere1,
-    const BHVSphere& sphere2
+BVHSphere::BVHSphere(
+    const BVHSphere& sphere1,
+    const BVHSphere& sphere2
 ) {
     Vector3D centreTocentre = sphere2.centre - sphere1.centre;
     // We use the square of the distance to save on performance
@@ -64,25 +64,25 @@ BHVSphere::BHVSphere(
 }
 
 
-bool BHVSphere::overlaps(const BHVSphere* sphere) const {
-	/*
-		In order to determine that spheres intersect, all we need to do is
-		establish that the distance between the two centers is smaller 
-		than the sum of the radii. Note that we use the squares of the
-		distances here as they are less expensive to calculate.
-	*/
-	real distanceSquared = (centre - sphere->centre).magnitudeSquared();
-	return ((radius + sphere->radius) * (radius + sphere->radius)
-		> distanceSquared);
+bool BVHSphere::overlaps(const BVHSphere* sphere) const {
+    /*
+        In order to determine that spheres intersect, all we need to do is
+        establish that the distance between the two centers is smaller
+        than the sum of the radii. Note that we use the squares of the
+        distances here as they are less expensive to calculate.
+    */
+    real distanceSquared = (centre - sphere->centre).magnitudeSquared();
+    return ((radius + sphere->radius) * (radius + sphere->radius)
+        > distanceSquared);
 }
 
 
-real BHVSphere::getNewGrowth(const BHVSphere& newSphere) const {
+real BVHSphere::getNewGrowth(const BVHSphere& newSphere) const {
     /*
         To calculate the new growth, we can just create a new bounding
         sphere encompassing the calling object sphere new bounding sphere.
     */
-    BHVSphere encompassingSphere(*this, newSphere);
+    BVHSphere encompassingSphere(*this, newSphere);
 
     /*
         We then return the difference in size between the calling object

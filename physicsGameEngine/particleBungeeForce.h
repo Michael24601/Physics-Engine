@@ -33,7 +33,7 @@ namespace pe {
 			the vector (position - otherObjecsPosition). This formula is only
 			applicable when the rope is elongated, not compressed.
 		*/
-		virtual void updateForce(Particle* particle, real duration);
+		virtual void updateForce(Particle* particle, real duration) const;
 	};
 }
 

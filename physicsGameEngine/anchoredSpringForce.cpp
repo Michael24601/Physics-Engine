@@ -4,7 +4,7 @@
 
 using namespace pe;
 
-void AnchoredSpringForce::updateForce(Particle* particle, real duration) {
+void AnchoredSpringForce::updateForce(Particle* particle, real duration) const {
 	// According to the formula defined in the header
 	Vector3D force = particle->position;
 	force -= *anchor;

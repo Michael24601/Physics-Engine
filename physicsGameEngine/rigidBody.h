@@ -151,38 +151,53 @@ namespace pe {
 		real linearDamping;
 		real angularDamping;
 
-	public:
-
 		/*
 			A body is allowed to go to sleep when it has no motion,
 			or a low amount of motion, to alleviate having to integrate it
-			and check that it has collision. 
+			and check that it has collision.
 		*/
 		bool isAwake;
 
-		/**
-		* Holds the amount of motion of the body. This is a recency-
-		* weighted mean that can be used to put a body to sleep.
-		*/
-		real motion;
+	public:
 
-		/*
-			This is used to check how long the object was stationary.
-			It solves the issue of an object being put to sleep
-			after low motion in one frame while still moving.
-		*/
-		real consecutiveLowMotionTime = 0;
 
-		bool canSleep;
+		RigidBody() : isAwake{true} {};
 
-		RigidBody() : isAwake{ true }, canSleep{false} {};
+
+		RigidBody(
+			real mass,
+			const Matrix3x3& inertiaTensor,
+			const Vector3D& position = Vector3D::ZERO,
+			const Quaternion& orientation = Quaternion::IDENTITY
+		) : position{ position }, orientation{orientation}, isAwake {true} {
+			
+			setMass(mass);
+			setInertiaTensor(inertiaTensor);
+
+			angularDamping = 1;
+			linearDamping = 1;
+
+			// Initializes the transform matrix
+			calculateDerivedData();
+		}
+
+
+		void setAngularDamping(real damping);
+
+
+		void setLinearDamping(real damping);
+
 
 		/*
 			Calculates internal data of the object based on its state.
 			Used to update things like the transform matrix based on the
 			current orientation and orientation of the data.
+			Must also be used at the creation of the rigid body, so that
+			the transform matrix immediatly reflects the positions and
+			orientation of the object.
 		*/
 		void calculateDerivedData();
+
 
 		void setInertiaTensor(const Matrix3x3& inertiaTensor);
 

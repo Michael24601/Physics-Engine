@@ -1,5 +1,5 @@
 
-#include "customPrimitive.h"
+#include "importedMesh.h"
 
 using namespace pe;
 
@@ -102,11 +102,14 @@ static void pe::extractMeshInformation(
 
 static void pe::extractMeshFacesAndEdges(
     const std::string& filename,
-    std::vector<Vector3D>* localVertices,
+    const std::vector<Vector3D>& vertices,
     const std::vector<Vector3D>& normals,
     const std::vector<Vector2D>& textures,
-    std::vector<Face*>& faces,
-    std::vector<Edge*>& edges
+    std::vector<std::vector<int>>& faces,
+    std::vector<std::pair<int, int>>& edges,
+    std::vector<std::vector<Vector3D>>& vertexNormals,
+    std::vector<std::vector<Vector2D>>& faceTextureCoords,
+    std::vector<std::string>& faceTextureId
 ) {
 
     std::ifstream objFile(filename);
@@ -176,56 +179,33 @@ static void pe::extractMeshFacesAndEdges(
                 }
             }
 
-            // No vertex normals, so the faces are flat
-            if (faceType == FaceType::VertexTexture
-                || faceType == FaceType::VertexOnly) {
-                Face* face = new Face(
-                    localVertices,
-                    faceVertexIndeces
-                );
-
-                // If we have any textures, we can set tHem
-                if (faceTextures.size() > 0) {
-                    face->setTextureCoordinates(faceTextures);
-                }
-
-                face->texture = currentTexture;
-
-                faces.push_back(face);
+            // If we have any textures, we can set them
+            if (faceTextures.size() > 0) {
+                faceTextureCoords.push_back(faceTextures);
             }
-            else {
-
-                CurvedFace* face = new CurvedFace(
-                    localVertices,
-                    faceVertexIndeces,
-                    faceNormals
-                );
-
-                // If we have any textures, we can set tHem
-                if (faceTextures.size() > 0) {
-                    face->setTextureCoordinates(faceTextures);
-                }
-
-                face->texture = currentTexture;
-
-                faces.push_back(face);
+            faceTextureId.push_back(currentTexture);
+            faces.push_back(faceVertexIndeces);
+           
+            // No vertex normals, so the faces are flat
+            if (faceType == FaceType::VertexNormal
+                || faceType == FaceType::VertexNormalTexture) {
+                vertexNormals.push_back(faceNormals);
             }
         }
+
         // Otherwise the line is empty or a comment or something else
     }
 
     objFile.close();
 
     // Then for each face, we connect consecutive vertices with edges
-    for (Face* face : faces) {
-        int vertexNumber = face->getVertexNumber();
+    for (const auto& face : faces) {
+        int vertexNumber = face.size();
         for (int i = 0; i < vertexNumber; i++) {
-            Edge* edge = new Edge(
-                localVertices,
-                face->getIndex(i),
-                face->getIndex((i + 1) % vertexNumber)
-            );
-            edges.push_back(edge);
+            edges.push_back(std::make_pair(
+                face[i], 
+                face[(i + 1) % vertexNumber]
+            ));
         }
     }
 
@@ -260,105 +240,53 @@ void pe::centerOfGravityToOrigin(std::vector<Vector3D>& vectors) {
     }
 }
 
+Mesh* pe::extractMesh(std::string filename, real scale) {
 
-Matrix3x3 pe::approximateInertiaTensor(Polyhedron* polyhedron) {
-
-    AxisAlignedBoundingBox boundingBox(polyhedron);
-    Vector3D offset = boundingBox.getPosition();
-    Vector3D halfsize = boundingBox.getHalfsize();
-
-    // Minimum and maximum bounds
-    real minX = offset.x - halfsize.x;
-    real maxX = offset.x + halfsize.x;
-    real minY = offset.y - halfsize.y;
-    real maxY = offset.y + halfsize.y;
-    real minZ = offset.z - halfsize.z;
-    real maxZ = offset.z + halfsize.z;
-
-    std::vector<Vector3D> points;
-
-    // We can generate 1000 points
-    const int numPoints = 1000;
-    for (int i = 0; i < numPoints; i++) {
-        real randX = generateRandomNumber(minX, maxX);
-        real randY = generateRandomNumber(minY, maxY);
-        real randZ = generateRandomNumber(minZ, maxZ);
-
-        Vector3D randomPoint(randX, randY, randZ);
-        if (polyhedron->isPointInsidePolyhedron(randomPoint)) {
-            points.push_back(randomPoint);
-        }
-    }
-
-    real pointMass = polyhedron->body->getMass() / (real)numPoints;
-
-    real matrixEntry[3][3]{ {0, 0, 0}, {0, 0, 0}, {0, 0, 0} };
-    real sum{ 0 };
-    for (const Vector3D& point : points) {
-        real distanceSquared = point.magnitudeSquared();
-
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                int delta = (i == j ? 1 : 0);
-
-                /*
-                    Here, point[0] = point.x, point[1] = point.y,
-                    and point[2] = point.z.
-                */
-                matrixEntry[i][j] += pointMass
-                    * (distanceSquared * delta - point[i] * point[j]);
-            }
-        }
-    }
-
-    return Matrix3x3(
-        matrixEntry[0][0], matrixEntry[0][1], matrixEntry[0][2],
-        matrixEntry[1][0], matrixEntry[1][1], matrixEntry[1][2],
-        matrixEntry[2][0], matrixEntry[2][1], matrixEntry[2][2]
-    );
-}
-
-
-Polyhedron pe::returnPrimitive(
-    std::string filename,
-    real mass,
-    const Vector3D& position,
-    RigidBody* body,
-    real scale
-) {
-    std::vector<Vector3D> localVertices;
+    std::vector<Vector3D> vertices;
     std::vector<Vector3D> normals;
     std::vector<Vector2D> textures;
 
-    extractMeshInformation(filename, localVertices, normals, textures);
-    centerOfGravityToOrigin(localVertices);
+    extractMeshInformation(filename, vertices, normals, textures);
+    centerOfGravityToOrigin(vertices);
 
-    for (Vector3D& vertex : localVertices) {
+    for (Vector3D& vertex : vertices) {
         vertex *= scale;
     }
 
-    // We can for now just pick the default empty interia tensor.
-    Polyhedron polyhedron(
-        mass, position, Matrix3x3(), localVertices, body
-    );
-
-    Matrix3x3 inertiaTensor = approximateInertiaTensor(&polyhedron);
-    polyhedron.body->setInertiaTensor(inertiaTensor);
-
-    std::vector<Face*> faces;
-    std::vector<Edge*> edges;
+    std::vector<std::vector<int>> faces;
+    std::vector<std::pair<int, int>> edges;
+    std::vector<std::vector<Vector3D>> vertexNormals;
+    std::vector<std::string> faceTextureId;
+    std::vector<std::vector<Vector2D>> faceTextureCoords;
 
     extractMeshFacesAndEdges(
         filename,
-        &polyhedron.localVertices,
+        vertices,
         normals,
         textures,
         faces,
-        edges
+        edges,
+        vertexNormals,
+        faceTextureCoords,
+        faceTextureId
     );
 
-    polyhedron.setFaces(faces);
-    polyhedron.setEdges(edges);
+    Mesh* mesh = new Mesh(vertices, faces, edges);
 
-    return polyhedron;
+    // If we have the required vertex normals
+    if(vertexNormals.size() == faces.size()){
+        mesh->setVertexNormals(vertexNormals);
+    }
+
+    // Texture mapping information 
+    if (faceTextureCoords.size() == faces.size()) {
+        for (int i = 0; i < faces.size(); i++) {
+            mesh->setFaceTextureCoordinates(i, faceTextureCoords[i]);
+
+            // TODO: FIX THIS
+            //mesh->getFace(i).texture = faceTextureId[i];
+        }
+    }
+
+    return mesh;
 }

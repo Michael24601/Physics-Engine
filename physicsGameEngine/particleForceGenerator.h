@@ -23,7 +23,7 @@ namespace pe {
 			include the duration parameter in case the frame size affects 
 			how the force affects the particle.
 		*/
-		virtual void updateForce(Particle* particle, real duration) = 0;
+		virtual void updateForce(Particle* particle, real duration) const = 0;
 	};
 }
 

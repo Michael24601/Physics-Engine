@@ -24,7 +24,7 @@ namespace pe {
 
 		RigidBodyGravity(const Vector3D& gravity) : gravity{ gravity } {};
 
-		virtual void updateForce(RigidBody* body, real duration);
+		virtual void updateForce(RigidBody* body, real duration) const override;
 	};
 }
 

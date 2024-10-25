@@ -58,25 +58,24 @@
 
 namespace pe {
 
-	template<class BoundingVolumeClass>
 	class BoundingVolumeHierarchy {
 
 	private:
 
 		// Represents the root of the tree
-		BVHNode<BoundingVolumeClass>* root;
+		BVHNode* root;
 
 	public:
 
 		BoundingVolumeHierarchy() : root {nullptr} {}
 
 		/*
-			Inserts a polyhedron accompanied by its bounding volume into
-			the tree.
+			Inserts an index corresponding to a body accompanied by its
+			bounding volume into the tree.
 		*/
 		void insert(
-			Polyhedron* polyhedron,
-			const BoundingVolumeClass& boundingVolume
+			int index,
+			const BVHSphere& boundingVolume
 		);
 
 		/*
@@ -85,11 +84,11 @@ namespace pe {
 			recalculating the bounding volumes for the ancestors and making
 			the sibling the parent.
 		*/
-		void removeSubtree(BVHNode<BoundingVolumeClass>* node);
+		void removeSubtree(BVHNode* node);
 
 		
 		// Remove later
-		void displayAux(std::ostream& out, BVHNode<BoundingVolumeClass>* ptr, int indent) {
+		void displayAux(std::ostream& out, BVHNode* ptr, int indent) {
 			if (ptr == NULL)
 				return;
 			displayAux(out, ptr->children[0], indent + 16);
@@ -97,12 +96,12 @@ namespace pe {
 			real radius = ptr->boundingVolume.radius;
 			std::cout << std::setw(indent) << " " << centre.x << " "
 				<< centre.y << " " << centre.z << " " << radius << " "
-				<< ptr->polyhedron << "\n";
+				<< ptr->index << "\n";
 			displayAux(out, ptr->children[1], indent + 16);
 		}
 
 
-		BVHNode<BoundingVolumeClass>* getRoot() {
+		BVHNode* getRoot() {
 			return root;
 		}
 
@@ -110,27 +109,24 @@ namespace pe {
 
 	// Function definitions (included in header because of the template)
 
-	template<class BoundingVolumeClass>
-	void BoundingVolumeHierarchy<BoundingVolumeClass>::insert(
-		Polyhedron* polyhedron, 
-		const BoundingVolumeClass& boundingVolume
+	void BoundingVolumeHierarchy::insert(
+		int index,
+		const BVHSphere& boundingVolume
 	) {
 		// If the tree is empty, create a root with the body in it, and no parent
 		if (root == nullptr) {
-			root = new BVHNode<BoundingVolumeClass>(
-				polyhedron, boundingVolume, nullptr
+			root = new BVHNode(
+				index, boundingVolume, nullptr
 			);
 		}
 		// Otherwise, call the insert function at the root
 		else {
-			root->insertInSubtree(polyhedron, boundingVolume);
+			root->insertInSubtree(index, boundingVolume);
 		}
 	}
 
 
-	template<class BoundingVolumeClass>
-	void BoundingVolumeHierarchy<BoundingVolumeClass>::removeSubtree(
-		BVHNode<BoundingVolumeClass>* node) {
+	void BoundingVolumeHierarchy::removeSubtree(BVHNode* node) {
 		node->~BVHNode();
 	}
 }

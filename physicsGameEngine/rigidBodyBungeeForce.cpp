@@ -11,7 +11,7 @@ RigidBodyBungeeForce::RigidBodyBungeeForce(const Vector3D& connectionPoint,
 	springConstant{ springConstant }, restLength{ restLength } {}
 
 
-void RigidBodyBungeeForce::updateForce(RigidBody* body, real duration) {
+void RigidBodyBungeeForce::updateForce(RigidBody* body, real duration) const {
 	// Calculate the two ends in world space.
 	/*
 		UNCLEAR WHY BUT USING body->getPointInWorldCoordinates(connectionPoint)

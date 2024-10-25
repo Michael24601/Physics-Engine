@@ -16,8 +16,7 @@ void RigidBodyWorld::startFrame() {
 	}
 }
 
-void RigidBodyWorld::runPhysics(real duration)
-{
+void RigidBodyWorld::runPhysics(real duration){
 	// First apply the force generators, then integrate the objects
 	RigidBodyRegistrationPtr ptr = firstRigidBody;
 	while (ptr){

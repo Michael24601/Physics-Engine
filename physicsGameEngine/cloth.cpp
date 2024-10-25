@@ -5,308 +5,280 @@ using namespace pe;
 
 
 Cloth::Cloth(
-	Vector3D topLeft,
-	Vector3D bottomRight,
-	int rowSize,
-	int columnSize,
+	const std::pair<int, int>& sideDensity,
+	const std::pair<real, real>& sideLength,
+	const std::pair<Vector3D, Vector3D>& sideDirection,
+	const Vector3D& origin,
 	real mass,
 	real damping,
-	real ropeStrength,
-	real dampingConstant
-) : 
-	Mesh(
-		returnParticleGrid(
-			columnSize,
-			rowSize,
-			topLeft,
-			bottomRight
-		),
-		mass,
-		damping
-	),
-	rowSize{ rowSize },
-	columnSize{ columnSize },
-	ropeStrength{ ropeStrength },
-	dampingConstant{dampingConstant} {
-
-	setFaces(calculateFaces());
-	setEdges(calculateEdges());
-
-	setForces();
-	setConstraints();
-}
-
-
-real Cloth::calculateTriangleArea(
-	const Vector3D& v0, 
-	const Vector3D& v1, 
-	const Vector3D& v2
+	real structuralStifness,
+	real shearStifness,
+	real bendStiffness
+) : SoftObject(std::move(
+		generateSoftObject(
+		sideDensity, sideLength, sideDirection,
+		origin, mass, damping, structuralStifness, 
+		shearStifness, bendStiffness
+	))
 ) {
-	real a = (v1 - v0).magnitude();
-	real b = (v2 - v1).magnitude();
-	real c = (v0 - v2).magnitude();
-	// Semiperimeter
-	real s = (a + b + c) / 2.0;
-	// Heron's formula
-	return realSqrt(s * (s - a) * (s - b) * (s - c));
-}
+	
+	particleNeighbors.resize(body.particles.size());
 
+	for (int n = 0; n < body.particles.size(); n++) {
 
-std::vector<pe::Vector3D>  Cloth::returnParticleGrid(
-	int columnSize,
-	int rowSize,
-	Vector3D topLeft,
-	Vector3D bottomRight
-) {
-	std::vector<Vector3D> positions;
+		int particlesX = sideDensity.first;
+		int particlesY = sideDensity.second;
 
-	// Step sizes
-	real columnStep = (bottomRight.x - topLeft.x) /
-		static_cast<real>(columnSize - 1);
-	real rowStep = (bottomRight.y - topLeft.y) /
-		static_cast<real>(rowSize - 1);
+		// Converting 1D index to 2D grid coordinates
+		int i = n / particlesX;
+		int j = n % particlesX;
 
-	for (int row = 0; row < rowSize; ++row) {
-		for (int col = 0; col < columnSize; ++col) {
-			real x = topLeft.x + col * columnStep;
-			real y = topLeft.y + row * rowStep;
-			real z = topLeft.z + (bottomRight.z - topLeft.z) *
-				(col) / (columnSize - 1);
-
-			positions.push_back(Vector3D(x, y, z));
-		}
+		// Top
+		if (i > 0) 
+			particleNeighbors[n].push_back((i - 1) * particlesX + j);
+		// Bottom
+		if (i < particlesY - 1) 
+			particleNeighbors[n].push_back((i + 1) * particlesX + j);
+		// Left
+		if (j > 0) 
+			particleNeighbors[n].push_back(i * particlesX + (j - 1));
+		// Right
+		if (j < particlesX - 1) 
+			particleNeighbors[n].push_back(i * particlesX + (j + 1));
 	}
 
-	return positions;
 }
 
 
-std::vector<Edge*> Cloth::calculateEdges() {
+SoftObject Cloth::generateSoftObject(
+	const std::pair<int, int>& sideDensity,
+	const std::pair<real, real>& sideLength,
+	const std::pair<Vector3D, Vector3D>& sideDirection,
+	const Vector3D& origin,
+	real mass,
+	real damping,
+	real structuralStiffness,
+	real shearStiffness,
+	real bendStiffness
+) {
 
-	std::vector<Edge*> edges;
+	std::vector<Vector3D> particleGrid;
 
-	/*
-		Note that we only include unique edges: if we have
-		an edge from particle i to j, we don't also include one
-		from j to i.
-	*/
-	for (int i = 0; i < columnSize * rowSize; i++) {
-		// Structural links (horizontal and vertical)
-		if (i >= rowSize) {
-			edges.push_back(
-				new Edge(&vertices, i, i - rowSize)
-			);
-		}
-		if (i % rowSize != 0) {
-			edges.push_back(
-				new Edge(&vertices, i, i - 1)
-			);
-		}
-		// Diagonals (shear)
-		if (i >= rowSize && i % rowSize != 0) {
-			edges.push_back(
-				new Edge(&vertices, i, i - rowSize - 1)
-			);
-		}
-		if (i >= rowSize && (i + 1) % rowSize != 0) {
-			edges.push_back(
-				new Edge(&vertices, i, i - rowSize + 1)
-			);
-		}
-	}
+	// The step size in each direction
+	real step1 = sideLength.first / (sideDensity.first - 1);
+	real step2 = sideLength.second / (sideDensity.second - 1);
 
-	return edges;
-}
-
-
-std::vector<CurvedFace*> Cloth::calculateFaces() {
-
-	std::vector<CurvedFace*> faces;
-
-	for (int i = 0; i < columnSize - 1; i++) {
-		for (int j = 0; j < rowSize - 1; j++) {
-
-			/*
-				The faces are triangles which make up the squares
-				connecting 4 vertices nect to each other in the mesh.
-			*/
-			std::vector<int> indexes[2]{
-				{
-					i * rowSize + j,
-					(i + 1) * rowSize + j,
-					(i + 1) * rowSize + (j + 1)
-				},
-				{
-					(i + 1) * rowSize + (j + 1),
-					i * rowSize + (j + 1),
-					i * rowSize + j
-				}
-			};
-
-
-			std::vector<Vector2D> uv[2]{
-				{
-					Vector2D(i * (1.0 / rowSize), j * (1.0 / columnSize)),
-					Vector2D((i + 1) * (1.0 / rowSize), j * (1.0 / columnSize)),
-					Vector2D((i + 1) * (1.0 / rowSize), (j + 1) * (1.0 / columnSize))
-				},
-				{
-					Vector2D((i + 1) * (1.0 / rowSize), (j + 1) * (1.0 / columnSize)),
-					Vector2D(i * (1.0 / rowSize), (j + 1) * (1.0 / columnSize)),
-					Vector2D(i * (1.0 / rowSize), j * (1.0 / columnSize))
-				}
-			};
-
-			for (int i = 0; i < 2; i++) {
-
-				// The normals are not initially set, but will be calculated each frame
-				std::vector<Vector3D>faceNormals(indexes[i].size(), Vector3D());
-
-				CurvedFace* face = new CurvedFace(
-					&vertices,
-					indexes[i],
-					faceNormals
+	for (int i = 0; i < sideDensity.first; ++i) {
+		for (int j = 0; j < sideDensity.second; ++j) {
+			// Particle position
+			Vector3D particle = (
+				origin + sideDirection.first * (i * step1) +
+				sideDirection.second * (j * step2)
 				);
 
-				face->setTextureCoordinates(uv[i]);
-				faces.push_back(face);
+			particleGrid.push_back(particle);
+		}
+	}
+
+	int particlesX = sideDensity.first;
+	int particlesY = sideDensity.second;
+
+	// Generating the mesh, whose vertices are the particles themselves
+	std::vector<std::vector<int>> faces;
+	std::vector<std::pair<int, int>> edges;
+
+	// We also generate the spring pairs and strengths
+	std::vector<std::pair<int, int>> springPairs;
+	std::vector<real> springStrengths;
+
+	for (int i = 0; i < particlesY; i++) {
+		for (int j = 0; j < particlesX; j++) {
+
+			// Flattened index of the current particle
+			int current = i * particlesX + j;
+
+			/*
+				Structural Springs(to right and below) with bidirectional
+				pairs.
+			*/
+			if (j < particlesX - 1) {
+				int right = current + 1;
+				edges.push_back({ current, right });
+				springPairs.push_back({ current, right });
+				springPairs.push_back({ right, current });
+				springStrengths.push_back(structuralStiffness);
+				springStrengths.push_back(structuralStiffness);
+			}
+			if (i < particlesY - 1) {
+				int bottom = current + particlesX;
+				edges.push_back({ current, bottom });
+				springPairs.push_back({ current, bottom });
+				springPairs.push_back({ bottom, current });
+				springStrengths.push_back(structuralStiffness);
+				springStrengths.push_back(structuralStiffness);
+			}
+
+			// Shear Springs (diagonals) with bidirectional pairs
+			if (i < particlesY - 1 && j < particlesX - 1) {
+				int bottomRight = current + particlesX + 1;
+				springPairs.push_back({ current, bottomRight });
+				springPairs.push_back({ bottomRight, current });
+				springStrengths.push_back(shearStiffness);
+				springStrengths.push_back(shearStiffness);
+			}
+			if (i < particlesY - 1 && j > 0) {
+				int bottomLeft = current + particlesX - 1;
+				springPairs.push_back({ current, bottomLeft });
+				springPairs.push_back({ bottomLeft, current });
+				springStrengths.push_back(shearStiffness);
+				springStrengths.push_back(shearStiffness);
+			}
+
+			/*
+				Bend Springs(two steps to the right, bottom,
+				diagonals) with bidirectional pairs.
+			*/
+			if (j < particlesX - 2) {
+				int twoRight = current + 2;
+				springPairs.push_back({ current, twoRight });
+				springPairs.push_back({ twoRight, current });
+				springStrengths.push_back(bendStiffness);
+				springStrengths.push_back(bendStiffness);
+			}
+			if (i < particlesY - 2) { // Two steps below
+				int twoDown = current + 2 * particlesX;
+				springPairs.push_back({ current, twoDown });
+				springPairs.push_back({ twoDown, current });
+				springStrengths.push_back(bendStiffness);
+				springStrengths.push_back(bendStiffness);
+			}
+			if (i < particlesY - 2 && j < particlesX - 2) {
+				int twoDownRight = current + 2 * particlesX + 2;
+				springPairs.push_back({ current, twoDownRight });
+				springPairs.push_back({ twoDownRight, current });
+				springStrengths.push_back(bendStiffness);
+				springStrengths.push_back(bendStiffness);
+			}
+			if (i < particlesY - 2 && j > 1) {
+				int twoDownLeft = current + 2 * particlesX - 2;
+				springPairs.push_back({ current, twoDownLeft });
+				springPairs.push_back({ twoDownLeft, current });
+				springStrengths.push_back(bendStiffness);
+				springStrengths.push_back(bendStiffness);
+			}
+
+			// The faces
+			if (i < particlesY - 1 && j < particlesX - 1) {
+				int bottomLeft = current + particlesX;
+				int bottomRight = current + particlesX + 1;
+				int topRight = current + 1;
+				faces.push_back(
+					{ current, topRight, bottomRight, bottomLeft }
+				);
 			}
 		}
 	}
 
-	return faces;
-}
 
-
-void Cloth::setForces() {
-
-	for (Edge* edge : edges) {
-		Vector3D distanceVector = vertices[edge->getIndex(0)] -
-			vertices[edge->getIndex(1)];
-		real distance = distanceVector.magnitude();
-
-		// Adds the bungee force for each edge twice (one from each particle)
-		SpringForce force{
-			ParticleSpringDamper(
-				particles[edge->getIndex(1)],
-				ropeStrength,
-				dampingConstant,
-				distance
-			),
-			ParticleSpringDamper(
-				particles[edge->getIndex(0)],
-				ropeStrength,
-				dampingConstant,
-				distance
-			),
-		};
-		forces.push_back(force);
+	/*
+		Then we generate the vertex - particle map, which in the case
+		of cloth is 1 to 1.
+	*/
+	std::vector<std::pair<int, int>> particleVertexMap(particleGrid.size());
+	for (int i = 0; i < particleGrid.size(); i++) {
+		particleVertexMap[i] = std::make_pair(i, i);
 	}
-}
 
 
-void Cloth::setConstraints() {
+	/*
+		Finally, we define the curvature, which in the case of cloth,
+		is all 4 adjacent faces, or 3 or 2 in cases of edges or corners.
+	*/
+	std::vector<std::vector<int>> particleFaces(particleGrid.size());
+	for (int n = 0; n < particleGrid.size(); n++) {
 
-	for (Edge* edge : edges) {
-		Vector3D distanceVector = vertices[edge->getIndex(0)] -
-			vertices[edge->getIndex(1)];
-		real restLength = distanceVector.magnitude();
+		// 1D index n coverted to 2D grid coordinates
+		int i = n / particlesX;
+		int j = n % particlesX;
 
-		// Adds the distance constraint for each edge as well
-		Particle* particle1 = particles[edge->getIndex(0)];
-		Particle* particle2 = particles[edge->getIndex(1)];
-
-		ParticleDistanceConstraint distanceConstraint(
-			particle1,
-			particle2,
-			restLength
-		);
-		distanceConstraints.push_back(distanceConstraint);
-	}
-}
-
-
-void Cloth::calculateMeshNormals() {
-
-	// Return their values to the 0 vector
-	particleNormals = std::vector<Vector3D>(particles.size());
-
-	// First we calculate the normal of each particle
-	for (CurvedFace* face : faces) {
-
-		real area = calculateTriangleArea(
-			face->getVertex(0), 
-			face->getVertex(1), 
-			face->getVertex(2)
-		);
-
-		/*
-			Since we don't have a transform matrix, we recalculate the
-			values using the formulas. The normals have to be set from
-			the outside, and the rest the face can calculate.
-		*/
-		for (int i = 0; i < face->getVertexNumber(); i++) {
-			/*
-				We add the face normal to the normal of each vertex in
-				the face (recall that mist vertices are shared among
-				several faces).
-			*/
-			particleNormals[face->getIndex(i)] += face->getNormal() * area;
+		// Top-left face
+		if (i > 0 && j > 0) {
+			particleFaces[n].push_back((i - 1)* (particlesX - 1) + (j - 1));
+		}
+		// Top-right face
+		if (i > 0 && j < particlesX - 1) {
+			particleFaces[n].push_back((i - 1)* (particlesX - 1) + j);
+		}
+		// Bottom-left face
+		if (i < particlesY - 1 && j > 0) {
+			particleFaces[n].push_back(i* (particlesX - 1) + (j - 1));
+		}
+		// Bottom-right face
+		if (i < particlesY - 1 && j < particlesX - 1) {
+			particleFaces[n].push_back(i* (particlesX - 1) + j);
 		}
 	}
 
+	std::vector<std::vector<std::vector<int>>> curvatureMap(faces.size());
+	for (int i = 0; i < faces.size(); i++) {
+		curvatureMap[i].resize(faces[i].size());
+		for (int j = 0; j < faces[i].size(); j++) {
+			int particleIdx = faces[i][j];
+			int faceCount = particleFaces[particleIdx].size();
 
-	// We then normalize them all
-	for (Vector3D& normal : particleNormals) {
-		normal.normalize();
+			curvatureMap[i][j].resize(faceCount);
+			for (int k = 0; k < faceCount; k++) {
+				curvatureMap[i][j][k] = particleFaces[particleIdx][k];
+			}
+		}
 	}
+
+	Curvature curvature;
+	curvature.curvatureMap = curvatureMap;
+
+	return SoftObject(
+		// The mesh
+		particleGrid, faces, edges, 
+		// The soft body
+		particleGrid, mass, damping, springPairs, springStrengths,
+		// Rendering data
+		particleVertexMap, curvature
+	);
 }
 
 
-void Cloth::applyConstraints() {
-	// Applies distance constraints
-	for (ParticleDistanceConstraint& constraint : distanceConstraints) {
-		constraint.applyConstraint();
-	}
-}
-
-
-void Cloth::laplacianSmoothing(int iterations, real factor) {
+void Cloth::applyLaplacianSmoothing(int iterations, real factor) {
 
 	for (int iteration = 0; iteration < iterations; iteration++) {
 
-		std::vector<Vector3D> sumNeighbors(particles.size());
-		std::vector<int> countNeighbors(particles.size(), 0);
+		std::vector<Vector3D> sumNeighbors(body.particles.size(), Vector3D::ZERO);
 
-		for (Edge* edge : edges) {
-			int index0 = edge->getIndex(0);
-			int index1 = edge->getIndex(1);
-
-			countNeighbors[index0]++;
-			countNeighbors[index1]++;
-
-			sumNeighbors[index0] += edge->getVertex(1);
-			sumNeighbors[index1] += edge->getVertex(0);
+		for (int i = 0; i < mesh.getEdgeCount(); i++) {
+			for (int j = 0; j < particleNeighbors[i].size(); j++) {
+				sumNeighbors[i] += body.particles[particleNeighbors[i][j]].position;
+			}
 		}
 
-		for (int i = 0; i < particles.size(); ++i) {
+		for (int i = 0; i < body.particles.size(); ++i) {
 
-			if (!particles[i]->isAwake) {
+			if (!body.particles[i].isAwake) {
 				continue;
 			}
 
 			Vector3D smoothedPosition;
-			if (countNeighbors[i] > 0) {
-				smoothedPosition = particles[i]->position + (
-					(sumNeighbors[i] / countNeighbors[i]) - particles[i]->position
+			// If the particle has neighbors
+			if (particleNeighbors[i].size() > 0) {
+				smoothedPosition = body.particles[i].position + (
+					(sumNeighbors[i] / particleNeighbors[i].size()) -
+					body.particles[i].position
 				) * factor;
 			}
 			else {
 				// If the particle has no neighbors, we keep its position unchanged
-				smoothedPosition = particles[i]->position;
+				smoothedPosition = body.particles[i].position;
 			}
 
-			particles[i]->position = smoothedPosition;
+			body.particles[i].position = smoothedPosition;
 		}
 	}
 }

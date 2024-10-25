@@ -5,7 +5,7 @@
 using namespace pe;
 
 // updateForce definition for the normal spring force class
-void ParticleSpringDamper::updateForce(Particle* particle, real duration) {
+void ParticleSpringDamper::updateForce(Particle* particle, real duration) const {
     Vector3D particleToParticle = otherParticle->position - particle->position;
     real currentLength = particleToParticle.magnitude();
     real deltaX = currentLength - restingLength;

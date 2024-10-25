@@ -357,10 +357,81 @@ Test bounding volume hierarchy.
 
 After seperating the farcture from applying forces on fractures,
 the latter functionality needs its own function.
-
+ 
 Fix texture units.
 
 Consider making the bounding volumes take vertices instead of
-polyhedron.
+polyhedron (DECIDED AGAINST THIS).
 
 Add a scale to the bounding volumes.
+
+Fix the edges and faces of the mesh such that the forces/springs
+are not necessarily the same as the vidible edges. Fix faces too
+to be less complex, with less functionality, and not part of the class
+but rather, just returned each frame. Make curved faces less complex.
+
+Make mesh universal, for both piolyhedra and soft bodies, and then 
+make more specific classes for the subsidivisions. Let the mesh be
+purely visual, with just faces and edges and no physics at all, no
+body or particles, epsecially since collisions are now handled by
+the bounding volumes.
+
+Remove the cuboidal, spherical etc... interfaces, and instead make
+them interfaces for the later object classes, instead of the polyhedron.
+
+Explore the idea of making bounding volumes shared among objects, the
+same way meshes are, so we spend less time fitting them.
+
+Consider adding the sleep condition, this time to the object,
+since they were removed from the body.
+
+Make it so the VAO and VBO are binded whenever we want to a single
+shader program, instead of having a shader program per mesh or
+object. Let the VAOs be bound to their meshes instead.
+
+No need to recreate and resend the VAO each frame for deformable
+bodies. We can simply modify them, which is faster.
+
+Consider splitting the rendering form the mesh.
+
+Fix the shaders such that there is no special texture version,
+and all are essentially the same.
+
+Consider making the shaders subclasses of each other. Also add
+a subclass of solid color shader which can scale bounding boxes
+at will.
+
+Consider adding the ability to change vector size in the buffer
+class, right not it is fixed at vec3.
+
+Make sure you're using throw in all the invalid argument exception
+instances, and remember to replace necessary asserts with the
+argument exceptions.
+
+Fix render as per the new mesh and vertex buffer designs (DONE).
+
+Figure out how to work the curvature into the mesh, in a function
+that updates the vertex normals using a curvature, but ensure
+the curvature is actually valid.
+
+Consider using an EBO instead of triangulation (DECIDED AGAINST IT).
+
+Consider adding a capsule bounding volume.
+
+Fix the BVH since there is no more a polyhedron. Perhaps by
+using indexes instead of sending pointers to polyhedra or
+bodies (DONE).
+
+Fix frustum culling, maybe get rid of it for now.
+
+Ensure triangulation in renderer works.
+
+Make the imported primitive return a vector of primitives for each
+texture.
+
+Ensure each face has default uv coordinates.
+
+Consider adding a way to adjust scale without changing the mesh
+(using the same primitive object).
+
+Make the particle updateForce function const.

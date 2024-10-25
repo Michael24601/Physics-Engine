@@ -6,8 +6,7 @@
 #ifndef BOUNDING_VOLUME_HIERARCHY_NODE_H
 #define BOUNDING_VOLUME_HIERARCHY_NODE_H
 
-#include "rigidBody.h"
-#include "polyhedron.h"
+#include "BVHSphere.h"
 
 namespace pe {
 
@@ -18,20 +17,17 @@ namespace pe {
 		accurate but slow collision detection system using this struct,
 		which store the two bodies that may need to be checked.
 
-		However, insetad of storing the bodies directly, it is best to store
-		the polyhedron they belong to, as the fine collision detection
-		algorithm needs to use the polyhedron properties, like vertices and
-		faces.
+		However, instead of storing the objects directly or a pointer to them,
+		we can just store an index that corresponds to each index.
+		It is for the caller of the BVH to ensure they know which index refers
+		to which object, and that the spheres sent along with each index
+		correspond to the correct object.
 	*/
 	struct PotentialContact {
-		Polyhedron* polyhedron[2];
+		int index[2];
 	};
 
-	/*
-		The node is templated to allow for multiple bounding volume types
-		to be used.
-	*/
-	template<class BoundingVolumeClass>
+
 	class BVHNode {
 
 	public:
@@ -39,18 +35,18 @@ namespace pe {
 		BVHNode* children[2];
 
 		// The bounding volume encompassing all children of this node
-		BoundingVolumeClass boundingVolume;
+		BVHSphere boundingVolume;
 
 		/*
 			In the bounding volume tree algorithms we are working with in
 			this system, only leaf nodes hold actual bodies, and the rest
 			only have the volume space encompassing its children's bodies,
 			or in case the children aren't leaves, whichever bodies exist
-			in its subtree. In this case, this variable is left null.
-
-			We store the whole polyhedron however, not just the body.
+			in its subtree. In this case, this variable is -1. Otherwise,
+			if a body is held, we store some index integer, which corresponds
+			to a body and its BVHSphere.
 		*/
-		Polyhedron* polyhedron;
+		int index;
 
 		/*
 			Pointer to the parent node in the hierarchy(NULL if it's the
@@ -66,12 +62,11 @@ namespace pe {
 			node is not a leaf node, the first parameter should be NULL.
 		*/
 		BVHNode(
-			Polyhedron* polyhedron,
-			const BoundingVolumeClass& boundingVolume, 
+			int index,
+			const BVHSphere& boundingVolume, 
 			BVHNode* parent
-		) :
-			polyhedron{ polyhedron }, boundingVolume{boundingVolume},
-			parent{parent} {
+		) : index{index}, boundingVolume{ boundingVolume }, parent{ parent } {
+
 			children[0] = children[1] = NULL;
 		}
 
@@ -80,7 +75,7 @@ namespace pe {
 			body in its bounding space.
 		*/
 		bool isLeaf() const {
-			return (polyhedron != NULL);
+			return (index != -1);
 		}
 
 		/*
@@ -110,7 +105,7 @@ namespace pe {
 			Checks if there is some overlapping with another node in the BHV
 			tree (their bouding volumes meaning).
 		*/
-		bool overlaps(const BVHNode<BoundingVolumeClass>* other) const;
+		bool overlaps(const BVHNode* other) const;
 
 		/*
 			Fills the given array, up to a limit, with potential contacts
@@ -122,7 +117,7 @@ namespace pe {
 			at different nodes.
 		*/
 		unsigned int getPotentialContactsWith(
-			const BVHNode<BoundingVolumeClass>* other,
+			const BVHNode* other,
 			PotentialContact* contacts, 
 			unsigned int limit
 		) const;
@@ -157,8 +152,8 @@ namespace pe {
 			where each node has 0 or 2 children, but never 1.
 		*/
 		void insertInSubtree(
-			Polyhedron* polyhedron,
-			const BoundingVolumeClass& boundingVolume
+			int index,
+			const BVHSphere& boundingVolume
 		);
 
 		/*
@@ -192,9 +187,8 @@ namespace pe {
 	};
 
 
-	template<class BoundingVolumeClass>
-	bool BVHNode<BoundingVolumeClass>::overlaps(
-		const BVHNode<BoundingVolumeClass>* other
+	bool BVHNode::overlaps(
+		const BVHNode* other
 	) const {
 		/*
 			To check that two nodes overlap is to check that their bounding
@@ -204,8 +198,7 @@ namespace pe {
 	}
 
 
-	template<class BoundingVolumeClass>
-	unsigned int BVHNode<BoundingVolumeClass>::getPotentialContacts(
+	unsigned int BVHNode::getPotentialContacts(
 		PotentialContact* contacts, unsigned int limit
 	) const {
 		/*
@@ -229,9 +222,8 @@ namespace pe {
 
 	// Function definitions (included in the header because of the template)
 
-	template<class BoundingVolumeClass>
-	unsigned int BVHNode<BoundingVolumeClass>::getPotentialContactsWith(
-		const BVHNode<BoundingVolumeClass>* other,
+	unsigned int BVHNode::getPotentialContactsWith(
+		const BVHNode* other,
 		PotentialContact* contacts, 
 		unsigned limit
 	) const {
@@ -252,8 +244,8 @@ namespace pe {
 				(those two).
 			*/
 			if (isLeaf() && other->isLeaf()) {
-				contacts->polyhedron[0] = polyhedron;
-				contacts->polyhedron[1] = other->polyhedron;
+				contacts->index[0] = index;
+				contacts->index[1] = other->index;
 				return 1;
 			}
 			/*
@@ -301,10 +293,9 @@ namespace pe {
 	}
 
 
-	template<class BoundingVolumeClass>
-	void BVHNode<BoundingVolumeClass>::insertInSubtree(
-		Polyhedron* polyhedron,
-		const BoundingVolumeClass& boundingVolume
+	void BVHNode::insertInSubtree(
+		int index,
+		const BVHSphere& boundingVolume
 	) {
 		/*
 			If the node we have arrived at after recursively descending the tree
@@ -320,20 +311,20 @@ namespace pe {
 				the first of the two children, while the new node is used for
 				the second.
 			*/
-			children[0] = new BVHNode<BoundingVolumeClass>(
-				this->polyhedron,
+			children[0] = new BVHNode(
+				this->index,
 				this->boundingVolume, 
 				this
 			);
 			// Child two holds the new body
-			children[1] = new BVHNode<BoundingVolumeClass>(
-				polyhedron,
+			children[1] = new BVHNode(
+				index,
 				boundingVolume, 
 				this
 			);
 
 			// And we remove the body from the node that now became a parent
-			this->polyhedron = nullptr;
+			this->index = -1;
 
 			// And we then recalculate the bounding volumes of all the ancestors
 			recalculateBoundingVolume();
@@ -353,17 +344,16 @@ namespace pe {
 			*/
 			if (children[0]->boundingVolume.getNewGrowth(boundingVolume) >
 				children[1]->boundingVolume.getNewGrowth(boundingVolume)) {
-				children[0]->insertInSubtree(polyhedron, boundingVolume);
+				children[0]->insertInSubtree(index, boundingVolume);
 			}
 			else {
-				children[1]->insertInSubtree(polyhedron, boundingVolume);
+				children[1]->insertInSubtree(index, boundingVolume);
 			}
 		}
 	}
 
 
-	template<class BoundingVolumeClass>
-	BVHNode<BoundingVolumeClass>::~BVHNode<BoundingVolumeClass>(){
+	BVHNode::~BVHNode(){
 		/*
 			This first step is about turning the sibling into the parent. Since
 			the tree is always full, only the root doesn't have a sibling, so
@@ -371,7 +361,7 @@ namespace pe {
 		*/
 		if (parent) {
 			// Find our sibling.
-			BVHNode<BoundingVolumeClass>* sibling;
+			BVHNode* sibling;
 			if (parent->children[0] == this) {
 				sibling = parent->children[1];
 			}
@@ -380,13 +370,13 @@ namespace pe {
 			}
 			// Write its data to our parent.
 			parent->boundingVolume = sibling->boundingVolume;
-			parent->polyhedron = sibling->polyhedron;
+			parent->index = sibling->index;
 			parent->children[0] = sibling->children[0];
 			parent->children[1] = sibling->children[1];
 
 			// We then delete the sibling
 			sibling->parent = nullptr;
-			sibling->polyhedron = nullptr;
+			sibling->index = -1;
 			sibling->children[0] = nullptr;
 			sibling->children[1] = nullptr;
 			delete sibling;
@@ -409,8 +399,7 @@ namespace pe {
 	}
 
 
-	template<class BoundingVolumeClass>
-	void BVHNode<BoundingVolumeClass>::recalculateBoundingVolume() {
+	void BVHNode::recalculateBoundingVolume() {
 		/*
 			As mentioned earlier, this function can only recalculate the
 			volume of a parent.
@@ -420,7 +409,7 @@ namespace pe {
 				The new volume is then calculated by creating a new bounding
 				volume now encompassing its new children.
 			*/
-			boundingVolume = BoundingVolumeClass(
+			boundingVolume = BVHSphere(
 				children[0]->boundingVolume,
 				children[1]->boundingVolume
 			);
