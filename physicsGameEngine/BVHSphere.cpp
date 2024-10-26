@@ -24,8 +24,7 @@ BVHSphere::BVHSphere(
         distance between the center is smaller than the difference
         between the radii.
     */
-    if (radiusDifference * radiusDifference
-        >= centreDistanceSquared) {
+    if (radiusDifference * radiusDifference >= centreDistanceSquared) {
         // Here we check to see which of the spheres is the larger
         if (sphere1.radius > sphere2.radius) {
             centre = sphere1.centre;
@@ -42,7 +41,7 @@ BVHSphere::BVHSphere(
     */
     else {
         /*
-            We use the centresand radii of the spheres to create the
+            We use the centres and radii of the spheres to create the
             new radius.
         */
         centreDistanceSquared = realSqrt(centreDistanceSquared);

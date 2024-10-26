@@ -14,7 +14,6 @@ namespace pe {
 
 	public:
 
-
 		OrientedBoundingBox() :
 			BoundingBox(Vector3D::ZERO, Matrix3x3::IDENTITY, Vector3D::ZERO) {}
 

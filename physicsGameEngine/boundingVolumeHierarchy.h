@@ -47,6 +47,11 @@
 	leaf and the new node, and because we always replace a parent by the
 	remaining node whenever we remove a node, the hierarchy is always a
 	full binary tree where each node has 0 or 2 children, but never 1.
+
+	Another advantage of a BVH is that it ensures each pair of objects
+	in potential contacts are considered once. If we were to simply
+	check each pair of objects, we might by mistake repeat each pair
+	twice, once in each order.
 */
 
 #ifndef BOUNDING_VOLUME_HIERARCHY_H
@@ -65,6 +70,14 @@ namespace pe {
 		// Represents the root of the tree
 		BVHNode* root;
 
+
+		// Auxiliary function for inorder traversal
+		unsigned int auxGetPotentialContacts(
+			const BVHNode* node,
+			PotentialContact* contacts,
+			unsigned int limit
+		) const;
+
 	public:
 
 		BoundingVolumeHierarchy() : root {nullptr} {}
@@ -74,8 +87,9 @@ namespace pe {
 			bounding volume into the tree.
 		*/
 		void insert(
-			int index,
-			const BVHSphere& boundingVolume
+			RigidObject* object,
+			const Vector3D& centre,
+			real radius
 		);
 
 		/*
@@ -91,13 +105,11 @@ namespace pe {
 		void displayAux(std::ostream& out, BVHNode* ptr, int indent) {
 			if (ptr == NULL)
 				return;
-			displayAux(out, ptr->children[0], indent + 16);
+			displayAux(out, ptr->children[0], indent + 8);
 			Vector3D centre = ptr->boundingVolume.centre;
 			real radius = ptr->boundingVolume.radius;
-			std::cout << std::setw(indent) << " " << centre.x << " "
-				<< centre.y << " " << centre.z << " " << radius << " "
-				<< ptr->index << "\n";
-			displayAux(out, ptr->children[1], indent + 16);
+			std::cout << std::setw(indent) << " " << ptr->object << "\n";
+			displayAux(out, ptr->children[1], indent + 8);
 		}
 
 
@@ -105,30 +117,25 @@ namespace pe {
 			return root;
 		}
 
+
+		/*
+			Returns all potential contacts in all of the BVH tree.
+			Note that it is not enough to just call
+			root->getPotentialContacts(), because the getPotentialContacts
+			of the BVHNode just checks for collisions between any nodes in the
+			left subtree with nodes in the right subtree, but does not check
+			for collisions internally in the left and right subtree.
+			To get those, we need to traverse the tree, and call
+			the function on each node that isn't null.
+		*/
+		unsigned int getPotentialContacts(
+			PotentialContact* contacts,
+			unsigned int  limit
+		) const;
+
+
 	};
 
-	// Function definitions (included in header because of the template)
-
-	void BoundingVolumeHierarchy::insert(
-		int index,
-		const BVHSphere& boundingVolume
-	) {
-		// If the tree is empty, create a root with the body in it, and no parent
-		if (root == nullptr) {
-			root = new BVHNode(
-				index, boundingVolume, nullptr
-			);
-		}
-		// Otherwise, call the insert function at the root
-		else {
-			root->insertInSubtree(index, boundingVolume);
-		}
-	}
-
-
-	void BoundingVolumeHierarchy::removeSubtree(BVHNode* node) {
-		node->~BVHNode();
-	}
 }
 
 #endif

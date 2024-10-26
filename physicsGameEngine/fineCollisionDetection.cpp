@@ -382,20 +382,69 @@ unsigned int pe::boxAndSphere(
 }
 
 
+
 void pe::generateContacts(
-    RigidBody* one,
-    const BoundingBox* BVOne,
-    RigidBody* two,
-    const BoundingBox* BVTwo,
+    RigidObject& one,
+    RigidObject& two,
     std::vector<Contact>& contacts,
     real restitution,
     real friction
 ) {
+
     std::vector<Contact> contactsGenerated;
 
-    Box boxOne(BVOne, one);
-    Box boxTwo(BVTwo, two);
-    boxAndBox(boxOne, boxTwo, contactsGenerated);
+    if (one.boundingVolume->getType() == BoundingVolume::TYPE::BOX &&
+        two.boundingVolume->getType() == BoundingVolume::TYPE::BOX) {
+
+        Box boxOne(
+            static_cast<const BoundingBox*>(one.boundingVolume), 
+            one.boundingVolumeTransform, &one.body
+        );
+        Box boxTwo(
+            static_cast<const BoundingBox*>(two.boundingVolume),
+            two.boundingVolumeTransform, &two.body
+        );
+        boxAndBox(boxOne, boxTwo, contactsGenerated);
+    }
+    else if (one.boundingVolume->getType() == BoundingVolume::TYPE::SPHERE &&
+        two.boundingVolume->getType() == BoundingVolume::TYPE::SPHERE) {
+
+        Ball sphereOne(
+            static_cast<const BoundingSphere*>(one.boundingVolume),
+            one.boundingVolumeTransform, &one.body
+        );
+        Ball sphereTwo(
+            static_cast<const BoundingSphere*>(two.boundingVolume),
+            two.boundingVolumeTransform, &two.body
+        );
+        sphereAndSphere(sphereOne, sphereTwo, contactsGenerated);
+    }
+    else if (one.boundingVolume->getType() == BoundingVolume::TYPE::SPHERE &&
+        two.boundingVolume->getType() == BoundingVolume::TYPE::BOX) {
+
+        Ball sphereOne(
+            static_cast<const BoundingSphere*>(one.boundingVolume),
+            one.boundingVolumeTransform, &one.body
+        );
+        Box boxTwo(
+            static_cast<const BoundingBox*>(two.boundingVolume),
+            two.boundingVolumeTransform, &two.body
+        );
+        boxAndSphere(boxTwo, sphereOne, contactsGenerated);
+    }
+    else if (one.boundingVolume->getType() == BoundingVolume::TYPE::BOX &&
+        two.boundingVolume->getType() == BoundingVolume::TYPE::SPHERE) {
+
+        Box boxOne(
+            static_cast<const BoundingBox*>(one.boundingVolume),
+            one.boundingVolumeTransform, &one.body
+        );
+        Ball sphereTwo(
+            static_cast<const BoundingSphere*>(two.boundingVolume),
+            two.boundingVolumeTransform, &two.body
+        );
+        boxAndSphere(boxOne, sphereTwo, contactsGenerated);
+    }
 
     for (Contact& contact : contactsGenerated) {
         contact.restitution = restitution;
@@ -403,71 +452,4 @@ void pe::generateContacts(
 
         contacts.push_back(contact);
     }
-}
-
-
-void pe::generateContacts(
-    RigidBody* one,
-    const BoundingSphere* BVOne,
-    RigidBody* two,
-    const BoundingSphere* BVTwo,
-    std::vector<Contact>& contacts,
-    real restitution,
-    real friction
-) {
-    std::vector<Contact> contactsGenerated;
-
-    Ball sphereOne(BVOne, one);
-    Ball sphereTwo(BVTwo, two);
-    sphereAndSphere(sphereOne, sphereTwo, contactsGenerated);
-
-    for (Contact& contact : contactsGenerated) {
-        contact.restitution = restitution;
-        contact.friction = friction;
-        contacts.push_back(contact);
-    }
-}
-
-
-void pe::generateContacts(
-    RigidBody* one,
-    const BoundingBox* BVOne,
-    RigidBody* two,
-    const BoundingSphere* BVTwo,
-    std::vector<Contact>& contacts,
-    real restitution,
-    real friction
-) {
-    std::vector<Contact> contactsGenerated;
-
-    Box box(BVOne, one);
-    Ball sphere(BVTwo, two);
-    boxAndSphere(box, sphere, contactsGenerated);
-
-    for (Contact& contact : contactsGenerated) {
-        contact.restitution = restitution;
-        contact.friction = friction;
-        contacts.push_back(contact);
-    }
-}
-
-
-void pe::generateContacts(
-    RigidBody* one,
-    const BoundingSphere* BVOne,
-    RigidBody* two,
-    const BoundingBox* BVTwo,
-    std::vector<Contact>& contacts,
-    real restitution,
-    real friction
-) {
-    generateContacts(
-        two, 
-        BVTwo, 
-        one, 
-        BVOne, 
-        contacts, 
-        restitution, 
-        friction
-    );
 }

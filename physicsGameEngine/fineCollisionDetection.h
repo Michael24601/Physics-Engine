@@ -6,7 +6,6 @@
 #include "rigidObject.h"
 #include "boundingBox.h"
 #include "boundingSphere.h"
-#include "orientedBoundingBox.h"
 
 namespace pe {
 
@@ -38,20 +37,13 @@ namespace pe {
             This is why we need an offset.
         */
         Box(
-            const BoundingBox* box,
+            const BoundingBox* box, 
+            const Matrix3x4& boundingVolumeTransform,
             RigidBody* body
         ) {
             halfSize = box->getHalfsize();
             this->body = body;
-
-            /*
-                The box is in local coordinates, as it is used to fit the mesh
-                once at creation. To get its transform matrix, we therefore
-                combine the position and orientation of the box with that of the
-                body.
-            */
-            transformMatrix = box->getTransformMatrix();
-            transformMatrix.combineMatrix(body->transformMatrix);
+            transformMatrix = boundingVolumeTransform;
         }
 
         Vector3D getAxis(int index) const {
@@ -80,20 +72,12 @@ namespace pe {
         */
         Ball(
             const BoundingSphere* ball,
+            const Matrix3x4& boundingVolumeTransform,
             RigidBody* body
-
         ) {
             radius = ball->getRadius();
             this->body = body;
-
-            /*
-                The ball is in local coordinates, as it is used to fit the mesh
-                once at creation. Unlike the box however, it has no orientation,
-                so we only care about combining the ball's offset to the body's
-                position.
-            */
-            transformMatrix = ball->getTransformMatrix();
-            transformMatrix.addTranslation(body->transformMatrix.getTranslation());
+            transformMatrix = boundingVolumeTransform;
         }
 
         Vector3D getAxis(int index) const {
@@ -204,43 +188,8 @@ namespace pe {
 
 
     void generateContacts(
-        RigidBody* one,
-        const BoundingBox* BVOne,
-        RigidBody* two,
-        const BoundingBox* BVTwo,
-        std::vector<Contact>& contacts,
-        real restitution,
-        real friction
-    );
-
-
-    void generateContacts(
-        RigidBody* one,
-        const BoundingSphere* BVOne,
-        RigidBody* two,
-        const BoundingSphere* BVTwo,
-        std::vector<Contact>& contacts,
-        real restitution,
-        real friction
-    );
-
-
-    void generateContacts(
-        RigidBody* one,
-        const BoundingBox* BVOne,
-        RigidBody* two,
-        const BoundingSphere* BVTwo,
-        std::vector<Contact>& contacts,
-        real restitution,
-        real friction
-    );
-
-
-    void generateContacts(
-        RigidBody* one,
-        const BoundingSphere* BVOne,
-        RigidBody* two,
-        const BoundingBox* BVTwo,
+        RigidObject& one,
+        RigidObject& two,
         std::vector<Contact>& contacts,
         real restitution,
         real friction

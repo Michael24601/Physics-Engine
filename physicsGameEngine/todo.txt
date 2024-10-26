@@ -444,5 +444,22 @@ Test generateFaceData().
 Test the vertex buffer error handling when the vertex data
 sent doesn't match the allocated space.
 
-Add a way to draw bounding volumes, and have a way to save the
-BV transform, and send it to the generateContacts function.
+Add a way to draw bounding volumes.
+
+Reconsider explicit boudning volume types in the derived
+classes.
+
+Consider making the objects in the BVH const (though the
+potential contacts then can't be used for the fine collision
+detection and resolution as the body is altered).
+
+Fix the issue where generating all contacts between all objects
+generates each contact twice, since order is considered
+(permutation when combinations are what's neede) (SOLVED,
+THE BVH DOES THIS AUTOMATICALLY, BUT EVEN WITHOUT IT, WE
+CAN JUST PLACE THEM AL IN A VECTOR AND USE 2 FOR LOOPS,
+WITH THE INNER ONE GOING ONLY AS FAR AS THE FIRST).
+
+Fix the BVH (DONE, THE ISSUE WAS THAT THE GETTER FOR THE]
+POTENTIAL CONTACTS HAD TO BE CALLED AT EACH NODE, NOT
+JUST THE ROOT).

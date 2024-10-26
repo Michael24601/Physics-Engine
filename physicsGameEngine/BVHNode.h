@@ -7,6 +7,7 @@
 #define BOUNDING_VOLUME_HIERARCHY_NODE_H
 
 #include "BVHSphere.h"
+#include "rigidObject.h"
 
 namespace pe {
 
@@ -16,15 +17,9 @@ namespace pe {
 		but fast) collision detection system, which are then sent to the
 		accurate but slow collision detection system using this struct,
 		which store the two bodies that may need to be checked.
-
-		However, instead of storing the objects directly or a pointer to them,
-		we can just store an index that corresponds to each index.
-		It is for the caller of the BVH to ensure they know which index refers
-		to which object, and that the spheres sent along with each index
-		correspond to the correct object.
 	*/
 	struct PotentialContact {
-		int index[2];
+		RigidObject* object[2];
 	};
 
 
@@ -42,14 +37,13 @@ namespace pe {
 			this system, only leaf nodes hold actual bodies, and the rest
 			only have the volume space encompassing its children's bodies,
 			or in case the children aren't leaves, whichever bodies exist
-			in its subtree. In this case, this variable is -1. Otherwise,
-			if a body is held, we store some index integer, which corresponds
-			to a body and its BVHSphere.
+			in its subtree. In this case, this variables for the body and
+			bounding volume are nullptr.
 		*/
-		int index;
+		RigidObject* object;
 
 		/*
-			Pointer to the parent node in the hierarchy(NULL if it's the
+			Pointer to the parent node in the hierarchy(nullptr if it's the
 			root). Used in order to modify the bounding volumes of the
 			ancestors (chain of parents up to to the root) when a node
 			is inserted or deleted.
@@ -59,15 +53,14 @@ namespace pe {
 		/*
 			Argumented constructor that sets the parent, body (polyhedron,
 			and bounding volumes while keeping the children null. If the
-			node is not a leaf node, the first parameter should be NULL.
+			node is not a leaf node, the first parameter should be nullptr.
 		*/
 		BVHNode(
-			int index,
-			const BVHSphere& boundingVolume, 
+			RigidObject* object,
+			const BVHSphere& sphere,
 			BVHNode* parent
-		) : index{index}, boundingVolume{ boundingVolume }, parent{ parent } {
-
-			children[0] = children[1] = NULL;
+		) : object{ object }, boundingVolume(sphere), parent{parent} {
+			children[0] = children[1] = nullptr;
 		}
 
 		/*
@@ -75,7 +68,7 @@ namespace pe {
 			body in its bounding space.
 		*/
 		bool isLeaf() const {
-			return (index != -1);
+			return object != nullptr;
 		}
 
 		/*
@@ -94,6 +87,13 @@ namespace pe {
 			number of generated potential contacts is also returned. A limit
 			may be placed to limit the number of possible contacts to
 			generate.
+
+			Note that this function doesn't check for collisions between
+			the nodes that are in the left subtree, or the nodes that are
+			in the right subtree; it only finds the combination of collisions
+			between nodes in the left subtree and right subtree.
+			To get the collisions inside the left and right subtree, we
+			need to call this function with the children of this function.
 		*/
 		unsigned int getPotentialContacts(
 			PotentialContact* contacts,
@@ -117,7 +117,7 @@ namespace pe {
 			at different nodes.
 		*/
 		unsigned int getPotentialContactsWith(
-			const BVHNode* other,
+			BVHNode* other,
 			PotentialContact* contacts, 
 			unsigned int limit
 		) const;
@@ -152,8 +152,8 @@ namespace pe {
 			where each node has 0 or 2 children, but never 1.
 		*/
 		void insertInSubtree(
-			int index,
-			const BVHSphere& boundingVolume
+			RigidObject* object,
+			const BVHSphere& sphere
 		);
 
 		/*
@@ -185,244 +185,6 @@ namespace pe {
 		*/
 		void recalculateBoundingVolume();
 	};
-
-
-	bool BVHNode::overlaps(
-		const BVHNode* other
-	) const {
-		/*
-			To check that two nodes overlap is to check that their bounding
-			volumes intersect.
-		*/
-		return boundingVolume.overlaps(&(other->boundingVolume));
-	}
-
-
-	unsigned int BVHNode::getPotentialContacts(
-		PotentialContact* contacts, unsigned int limit
-	) const {
-		/*
-			The function returns the number of contacts in this node's subtree,
-			so if the node is a leaf or the limit is 0, the array should not
-			be filled with any contatcs, and 0 is returned.
-		*/
-		if (isLeaf() || limit == 0) return 0;
-
-		/*
-			Otherwise, the list of all contacts in the subtree of this node
-			is just the list of potential contacts that bodies in the first
-			child may have with bodies of the second child.
-		*/
-		return children[0]->getPotentialContactsWith(
-			children[1], 
-			contacts,
-			limit
-		);
-	}
-
-	// Function definitions (included in the header because of the template)
-
-	unsigned int BVHNode::getPotentialContactsWith(
-		const BVHNode* other,
-		PotentialContact* contacts, 
-		unsigned limit
-	) const {
-		/*
-			If the bounding volumes of the two nodes don't overlap, then
-			none of the bodies in the left subtree will overlap with a body in
-			the right subtree (again, when called in this node, there is no
-			need to check for overlapping bodies in each subtree alone as that
-			is handled by lower nodes in the tree).
-		*/
-		if (!overlaps(other) || limit == 0) {
-			return 0;
-		}
-		// Otherwise, if they do overlap
-		else {
-			/*
-				If both nodes are leaf nodes, then there is one intersection
-				(those two).
-			*/
-			if (isLeaf() && other->isLeaf()) {
-				contacts->index[0] = index;
-				contacts->index[1] = other->index;
-				return 1;
-			}
-			/*
-				If at least one of them isn't a leaf, then an intersection
-				between the bounding volumes of the nodes doesn't necessarily
-				guarantee that the bounding volumes of the rigid bodies at the
-				leaf nodes will overlap, so we need to recursively go down the
-				tree until we reach all the leaf nodes.
-				If one is a leaf and the other isn't, we recursivly repeat the
-				function while descending into the non-leaf, until we reach
-				leaves and either return or not return a contact.
-				If neither is a leaf, then we descend into the longer branch.
-				This guarantees we always reach a point where we are comparing
-				two leaves.
-			*/
-			if (other->isLeaf() || (!isLeaf() && boundingVolume.getSize() >=
-				other->boundingVolume.getSize())) {
-
-				unsigned int  count = children[0]->getPotentialContactsWith(
-					other, contacts, limit
-				);
-				if (limit > count) {
-					return count + children[1]->getPotentialContactsWith(
-						other, contacts + count, limit - count
-					);
-				}
-				else {
-					return count;
-				}
-			}
-			else {
-				unsigned int count = getPotentialContactsWith(
-					other->children[0], contacts, limit
-				);
-				if (limit > count) {
-					return count + getPotentialContactsWith(
-						other->children[1], contacts + count, limit - count
-					);
-				}
-				else {
-					return count;
-				}
-			}
-		}
-	}
-
-
-	void BVHNode::insertInSubtree(
-		int index,
-		const BVHSphere& boundingVolume
-	) {
-		/*
-			If the node we have arrived at after recursively descending the tree
-			is a leaf, we replace this leaf by a parent and make the old leaf
-			and the new node its children. Neither one of the nodes will have
-			children at this point so they are left null.
-		*/
-		if (isLeaf()) {
-			/*
-				Because we recursively call this function through the child
-				nodes, the calling object at this point (the old leaf) will
-				be the parent of the two nodes, and a copy of it is used for
-				the first of the two children, while the new node is used for
-				the second.
-			*/
-			children[0] = new BVHNode(
-				this->index,
-				this->boundingVolume, 
-				this
-			);
-			// Child two holds the new body
-			children[1] = new BVHNode(
-				index,
-				boundingVolume, 
-				this
-			);
-
-			// And we remove the body from the node that now became a parent
-			this->index = -1;
-
-			// And we then recalculate the bounding volumes of all the ancestors
-			recalculateBoundingVolume();
-		}
-		/*
-			Otherwise, if we haven't yet arrived at a leaf, then we need to
-			choose to go left or right. Each parent always has two children
-			or no children (leaf), so we always have a choice to make, and the
-			choice always depends on whichever side changes their volume less
-			due to the added node.
-		*/
-		else{
-			/*
-				Chooses the bounding volume, left or right, changes the least,
-				and recursively calls the insert function until we arrive at a
-				leaf.
-			*/
-			if (children[0]->boundingVolume.getNewGrowth(boundingVolume) >
-				children[1]->boundingVolume.getNewGrowth(boundingVolume)) {
-				children[0]->insertInSubtree(index, boundingVolume);
-			}
-			else {
-				children[1]->insertInSubtree(index, boundingVolume);
-			}
-		}
-	}
-
-
-	BVHNode::~BVHNode(){
-		/*
-			This first step is about turning the sibling into the parent. Since
-			the tree is always full, only the root doesn't have a sibling, so
-			we only do this step if the node has a parent (isn't the root).
-		*/
-		if (parent) {
-			// Find our sibling.
-			BVHNode* sibling;
-			if (parent->children[0] == this) {
-				sibling = parent->children[1];
-			}
-			else {
-				sibling = parent->children[0];
-			}
-			// Write its data to our parent.
-			parent->boundingVolume = sibling->boundingVolume;
-			parent->index = sibling->index;
-			parent->children[0] = sibling->children[0];
-			parent->children[1] = sibling->children[1];
-
-			// We then delete the sibling
-			sibling->parent = nullptr;
-			sibling->index = -1;
-			sibling->children[0] = nullptr;
-			sibling->children[1] = nullptr;
-			delete sibling;
-
-			// And then recalculate the ancestors bounding volumes
-			parent->recalculateBoundingVolume();
-		}
-		/*
-			We then delete the actual node by recursing.This stops when a node
-			no longer has children(is a leaf).
-		*/
-		if (children[0]) {
-			children[0]->parent = nullptr;
-			delete children[0];
-		}
-		if (children[1]) {
-			children[1]->parent = nullptr;
-			delete children[1];
-		}
-	}
-
-
-	void BVHNode::recalculateBoundingVolume() {
-		/*
-			As mentioned earlier, this function can only recalculate the
-			volume of a parent.
-		*/
-		if (!isLeaf()) {
-			/*
-				The new volume is then calculated by creating a new bounding
-				volume now encompassing its new children.
-			*/
-			boundingVolume = BVHSphere(
-				children[0]->boundingVolume,
-				children[1]->boundingVolume
-			);
-			/*
-				Recurse up the tree as long as we're not at the root
-				(no parent).
-			*/
-			if (parent) {
-				parent->recalculateBoundingVolume();
-			}
-		}
-	}
-
 }
 
 #endif

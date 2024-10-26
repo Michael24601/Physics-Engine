@@ -33,6 +33,11 @@ namespace pe {
 		) : BoundingVolume(position, Matrix3x3::IDENTITY), radius{radius} {}
 
 
+		TYPE getType() const override {
+			return TYPE::SPHERE;
+		}
+
+
 		void fit(const std::vector<Vector3D>& vertices) {
 			/*
 				Calculates the smallest bounding sphere that encompasses

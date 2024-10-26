@@ -71,14 +71,15 @@ unsigned int pe::sphereAndPoint(
 }
 
 
-template<typename BoundingVolumeClass>
 void pe::generateContactParticleAndObject(
     Particle* particle,
-    const RigidObject<BoundingVolumeClass>& one,
+    const RigidObject& one,
     std::vector<ParticleContact>& contacts,
     real restitution
 ) {
     std::vector<ParticleContact> contactsGenerated;
+
+    /*
 
     if (std::is_base_of<BoundingBox, BoundingVolumeClass>::value) {
         Box box(one);
@@ -90,6 +91,8 @@ void pe::generateContactParticleAndObject(
         ball.radius *= 1.2;
         ballAndPoint(particle->position, ball, contactsGenerated);
     }
+
+    */
 
     for (ParticleContact& contact : contactsGenerated) {
         contact.restitutionCoefficient = restitution;

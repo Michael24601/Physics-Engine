@@ -22,14 +22,7 @@
 
 namespace pe {
 
-	template<typename BoundingVolumeClass>
 	class RigidObject {
-
-		// Ensuring that BoundingVolumeClass inherits from BoundingVolume
-		static_assert(
-			std::is_base_of<BoundingVolume, BoundingVolumeClass>::value,
-			"BoundingVolumeClass must inherit from BoundingVolume"
-			);
 
 	public:
 
@@ -43,12 +36,22 @@ namespace pe {
 
 
 		// The preferred bounding volume shape for collisions
-		const BoundingVolumeClass* boundingVolume;
+		const BoundingVolume* boundingVolume;
+
+
+		/*
+			When the bounding volume is first set, we assume it is set with
+			the local vertices of the mesh in mind. To get the real location
+			of the bounding volume, we must each frame combine the initial
+			offset and orientation of the bounding volume with that of the
+			rigid body.
+		*/
+		Matrix3x4 boundingVolumeTransform;
 
 
 		RigidObject(
 			Mesh* mesh,
-			BoundingVolumeClass* boundingVolume,
+			BoundingVolume* boundingVolume,
 			const Vector3D& position = Vector3D::ZERO,
 			const Quaternion& orientation = Quaternion::IDENTITY,
 			real mass = 0,
@@ -73,6 +76,10 @@ namespace pe {
 		void update() {
 			// Calculates the derived data, like the transform matrix
 			body.calculateDerivedData();
+
+			// Updates the bounding volume transform
+			boundingVolumeTransform = boundingVolume->getTransformMatrix();
+			boundingVolumeTransform.combineMatrix(body.transformMatrix);
 		}
 	};
 }

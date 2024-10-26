@@ -33,6 +33,22 @@ namespace pe {
 
 	public:
 
+		/*
+			In order to avoid the use of templates or dynamic type casting
+			which are burdensome and inefficient, we can do manual type checking
+			for bounding volume shapes, where each derived calss returns its shape.
+			There are more specific classes than just box or sphere, but the
+			enum just determines the basic shape.
+			This approach is not very scalable, but is acceptable since the number
+			of shapes is pretty small at 2 or 3.
+		*/
+		enum class TYPE {
+			BOX,
+			SPHERE,
+			CAPSULE
+		};
+
+
 		BoundingVolume() :
 			position{ Vector3D::ZERO }, 
 			orientation{ Matrix3x3::IDENTITY } {}
@@ -40,6 +56,9 @@ namespace pe {
 
 		BoundingVolume(const Vector3D& position, const Matrix3x3& orientation) :
 			position{ position }, orientation{ orientation } {}
+
+
+		virtual TYPE getType() const = 0;
 
 
 		/*

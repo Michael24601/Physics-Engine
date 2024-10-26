@@ -35,6 +35,11 @@ namespace pe{
 		) : BoundingVolume(position, orientation), halfsize{halfsize} {}
 
 
+		TYPE getType() const override {
+			return TYPE::BOX;
+		}
+
+
 		Vector3D getHalfsize() const {
 			return halfsize;
 		}

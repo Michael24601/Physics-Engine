@@ -22,12 +22,11 @@ namespace pe {
         const Ball& sphere,
         std::vector<ParticleContact>& data
     );
+    
 
-
-    template<typename BoundingVolumeClass>
     void generateContactParticleAndObject(
         Particle* particle,
-        const RigidObject<BoundingVolumeClass>& one,
+        const RigidObject& one,
         std::vector<ParticleContact>& contacts,
         real restitution
     );

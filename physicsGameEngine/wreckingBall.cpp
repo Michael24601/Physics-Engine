@@ -11,7 +11,7 @@
 #include "rigidBodySpringForce.h"
 #include "fineCollisionDetection.h"
 #include "collisionResolver.h"
-#include "boundingBox.h"
+#include "boundingVolumeHierarchy.h"
 
 using namespace pe;
 
@@ -163,7 +163,7 @@ void pe::runWreckingBall() {
             sphere.body.position.y = worldPos.y * 4;
         }
 
-        int numSteps = 1;
+        int numSteps = 2;
         real substep = deltaT / numSteps;
 
         
@@ -177,39 +177,38 @@ void pe::runWreckingBall() {
             g.updateForce(&(sphere.body), substep);
             f.updateForce(&(sphere.body), substep);
 
-            // Checking for collisions
+            // Coarse collision detection
 
-            std::vector<Contact> contacts;
+            BoundingVolumeHierarchy BVH;
             for (int i = 0; i < prisms.size(); i++) {
-
-                generateContacts(
-                    &prisms[i]->body, prisms[i]->boundingVolume, 
-                    &ground.body, ground.boundingVolume, contacts, 0.25, 0.0
+                BVH.insert(
+                    prisms[i], 
+                    prisms[i]->boundingVolumeTransform.getTranslation(),
+                    prisms[i]->boundingVolume->getBVHSphereRadius()
                 );
-                generateContacts(
-                    &prisms[i]->body, prisms[i]->boundingVolume,
-                    &sphere.body, sphere.boundingVolume, contacts, 0.25, 0.0
-                );
-
-                for (int j = 0; j < prisms.size(); j++) {
-                    if (i != j && (
-                        (prisms[i]->body.position - prisms[j]->body.position)
-                        .magnitudeSquared() < 350 * 350
-                        )) {
-                        generateContacts(
-                            &prisms[i]->body, prisms[i]->boundingVolume,
-                            &prisms[j]->body, prisms[j]->boundingVolume, 
-                            contacts, 0.25, 0.0
-                        );
-                    }
-                }
             }
-            generateContacts(
-                &ground.body, ground.boundingVolume,
-                &sphere.body, sphere.boundingVolume, contacts, 0.25, 0.0
+            BVH.insert(
+                &ground, 
+                ground.boundingVolumeTransform.getTranslation(),
+                ground.boundingVolume->getBVHSphereRadius()
+            );
+            BVH.insert(
+                &sphere, 
+                sphere.boundingVolumeTransform.getTranslation(),
+                sphere.boundingVolume->getBVHSphereRadius()
             );
 
-            CollisionResolver resolver(10, 1);
+            PotentialContact con[1000];
+            int size = BVH.getPotentialContacts(con, 1000);
+
+            // Fine collision detection/resolution
+            
+            std::vector<Contact> contacts;
+            for (int i = 0; i < size; i++) {
+                generateContacts(*con[i].object[0], *con[i].object[1], contacts, 0.25, 0.0);
+            }
+
+            CollisionResolver resolver(1, 1);
             resolver.resolveContacts(contacts.data(), contacts.size(), substep);
 
             // Integrating the bodies
@@ -229,8 +228,6 @@ void pe::runWreckingBall() {
             sphere.update();
             b.calculateDerivedData();
         }
-        
-        
 
         Vector3D p = sphere.body.transformMatrix.transform(sphere.mesh->getVertex(0));
         std::vector<float> springData {

@@ -276,6 +276,12 @@
     <ClCompile Include="edge.cpp">
       <Filter>Source Files\Primitive</Filter>
     </ClCompile>
+    <ClCompile Include="BVHNode.cpp">
+      <Filter>Source Files\Collision</Filter>
+    </ClCompile>
+    <ClCompile Include="boundingVolumeHierarchy.cpp">
+      <Filter>Source Files\Collision</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="accuracy.h">

@@ -51,7 +51,7 @@
 
 namespace pe {
 
-	class CuboidObject : public RigidObject<OrientedBoundingBox> {
+	class CuboidObject : public RigidObject {
 
 	public:
 
@@ -78,7 +78,7 @@ namespace pe {
 			const Quaternion& orientation,
 			real mass
 		) : width{ width }, height{ height }, depth{depth},
-			RigidObject<OrientedBoundingBox>(
+			RigidObject(
 			new Cuboid(width, height, depth),
 			new OrientedBoundingBox(Vector3D(width / 2.0, height / 2.0, depth / 2.0)),
 			position,
@@ -95,7 +95,7 @@ namespace pe {
 	};
 
 
-	class SphereObject : public RigidObject<BoundingSphere> {
+	class SphereObject : public RigidObject {
 
 	public:
 
@@ -121,7 +121,7 @@ namespace pe {
 			real mass
 		) : radius{ radius }, latitudeSegments{ latitudeSegments },
 			longitudeSegments{ longitudeSegments },
-			RigidObject<BoundingSphere>(
+			RigidObject(
 			new Sphere(radius, latitudeSegments, longitudeSegments),
 			new BoundingSphere(radius),
 			position,
@@ -138,7 +138,7 @@ namespace pe {
 	};
 
 
-	class PyramidObject : public RigidObject<OrientedBoundingBox> {
+	class PyramidObject : public RigidObject {
 
 	public:
 
@@ -163,7 +163,7 @@ namespace pe {
 			const Quaternion& orientation,
 			real mass
 		) : side{ side }, height{height},
-			RigidObject<OrientedBoundingBox>(
+			RigidObject(
 			new Pyramid(side, height),
 			/*
 				The centroid of the pyramid is one fourth of the way
@@ -191,7 +191,7 @@ namespace pe {
 	};
 
 
-	class ConeObject : public RigidObject<OrientedBoundingBox> {
+	class ConeObject : public RigidObject {
 
 	public:
 
@@ -218,7 +218,7 @@ namespace pe {
 			real mass,
 			bool smooth
 		) : radius{ radius }, height{ height }, segments{ segments },
-			RigidObject<OrientedBoundingBox>(
+			RigidObject(
 			new Cone(radius, height, segments),
 			/*
 				The centroid of the cone is one fourth of the way
@@ -246,7 +246,7 @@ namespace pe {
 	};
 
 
-	class CylinderObject : RigidObject<OrientedBoundingBox> {
+	class CylinderObject : RigidObject {
 
 	public:
 
@@ -275,7 +275,7 @@ namespace pe {
 			real mass,
 			bool smooth
 		) : radius{ radius }, height{ height }, segments{ segments },
-			RigidObject<OrientedBoundingBox>(
+			RigidObject(
 			new Cylinder(radius, height, segments),
 			new OrientedBoundingBox(Vector3D(radius, 0, radius)),
 			position,

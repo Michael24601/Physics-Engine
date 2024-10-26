@@ -161,6 +161,8 @@
   <ItemGroup>
     <ClCompile Include="anchoredSpringForce.cpp" />
     <ClCompile Include="ballPit.cpp" />
+    <ClCompile Include="boundingVolumeHierarchy.cpp" />
+    <ClCompile Include="BVHNode.cpp" />
     <ClCompile Include="BVHSphere.cpp" />
     <ClCompile Include="BVHSphere.h" />
     <ClCompile Include="cloth.cpp" />
