@@ -37,12 +37,6 @@
     <Filter Include="Source Files\Collision">
       <UniqueIdentifier>{daf10cc5-698b-46c7-b412-42350ceef7af}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Interfaces">
-      <UniqueIdentifier>{7022ec70-1863-4c8a-8abd-87020da1f78d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Interfaces">
-      <UniqueIdentifier>{52cde102-5ed5-42d9-b616-32e02268d7fd}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\Primitive">
       <UniqueIdentifier>{49246ebe-a3d8-4983-ab6f-2430c2a94f09}</UniqueIdentifier>
     </Filter>
@@ -85,29 +79,14 @@
     <Filter Include="Source Files\GLSL Shaders\Simple Shader">
       <UniqueIdentifier>{9010f6b8-c6ff-451b-8f42-ede477e8a8f9}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\OpenGL Graphics">
-      <UniqueIdentifier>{528a04ee-a99a-4fac-9ff7-2720c586fe4d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\GLSL Shaders\Texture Shader">
-      <UniqueIdentifier>{a6a5dfe1-0aec-4964-b4f3-94b506591bf5}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Simulations">
-      <UniqueIdentifier>{cdd87a84-6bbd-4319-88df-7a57008b66a2}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\Simulations">
       <UniqueIdentifier>{74eb1b04-fba4-4814-99a5-662e30c1bd61}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\Polyhedron">
       <UniqueIdentifier>{d72b1258-bfa2-4a0f-b0b0-372dc4cb6957}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\GLSL Shaders\Skybox Shader">
-      <UniqueIdentifier>{dc65b283-ab1e-4a96-a8ae-daddc63bf1c2}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\BoundingVolumes">
       <UniqueIdentifier>{fd493833-b574-4e4c-aef0-1c6c59a9dde1}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\BoundingVolumes">
-      <UniqueIdentifier>{1ac92eaf-c4ea-47ec-ad4e-97e0c5ecadd7}</UniqueIdentifier>
     </Filter>
     <Filter Include="Header Files\SoftBodyPhysics">
       <UniqueIdentifier>{1aa70bbb-545d-4597-8b7f-bec87747f6db}</UniqueIdentifier>
@@ -117,6 +96,24 @@
     </Filter>
     <Filter Include="Header Files\RigidObjects">
       <UniqueIdentifier>{e5aad90b-164c-4750-bd25-a7f3e7990117}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\GLSL Shaders\Texture Shader">
+      <UniqueIdentifier>{c2b810fe-b2e8-456c-bc3d-de79eec3db89}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\GLSL Shaders\Cubemap Shader">
+      <UniqueIdentifier>{dc65b283-ab1e-4a96-a8ae-daddc63bf1c2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Renderers">
+      <UniqueIdentifier>{2a817f8f-bdbe-4dd5-b9b1-77f37a7b0b56}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\OpenGL Utilities">
+      <UniqueIdentifier>{f6af3ec7-fa98-4c89-8a0b-c9815225c3d1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Polyhedron">
+      <UniqueIdentifier>{35c9c661-2ae7-4489-816b-83c83e7f83b2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Simulations">
+      <UniqueIdentifier>{cdd87a84-6bbd-4319-88df-7a57008b66a2}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -128,9 +125,6 @@
     </ClCompile>
     <ClCompile Include="anchoredSpringForce.cpp">
       <Filter>Source Files\ParticlePhysics</Filter>
-    </ClCompile>
-    <ClCompile Include="drawingUtil.cpp">
-      <Filter>Source Files\OpenGL Graphics</Filter>
     </ClCompile>
     <ClCompile Include="particle.cpp">
       <Filter>Source Files\ParticlePhysics</Filter>
@@ -186,9 +180,6 @@
     <ClCompile Include="sat.cpp">
       <Filter>Source Files\Collision</Filter>
     </ClCompile>
-    <ClCompile Include="shaderInterface.cpp">
-      <Filter>Source Files\Interfaces</Filter>
-    </ClCompile>
     <ClCompile Include="contact.cpp">
       <Filter>Source Files\Collision</Filter>
     </ClCompile>
@@ -212,9 +203,6 @@
     </ClCompile>
     <ClCompile Include="particleSpringDamper.cpp">
       <Filter>Source Files\ParticlePhysics</Filter>
-    </ClCompile>
-    <ClCompile Include="openglUtility.cpp">
-      <Filter>Source Files\OpenGL Graphics</Filter>
     </ClCompile>
     <ClCompile Include="wreckingBall.cpp">
       <Filter>Source Files\Simulations</Filter>
@@ -258,9 +246,6 @@
     <ClCompile Include="quaternion.cpp">
       <Filter>Source Files\Core</Filter>
     </ClCompile>
-    <ClCompile Include="fracture.cpp">
-      <Filter>Source Files\Simulations</Filter>
-    </ClCompile>
     <ClCompile Include="matrix3x3.cpp">
       <Filter>Source Files\Core</Filter>
     </ClCompile>
@@ -275,6 +260,21 @@
     </ClCompile>
     <ClCompile Include="vector2D.cpp">
       <Filter>Source Files\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="faceRenderer.h">
+      <Filter>Header Files\Renderers</Filter>
+    </ClCompile>
+    <ClCompile Include="shaderInterface.cpp">
+      <Filter>Source Files\OpenGL Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="openglUtility.cpp">
+      <Filter>Source Files\OpenGL Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="drawingUtil.cpp">
+      <Filter>Source Files\OpenGL Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="edge.cpp">
+      <Filter>Source Files\Primitive</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -368,9 +368,6 @@
     <ClInclude Include="cloth.h">
       <Filter>Header Files\SoftBodyPhysics</Filter>
     </ClInclude>
-    <ClInclude Include="shaderInterface.h">
-      <Filter>Header Files\Interfaces</Filter>
-    </ClInclude>
     <ClInclude Include="contact.h">
       <Filter>Header Files\Collision</Filter>
     </ClInclude>
@@ -379,12 +376,6 @@
     </ClInclude>
     <ClInclude Include="vector2D.h">
       <Filter>Header Files\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="particleDistanceConstraint.h">
-      <Filter>Header Files\SoftBodyPhysics</Filter>
-    </ClInclude>
-    <ClInclude Include="particleAngleConstraint.h">
-      <Filter>Header Files\SoftBodyPhysics</Filter>
     </ClInclude>
     <ClInclude Include="openglUtility.h">
       <Filter>Header Files\OpenGL Utilities</Filter>
@@ -449,43 +440,22 @@
     <ClInclude Include="cookTorranceShader.frag.glsl">
       <Filter>Source Files\GLSL Shaders\Cook Torrance Shader</Filter>
     </ClInclude>
-    <ClInclude Include="cookTorranceTextureShader.vert.glsl">
-      <Filter>Source Files\GLSL Shaders\Cook Torrance Shader</Filter>
-    </ClInclude>
-    <ClInclude Include="cookTorranceTextureShader.frag.glsl">
-      <Filter>Source Files\GLSL Shaders\Cook Torrance Shader</Filter>
-    </ClInclude>
     <ClInclude Include="phongShader.vert.glsl">
       <Filter>Source Files\GLSL Shaders\Phong Shader</Filter>
     </ClInclude>
     <ClInclude Include="phongShader.frag.glsl">
       <Filter>Source Files\GLSL Shaders\Phong Shader</Filter>
     </ClInclude>
-    <ClInclude Include="diffuseTextureShader.vert.glsl">
+    <ClInclude Include="diffuseShader.vert.glsl">
       <Filter>Source Files\GLSL Shaders\Diffuse Lighting Shader</Filter>
     </ClInclude>
-    <ClInclude Include="anisotropicShader.h">
-      <Filter>Header Files\OpenGL Shaders</Filter>
-    </ClInclude>
-    <ClInclude Include="anisotropicTextureShader.h">
-      <Filter>Header Files\OpenGL Shaders</Filter>
-    </ClInclude>
     <ClInclude Include="cookTorranceReflectionShader.h">
-      <Filter>Header Files\OpenGL Shaders</Filter>
-    </ClInclude>
-    <ClInclude Include="cookTorranceSkyboxReflectionShader.h">
       <Filter>Header Files\OpenGL Shaders</Filter>
     </ClInclude>
     <ClInclude Include="cookTorranceShader.h">
       <Filter>Header Files\OpenGL Shaders</Filter>
     </ClInclude>
-    <ClInclude Include="cookTorranceTextureShader.h">
-      <Filter>Header Files\OpenGL Shaders</Filter>
-    </ClInclude>
     <ClInclude Include="diffuseLightingShader.h">
-      <Filter>Header Files\OpenGL Shaders</Filter>
-    </ClInclude>
-    <ClInclude Include="diffuseTextureShader.h">
       <Filter>Header Files\OpenGL Shaders</Filter>
     </ClInclude>
     <ClInclude Include="phongShader.h">
@@ -500,7 +470,7 @@
     <ClInclude Include="simpleShader.h">
       <Filter>Header Files\OpenGL Shaders</Filter>
     </ClInclude>
-    <ClInclude Include="skyboxShader.h">
+    <ClInclude Include="cubemapShader.h">
       <Filter>Header Files\OpenGL Shaders</Filter>
     </ClInclude>
     <ClInclude Include="solidColorShader.h">
@@ -527,25 +497,10 @@
     <ClInclude Include="textureShader.h">
       <Filter>Header Files\OpenGL Shaders</Filter>
     </ClInclude>
-    <ClInclude Include="advancedDiffuseTextureShader.h">
-      <Filter>Header Files\OpenGL Shaders</Filter>
-    </ClInclude>
-    <ClInclude Include="shadowMappingTextureShader.h">
-      <Filter>Header Files\OpenGL Shaders</Filter>
-    </ClInclude>
-    <ClInclude Include="ShadowMappingTextureShader.frag.glsl">
-      <Filter>Source Files\GLSL Shaders\Shadow Shader</Filter>
-    </ClInclude>
     <ClInclude Include="simulations.h">
       <Filter>Header Files\Simulations</Filter>
     </ClInclude>
     <ClInclude Include="boundingVolume.h">
-      <Filter>Header Files\BoundingVolumes</Filter>
-    </ClInclude>
-    <ClInclude Include="axisAlignedBoundingBox.h">
-      <Filter>Header Files\BoundingVolumes</Filter>
-    </ClInclude>
-    <ClInclude Include="orientedBoundingBox.h">
       <Filter>Header Files\BoundingVolumes</Filter>
     </ClInclude>
     <ClInclude Include="boundingBox.h">
@@ -560,35 +515,11 @@
     <ClInclude Include="curvature.h">
       <Filter>Header Files\Primitive</Filter>
     </ClInclude>
-    <ClInclude Include="cone.h">
-      <Filter>Header Files\RigidObjects</Filter>
-    </ClInclude>
-    <ClInclude Include="cylinder.h">
-      <Filter>Header Files\RigidObjects</Filter>
-    </ClInclude>
-    <ClInclude Include="pyramid.h">
-      <Filter>Header Files\RigidObjects</Filter>
-    </ClInclude>
-    <ClInclude Include="cuboid.h">
-      <Filter>Header Files\RigidObjects</Filter>
-    </ClInclude>
-    <ClInclude Include="sphere.h">
-      <Filter>Header Files\RigidObjects</Filter>
-    </ClInclude>
-    <ClInclude Include="importedMesh.h">
-      <Filter>Header Files\RigidObjects</Filter>
-    </ClInclude>
-    <ClInclude Include="vertexBuffer.h">
-      <Filter>Header Files\OpenGL Utilities</Filter>
-    </ClInclude>
     <ClInclude Include="softBody.h">
       <Filter>Header Files\SoftBodyPhysics</Filter>
     </ClInclude>
     <ClInclude Include="inertiaTensorUtil.h">
       <Filter>Header Files\RigidBodyPhysics</Filter>
-    </ClInclude>
-    <ClInclude Include="renderer.h">
-      <Filter>Header Files\Interfaces</Filter>
     </ClInclude>
     <ClInclude Include="softObject.h">
       <Filter>Header Files\SoftBodyPhysics</Filter>
@@ -596,12 +527,57 @@
     <ClInclude Include="rigidObject.h">
       <Filter>Header Files\RigidObjects</Filter>
     </ClInclude>
+    <ClInclude Include="skyboxRenderer.h">
+      <Filter>Header Files\Renderers</Filter>
+    </ClInclude>
+    <ClInclude Include="vertexBuffer.h">
+      <Filter>Header Files\OpenGL Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="edgeRenderer.h">
+      <Filter>Header Files\Renderers</Filter>
+    </ClInclude>
+    <ClInclude Include="shaderInterface.h">
+      <Filter>Header Files\OpenGL Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="cone.h">
+      <Filter>Header Files\Polyhedron</Filter>
+    </ClInclude>
+    <ClInclude Include="cuboid.h">
+      <Filter>Header Files\Polyhedron</Filter>
+    </ClInclude>
+    <ClInclude Include="cylinder.h">
+      <Filter>Header Files\Polyhedron</Filter>
+    </ClInclude>
+    <ClInclude Include="pyramid.h">
+      <Filter>Header Files\Polyhedron</Filter>
+    </ClInclude>
+    <ClInclude Include="sphere.h">
+      <Filter>Header Files\Polyhedron</Filter>
+    </ClInclude>
+    <ClInclude Include="importedMesh.h">
+      <Filter>Header Files\Primitive</Filter>
+    </ClInclude>
+    <ClInclude Include="polyhedra.h">
+      <Filter>Header Files\RigidObjects</Filter>
+    </ClInclude>
+    <ClInclude Include="particleAngleConstraint.h">
+      <Filter>Header Files\ParticlePhysics</Filter>
+    </ClInclude>
+    <ClInclude Include="particleDistanceConstraint.h">
+      <Filter>Header Files\ParticlePhysics</Filter>
+    </ClInclude>
+    <ClInclude Include="orientedBoundingBox.h">
+      <Filter>Header Files\BoundingVolumes</Filter>
+    </ClInclude>
+    <ClInclude Include="axisAlignedBoundingBox.h">
+      <Filter>Header Files\BoundingVolumes</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="todo.txt" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="diffuseTextureShader.frag.glsl">
+    <None Include="diffuseShader.frag.glsl">
       <Filter>Source Files\GLSL Shaders\Diffuse Lighting Shader</Filter>
     </None>
     <None Include="solidColorShader.vert.glsl">
@@ -610,19 +586,16 @@
     <None Include="solidColorShader.frag.glsl">
       <Filter>Source Files\GLSL Shaders\Solid Color Shader</Filter>
     </None>
-    <None Include="skyboxShader.frag.glsl">
-      <Filter>Source Files\GLSL Shaders\Skybox Shader</Filter>
+    <None Include="cubemapShader.frag.glsl">
+      <Filter>Source Files\GLSL Shaders\Cubemap Shader</Filter>
     </None>
-    <None Include="skyboxShader.vert.glsl">
-      <Filter>Source Files\GLSL Shaders\Skybox Shader</Filter>
-    </None>
-    <None Include="cookTorranceReflectionShader.frag.glsl">
-      <Filter>Source Files\GLSL Shaders\Reflection Shader</Filter>
+    <None Include="cubemapShader.vert.glsl">
+      <Filter>Source Files\GLSL Shaders\Cubemap Shader</Filter>
     </None>
     <None Include="cookTorranceReflectionShader.vert.glsl">
       <Filter>Source Files\GLSL Shaders\Reflection Shader</Filter>
     </None>
-    <None Include="cookTorranceSkyboxReflectionShader.frag.glsl">
+    <None Include="cookTorranceReflectionShader.frag.glsl">
       <Filter>Source Files\GLSL Shaders\Reflection Shader</Filter>
     </None>
     <None Include="shadowMappingShader.frag.glsl">
@@ -637,14 +610,11 @@
     <None Include="shadowMappingShader.vert.glsl">
       <Filter>Source Files\GLSL Shaders\Shadow Shader</Filter>
     </None>
-    <None Include="textureShader.vert.glsl">
-      <Filter>Source Files\GLSL Shaders\Texture Shader</Filter>
-    </None>
     <None Include="textureShader.frag.glsl">
       <Filter>Source Files\GLSL Shaders\Texture Shader</Filter>
     </None>
-    <None Include="shadowMappingTextureShader.vert.glsl">
-      <Filter>Source Files\GLSL Shaders\Shadow Shader</Filter>
+    <None Include="textureShader.vert.glsl">
+      <Filter>Source Files\GLSL Shaders\Texture Shader</Filter>
     </None>
   </ItemGroup>
 </Project>

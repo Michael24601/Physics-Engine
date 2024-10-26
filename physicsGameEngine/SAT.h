@@ -7,14 +7,14 @@
 	which is also needed, always faces outward, not inward.
 */
 
+#ifdef DONE_REFACTOR
+
 #ifndef SAT_H
 #define SAT_H
 
 #include "rigidBody.h"
 #include <vector>
 #include "contact.h"
-
-
 #include "polyhedron.h"
 #include "contact.h"
 #include <vector>
@@ -36,5 +36,7 @@ namespace pe {
     bool testIntersection(const Polyhedron& C0, const Polyhedron& C1);
 
 }
+
+#endif
 
 #endif

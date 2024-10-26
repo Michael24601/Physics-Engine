@@ -22,7 +22,8 @@ namespace pe {
 
         SimpleShader() : Shader(
             "simpleShader.vert.glsl",
-            "simpleShader.frag.glsl"
+            "simpleShader.frag.glsl",
+            std::vector<unsigned int>{3}
         ) {}
 
     };

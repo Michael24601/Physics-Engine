@@ -1,4 +1,6 @@
 
+#ifdef DONE_REFACTOR
+
 #include "sat.h"
 
 using namespace pe;
@@ -121,3 +123,5 @@ bool pe::testIntersection(const Polyhedron& C0, const Polyhedron& C1) {
 
 	return true;
 }
+
+#endif

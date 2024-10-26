@@ -435,3 +435,14 @@ Consider adding a way to adjust scale without changing the mesh
 (using the same primitive object).
 
 Make the particle updateForce function const.
+
+See if you want the skybox to be mapped in the environment, or
+in the shader directly sent.
+
+Test generateFaceData().
+
+Test the vertex buffer error handling when the vertex data
+sent doesn't match the allocated space.
+
+Add a way to draw bounding volumes, and have a way to save the
+BV transform, and send it to the generateContacts function.

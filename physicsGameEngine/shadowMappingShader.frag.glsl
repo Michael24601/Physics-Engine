@@ -3,10 +3,13 @@
 
 in vec3 FragPos;
 in vec3 Normal;
+in vec2 TexCoord;
 in vec4 FragPosLightSpace;
 in vec3 ViewPos;
 
-uniform vec4 objectColor;
+uniform vec4 color;
+uniform sampler2D objectTexture;
+uniform bool useTexture;
 
 uniform vec3 lightPos;
 
@@ -76,7 +79,13 @@ float PCFShadowCalculation(vec4 fragPosLightSpace, vec3 lightDir){
 
 
 void main(){
-    vec3 color = objectColor.rgb;
+
+    vec4 objectColor;
+    if(useTexture)
+        objectColor = texture(objectTexture, TexCoord);
+    else
+        objectColor = color;
+
     vec3 normal = normalize(Normal);
     vec3 lightColor = vec3(1.0);
     // ambient
@@ -103,7 +112,8 @@ void main(){
         specular = vec3(0.0);
     }
 
-    vec3 lighting = (ambient + (1.0 - shadow) * (diffuse + specular)) * color; 
+    vec3 lighting = (ambient + (1.0 - shadow) * (diffuse + specular)) 
+        * objectColor.rgb; 
 
     FragColor = vec4(lighting, 1.0);
 }

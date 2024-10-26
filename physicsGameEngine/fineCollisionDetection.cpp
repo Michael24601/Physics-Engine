@@ -383,43 +383,19 @@ unsigned int pe::boxAndSphere(
 
 
 void pe::generateContacts(
-    const RigidObject& one,
-    const RigidObject& two,
+    RigidBody* one,
+    const BoundingBox* BVOne,
+    RigidBody* two,
+    const BoundingBox* BVTwo,
     std::vector<Contact>& contacts,
     real restitution,
     real friction
 ) {
-
     std::vector<Contact> contactsGenerated;
 
-    if (one.boundingVolumeType == BOUNDING_VOLUME::BOX &&
-        two.boundingVolumeType == BOUNDING_VOLUME::BOX) {
-
-        Box boxOne(one.boundingBox, one.body);
-        Box boxTwo(two.boundingBox, two.body);
-        boxAndBox(boxOne, boxTwo, contactsGenerated);
-    }
-    else if (one.boundingVolumeType == BOUNDING_VOLUME::SPHERE &&
-        two.boundingVolumeType == BOUNDING_VOLUME::SPHERE) {
-
-        Ball ballOne(one.boundingSphere, one.body);
-        Ball ballTwo(two.boundingSphere, two.body);
-        sphereAndSphere(ballOne, ballTwo, contactsGenerated);
-    }
-    else if (one.boundingVolumeType == BOUNDING_VOLUME::BOX &&
-        two.boundingVolumeType == BOUNDING_VOLUME::SPHERE) {
-
-        Box boxOne(one.boundingBox, one.body);
-        Ball ballTwo(two.boundingSphere, two.body);
-        boxAndSphere(boxOne, ballTwo, contactsGenerated);
-    }
-    else if (one.boundingVolumeType == BOUNDING_VOLUME::SPHERE &&
-        two.boundingVolumeType == BOUNDING_VOLUME::BOX) {
-
-        Ball ballOne(one.boundingSphere, one.body);
-        Box boxTwo(two.boundingBox, two.body);
-        boxAndSphere(boxTwo, ballOne, contactsGenerated);
-    }
+    Box boxOne(BVOne, one);
+    Box boxTwo(BVTwo, two);
+    boxAndBox(boxOne, boxTwo, contactsGenerated);
 
     for (Contact& contact : contactsGenerated) {
         contact.restitution = restitution;
@@ -427,4 +403,71 @@ void pe::generateContacts(
 
         contacts.push_back(contact);
     }
+}
+
+
+void pe::generateContacts(
+    RigidBody* one,
+    const BoundingSphere* BVOne,
+    RigidBody* two,
+    const BoundingSphere* BVTwo,
+    std::vector<Contact>& contacts,
+    real restitution,
+    real friction
+) {
+    std::vector<Contact> contactsGenerated;
+
+    Ball sphereOne(BVOne, one);
+    Ball sphereTwo(BVTwo, two);
+    sphereAndSphere(sphereOne, sphereTwo, contactsGenerated);
+
+    for (Contact& contact : contactsGenerated) {
+        contact.restitution = restitution;
+        contact.friction = friction;
+        contacts.push_back(contact);
+    }
+}
+
+
+void pe::generateContacts(
+    RigidBody* one,
+    const BoundingBox* BVOne,
+    RigidBody* two,
+    const BoundingSphere* BVTwo,
+    std::vector<Contact>& contacts,
+    real restitution,
+    real friction
+) {
+    std::vector<Contact> contactsGenerated;
+
+    Box box(BVOne, one);
+    Ball sphere(BVTwo, two);
+    boxAndSphere(box, sphere, contactsGenerated);
+
+    for (Contact& contact : contactsGenerated) {
+        contact.restitution = restitution;
+        contact.friction = friction;
+        contacts.push_back(contact);
+    }
+}
+
+
+void pe::generateContacts(
+    RigidBody* one,
+    const BoundingSphere* BVOne,
+    RigidBody* two,
+    const BoundingBox* BVTwo,
+    std::vector<Contact>& contacts,
+    real restitution,
+    real friction
+) {
+    generateContacts(
+        two, 
+        BVTwo, 
+        one, 
+        BVOne, 
+        contacts, 
+        restitution, 
+        friction
+    );
 }

@@ -2,23 +2,19 @@
 #ifndef SPHERE_H
 #define SPHERE_H
 
-#include "rigidObject.h"
+#include "mesh.h"
 
 namespace pe {
 
-	class Sphere : public RigidObject<BoundingSphere> {
-
-	private:
-
-		real radius;
-		int latitudeSegments;
-		int longitudeSegments;
+	class Sphere : public Mesh {
 
 	public:
 
 		// Tesselates sphere by generating vertices
-		static Mesh* generateMesh(
-			real radius, int latitudeSegments, int longitudeSegments
+		static std::vector<Vector3D> generateVertices(
+			real radius, 
+			int latitudeSegments,
+			int longitudeSegments
 		) {
 
 			std::vector<Vector3D> vertices;
@@ -44,8 +40,17 @@ namespace pe {
 					vertices.push_back(v);
 				}
 			}
+			return vertices;
+		}
+
+
+		static std::vector<std::vector<int>> generateFaces(
+			int latitudeSegments,
+			int longitudeSegments
+		) {
 
 			std::vector<std::vector<int>> faces;
+
 			// Generates sphere faces based on how the vertices were
 			for (int lat = 0; lat < latitudeSegments; lat++) {
 
@@ -64,6 +69,15 @@ namespace pe {
 					faces.push_back(std::vector<int>{ v[0], v[1], v[3], v[2] });
 				}
 			}
+
+			return faces;
+		}
+
+
+		static std::vector<std::pair<int, int>> generateEdges(
+			int latitudeSegments,
+			int longitudeSegments
+		) {
 
 			std::vector<std::pair<int, int>> edges;
 
@@ -87,33 +101,43 @@ namespace pe {
 				}
 			}
 
-			Mesh* mesh = new Mesh(vertices, faces, edges);
+			return edges;
+		}
 
-			// Vertex normals for curvature
-			std::vector<std::vector<Vector3D>> vertexNormals(mesh->getFaceCount());
-			for (int i = 0; i < mesh->getFaceCount(); i++) {
 
-				vertexNormals[i].resize(mesh->getFace(i).getVertexCount());
+		std::vector<std::vector<Vector3D>> generateVertexNormals() {
+
+			std::vector<std::vector<Vector3D>> vertexNormals(getFaceCount());
+
+			for (int i = 0; i < getFaceCount(); i++) {
+
+				vertexNormals[i].resize(getFace(i).getVertexCount());
 
 				/*
 					For a sphere, the vertex normals of each point is just the
 					normalized position vector relative to the centre.
 				*/
-				for (int j = 0; j < mesh->getFace(i).getVertexCount(); j++) {
-					vertexNormals[i][j] = mesh->getFaceVertex(i, j);
+				for (int j = 0; j < getFace(i).getVertexCount(); j++) {
+					vertexNormals[i][j] = getFaceVertex(i, j);
 					vertexNormals[i][j].normalize();
 				}
 			}
 
-			mesh->setVertexNormals(vertexNormals);
+			return vertexNormals;
+		}
 
-			// UV coordinates
-			for (int i = 0; i < mesh->getFaceCount(); i++) {
+
+		/*
+			Sets the UV coordinates in such a way as to stretch a single
+			texture over the whole sphere.
+		*/
+		void setUVCoordinates() {
+			for (int i = 0; i < getFaceCount(); i++) {
 
 				std::vector<Vector2D> textureCoordinates;
-				for (int j = 0; j < mesh->getFace(i).getVertexCount(); j++) {
+				for (int j = 0; j < getFace(i).getVertexCount(); j++) {
 
-					int index = mesh->getFace(i).getIndex(j);
+					int index = getFace(i).getIndex(j);
 
 					/*
 						The vector from the centre of the sphere to the
@@ -122,7 +146,7 @@ namespace pe {
 						We then normalize d or divide d.y by the radius
 						in the phi calculation.
 					*/
-					Vector3D d = mesh->getVertex(index);
+					Vector3D d = getVertex(index);
 					d.normalize();
 
 					real theta = std::atan2(d.z, d.x);
@@ -133,39 +157,34 @@ namespace pe {
 					textureCoordinates.push_back(Vector2D(u, v));
 				}
 
-				mesh->setFaceTextureCoordinates(i, textureCoordinates);
+				setFaceTextureCoordinates(i, textureCoordinates);
 			}
-
-			return mesh;
 		}
 
 
-		Sphere(
-			real radius, int latitudeSegments, int longitudeSegments,
-			const Vector3D& position,
-			const Quaternion& orientation,
-			real mass,
-			bool smooth
-		) : RigidObject<BoundingSphere>(
-			generateMesh(radius, latitudeSegments, longitudeSegments),
-			new Renderer(mesh, GL_STATIC_DRAW, smooth),
-			new BoundingSphere(radius),
-			position,
-			orientation,
-			mass,
-			Matrix3x3(
-				(2.0 / 5.0)* mass* radius* radius, 0, 0,
-				0, (2.0 / 5.0)* mass* radius* radius, 0,
-				0, 0, (2.0 / 5.0)* mass* radius* radius
-			)
-		), radius{ radius }, latitudeSegments{ latitudeSegments }, 
-			longitudeSegments{ longitudeSegments }{}
+	public:
 
+		const real radius;
+		const int latitudeSegments;
+		const int longitudeSegments;
 
-		~Sphere() {
-			delete mesh;
-			delete renderer;
-			delete boundingVolume;
+		Sphere(real radius, int latitudeSegments, int longitudeSegments) :
+			radius{ radius }, latitudeSegments{ latitudeSegments },
+			longitudeSegments{ longitudeSegments },
+			Mesh(
+				generateVertices(radius, latitudeSegments, longitudeSegments), 
+				generateFaces(latitudeSegments, longitudeSegments),
+				generateEdges(latitudeSegments, longitudeSegments)
+			) {
+
+			/*
+				Because a sphere is a rigid object that can't be deformed,
+				and because it has a transform matrix, there is no need
+				to generate a curvature map, and we can instead directly set
+				and later update the vertex normals.
+			*/
+			setVertexNormals(generateVertexNormals());
+			setUVCoordinates();
 		}
 
 	};
@@ -173,3 +192,4 @@ namespace pe {
 
 
 #endif
+

@@ -2,28 +2,25 @@
 #ifndef CYLINDER_H
 #define CYLINDER_H
 
-#include "rigidObject.h"
-#include "orientedBoundingBox.h"
+#include "mesh.h"
 
 namespace pe {
 
-	class Cylinder: public RigidObject<OrientedBoundingBox> {
+	class Cylinder : public Mesh {
 
 	private:
 
-		real radius;
-		real height;
-		int segments;
-
-	public:
-
-		static Mesh* generateMesh(real radius, real height, int segments) {
+		static std::vector<Vector3D> generateCylinderVertices(
+			real radius, 
+			real height, 
+			int segments
+		) {
 
 			std::vector<Vector3D> vertices;
 
 			for (int i = 0; i <= segments; ++i) {
 				// Calculate the angle for each segment
-				real theta = 2.0f * PI * static_cast<real>(i) / 
+				real theta = 2.0f * PI * static_cast<real>(i) /
 					static_cast<real>(segments);
 
 				// Vertices of the current point on the side of the cylinder
@@ -35,7 +32,7 @@ namespace pe {
 				);
 
 				/*
-					Vertices of the corresponding point at the bottom of 
+					Vertices of the corresponding point at the bottom of
 					the cylinder.
 				*/
 				Vector3D v_bottom = v_side - Vector3D(0.0f, height, 0.0f);
@@ -44,6 +41,10 @@ namespace pe {
 				vertices.push_back(v_bottom);
 			}
 
+			return vertices;
+		}
+
+		static std::vector<std::vector<int>> generateFaces(int segments) {
 
 			std::vector<std::vector<int>> faces;
 
@@ -76,6 +77,11 @@ namespace pe {
 			}
 			faces.push_back(bottomFaceIndexes);
 
+			return faces;
+		}
+
+
+		static std::vector<std::pair<int, int>> generateEdges(int segments) {
 
 			std::vector<std::pair<int, int>> edges;
 
@@ -89,42 +95,73 @@ namespace pe {
 				int v2 = (v0 + 2) % (2 * segments);
 				int v3 = v2 + 1;
 
+				/*
+					We can account for all edges in the cylinder if, for each
+					rectangular side face, we generate 3 edges: the top and
+					bottom ones (on the bases), and one of the side edges
+					(connecting the two bases). The 4th side of the rectangle
+					will repeat on the next rectangle.
+				*/
+
 				edges.push_back(std::make_pair(v0, v1));
 				edges.push_back(std::make_pair(v1, v3));
 				edges.push_back(std::make_pair(v2, v0));
-				edges.push_back(std::make_pair(v2, v3));
 			}
 
-			Mesh* mesh = new Mesh(vertices, faces, edges);
+			return edges;
+		}
 
-			// First we find a reference point on the base faces
-			Vector3D referenceVertices[2];
-			referenceVertices[0] = mesh->getFaceVertex(0, 0);
-			referenceVertices[1] = mesh->getFaceVertex(1, 0);
 
-			// We will also need the centroid of each of those base faces
+		/*
+			Sets the UV coordinates in such a way as to stretch a single
+			texture over the curved area of the cylinder.
+			The top and bottom faces remain with the same uv-coordinates.
+		*/
+		void setUVCoordinates() {
+			/*
+				First we find a reference point on the base faces.
+			*/
+			Vector3D vertices[2];
+			vertices[0] = getFaceVertex(0, 0);
+			vertices[1] = getFaceVertex(1, 0);
+
+			/*
+				We will also need the centroid of each of those base
+				faces.
+			*/
 			Vector3D centroids[2];
-			centroids[0] = mesh->getFace(0).getCentroid();
-			centroids[1] = mesh->getFace(1).getCentroid();
+			centroids[0] = getFace(0).getCentroid();
+			centroids[1] = getFace(1).getCentroid();
 
 			/*
 				And then we calculate the vector connecting each
 				reference point to the centroid.
 			*/
-			Vector3D vertexSegments[2];
-			vertexSegments[0] = referenceVertices[0] - centroids[1];
-			vertexSegments[1] = referenceVertices[0] - centroids[1];
+			Vector3D segments[2];
+			segments[0] = vertices[0] - centroids[1];
+			segments[1] = vertices[0] - centroids[1];
 
-
-			for (int i = 2; i < mesh->getFaceCount(); i++) {
+			// Starting with the first curved face.
+			for (int i = 2; i < getFaceCount(); i++) {
 				std::vector<Vector2D> textureCoordinates;
-				for (int j = 0; j < mesh->getFace(i).getVertexCount(); j++) {
+				/*
+					Then for each of the side faces (curved), we get each
+					vertex, and depending on which base it is in, give it
+					a v coordinate of 1 or 0 (up or down). Then, we can
+					calculate the angle between the segment connecting
+					the centroid to it, and the segment connecting the
+					centroid to the reference. We then divide the result
+					by 2 * pi (a full turn) to get the u coordinate.
+				*/
+				for (int j = 0; j < getFace(i).getVertexCount(); j++) {
 
-					Vector3D vertex = mesh->getFaceVertex(i, j);
+					Vector3D vertex = getFaceVertex(i, j);
 
 					/*
 						Here we determine wether this vertex is in the top
 						or bottom base face.
+						We can use the magnitude squared as it is more
+						efficient than the magnitude in this case.
 					*/
 					real distance0 = (vertex - centroids[0]).magnitudeSquared();
 					real distance1 = (vertex - centroids[1]).magnitudeSquared();
@@ -136,9 +173,15 @@ namespace pe {
 						baseIndex = 1;
 					}
 
+					/*
+						Then we calculate the segment, then the angle.
+						Note that there is no need to calculate the
+						length of the segments, as we already know it's
+						the radius.
+					*/
 					Vector3D segment = vertex - centroids[baseIndex];
 					real angle = acos(
-						vertexSegments[baseIndex].scalarProduct(segment) / (radius * radius)
+						segments[baseIndex].scalarProduct(segment) / (radius * radius)
 					);
 
 					real u = angle / (2 * PI);
@@ -146,20 +189,23 @@ namespace pe {
 					textureCoordinates.push_back(Vector2D(u, v));
 				}
 
-				mesh->setFaceTextureCoordinates(i, textureCoordinates);
+				setFaceTextureCoordinates(i, textureCoordinates);
 			}
+		}
 
 
-			std::vector<std::vector<Vector3D>> vertexNormals(mesh->getFaceCount());
+		std::vector<std::vector<Vector3D>> generateVertexNormals() {
 
-			for (int i = 0; i < mesh->getFaceCount(); i++) {
+			std::vector<std::vector<Vector3D>> vertexNormals(getFaceCount());
 
-				vertexNormals[i].resize(mesh->getFace(i).getVertexCount());
+			for (int i = 0; i < getFaceCount(); i++) {
+
+				vertexNormals[i].resize(getFace(i).getVertexCount());
 
 				// Flat bases
-				if (i == mesh->getFaceCount() - 1 || i == mesh->getFaceCount() - 2) {
-					for (int j = 0; j < mesh->getFace(i).getVertexCount(); j++) {
-						vertexNormals[i][j] = mesh->getFace(i).getNormal();
+				if (i == getFaceCount() - 1 || i == getFaceCount() - 2) {
+					for (int j = 0; j < getFace(i).getVertexCount(); j++) {
+						vertexNormals[i][j] = getFace(i).getNormal();
 					}
 				}
 				// For side faces, there are 4 vertices
@@ -169,47 +215,34 @@ namespace pe {
 						vector of the vertices relative to the centre of the cylinder,
 						but with a flat y-component.
 					*/
-					for (int j = 0; j < mesh->getFace(i).getVertexCount(); j++) {
-						vertexNormals[i][j] = mesh->getFace(i).getVertex(mesh, j);
+					for (int j = 0; j < getFace(i).getVertexCount(); j++) {
+						vertexNormals[i][j] = getFace(i).getVertex(this, j);
 						vertexNormals[i][j].y = 0;
 						vertexNormals[i][j].normalize();
 					}
 				}
 			}
 
-			mesh->setVertexNormals(vertexNormals);
-
-			return mesh;
+			return vertexNormals;
 		}
 
 
-		Cylinder(
-			real radius, real height, int segments,
-			const Vector3D& position,
-			const Quaternion& orientation,
-			real mass,
-			bool smooth
-		) : RigidObject<OrientedBoundingBox>(
-			generateMesh(radius, height, segments),
-			new Renderer(mesh, GL_STATIC_DRAW, smooth),
-			new OrientedBoundingBox(Vector3D(radius, 0, radius)),
-			position,
-			orientation,
-			mass,
-			Matrix3x3(
-				(1.0 / 12.0)* mass*
-				(3.0 * radius * radius + height * height), 0, 0,
-				0, (1.0 / 12.0)* mass*
-				(3.0 * radius * radius + height * height), 0,
-				0, 0, (1.0 / 12.0)* mass* (3.0 * radius * radius)
-			)
-		), radius{ radius }, height{ height }, segments{ segments } {}
+	public:
 
+		const real radius;
+		const real height;
+		const int segments;
 
-		~Cylinder() {
-			delete mesh;
-			delete renderer;
-			delete boundingVolume;
+		Cylinder(real radius, real height, int segments) :
+			radius{ radius }, height{ height }, segments{ segments },
+			Mesh(
+				generateCylinderVertices(radius, height, segments), 
+				generateFaces(segments), 
+				generateEdges(segments)
+			) {
+
+			setVertexNormals(generateVertexNormals());
+			setUVCoordinates();
 		}
 
 	};

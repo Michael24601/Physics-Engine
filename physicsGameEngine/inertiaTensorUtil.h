@@ -1,7 +1,3 @@
-/*
-	Repository for well known inertia tensors, as well as an inertia
-	tensor approximation function.
-*/
 
 #ifndef INERTIA_TENSOR_UTIL
 #define INERTIA_TENSOR_UTIL
@@ -15,77 +11,7 @@ namespace pe {
 	class InertiaTensorUtil {
 
 	public:
-		
-		static Matrix3x3 getRectangularPrismInertiaTensor(
-			real width,
-			real height,
-			real depth,
-			real mass
-		) {
-			return Matrix3x3(
-				(mass / 12.0) * (height * height + depth * depth), 0, 0,
-				0, (mass / 12.0) * (width * width + depth * depth), 0,
-				0, 0, (mass / 12.0) * (width * width + height * height)
-			);
-		}
-
-
-		static Matrix3x3 getConeInertiaTensor(
-			real height,
-			real radius,
-			real mass
-		) {
-			return Matrix3x3(
-				(3.0 / 80.0) * mass * (radius * radius + 4.0 * height * height), 0, 0,
-				0, (3.0 / 80.0) * mass * (radius * radius + 4.0 * height * height), 0,
-				0, 0, (3.0 / 40.0) * mass * radius * radius
-			);
-		}
-
-
-		static Matrix3x3 getCylinderInertiaTensor(
-			real height,
-			real radius,
-			real mass
-		) {		
-			return Matrix3x3(
-				(1.0 / 12.0) * mass *
-				(3.0 * radius * radius + height * height), 0, 0,
-				0, (1.0 / 12.0) * mass *
-				(3.0 * radius * radius + height * height), 0,
-				0, 0, (1.0 / 12.0) * mass * (3.0 * radius * radius)
-			);
-		}
-
-		static Matrix3x3 getPyramidInertiaTensor(
-			real side,
-			real height,
-			real mass
-		) {
-			return Matrix3x3(
-				(mass / 10.0) * (3 * side * side + height * height), 0, 0,
-				0, (mass / 10.0) * (3 * side * side + height * height), 0,
-				0, 0, (mass / 5.0) * side * side
-			);
-		}
-
-
-		/*
-			The inertia tensor of a solid sphere is different than an empty
-			sphere. This is a full sphere.
-		*/
-		static Matrix3x3 getSolidSphereInertiaTensor(
-			real radius,
-			real mass
-		) {
-			return Matrix3x3(
-				(2.0 / 5.0) * mass * radius * radius, 0, 0,
-				0, (2.0 / 5.0) * mass * radius * radius, 0,
-				0, 0, (2.0 / 5.0) * mass * radius * radius
-			);
-		}
-
-
+	
 		/*
 			This function approximates the inertia tensor of a solid,
 			closed mesh.
@@ -115,9 +41,9 @@ namespace pe {
 			real mass
 		) {
 
-			// First we place the vertices in a box
+			// First we place the vertices in an axis aligned box
 			AxisAlignedBoundingBox boundingBox;
-			boundingBox.fit(mesh->vertices);
+			boundingBox.fit(mesh->getVertices());
 
 			Vector3D offset = boundingBox.getPosition();
 			Vector3D halfsize = boundingBox.getHalfsize();

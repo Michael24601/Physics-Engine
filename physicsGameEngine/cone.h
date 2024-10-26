@@ -2,22 +2,24 @@
 #ifndef CONE_H
 #define CONE_H
 
-#include "rigidObject.h"
-#include "orientedBoundingBox.h"
+#include "mesh.h"
 
 namespace pe {
 
-	class Cone : public RigidObject<OrientedBoundingBox> {
+	class Cone : public Mesh {
 
 	private:
 
-		real radius;
-		real height;
-		int segments;
-
-	public:
-
-		static Mesh* generateMesh(real radius, real height, int segments) {
+		/*
+			Defines the vertices of a tessalated cone with a certain radius,
+			height, and a number of segments (the more segments the more
+			it will look like a cone).
+		*/
+		static std::vector<Vector3D> generateVertices(
+			real radius, 
+			real height, 
+			int segments
+		) {
 
 			std::vector<Vector3D> vertices;
 
@@ -26,7 +28,7 @@ namespace pe {
 
 			for (int i = 0; i <= segments; ++i) {
 				// Calculate the angle for each segment
-				real theta = 2.0f * PI * static_cast<real>(i) / 
+				real theta = 2.0f * PI * static_cast<real>(i) /
 					static_cast<real>(segments);
 
 				// Vertices of the current point on the base of the cone
@@ -39,6 +41,14 @@ namespace pe {
 				vertices.push_back(v_base);
 			}
 
+			return vertices;
+		}
+
+
+		/*
+			Assumes the vertices and segment length have been set.
+		*/
+		static std::vector<std::vector<int>> generateFaces(int segments) {
 
 			std::vector<std::vector<int>> faces;
 
@@ -57,6 +67,11 @@ namespace pe {
 			}
 			faces.push_back(baseFaceIndexes);
 
+			return faces;
+		}
+
+
+		static std::vector<std::pair<int, int>> generateEdges(int segments) {
 
 			std::vector<std::pair<int, int>> edges;
 
@@ -75,82 +90,61 @@ namespace pe {
 				edges.push_back(std::make_pair(0, i));
 			}
 
-			Mesh* mesh = new Mesh(vertices, faces, edges);
-			
-			// Vertex normals
-			std::vector<std::vector<Vector3D>> vertexNormals(mesh->getFaceCount());
+			return edges;
+		}
 
-			for (int i = 0; i < mesh->getFaceCount(); i++) {
 
-				vertexNormals[i].resize(mesh->getFace(i).getVertexCount());
+		std::vector<std::vector<Vector3D>> generateVertexNormals() {
+
+			std::vector<std::vector<Vector3D>> vertexNormals(getFaceCount());
+
+			for (int i = 0; i < getFaceCount(); i++) {
+
+				vertexNormals[i].resize(getFace(i).getVertexCount());
 
 				// Flat base
-				if (i == mesh->getFaceCount() - 1) {
-					for (int j = 0; j < mesh->getFace(i).getVertexCount(); j++) {
-						vertexNormals[i][j] = mesh->getFace(i).getNormal();
+				if (i == getFaceCount() - 1) {
+					for (int j = 0; j < getFace(i).getVertexCount(); j++) {
+						vertexNormals[i][j] = getFace(i).getNormal();
 					}
 				}
 				// For side faces, there are 3 vertices
 				else {
 					// Apex, has the reverse of the base
-					vertexNormals[i][0] = 
-						mesh->getFace(mesh->getFaceCount() - 1).getNormal().inverse();
+					vertexNormals[i][0] = getFace(getFaceCount() - 1).getNormal().inverse();
 					/*
 						The normal of the side vertices is the normalized position
 						vector of the vertices relative to the centre of the cone,
 						but with a flat y-component.
 					*/
-					vertexNormals[i][1] = mesh->getFace(i).getVertex(mesh, 1);
+					vertexNormals[i][1] = getFace(i).getVertex(this, 1);
 					vertexNormals[i][1].y = 0;
 					vertexNormals[i][1].normalize();
-					vertexNormals[i][2] = mesh->getFace(i).getVertex(mesh, 2);
+					vertexNormals[i][2] = getFace(i).getVertex(this, 2);
 					vertexNormals[i][2].y = 0;
 					vertexNormals[i][2].normalize();
 				}
 			}
 
-			mesh->setVertexNormals(vertexNormals);
-			
-			return mesh;
+			return vertexNormals;
 		}
 
 
-		Cone(
-			real radius, real height, int segments,
-			const Vector3D& position,
-			const Quaternion& orientation,
-			real mass,
-			bool smooth
-		) : RigidObject<OrientedBoundingBox>(
-			generateMesh(radius, height, segments),
-			new Renderer(mesh, GL_STATIC_DRAW, smooth),
-			/*
-				The centroid of the cone is one fourth of the way
-				up from the base. The bounding box is centred halfway
-				between the base and apex of the pyramid, so we have
-				to shift it by a quarter of the height.
-				The halfsize of the bounding box is the radius,
-				half the height, then the radius.
-			*/
-			new OrientedBoundingBox(
-				Vector3D(radius, height / 2.0, radius),
-				Vector3D(0, height / 4.0, 0)
-			),
-			position,
-			orientation,
-			mass,
-			Matrix3x3(
-				(3.0 / 80.0)* mass* (radius* radius + 4.0 * height * height), 0, 0,
-				0, (3.0 / 80.0)* mass* (radius* radius + 4.0 * height * height), 0,
-				0, 0, (3.0 / 40.0)* mass* radius* radius
-			)
-		), radius{ radius }, height{ height }, segments{segments} {}
+	public:
 
+		const real radius;
+		const real height;
+		const int segments;
 
-		~Cone() {
-			delete mesh;
-			delete renderer;
-			delete boundingVolume;
+		Cone(real radius, real heigth, int segments) :
+			radius{ radius }, height{ height }, segments{ segments },
+			Mesh(
+				generateVertices(radius, height, segments), 
+				generateFaces(segments), 
+				generateEdges(segments)
+			){
+
+			setVertexNormals(generateVertexNormals());
 		}
 
 	};
@@ -158,3 +152,4 @@ namespace pe {
 
 
 #endif
+

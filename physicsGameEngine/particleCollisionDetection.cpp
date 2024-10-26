@@ -71,40 +71,25 @@ unsigned int pe::sphereAndPoint(
 }
 
 
-void pe::generateContactParticleAndBox(
+template<typename BoundingVolumeClass>
+void pe::generateContactParticleAndObject(
     Particle* particle,
-    const Cuboidal& one,
+    const RigidObject<BoundingVolumeClass>& one,
     std::vector<ParticleContact>& contacts,
     real restitution
 ) {
-
     std::vector<ParticleContact> contactsGenerated;
 
-    Box box(one);
-    box.halfSize *= 1.2;
-    boxAndPoint(particle->position, box, contactsGenerated);
-
-    for (ParticleContact& contact : contactsGenerated) {
-        contact.restitutionCoefficient = restitution;
-        contact.particle[0] = particle;
-        contact.particle[1] = NULL;
-        contacts.push_back(contact);
+    if (std::is_base_of<BoundingBox, BoundingVolumeClass>::value) {
+        Box box(one);
+        box.halfSize *= 1.2;
+        boxAndPoint(particle->position, box, contactsGenerated);
     }
-}
-
-
-void pe::generateContactParticleAndSphere(
-    Particle* particle,
-    const Spherical& one,
-    std::vector<ParticleContact>& contacts,
-    real restitution
-) {
-
-    std::vector<ParticleContact> contactsGenerated;
-
-    Ball sphere(one);
-    sphere.radius *= 1.2;
-    sphereAndPoint(particle->position, sphere, contactsGenerated);
+    else if (std::is_base_of<BoundingSphere, BoundingVolumeClass>::value) {
+        Ball ball(one);
+        ball.radius *= 1.2;
+        ballAndPoint(particle->position, ball, contactsGenerated);
+    }
 
     for (ParticleContact& contact : contactsGenerated) {
         contact.restitutionCoefficient = restitution;

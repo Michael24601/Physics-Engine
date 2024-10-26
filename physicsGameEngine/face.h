@@ -18,11 +18,11 @@
 #include "vector2D.h"
 #include "matrix3x4.h"
 #include "matrix3x3.h"
-#include "mesh.h"
-#include <vector>
-#include <unordered_set>
 
 namespace pe {
+
+	// Forward declaration to avoid circular dependency
+	class Mesh;
 
 	/*
 		The face class stores the association between vertices in a

@@ -3,8 +3,10 @@
 #define FINE_COLLISION_DETECTION_H
 
 #include "contact.h"
-#include "solidSphere.h"
 #include "rigidObject.h"
+#include "boundingBox.h"
+#include "boundingSphere.h"
+#include "orientedBoundingBox.h"
 
 namespace pe {
 
@@ -35,7 +37,10 @@ namespace pe {
             which will be closer to areas of the shape with more vertices.
             This is why we need an offset.
         */
-        Box(BoundingBox* box, RigidBody* body) {
+        Box(
+            const BoundingBox* box,
+            RigidBody* body
+        ) {
             halfSize = box->getHalfsize();
             this->body = body;
 
@@ -73,7 +78,11 @@ namespace pe {
         /*
             Constructs a sphere from a spherical polyhedron.
         */
-        Ball(BoundingSphere* ball, RigidBody* body) {
+        Ball(
+            const BoundingSphere* ball,
+            RigidBody* body
+
+        ) {
             radius = ball->getRadius();
             this->body = body;
 
@@ -84,7 +93,7 @@ namespace pe {
                 position.
             */
             transformMatrix = ball->getTransformMatrix();
-            transformMatrix.addTranslation(body->position);
+            transformMatrix.addTranslation(body->transformMatrix.getTranslation());
         }
 
         Vector3D getAxis(int index) const {
@@ -195,8 +204,43 @@ namespace pe {
 
 
     void generateContacts(
-        const RigidObject& one,
-        const RigidObject& two,
+        RigidBody* one,
+        const BoundingBox* BVOne,
+        RigidBody* two,
+        const BoundingBox* BVTwo,
+        std::vector<Contact>& contacts,
+        real restitution,
+        real friction
+    );
+
+
+    void generateContacts(
+        RigidBody* one,
+        const BoundingSphere* BVOne,
+        RigidBody* two,
+        const BoundingSphere* BVTwo,
+        std::vector<Contact>& contacts,
+        real restitution,
+        real friction
+    );
+
+
+    void generateContacts(
+        RigidBody* one,
+        const BoundingBox* BVOne,
+        RigidBody* two,
+        const BoundingSphere* BVTwo,
+        std::vector<Contact>& contacts,
+        real restitution,
+        real friction
+    );
+
+
+    void generateContacts(
+        RigidBody* one,
+        const BoundingSphere* BVOne,
+        RigidBody* two,
+        const BoundingBox* BVTwo,
         std::vector<Contact>& contacts,
         real restitution,
         real friction

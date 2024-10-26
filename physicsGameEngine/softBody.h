@@ -35,14 +35,15 @@ namespace pe {
 				particles[i].damping = damping;
 			}
 
-			springs.resize(springPairs.size());
-			for (int i = 0; i < springs.size(); i++) {
-				springs[i] = ParticleSpringDamper(
-					&particles[springPairs[i].second],
-					springStrengths[i],
-					1.0,
-					(particles[springPairs[i].second].position - 
-					particles[springPairs[i].first].position).magnitude()
+			for (int i = 0; i < springPairs.size(); i++) {
+				springs.push_back(
+					ParticleSpringDamper(
+						&particles[springPairs[i].second],
+						springStrengths[i],
+						1.0,
+						(particles[springPairs[i].second].position - 
+						particles[springPairs[i].first].position).magnitude()
+					)
 				);
 			}
 		}

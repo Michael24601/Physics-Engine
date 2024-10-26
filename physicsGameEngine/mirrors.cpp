@@ -1,4 +1,6 @@
 
+#ifdef DONE_REFACTOR
+
 #include "simulations.h"
 
 using namespace pe;
@@ -186,3 +188,5 @@ void pe::runMirrors() {
     }
 
 }
+
+#endif

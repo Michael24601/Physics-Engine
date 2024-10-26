@@ -13,7 +13,8 @@ namespace pe {
 
         ShadowMappingShader() : Shader (
             "shadowMappingShader.vert.glsl",
-            "shadowMappingShader.frag.glsl"
+            "shadowMappingShader.frag.glsl",
+            std::vector<unsigned int>{3, 3, 2}
         ) {}
 
         void setShadowMap(const GLuint& textureId) {
@@ -25,9 +26,23 @@ namespace pe {
             );
         }
 
+
         void setObjectColor(const glm::vec4& color) {
-            setUniform("objectColor", color);
+            setUniform("color", color);
+            setUniform("useTexture", false);
         }
+
+
+        void setObjectTexture(const GLuint& textureId) {
+            setTextureUniform(
+                "objectTexture",
+                textureId,
+                GL_TEXTURE_2D,
+                1
+            );
+            setUniform("useTexture", true);
+        }
+
 
         void setLightPosition(const glm::vec3& position) {
             // Setting an array means sending the first value

@@ -3,7 +3,7 @@
 #define IMPORTED_MESH_H
 
 #include "mesh.h"
-#include "axisAlignedBoundingBox.h"
+#include "boundingBox.h"
 #include "util.h"
 #include <string>
 

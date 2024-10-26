@@ -13,14 +13,12 @@ namespace pe {
 
 	private:
 
-
-        void checkForOpenGLError() {
+        void checkForOpenGLError() const {
             GLenum error;
             while ((error = glGetError()) != GL_NO_ERROR) {
                 std::cerr << "OpenGL error: " << error << std::endl;
             }
         }
-
 
         /*
             Given the number of attributes (such as vertex, normal, uv etc...)
@@ -81,24 +79,21 @@ namespace pe {
             The size of each attribute, meaning whether it is a vec2, vec3,
             or vec4.
         */
-        std::vector<unsigned int> attributeSizes;
+        const std::vector<unsigned int> attributeSizes;
 
         // The total size of the data
         size_t totalDataSize;
 
-        int attributeNumber;
+        const unsigned int attributeNumber;
         // Vertex number per attribute
-        int vertexNumber;
+        const GLsizei vertexNumber;
 
         /*
             Determines if a face (triangle) or edge (line) is being drawn.
             Its value is 3 (triangle) or 2 (edge), and refers to how the
             vertices are packed, in threes or twos.
         */
-        int topologyType;
-        
-        // Total number of vertices in the given data
-        GLsizei vertexNumber;
+        unsigned int topologyType;
 
         VertexBuffer(
             int vertexNumber,
@@ -213,7 +208,7 @@ namespace pe {
             Note that this function must be called after a shader program
             has been activated/used.
         */
-        void render() {
+        void render() const {
 
             // Binds VAO and draw
             glBindVertexArray(vao);

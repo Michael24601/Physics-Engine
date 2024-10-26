@@ -1,4 +1,6 @@
 
+#ifdef DONE_REFACTOR
+
 #include "gjk.h"
 
 using namespace pe;
@@ -163,3 +165,5 @@ bool pe::testIntersectionGJK(
     Vector3D pToQ(q.getCentre() - p.getCentre());
     return GJK(p, q, pToQ, upperLimit);
 }
+
+#endif

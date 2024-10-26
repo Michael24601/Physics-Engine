@@ -60,6 +60,13 @@ namespace pe {
 		);
 
 
+		/*
+			Applies laplacian smoothing in order to make the cloth behave
+			better and look smoother.
+			Done after the spring forces and other forces have been applied
+			and the particles have been integrated, but before the mesh
+			vertices have been moved to match the particle grid position.
+		*/
 		void applyLaplacianSmoothing(int iterations, real factor);
 
 	};

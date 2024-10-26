@@ -3,8 +3,13 @@
 
 in vec3 FragPos;
 in vec3 Normal;
+in vec2 TexCoord;
 
-uniform vec4 objectColor;
+uniform vec4 color;
+uniform sampler2D objectTexture;
+uniform bool useTexture;
+
+uniform samplerCube skybox;
 uniform samplerCube environmentMap;
 
 #define MAX_LIGHTS 10
@@ -17,11 +22,19 @@ uniform int numActiveLights;
 uniform float roughness;
 uniform float fresnel;
 
+uniform float reflectionStrength;
+uniform float lightInfluence;
+
 uniform mat4 view;
 
-uniform float reflectionStrength;
-
 out vec4 FragColor;
+
+/*
+    Continous function that returns a when x is 0, and 1 when x is 1.
+*/
+float customFunction(float a, float x) {
+    return (1.0 - x) * a + x * 1.0;
+}
 
 void main() {
 
@@ -34,11 +47,26 @@ void main() {
 
     vec3 viewDir = normalize(viewPos - FragPos);
 
+   vec3 envReflection = texture(environmentMap, reflect(-viewDir, Normal)).rgb;
+
+    vec3 I = normalize(FragPos - viewPos);
+    vec3 R = reflect(I, normalize(Normal));
+    vec3 skyboxColor = texture(skybox, R).rgb;
+
+    vec4 objectColor;
+    if(useTexture)
+        objectColor = texture(objectTexture, TexCoord);
+    else
+        objectColor = color;
+
+    vec3 color = objectColor.rgb * (1-reflectionStrength)
+        + (skyboxColor + envReflection) * reflectionStrength;
+
     for (int i = 0; i < numActiveLights; ++i) {
         // Diffuse calculation
         vec3 lightDir = normalize(lightPos[i] - FragPos);
         float diff = max(dot(Normal, lightDir), 0.0);
-        vec3 diffuse = objectColor.rgb * diff;
+        vec3 diffuse = color * diff;
         finalDiffuse += diffuse;
 
         // Cook-Torrance specular calculation
@@ -62,15 +90,11 @@ void main() {
         finalSpecular += specular;
     }
 
-    vec3 ambientColor = 0.1 * objectColor.rgb;
+    vec3 ambientColor = (0.1 + 0.9 * (1 - lightInfluence)) * color.rgb;
 
-    vec3 envReflection = texture(environmentMap, reflect(-viewDir, Normal)).rgb;
-
-    vec3 scaledEnvReflection = envReflection * reflectionStrength;
-
-    vec3 resultColor = finalSpecular + 
-        (finalDiffuse + ambientColor) * (1-reflectionStrength) 
-        + scaledEnvReflection;
+    vec3 resultColor = ambientColor 
+    + finalDiffuse * (lightInfluence)
+    + finalSpecular;
 
     FragColor = vec4(resultColor, objectColor.a);
 }

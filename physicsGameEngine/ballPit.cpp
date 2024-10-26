@@ -1,4 +1,6 @@
 
+#ifdef DONE_REFACTOR
+
 #include "simulations.h"
 
 using namespace pe;
@@ -293,5 +295,6 @@ void pe::runBallPit() {
             deltaTime = 0.0f;
         }
     }
-
 }
+
+#endif

@@ -3,7 +3,6 @@
 #define PARTICLE_COLLISION_DETECTION_H
 
 #include "fineCollisionDetection.h"
-#include "collisionVolume.h"
 #include "particleContact.h"
 
 namespace pe {
@@ -25,17 +24,10 @@ namespace pe {
     );
 
 
-    void generateContactParticleAndBox(
+    template<typename BoundingVolumeClass>
+    void generateContactParticleAndObject(
         Particle* particle,
-        const Cuboidal& one,
-        std::vector<ParticleContact>& contacts,
-        real restitution
-    );
-
-
-    void generateContactParticleAndSphere(
-        Particle* particle,
-        const Spherical &one,
+        const RigidObject<BoundingVolumeClass>& one,
         std::vector<ParticleContact>& contacts,
         real restitution
     );

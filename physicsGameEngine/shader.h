@@ -14,6 +14,7 @@
 #include "drawingUtil.h"
 #include "shaderInterface.h"
 #include "openglUtility.h"
+#include "vertexBuffer.h"
 
 namespace pe {
 
@@ -25,6 +26,15 @@ namespace pe {
         static constexpr int MAXIMUM_NUMBER_OF_LIGHT_SOURCES = 10;
 
         ShaderProgram shaderProgram;
+
+        /*
+            The minimum number of attributes the shader expects
+            and the size of each attribute (vec2, vec3, vec4...).
+            These can be used to ensure the VBO object sent actually
+            has the needed data.
+        */
+        const unsigned int minAttributeNumber;
+        const std::vector<unsigned int> attributeSizes;
 
         /*
             Below are functions that allow us to set uniforms of any type.
@@ -163,12 +173,17 @@ namespace pe {
     public:
 
         Shader(
+            /*
+                The vertex and fragment shader code.
+            */
             const std::string& vertexShaderSource,
-            const std::string& fragmentShaderSource
+            const std::string& fragmentShaderSource,
+            const std::vector<unsigned int>& attributeSizes
         ) : shaderProgram(
             readFileToString(vertexShaderSource),
             readFileToString(fragmentShaderSource)
-        ) {}
+        ), minAttributeNumber{attributeSizes.size()},
+           attributeSizes{attributeSizes} {}
 
 
         ~Shader() {
@@ -179,6 +194,11 @@ namespace pe {
         
         GLuint getShaderProgram() {
             return shaderProgram.getShaderProgram();
+        }
+
+
+        void useShaderProgram() {
+            glUseProgram(shaderProgram.getShaderProgram());
         }
 
 
@@ -203,6 +223,56 @@ namespace pe {
 
         void setProjectionMatrix(const glm::mat4& projection) {
             setUniform("projection", projection);
+        }
+
+        /*
+            This function is similar to the set model function, but also
+            allows adding a scaling factor to the model matrix.
+            Careful using it: if the objects that are being rendered
+            have collision detection applied to them, this function will
+            make them look larger or smaller than they physically are.
+            If a
+        */
+        void setModelMatrix(const glm::mat4& model, const glm::vec3& scale) {
+            glm::mat4 scalingMatrix = glm::scale(glm::mat4(1.0f), scale);
+            glm::mat4 scaledModelMatrix = scalingMatrix * model;
+            setUniform("model", scaledModelMatrix);
+        }
+
+
+        /*
+            Funcion that renders the given VBO object using the shader.
+            Just ensure the uniforms are set before the function is called.
+            The function can be overriden if specific shaders require
+            some extra steps.
+        */
+        virtual void render(const VertexBuffer& buffer) {
+
+            // Ensuring the VBO is valid
+            if (buffer.attributeNumber < minAttributeNumber) {
+                std::cerr << "The VBO does not have the required data for this shader."
+                    << "(expected at least " << minAttributeNumber 
+                    << " attributes, but got " << buffer.attributeNumber << ")\n";
+                return;
+            }
+            for (int i = 0; i < minAttributeNumber; i++) {
+                if (buffer.attributeSizes[i] != attributeSizes[i]) {
+                    std::cerr << "Attribute size mismatch for attribute index "
+                        << i << ". Expected " << attributeSizes[i]
+                        << " but got " << buffer.attributeSizes[i] << "\n";
+                    return;
+                }
+            }
+
+            glUseProgram(shaderProgram.getShaderProgram());
+
+            buffer.render();
+
+            /*
+                 Goes back to using no program,(in case other shaders need
+                 to draw).
+             */
+            glUseProgram(0);
         }
 
 	};

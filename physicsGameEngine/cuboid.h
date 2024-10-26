@@ -2,35 +2,33 @@
 #ifndef CUBOID_H
 #define CUBOID_H
 
-#include "rigidObject.h"
-#include "orientedBoundingBox.h"
+#include "mesh.h"
 
 namespace pe {
 
-	class Cuboid: public RigidObject<OrientedBoundingBox> {
+	class Cuboid : public Mesh {
 
 	private:
 
-		real width;
-		real height;
-		real depth;
-
-	public:
-
-		static Mesh* generateMesh(
-			real width, real height, real depth
+		static std::vector<Vector3D> generateVertices(
+			real width, 
+			real height, 
+			real depth
 		) {
-
-			std::vector<Vector3D> vertices{
+			return std::vector<Vector3D>{
 				Vector3D(-width / 2, -height / 2, -depth / 2),
-				Vector3D(width / 2, -height / 2, -depth / 2),
-				Vector3D(width / 2, -height / 2, depth / 2),
-				Vector3D(-width / 2, -height / 2, depth / 2),
-				Vector3D(-width / 2, height / 2, -depth / 2),
-				Vector3D(width / 2, height / 2, -depth / 2),
-				Vector3D(width / 2, height / 2, depth / 2),
-				Vector3D(-width / 2, height / 2, depth / 2)
+					Vector3D(width / 2, -height / 2, -depth / 2),
+					Vector3D(width / 2, -height / 2, depth / 2),
+					Vector3D(-width / 2, -height / 2, depth / 2),
+					Vector3D(-width / 2, height / 2, -depth / 2),
+					Vector3D(width / 2, height / 2, -depth / 2),
+					Vector3D(width / 2, height / 2, depth / 2),
+					Vector3D(-width / 2, height / 2, depth / 2)
 			};
+		}
+
+
+		static std::vector<std::pair<int, int>> generateEdges() {
 
 			std::vector<std::pair<int, int>> edges{
 				 std::make_pair(0, 1),
@@ -47,6 +45,13 @@ namespace pe {
 				 std::make_pair(3, 7)
 			};
 
+			return edges;
+		}
+
+
+		// All vertices are in counter-clockwise order
+		static std::vector<std::vector<int>> generateFaces() {
+
 			std::vector<std::vector<int>> faces{
 				std::vector<int>{ 0, 1, 2, 3 },
 				std::vector<int>{ 7, 6, 5, 4 },
@@ -56,47 +61,42 @@ namespace pe {
 				std::vector<int>{ 3, 2, 6, 7 }
 			};
 
-			Mesh* mesh = new Mesh(vertices, faces, edges);
-
-			std::vector<Vector2D> textureCoordinates{
-				Vector2D(0, 0),
-				Vector2D(0, 1),
-				Vector2D(1, 1),
-				Vector2D(1, 0)
-			};
-
-			for (int i = 0; i < mesh->getFaceCount(); i++) {
-				mesh->setFaceTextureCoordinates(i, textureCoordinates);
-			}
-
-			return mesh;
+			return faces;
 		}
 
 
-		Cuboid(
-			real width, real height, real depth,
-			const Vector3D& position,
-			const Quaternion& orientation,
-			real mass
-		) : RigidObject<OrientedBoundingBox>(
-			generateMesh(width, height, depth),
-			new Renderer(mesh, GL_STATIC_DRAW, false),
-			new OrientedBoundingBox(Vector3D(width/2.0, height/2.0, depth/2.0)),
-			position,
-			orientation,
-			mass,
-			Matrix3x3(
-				(mass / 12.0)* (height* height + depth * depth), 0, 0,
-				0, (mass / 12.0)* (width* width + depth * depth), 0,
-				0, 0, (mass / 12.0)* (width* width + height * height)
-			)
-		), width{ width }, height{ height }, depth{depth} {}
+		/*
+			Since we know how a rectangular prism looks, and the kinds of
+			faces it has, we can set each face's uv coordinates this way.
+		*/
+		void setUVCoordinates(real cornerX = 1, real cornerY = 1) {
+			std::vector<Vector2D> textureCoordinates{
+				Vector2D(0, 0),
+				Vector2D(0, cornerY),
+				Vector2D(cornerX, cornerY),
+				Vector2D(cornerX, 0)
+			};
+			for (int i = 0; i < getFaceCount(); i++) {
+				setFaceTextureCoordinates(i, textureCoordinates);
+			}
+		}
 
 
-		~Cuboid() {
-			delete mesh;
-			delete renderer;
-			delete boundingVolume;
+	public:
+
+		const real width;
+		const real height;
+		const real depth;
+
+		Cuboid(real width, real height, real depth) :
+			width{ width }, height{ height }, depth{ depth },
+			Mesh(
+				generateVertices(width, height, depth), 
+				generateFaces(), 
+				generateEdges()
+			) {
+
+			setUVCoordinates();
 		}
 
 	};

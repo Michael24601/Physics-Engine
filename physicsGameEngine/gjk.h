@@ -1,4 +1,6 @@
 
+#ifdef DONE_REFACTOR
+
 #include <vector>
 #include "contact.h"
 #include "polyhedron.h"
@@ -45,3 +47,5 @@ namespace pe {
     );
 
 }
+
+#endif

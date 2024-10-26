@@ -1,28 +1,35 @@
 
 #include "face.h"
+#include "mesh.h"
 
 using namespace pe;
-
 
 bool Face::findUniqueVertexIndexes(
 	const Mesh* mesh,
 	int index[3]
 ) const {
-	std::unordered_set<Vector3D> set;
-	int foundCount = 0;
-
-	set.insert(getVertex(mesh, 0));
-	index[foundCount] = 0;
-	foundCount++;
+	// Initialize the first unique vertex index
+	index[0] = 0;
+	// Starting with one unique vertex found
+	int foundCount = 1;
 
 	for (int i = 1; i < getVertexCount(); i++) {
-		if (set.find(getVertex(mesh, i)) == set.end()) {
-			set.insert(getVertex(mesh, i));
+		bool isUnique = true;
+
+		for (int j = 0; j < foundCount; j++) {
+			if (getVertex(mesh, i) == getVertex(mesh, index[j])) {
+				isUnique = false; // Not unique if a match is found
+				break;
+			}
+		}
+
+		// If it's unique, we add it to the list
+		if (isUnique) {
 			index[foundCount] = i;
 			foundCount++;
 
+			// We can stop once we've found 3 unique vertices
 			if (foundCount == 3) {
-				// Successfully found 3 unique vertices
 				return true;
 			}
 		}

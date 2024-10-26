@@ -12,7 +12,8 @@ namespace pe {
 
         TextureShader() : Shader(
             "textureShader.vert.glsl",
-            "textureShader.frag.glsl"
+            "textureShader.frag.glsl",
+            std::vector<unsigned int>{3, 2}
         ) {}
 
         void setObjectTexture(const GLuint& textureId) {

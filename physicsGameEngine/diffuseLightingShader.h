@@ -12,11 +12,23 @@ namespace pe {
 
         DiffuseLightingShader() : Shader(
             "diffuseLightingShader.vert.glsl",
-            "diffuseLightingShader.frag.glsl"
+            "diffuseLightingShader.frag.glsl",
+            std::vector<unsigned int>{3, 3, 2}
         ) {}
 
         void setObjectColor(const glm::vec4& color) {
             setUniform("objectColor", color);
+            setUniform("useTexture", false);
+        }
+
+        void setObjectTexture(const GLuint& textureId) {
+            setTextureUniform(
+                "objectTexture",
+                textureId,
+                GL_TEXTURE_2D,
+                0
+            );
+            setUniform("useTexture", true);
         }
 
         void setLightPosition(const glm::vec3* positions, int size) {

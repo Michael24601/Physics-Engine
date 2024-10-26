@@ -87,6 +87,10 @@ namespace pe {
 			return Matrix3x4(orientation, position);
 		}
 
+		const Vector3D& getPosition() const {
+			return position;
+		}
+
 	};
 }
 

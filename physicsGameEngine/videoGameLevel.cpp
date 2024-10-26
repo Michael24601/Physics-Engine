@@ -1,4 +1,5 @@
 
+#ifdef DONE_REFACTOR
 
 #include "simulations.h"
 
@@ -613,5 +614,6 @@ void pe::runVideoGameLevel() {
             deltaTime = 0.0f;
         }
     }
-
 }
+
+#endif

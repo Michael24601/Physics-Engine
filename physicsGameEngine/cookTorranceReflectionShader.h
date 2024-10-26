@@ -12,7 +12,8 @@ namespace pe {
 
         CookTorranceReflectionShader() : Shader(
             "cookTorranceReflectionShader.vert.glsl",
-            "cookTorranceReflectionShader.frag.glsl"
+            "cookTorranceReflectionShader.frag.glsl",
+            std::vector<unsigned int>{3, 3, 2}
         ) {}
 
         void setEnvironmentMap(GLuint environmentMapTextureId, int activeTexture = 1) {
@@ -21,6 +22,15 @@ namespace pe {
                 environmentMapTextureId, 
                 GL_TEXTURE_CUBE_MAP, 
                 activeTexture
+            );
+        }
+
+        void setSkybox(GLuint skyboxTextureId) {
+            setTextureUniform(
+                "skybox",
+                skyboxTextureId,
+                GL_TEXTURE_CUBE_MAP,
+                0
             );
         }
 
@@ -34,8 +44,19 @@ namespace pe {
             setUniform("lightColors", colors, size);
         }
 
-        void setBaseColor(const glm::vec4& baseColor) {
-            setUniform("objectColor", baseColor);
+        void setObjectColor(const glm::vec4& color) {
+            setUniform("color", color);
+            setUniform("useTexture", false);
+        }
+
+        void setObjectTexture(const GLuint& textureId) {
+            setTextureUniform(
+                "objectTexture",
+                textureId,
+                GL_TEXTURE_2D,
+                0
+            );
+            setUniform("useTexture", true);
         }
 
         void setRoughness(float roughness) {
@@ -48,6 +69,10 @@ namespace pe {
 
         void setReflectionStrength(float reflectionStrength) {
             setUniform("reflectionStrength", reflectionStrength);
+        }
+
+        void setLightInfluence(float lightInfluence) {
+            setUniform("lightInfluence", lightInfluence);
         }
     };
 }

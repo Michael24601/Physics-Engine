@@ -2,7 +2,8 @@
 #ifndef SOFT_OBJECT_H
 #define SOFT_OBJECT_H
 
-#include "renderer.h"
+#include "mesh.h"
+#include "curvature.h"
 #include "softBody.h"
 
 namespace pe {
@@ -36,7 +37,7 @@ namespace pe {
 			managed by this class.
 		*/
 		Mesh mesh;
-		Renderer renderer;
+
 
 		/*
 			Maps particles in the soft body to a vertex in the mesh that
@@ -57,8 +58,7 @@ namespace pe {
 			const Curvature& curvature = Curvature()
 		) : mesh(vertices, faceIndexes, edgeIndexes),
 			body(particleCoordinates, mass, damping, springPairs, springStrengths),
-			isCurved{ mesh.isValidCurvature(curvature)},
-			renderer(&(this->mesh), GL_DYNAMIC_DRAW, isCurved),
+			isCurved{curvature.curvatureMap.size() > 0},
 			curvature(curvature),
 			particleVertexMap{ particleVertexMap } {
 		

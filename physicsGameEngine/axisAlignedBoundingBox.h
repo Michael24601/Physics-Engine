@@ -4,6 +4,12 @@
 	The box can't be transformed using a transform matrix because it
 	is meant to remain axis aligned, and must be recalculated if used
 	on a moving, rotating rigid body.
+
+	This also means that it works best when the mesh vertex data is
+	not in local coordinates, but is instead in world coordinates,
+	since the AABB can't be transformed along with the object's
+	transform matrix. So ensure the transformation is applied to
+	the coordinates before they are sent.
 */
 
 #ifndef AXIS_ALIGNED_BOUNDING_BOX_H

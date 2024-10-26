@@ -5,10 +5,9 @@
 #include "vector3D.h"
 #include "face.h"
 #include "edge.h"
-#include "curvature.h"
 #include <numeric>
+#include <unordered_set>
 #include "util.h"
-#include "renderer.h"
 
 namespace pe {
 
@@ -48,8 +47,7 @@ namespace pe {
 
 			edges.resize(edgeIndexes.size());
 			for (int i = 0; i < edges.size(); i++) {
-				edges[i] =Edge(
-					this, 
+				edges[i] = Edge( 
 					edgeIndexes[i].first, 
 					edgeIndexes[i].second
 				);
@@ -202,25 +200,6 @@ namespace pe {
 				polyhedron.
 			*/
 			return (intersectionCount % 2) == 1;
-		}
-
-
-		/*
-			This function just ensures a curvature object matches the mesh
-			in terms of dimensionality (same number of faces, etc...).
-		*/
-		bool isValidCurvature(const Curvature& curvature) const {
-			if (curvature.curvatureMap.size() != getFaceCount()) {
-				return false;
-			}
-
-			for (int i = 0; i < getFaceCount(); i++) {
-				if (curvature.curvatureMap[i].size() != getFace(i).getVertexCount()) {
-					return false;
-				}
-			}
-
-			return true;
 		}
 
 	};
