@@ -11,14 +11,15 @@ Cloth::Cloth(
 	const Vector3D& origin,
 	real mass,
 	real damping,
+	real dampingCoefficient,
 	real structuralStifness,
 	real shearStifness,
 	real bendStiffness
 ) : SoftObject(std::move(
 		generateSoftObject(
 		sideDensity, sideLength, sideDirection,
-		origin, mass, damping, structuralStifness, 
-		shearStifness, bendStiffness
+		origin, mass, damping, dampingCoefficient,
+		structuralStifness, shearStifness, bendStiffness
 	))
 ) {
 	
@@ -57,6 +58,7 @@ SoftObject Cloth::generateSoftObject(
 	const Vector3D& origin,
 	real mass,
 	real damping,
+	real dampingCoefficient,
 	real structuralStiffness,
 	real shearStiffness,
 	real bendStiffness
@@ -74,7 +76,7 @@ SoftObject Cloth::generateSoftObject(
 			Vector3D particle = (
 				origin + sideDirection.first * (i * step1) +
 				sideDirection.second * (j * step2)
-				);
+			);
 
 			particleGrid.push_back(particle);
 		}
@@ -240,7 +242,8 @@ SoftObject Cloth::generateSoftObject(
 		// The mesh
 		particleGrid, faces, edges, 
 		// The soft body
-		particleGrid, mass, damping, springPairs, springStrengths,
+		particleGrid, mass, damping, dampingCoefficient,
+		springPairs, springStrengths,
 		// Rendering data
 		particleVertexMap, curvature
 	);
@@ -253,7 +256,7 @@ void Cloth::applyLaplacianSmoothing(int iterations, real factor) {
 
 		std::vector<Vector3D> sumNeighbors(body.particles.size(), Vector3D::ZERO);
 
-		for (int i = 0; i < mesh.getEdgeCount(); i++) {
+		for (int i = 0; i < body.particles.size(); i++) {
 			for (int j = 0; j < particleNeighbors[i].size(); j++) {
 				sumNeighbors[i] += body.particles[particleNeighbors[i][j]].position;
 			}

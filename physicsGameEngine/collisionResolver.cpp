@@ -56,9 +56,6 @@ void CollisionResolver::adjustPositions(
 		}
 		if (index == numContacts) break;
 
-		// Match the awake state at the contact.
-		c[index].matchAwakeState();
-
 		// Resolve the penetration.
 		c[index].applyPositionChange(
 			velocityChange,
@@ -139,10 +136,6 @@ void CollisionResolver::adjustVelocities(
 			}
 		}
 		if (index == numContacts) break;
-
-
-		// Match the awake state at the contact
-		c[index].matchAwakeState();
 
 
 		// Do the resolution on the contact that came out top.

@@ -165,9 +165,7 @@ void RigidBody::integrate(real duration) {
 
 	// If the body is not awake, we don't integrate it
 	if (!isAwake) {
-
 		clearAccumulators();
-
 		return;
 	}
 

@@ -25,6 +25,14 @@ out vec4 FragColor;
 
 void main(){
 
+    // When we disable face culling in order to draw both sides
+    // of the faces of an object (such as when drawing cloth),
+    // not only is the front face drawn, but also the back face
+    // (which is the same face but with the vertices in reverse
+    // order). The noraml of said face is the same as the front
+    // face but inverted.
+    vec3 normal = gl_FrontFacing ? Normal : -Normal;
+
     // We can extract the camera position from thew view matrix, 
     // no need to send it as a uniform
     vec3 viewPos = (inverse(view))[3].xyz;
@@ -41,13 +49,13 @@ void main(){
     for (int i = 0; i < numActiveLights; ++i) {
         // Diffuse calculation
         vec3 lightDir = normalize(lightPos[i] - FragPos);
-        float diff = max(dot(Normal, lightDir), 0.0);
+        float diff = max(dot(normal, lightDir), 0.0);
         vec3 diffuse = objColor.rgb * diff;
         finalDiffuse += diffuse;
 
         // Specular calculation
         vec3 viewDir = normalize(viewPos - FragPos);
-        vec3 reflectDir = reflect(-lightDir, Normal);
+        vec3 reflectDir = reflect(-lightDir, normal);
         float spec = pow(max(dot(viewDir, reflectDir), 0.0), shininess);
 
         // The opacity of the phong effect is determined through the alpha value

@@ -240,7 +240,7 @@
     <ClCompile Include="mirrors.cpp">
       <Filter>Source Files\Simulations</Filter>
     </ClCompile>
-    <ClCompile Include="clothCollision.cpp">
+    <ClCompile Include="clothSimulation.cpp">
       <Filter>Source Files\Simulations</Filter>
     </ClCompile>
     <ClCompile Include="quaternion.cpp">
@@ -401,18 +401,6 @@
     <ClInclude Include="joint.h">
       <Filter>Header Files\Joint</Filter>
     </ClInclude>
-    <ClInclude Include="fixedJoint.h">
-      <Filter>Header Files\Joint</Filter>
-    </ClInclude>
-    <ClInclude Include="springJoint.h">
-      <Filter>Header Files\Joint</Filter>
-    </ClInclude>
-    <ClInclude Include="ballJoint.h">
-      <Filter>Header Files\Joint</Filter>
-    </ClInclude>
-    <ClInclude Include="sphericalJoint.h">
-      <Filter>Header Files\Joint</Filter>
-    </ClInclude>
     <ClInclude Include="rigidBodyBungeeForce.h">
       <Filter>Header Files\RigidBodyPhysics</Filter>
     </ClInclude>
@@ -452,7 +440,7 @@
     <ClInclude Include="phongShader.frag.glsl">
       <Filter>Source Files\GLSL Shaders\Phong Shader</Filter>
     </ClInclude>
-    <ClInclude Include="diffuseShader.vert.glsl">
+    <ClInclude Include="diffuseLightingShader.vert.glsl">
       <Filter>Source Files\GLSL Shaders\Diffuse Lighting Shader</Filter>
     </ClInclude>
     <ClInclude Include="cookTorranceReflectionShader.h">
@@ -583,7 +571,7 @@
     <Text Include="todo.txt" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="diffuseShader.frag.glsl">
+    <None Include="diffuseLightingShader.frag.glsl">
       <Filter>Source Files\GLSL Shaders\Diffuse Lighting Shader</Filter>
     </None>
     <None Include="solidColorShader.vert.glsl">

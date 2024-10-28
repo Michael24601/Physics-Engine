@@ -52,12 +52,16 @@ namespace pe {
 			const std::vector<Vector3D>& particleCoordinates,
 			real mass,
 			real damping,
+			real dampingCoefficient,
 			const std::vector<std::pair<int, int>>& springPairs,
 			const std::vector<real> springStrengths,
 			const std::vector<std::pair<int, int>>& particleVertexMap,
 			const Curvature& curvature = Curvature()
 		) : mesh(vertices, faceIndexes, edgeIndexes),
-			body(particleCoordinates, mass, damping, springPairs, springStrengths),
+			body(
+				particleCoordinates, mass, damping, dampingCoefficient, 
+				springPairs, springStrengths
+			),
 			isCurved{curvature.curvatureMap.size() > 0},
 			curvature(curvature),
 			particleVertexMap{ particleVertexMap } {

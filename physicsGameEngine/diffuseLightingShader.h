@@ -17,7 +17,7 @@ namespace pe {
         ) {}
 
         void setObjectColor(const glm::vec4& color) {
-            setUniform("objectColor", color);
+            setUniform("color", color);
             setUniform("useTexture", false);
         }
 
@@ -35,6 +35,10 @@ namespace pe {
             // Setting an array means sending the first value
             setUniform("lightPos", positions, size);
             setUniform("numActiveLights", size);
+        }
+
+        void setLightColors(const glm::vec4* colors, int size) {
+            setUniform("lightColors", colors, size);
         }
 
     };

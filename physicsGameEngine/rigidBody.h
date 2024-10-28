@@ -152,9 +152,9 @@ namespace pe {
 		real angularDamping;
 
 		/*
-			A body is allowed to go to sleep when it has no motion,
-			or a low amount of motion, to alleviate having to integrate it
-			and check that it has collision.
+			A body that is not awake is not currently active.
+			It can't be integrated, or moved. When it collides with an
+			object, it remains unmoving.
 		*/
 		bool isAwake;
 

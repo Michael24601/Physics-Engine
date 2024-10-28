@@ -71,6 +71,12 @@ namespace pe {
             // best not to render both sides (enable culling) so it appears correct.
             if (cullFaces) {
                 glEnable(GL_CULL_FACE);
+                // The back face (the one being culled) is the one drawn in the opposite
+                // of the order we chose. So if we chose counter clockwise as the front
+                // face, the one culled is the back face.
+                // We could instead cull the front face, or both, but it makes the most
+                // sense for the culled face to be the one we deemed to be the back.
+                glCullFace(GL_BACK);
             }
             else {
                 glDisable(GL_CULL_FACE);

@@ -166,7 +166,7 @@
     <ClCompile Include="BVHSphere.cpp" />
     <ClCompile Include="BVHSphere.h" />
     <ClCompile Include="cloth.cpp" />
-    <ClCompile Include="clothCollision.cpp" />
+    <ClCompile Include="clothSimulation.cpp" />
     <ClCompile Include="collisionResolver.cpp" />
     <ClCompile Include="contact.cpp" />
     <ClCompile Include="edge.cpp" />
@@ -218,7 +218,6 @@
   <ItemGroup>
     <ClInclude Include="accuracy.h" />
     <ClInclude Include="axisAlignedBoundingBox.h" />
-    <ClInclude Include="ballJoint.h" />
     <ClInclude Include="boundingBox.h" />
     <ClInclude Include="boundingSphere.h" />
     <ClInclude Include="boundingVolume.h" />
@@ -251,11 +250,10 @@
     <ClInclude Include="cookTorranceShader.vert.glsl" />
     <ClInclude Include="importedMesh.h" />
     <ClInclude Include="cylinder.h" />
-    <ClInclude Include="diffuseShader.vert.glsl" />
+    <ClInclude Include="diffuseLightingShader.vert.glsl" />
     <ClInclude Include="freeMovingCamera.h" />
     <ClInclude Include="gjk.h" />
     <ClInclude Include="fineCollisionDetection.h" />
-    <ClInclude Include="fixedJoint.h" />
     <ClInclude Include="joint.h" />
     <ClInclude Include="openglUtility.h" />
     <ClInclude Include="particleCollisionDetection.h" />
@@ -307,9 +305,7 @@
     <ClInclude Include="softBody.h" />
     <ClInclude Include="solidColorShader.h" />
     <ClInclude Include="sphere.h" />
-    <ClInclude Include="sphericalJoint.h" />
     <ClInclude Include="particleSpringDamper.h" />
-    <ClInclude Include="springJoint.h" />
     <ClInclude Include="textureShader.h" />
     <ClInclude Include="util.h" />
     <ClInclude Include="vector2D.h" />
@@ -323,7 +319,7 @@
     <None Include="cookTorranceReflectionShader.vert.glsl" />
     <None Include="shadowMappingShader.vert.glsl" />
     <None Include="shadowMappingShader.frag.glsl" />
-    <None Include="diffuseShader.frag.glsl" />
+    <None Include="diffuseLightingShader.frag.glsl" />
     <None Include="simpleShader.frag.glsl" />
     <None Include="simpleShader.vert.glsl" />
     <None Include="cubemapShader.frag.glsl" />

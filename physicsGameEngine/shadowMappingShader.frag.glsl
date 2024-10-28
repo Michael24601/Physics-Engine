@@ -80,13 +80,20 @@ float PCFShadowCalculation(vec4 fragPosLightSpace, vec3 lightDir){
 
 void main(){
 
+    // When we disable face culling in order to draw both sides
+    // of the faces of an object (such as when drawing cloth),
+    // not only is the front face drawn, but also the back face
+    // (which is the same face but with the vertices in reverse
+    // order). The noraml of said face is the same as the front
+    // face but inverted.
+    vec3 normal = gl_FrontFacing ? Normal : -Normal;
+
     vec4 objectColor;
     if(useTexture)
         objectColor = texture(objectTexture, TexCoord);
     else
         objectColor = color;
 
-    vec3 normal = normalize(Normal);
     vec3 lightColor = vec3(1.0);
     // ambient
     vec3 ambient = 0.15 * lightColor;

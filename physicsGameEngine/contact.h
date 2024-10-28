@@ -178,9 +178,6 @@ namespace pe {
 		);
 
 
-		void matchAwakeState();
-
-
 		/*
 			Calculates the desired delta velocity of the contact (the two
 			bodies), all while considering the restitution coefficient.

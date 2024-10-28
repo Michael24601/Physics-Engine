@@ -463,3 +463,22 @@ WITH THE INNER ONE GOING ONLY AS FAR AS THE FIRST).
 Fix the BVH (DONE, THE ISSUE WAS THAT THE GETTER FOR THE]
 POTENTIAL CONTACTS HAD TO BE CALLED AT EACH NODE, NOT
 JUST THE ROOT).
+
+Consider re-adding templates for the bounding volume type
+of the rigidObject, and consider also adding templates for
+the spring type (though make sure the spring force generator
+of the particles is made into a class first that all springs
+and bungee forces inherit from).
+
+Make sure removing the matchAwakeState functionality from the
+collision resolver was the right move.
+
+Currently, the isAwake state of bodies and particles acts as
+an isActive boolean; when false, the body can't be moved or
+pushed and is essentially still. However; isAwake should instead
+be used to put the body to sleep when it stops moving and 
+move it again when a force is added to it or when it collides.
+The isAwake and isActive should be seperate, and both are
+usable. When that is done, return the matchAwakeState function
+to the collision resolver, since isAwake no longer acts as
+an isActive.

@@ -457,18 +457,3 @@ void Contact::calculateDesiredDeltaVelocity(real duration) {
 		-contactVelocity.x
 		- thisRestitution * (contactVelocity.x - velocityFromAcc);
 }
-
-
-void Contact::matchAwakeState(){
-	// Collisions with the world never cause a body to wake up.
-	if (!body[1]) return;
-
-	bool body0awake = body[0]->isAwake;
-	bool body1awake = body[1]->isAwake;
-
-	// Wake up only the sleeping one
-	if (body0awake ^ body1awake) {
-		if (body0awake) body[1]->setAwake(true);
-		else body[0]->setAwake(true);
-	}
-}

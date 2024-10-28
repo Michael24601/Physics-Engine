@@ -18,6 +18,7 @@ namespace pe {
 			const std::vector<Vector3D>& particleCoordinates,
 			real mass,
 			real damping,
+			real dampingCoefficient,
 			const std::vector<std::pair<int, int>>& springPairs,
 			const std::vector<real> springStrengths
 		) : springPairs{springPairs} {
@@ -40,7 +41,7 @@ namespace pe {
 					ParticleSpringDamper(
 						&particles[springPairs[i].second],
 						springStrengths[i],
-						1.0,
+						dampingCoefficient,
 						(particles[springPairs[i].second].position - 
 						particles[springPairs[i].first].position).magnitude()
 					)
@@ -69,7 +70,7 @@ namespace pe {
 
 
 		// Integrates all of the particles
-		void integrate(real duration) {
+		void verletIntegrate(real duration) {
 			for (int i = 0; i < particles.size(); i++) {
 				particles[i].verletIntegrate(duration);
 			}

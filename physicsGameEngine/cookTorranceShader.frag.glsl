@@ -26,6 +26,14 @@ out vec4 FragColor;
 
 void main(){
 
+    // When we disable face culling in order to draw both sides
+    // of the faces of an object (such as when drawing cloth),
+    // not only is the front face drawn, but also the back face
+    // (which is the same face but with the vertices in reverse
+    // order). The noraml of said face is the same as the front
+    // face but inverted.
+    vec3 normal = gl_FrontFacing ? Normal : -Normal;
+
     // We can extract the camera position from thew view matrix, 
     // no need to send it as a uniform
     vec3 viewPos = (inverse(view))[3].xyz;
@@ -49,7 +57,7 @@ void main(){
         // Cook-Torrance specular calculation
         vec3 viewDir = normalize(viewPos - FragPos);
         vec3 halfwayDir = normalize(lightDir + viewDir);
-        float NdotH = max(dot(Normal, halfwayDir), 0.0);
+        float NdotH = max(dot(normal, halfwayDir), 0.0);
         float D = (roughness * roughness) / (3.14159265359 * pow(
             (NdotH * NdotH * (roughness * roughness - 1.0) + 1.0), 
             2.0)
@@ -57,8 +65,8 @@ void main(){
         float G = min(
             1.0, 
             min(
-                2.0 * NdotH * dot(Normal, viewDir) / dot(viewDir, halfwayDir), 
-                2.0 * NdotH * dot(Normal, lightDir) / dot(lightDir, halfwayDir)
+                2.0 * NdotH * dot(normal, viewDir) / dot(viewDir, halfwayDir), 
+                2.0 * NdotH * dot(normal, lightDir) / dot(lightDir, halfwayDir)
             )
         );
         float F = fresnel + (1.0 - fresnel) * pow(1.0 - NdotH, 5.0);
@@ -68,7 +76,7 @@ void main(){
             the alpha value.
         */
         vec3 specular = lightColors[i].rgb * (D * G * F) 
-            / (4.0 * dot(Normal, viewDir) * dot(Normal, lightDir));
+            / (4.0 * dot(normal, viewDir) * dot(normal, lightDir));
         finalSpecular += specular;
     }
 

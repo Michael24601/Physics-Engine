@@ -19,8 +19,6 @@ namespace pe {
 
 	void runBallPit();
 
-	void runFracture();
-
 	void runRagdoll();
 
 	void runFlag();
@@ -29,7 +27,7 @@ namespace pe {
 
 	void runMirrors();
 
-	void runClothCollision();
+	void runClothSimulation();
 
 	void runVideoGameLevel();
 }

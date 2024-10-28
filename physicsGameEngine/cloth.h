@@ -19,6 +19,7 @@ namespace pe {
 			const Vector3D& origin,
 			real mass,
 			real damping,
+			real dampingCoefficient,
 			real structuralStifness,
 			real shearStifness,
 			real bendStiffness
@@ -36,8 +37,8 @@ namespace pe {
 		/*
 			The direction vector of each row and column
 			(must not be colinear).
-			They must also be normalized, but the
-			constructor normalizes them anyway.
+			They must also be normalized, but the constructor normalizes
+			them anyway.
 		*/
 		std::pair<Vector3D, Vector3D> sideDirection;
 
@@ -54,6 +55,7 @@ namespace pe {
 			const Vector3D& origin,
 			real mass,
 			real damping,
+			real dampingCoefficient,
 			real structuralStifness,
 			real shearStifness,
 			real bendStiffness

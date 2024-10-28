@@ -9,22 +9,22 @@ namespace pe {
 	class Joint {
 
 	public:
-		/**
-		* Holds the two rigid bodies that are connected by this joint.
+		/*
+			Holds the two rigid bodies that are connected by this joint.
 		*/
 		RigidBody* body[2];
-		/**
-		* Holds the relative location of the connection for each
-		* body, given in local coordinates.
+		/*
+			Holds the relative location of the connection for each
+			body, given in local coordinates.
 		*/
 		Vector3D position[2];
 
-		/**
-		* Holds the maximum displacement at the joint before the
-		* joint is considered to be violated. This is normally a
-		* small, epsilon value. It can be larger, however, in which
-		* case the joint will behave as if an inelastic cable joined
-		* the bodies at their joint locations.
+		/*
+			Holds the maximum displacement at the joint before the
+			joint is considered to be violated. This is normally a
+			small, epsilon value. It can be larger, however, in which
+			case the joint will behave as if an inelastic cable joined
+			the bodies at their joint locations.
 		*/
 		real error;
 
@@ -43,9 +43,9 @@ namespace pe {
 			position[1] = connectionPoint2;
 		}
 
-		/**
-		* Generates the contacts required to restore the joint if it
-		* has been violated.
+		/*
+			Generates the contacts required to restore the joint if it
+			has been violated.
 		*/
 		unsigned int addContact(
 			std::vector<Contact>& contacts

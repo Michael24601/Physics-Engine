@@ -1,13 +1,22 @@
 
-#ifdef DONE_REFACTOR
-
 #include "simulations.h"
+#include "glfwWindowWrapper.h"
+#include "rotatingCamera.h"
+#include "cookTorranceShader.h"
+#include "solidColorShader.h"
+#include "polyhedra.h"
+#include "faceRenderer.h"
+#include "rigidBodyGravity.h"
+#include "rigidBodySpringForce.h"
+#include "fineCollisionDetection.h"
+#include "collisionResolver.h"
+#include "boundingVolumeHierarchy.h"
 
 using namespace pe;
 
 
 void pe::runBallPit() {
-    
+
     GlfwWindowWrapper window(1200, 800, 6, "window", true);
 
     RotatingCamera camera(
@@ -45,118 +54,89 @@ void pe::runBallPit() {
     const int MAX_SPHERES = 50;
     int numSpheres = 0;
 
-    // Shaders
-    CookTorranceShader sphereShader;
-    std::vector<CookTorranceShader> cubeShaders(13);
-
-    const real mass = 0;
-
-
-    std::vector<SolidSphere*> spheres;
-    std::vector<RectangularPrism*> walls;
-
-
-    walls.push_back(new RectangularPrism(
-        100, 400, 1200, mass, Vector3D(-550, 250, 0), new RigidBody
-    ));
-    walls.push_back(new RectangularPrism(
-        100, 400, 1200, mass, Vector3D(550, 250, 0), new RigidBody
-    ));
-    walls.push_back(new RectangularPrism(
-        1200, 400, 100, mass, Vector3D(0, 250, 550), new RigidBody
-    ));
-    walls.push_back(new RectangularPrism(
-        1200, 400, 100, mass, Vector3D(0, 250, -550), new RigidBody
-    ));
-
-    walls.push_back(new RectangularPrism(
-        400, 400, 400, mass, Vector3D(400, 250, 400), new RigidBody
-    ));
-    walls.push_back(new RectangularPrism(
-        400, 400, 400, mass, Vector3D(400, 250, -400), new RigidBody
-    ));
-    walls.push_back(new RectangularPrism(
-        400, 400, 400, mass, Vector3D(-400, 250, 400), new RigidBody
-    ));
-    walls.push_back(new RectangularPrism(
-        400, 400, 400, mass, Vector3D(-400, 250, -400), new RigidBody
-    ));
-
-    walls.push_back(new RectangularPrism(
-        400 * 1.45, 10, 400, mass, Vector3D(325, 210, 0), new RigidBody
-    ));
-    walls.push_back(new RectangularPrism(
-        400, 10, 400 * 1.5, mass, Vector3D(0, 210, -325), new RigidBody
-    ));
-    walls.push_back(new RectangularPrism(
-        400, 10, 400 * 1.5, mass, Vector3D(0, 210, 325), new RigidBody
-    ));
-    walls.push_back(new RectangularPrism(
-        400 * 1.5, 10, 400, mass, Vector3D(-325, 210, -0), new RigidBody
-    ));
-
-    walls.push_back(new RectangularPrism(
-        1200, 50, 1200, mass, Vector3D(0, 25, 0), new RigidBody
-    ));
-
-    walls[8]->body->orientation = Quaternion::rotatedByAxisAngle(Vector3D::RIGHT, -PI / 3.4);
-    walls[9]->body->orientation = Quaternion::rotatedByAxisAngle(Vector3D::FORWARD, -PI / 3.4);
-    walls[10]->body->orientation = Quaternion::rotatedByAxisAngle(Vector3D::FORWARD, PI / 3.4);
-    walls[11]->body->orientation = Quaternion::rotatedByAxisAngle(Vector3D::RIGHT, PI / 3.4);
-
-
-    for (RectangularPrism* prism : walls) {
-        prism->body->calculateDerivedData();
-    }
-
-
-    for (int i = 0; i < walls.size(); i++) {
-
-        walls[i]->update();
-
-        walls[i]->body->inverseMass = 0;
-        walls[i]->body->canSleep = true;
-
-        FaceData data = getFaceData(*walls[i]);
-        std::vector<std::vector<glm::vec3>> vertices{
-            data.vertices, data.normals
-        };
-
-        cubeShaders[i].sendVaribleData(vertices, GL_STATIC_DRAW);
-        cubeShaders[i].setTrianglesNumber(data.vertices.size());
-        cubeShaders[i].setLightPosition(lightPos, 1);
-        cubeShaders[i].setLightColors(lightColors, 1);
-        cubeShaders[i].setFresnel(0.05);
-        cubeShaders[i].setRoughness(0.5);
-        cubeShaders[i].setObjectColor(colorWhite);
-    }
-
-    SolidColorShader s;
-    int j = 9;
-    EdgeData d = getBoxData(walls[j]->boundingBox);
-    std::vector<std::vector<glm::vec3>> v = { d.vertices };
-    s.sendVaribleData(v, GL_STATIC_DRAW);
-    s.setEdgeNumber(d.vertices.size());
-    s.setObjectColor(colorRed);
-    glm::mat4 m = convertToGLM(walls[j]->boundingBox.getTransformMatrix());
-    s.setModelMatrix(m);
-    s.setProjectionMatrix(camera.getProjectionMatrix());
-
-    // Sphere
-
-    SolidSphere sphere(70, 5, 20, 20, Vector3D(0, 0, 0), new RigidBody);
-
-    FaceData data = getFaceData(sphere);
-    std::vector<std::vector<glm::vec3>>vertices = {
-        data.vertices, data.normals
+    // Objects
+    std::vector<CuboidObject*> walls{
+        // Walls
+        new CuboidObject(
+            100, 400, 1200, Vector3D(-550, 250, 0), Quaternion::IDENTITY, 0
+        ),
+        new CuboidObject(
+            100, 400, 1200, Vector3D(550, 250, 0), Quaternion::IDENTITY, 0
+        ),
+        new CuboidObject(
+            1200, 400, 100, Vector3D(0, 250, 550), Quaternion::IDENTITY, 0
+        ),
+        new CuboidObject(
+            1200, 400, 100, Vector3D(0, 250, -550), Quaternion::IDENTITY, 0
+        ),
+        new CuboidObject(
+            400, 400, 400, Vector3D(400, 250, 400), Quaternion::IDENTITY, 0
+        ),
+        new CuboidObject(
+            400, 400, 400, Vector3D(400, 250, -400), Quaternion::IDENTITY, 0
+        ),
+        new CuboidObject(
+            400, 400, 400, Vector3D(-400, 250, 400), Quaternion::IDENTITY, 0
+        ),
+        new CuboidObject(
+            400, 400, 400, Vector3D(-400, 250, -400), Quaternion::IDENTITY, 0
+        ),
+        // Planks
+        new CuboidObject(
+            400 * 1.45, 10, 400, Vector3D(325, 210, 0),
+            Quaternion::rotatedByAxisAngle(Vector3D::RIGHT, -PI / 3.4), 0
+        ),
+        new CuboidObject(
+            400, 10, 400 * 1.45, Vector3D(0, 210, -325),
+            Quaternion::rotatedByAxisAngle(Vector3D::FORWARD, -PI / 3.4), 0
+        ),
+        new CuboidObject(
+            400, 10, 400 * 1.45, Vector3D(0, 210, 325),
+            Quaternion::rotatedByAxisAngle(Vector3D::FORWARD, PI / 3.4), 0
+        ),
+        new CuboidObject(
+            400 * 1.45, 10, 400, Vector3D(-325, 210, -0),
+            Quaternion::rotatedByAxisAngle(Vector3D::RIGHT, PI / 3.4), 0
+        ),
+        // Ground
+        new CuboidObject(
+            1200, 50, 1200, Vector3D(0, 25, 0), Quaternion::IDENTITY, 0
+        )
     };
-    sphereShader.sendVaribleData(vertices, GL_STATIC_DRAW);
-    sphereShader.setTrianglesNumber(data.vertices.size());
-    sphereShader.setLightPosition(lightPos, 1);
-    sphereShader.setLightColors(lightColors, 1);
-    sphereShader.setFresnel(0.1);
-    sphereShader.setRoughness(0.05);
-    sphereShader.setObjectColor(colorBlue);
+
+    for (CuboidObject* o : walls) {
+        o->body.inverseMass = 0;
+        o->body.isAwake = false;
+    }
+
+    // To be filled in real time
+    std::vector<SphereObject*> spheres;
+
+    // Vertex buffers
+    std::vector<FaceRenderer*> wallRenderers;
+    for (CuboidObject* o : walls) {
+        wallRenderers.push_back(
+            new FaceRenderer(
+                o->mesh, GL_STATIC_DRAW,
+                NORMALS::USE_FACE_NORMALS, UV::INCLUDE
+            )
+        );
+    };
+    // We haven't created any spheres yet, but they will all have
+    // the same size and tessalation, so we can use the same vertex
+    // buffer.
+    Sphere sphereMesh(70, 20, 20);
+    FaceRenderer sphereRenderer(
+        &sphereMesh, GL_STATIC_DRAW,
+        NORMALS::USE_VERTEX_NORMALS, UV::INCLUDE
+    );
+
+    // Shaders
+    CookTorranceShader shader;
+    shader.setLightPosition(lightPos, 1);
+    shader.setLightColors(lightColors, 1);
+    shader.setFresnel(0.5);
+    shader.setRoughness(0.05);
 
     // Forces
 
@@ -189,8 +169,8 @@ void pe::runBallPit() {
         }
         else if (glfwGetKey(window.getWindow(), GLFW_KEY_A) == GLFW_RELEASE) {
 
+            // Generates a sphere on each keypress
             if (isPressed) {
-
                 int r = generateRandomNumber(0, 4);
                 int l1 = 0, g1 = 0, l2 = 0, g2 = 0;
                 switch (r) {
@@ -205,13 +185,12 @@ void pe::runBallPit() {
                 int m = generateRandomNumber(l2, g2);
                 // We can generate only 1 vertex for
                 // these spheres as they will be shaded later
-                SolidSphere* v = new SolidSphere(
-                    70, 0.1, 1, 1, Vector3D(n, 1000, m), new RigidBody
+                SphereObject* s = new SphereObject(
+                    70, 1, 1, Vector3D(n, 1000, m), Quaternion::IDENTITY, 20
                 );
-                v->body->angularDamping = 0.3;
-                v->body->linearDamping = 0.95;
-                v->body->canSleep = true;
-                spheres.push_back(v);
+                s->body.angularDamping = 0.3;
+                s->body.linearDamping = 0.95;
+                spheres.push_back(s);
             }
 
             isPressed = false;
@@ -223,52 +202,56 @@ void pe::runBallPit() {
 
         while (numSteps--) {
 
-            for (SolidSphere* s : spheres) {
-                s->body->calculateDerivedData();
-                s->update();
+            for (SphereObject* s : spheres) {
+                g.updateForce(&s->body, substep);
             }
 
-            for (SolidSphere* s : spheres) {
-                g.updateForce(s->body, substep);
+            BoundingVolumeHierarchy BVH;
+            for (SphereObject* o : spheres) {
+                BVH.insert(
+                    o,
+                    o->boundingVolumeTransform.getTranslation(),
+                    o->boundingVolume->getBVHSphereRadius()
+                );
+            }
+            for (CuboidObject* o : walls) {
+                BVH.insert(
+                    o,
+                    o->boundingVolumeTransform.getTranslation(),
+                    o->boundingVolume->getBVHSphereRadius()
+                );
             }
 
+            PotentialContact con[1000];
+            int size = BVH.getPotentialContacts(con, 1000);
+
+            // Fine collision detection/resolution
 
             std::vector<Contact> contacts;
-            for (int i = 0; i < walls.size(); i++) {
-                for (SolidSphere* s : spheres) {
-                    generateContactBoxAndSphere(*(walls[i]), *s, contacts, 1.0, 0.5);
+            for (int i = 0; i < size; i++) {
+                // We only do the expensive fine collision detection phase
+                // if at least one body is awake (moving), otherwise it serves
+                // no purpose and wastes time.
+                if (con[i].object[0]->body.isAwake || con[i].object[1]->body.isAwake) {
+                    generateContacts(
+                        *con[i].object[0], *con[i].object[1], contacts, 0.6, 0.0
+                    );
                 }
             }
-            for (SolidSphere* s : spheres) {
-                for (SolidSphere* s2 : spheres) {
-                    if (
-                        (s2->getCentre() - s->getCentre()).magnitudeSquared() <
-                        (s2->radius + s->radius) * (s2->radius + s->radius)
-                        ) {
-                        generateContactSphereAndSphere(*s2, *s, contacts, 0.5, 0.0);
-                    }
-                }
-            }
-
 
             CollisionResolver resolver(1, 0);
             resolver.resolveContacts(contacts.data(), contacts.size(), substep);
 
-            for (SolidSphere* s : spheres) {
-                s->body->integrate(substep);
+            for (SphereObject* s : spheres) {
+                s->body.integrate(substep);
+            }
+            for (SphereObject* s : spheres) {
+                s->update();
             }
         }
 
-
-        for (int i = 0; i < walls.size(); i++) {
-            cubeShaders[i].setProjectionMatrix(camera.getProjectionMatrix());
-            cubeShaders[i].setViewMatrix(camera.getViewMatrix());
-            cubeShaders[i].setModelMatrix(convertToGLM(walls[i]->getTransformMatrix()));
-        }
-
-        sphereShader.setProjectionMatrix(camera.getProjectionMatrix());
-        sphereShader.setViewMatrix(camera.getViewMatrix());
-
+        shader.setProjectionMatrix(camera.getProjectionMatrix());
+        shader.setViewMatrix(camera.getViewMatrix());
 
         if (deltaTime >= frameRate) {
 
@@ -278,17 +261,18 @@ void pe::runBallPit() {
             glClearColor(0.1f, 0.15f, 0.15f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+
+            shader.setObjectColor(colorWhite);
             for (int i = 0; i < walls.size(); i++) {
-                cubeShaders[i].drawFaces();
-            }
-            for (SolidSphere* s : spheres) {
-                sphereShader.setModelMatrix(convertToGLM(s->getTransformMatrix()));
-                sphereShader.drawFaces();
+                shader.setModelMatrix(convertToGLM(walls[i]->body.transformMatrix));
+                shader.render(wallRenderers[i]->getVertexBuffer());
             }
 
-            s.setViewMatrix(camera.getViewMatrix());
-            s.drawEdges();
-
+            shader.setObjectColor(colorBlue);
+            for (SphereObject* o : spheres) {
+                shader.setModelMatrix(convertToGLM(o->body.transformMatrix));
+                shader.render(sphereRenderer.getVertexBuffer());
+            }
 
             glfwSwapBuffers(window.getWindow());
 
@@ -296,5 +280,3 @@ void pe::runBallPit() {
         }
     }
 }
-
-#endif
