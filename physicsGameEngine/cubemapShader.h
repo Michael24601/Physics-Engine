@@ -19,15 +19,10 @@
 #define CUBEMAP_SHADER_H
 
 #include "shader.h"
-#include "vertexBuffer.h"
 
 namespace pe {
 
-    class CubemapShader : public Shader{
-
-    private:
-        
-        VertexBuffer buffer;
+    class CubemapShader : public Shader {
 
     public:
 
@@ -79,7 +74,7 @@ namespace pe {
             box, but with the vertices in reverse order so that the
             faces of the box are drawn on the inside, not outside.
         */
-        void render(const VertexBuffer& buffer) override {
+        void render(const VertexBuffer& buffer) const override {
        
             // First we disable depth writing
             glDepthMask(GL_FALSE);

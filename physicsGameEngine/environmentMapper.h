@@ -148,7 +148,7 @@ namespace pe {
                 for (Shader* shader : shaders) {
                     shader->setProjectionMatrix(projection);
                     shader->setViewMatrix(view);
-                    shader->drawFaces();
+                    // Setting other object specific data
                 }
             }
 

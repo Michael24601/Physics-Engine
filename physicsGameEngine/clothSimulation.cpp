@@ -5,11 +5,10 @@
 #include "cookTorranceShader.h"
 #include "solidColorShader.h"
 #include "polyhedra.h"
-#include "faceRenderer.h"
 #include "particleGravity.h"
 #include "diffuseLightingShader.h"
 #include "cloth.h"
-
+#include "faceBufferGenerator.h"
 
 using namespace pe;
 
@@ -49,6 +48,7 @@ void pe::runClothSimulation() {
     real mass = 0.5;
     real damping = 0.9;
     real dampingCoefficient = 0.003;
+
     int laplacianIterations = 1;
     real laplacianFactor = 0.05;
 
@@ -68,9 +68,9 @@ void pe::runClothSimulation() {
 
     ParticleGravity g(Vector3D(0, -10, 0));
 
-    FaceRenderer renderer(
+    VertexBuffer buffer = createFaceVertexBuffer(
         &cloth.mesh, GL_DYNAMIC_DRAW, 
-        NORMALS::USE_VERTEX_NORMALS, UV::INCLUDE
+        NORMALS::VERTEX_NORMALS, UV::INCLUDE
     );
 
     // Shaders
@@ -138,7 +138,9 @@ void pe::runClothSimulation() {
         }
 
         cloth.update();
-        renderer.updateVbo();
+        buffer.setData(generateFaceData(
+            &cloth.mesh, NORMALS::VERTEX_NORMALS, UV::INCLUDE
+        ));
 
         shader.setViewMatrix(camera.getViewMatrix());
         shader.setProjectionMatrix(camera.getProjectionMatrix());
@@ -153,7 +155,7 @@ void pe::runClothSimulation() {
             glClearColor(0.1f, 0.2f, 0.2f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-            shader.render(renderer.getVertexBuffer());
+            shader.render(buffer);
 
             glfwSwapBuffers(window.getWindow());
             glfwPollEvents();

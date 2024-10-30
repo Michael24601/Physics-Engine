@@ -1,31 +1,21 @@
 
-#ifndef DIFFUSE_LIGHTING_SHADER_H
-#define DIFFUSE_LIGHTING_SHADER_H
+#ifndef FLAT_SHADER_H
+#define FLAT_SHADER_H
 
 #include "shader.h"
 #include "renderComponent.h"
 
 namespace pe {
 
-    class DiffuseLightingShader : public Shader{
+    class FlatShader : public Shader {
 
     public:
 
-        DiffuseLightingShader() : Shader(
-            "diffuseLightingShader.vert.glsl",
-            "diffuseLightingShader.frag.glsl",
-            std::vector<unsigned int>{3, 3, 2}
+        FlatShader() : Shader(
+            "flatShader.vert.glsl",
+            "flatShader.frag.glsl",
+            std::vector<unsigned int>{3, 2}
         ) {}
-
-        void setLightPosition(const glm::vec3* positions, int size) {
-            // Setting an array means sending the first value
-            setUniform("lightPos", positions, size);
-            setUniform("numActiveLights", size);
-        }
-
-        void setLightColors(const glm::vec4* colors, int size) {
-            setUniform("lightColors", colors, size);
-        }
 
         void setObjectColor(const glm::vec4& color) {
             setUniform("color", color);

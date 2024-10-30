@@ -31,6 +31,11 @@ namespace pe {
 		std::vector<Face> faces;
 		std::vector<Edge> edges;
 
+		/*
+			The total number of vertices if each face vertex is counted as
+			unique.
+		*/
+		int faceVertexCount;
 
 	public:
 
@@ -40,9 +45,11 @@ namespace pe {
 			const std::vector<std::pair<int, int>>& edgeIndexes
 		) : vertices{ vertices }, vertexNormals{ vertexNormals } {
 
+			faceVertexCount = 0;
 			faces.resize(faceIndexes.size());
 			for (int i = 0; i < faces.size(); i++) {
 				faces[i] = Face(this, faceIndexes[i]);
+				faceVertexCount += faces[i].getVertexCount();
 			}
 
 			edges.resize(edgeIndexes.size());
@@ -124,6 +131,10 @@ namespace pe {
 
 		const std::vector<Vector3D>& getVertices() const {
 			return vertices;
+		}
+
+		int getFaceVertexCount() const {
+			return faceVertexCount;
 		}
 
 		void setFaceTextureCoordinates(

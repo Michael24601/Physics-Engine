@@ -3,7 +3,7 @@
 
 int main() {
 
-	pe::runClothSimulation();
+	pe::runBallPit();
 
 	return 0;
 }

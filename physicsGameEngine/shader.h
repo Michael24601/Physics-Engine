@@ -18,6 +18,9 @@
 
 namespace pe {
 
+    // Forward declaration to avoid circular dependency
+    class RenderComponent;
+
 	class Shader {
 
     protected:
@@ -197,7 +200,7 @@ namespace pe {
         }
 
 
-        void useShaderProgram() {
+        void useShaderProgram() const {
             glUseProgram(shaderProgram.getShaderProgram());
         }
 
@@ -241,12 +244,24 @@ namespace pe {
 
 
         /*
+            Because each shaders has its own data, each shader will
+            override this function and set their own uniforms given a render
+            object.
+            Note that this only includes the object specific data, not the
+            world parameters such as light positions, shininess factors,
+            and shadow maps of the world; this data is not available in
+            any render component.
+        */
+        virtual void setObjectData(RenderComponent& component) = 0;
+
+
+        /*
             Funcion that renders the given VBO object using the shader.
             Just ensure the uniforms are set before the function is called.
             The function can be overriden if specific shaders require
             some extra steps.
         */
-        virtual void render(const VertexBuffer& buffer) {
+        virtual void render(const VertexBuffer& buffer) const {
 
             // Ensuring the VBO is valid
             if (buffer.attributeNumber < minAttributeNumber) {

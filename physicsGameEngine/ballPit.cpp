@@ -5,12 +5,12 @@
 #include "cookTorranceShader.h"
 #include "solidColorShader.h"
 #include "polyhedra.h"
-#include "faceRenderer.h"
 #include "rigidBodyGravity.h"
 #include "rigidBodySpringForce.h"
 #include "fineCollisionDetection.h"
 #include "collisionResolver.h"
 #include "boundingVolumeHierarchy.h"
+#include "faceBufferGenerator.h"
 
 using namespace pe;
 
@@ -50,6 +50,16 @@ void pe::runBallPit() {
     glm::vec4 lightColors[]{
         glm::vec4(1.0f, 1.0f, 1.0f, 1.0f),
     };
+
+
+    // Shaders
+    CookTorranceShader shader;
+    shader.setLightPosition(lightPos, 1);
+    shader.setLightColors(lightColors, 1);
+    shader.setFresnel(0.5);
+    shader.setRoughness(0.05);
+    shader.setProjectionMatrix(camera.getProjectionMatrix());
+
 
     const int MAX_SPHERES = 50;
     int numSpheres = 0;
@@ -107,36 +117,12 @@ void pe::runBallPit() {
     for (CuboidObject* o : walls) {
         o->body.inverseMass = 0;
         o->body.isAwake = false;
+        o->faceRenderer.setColor(colorWhite);
+        o->faceRenderer.setShader(&shader);
     }
 
     // To be filled in real time
     std::vector<SphereObject*> spheres;
-
-    // Vertex buffers
-    std::vector<FaceRenderer*> wallRenderers;
-    for (CuboidObject* o : walls) {
-        wallRenderers.push_back(
-            new FaceRenderer(
-                o->mesh, GL_STATIC_DRAW,
-                NORMALS::USE_FACE_NORMALS, UV::INCLUDE
-            )
-        );
-    };
-    // We haven't created any spheres yet, but they will all have
-    // the same size and tessalation, so we can use the same vertex
-    // buffer.
-    Sphere sphereMesh(70, 20, 20);
-    FaceRenderer sphereRenderer(
-        &sphereMesh, GL_STATIC_DRAW,
-        NORMALS::USE_VERTEX_NORMALS, UV::INCLUDE
-    );
-
-    // Shaders
-    CookTorranceShader shader;
-    shader.setLightPosition(lightPos, 1);
-    shader.setLightColors(lightColors, 1);
-    shader.setFresnel(0.5);
-    shader.setRoughness(0.05);
 
     // Forces
 
@@ -186,10 +172,12 @@ void pe::runBallPit() {
                 // We can generate only 1 vertex for
                 // these spheres as they will be shaded later
                 SphereObject* s = new SphereObject(
-                    70, 1, 1, Vector3D(n, 1000, m), Quaternion::IDENTITY, 20
+                    70, 20, 20, Vector3D(n, 1000, m), Quaternion::IDENTITY, 20
                 );
                 s->body.angularDamping = 0.3;
                 s->body.linearDamping = 0.95;
+                s->faceRenderer.setColor(colorBlue);
+                s->faceRenderer.setShader(&shader);
                 spheres.push_back(s);
             }
 
@@ -250,7 +238,6 @@ void pe::runBallPit() {
             }
         }
 
-        shader.setProjectionMatrix(camera.getProjectionMatrix());
         shader.setViewMatrix(camera.getViewMatrix());
 
         if (deltaTime >= frameRate) {
@@ -261,17 +248,14 @@ void pe::runBallPit() {
             glClearColor(0.1f, 0.15f, 0.15f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-
-            shader.setObjectColor(colorWhite);
             for (int i = 0; i < walls.size(); i++) {
-                shader.setModelMatrix(convertToGLM(walls[i]->body.transformMatrix));
-                shader.render(wallRenderers[i]->getVertexBuffer());
+                walls[i]->updateModelMatrix();
+                walls[i]->faceRenderer.render();
             }
 
-            shader.setObjectColor(colorBlue);
             for (SphereObject* o : spheres) {
-                shader.setModelMatrix(convertToGLM(o->body.transformMatrix));
-                shader.render(sphereRenderer.getVertexBuffer());
+                o->updateModelMatrix();
+                o->faceRenderer.render();
             }
 
             glfwSwapBuffers(window.getWindow());

@@ -1,17 +1,16 @@
 
-
 #include "simulations.h"
 #include "glfwWindowWrapper.h"
 #include "rotatingCamera.h"
 #include "cookTorranceShader.h"
 #include "solidColorShader.h"
 #include "polyhedra.h"
-#include "faceRenderer.h"
 #include "rigidBodyGravity.h"
 #include "rigidBodySpringForce.h"
 #include "fineCollisionDetection.h"
 #include "collisionResolver.h"
 #include "boundingVolumeHierarchy.h"
+#include "faceBufferGenerator.h"
 
 using namespace pe;
 
@@ -30,6 +29,15 @@ void pe::runWreckingBall() {
         0.001
     );
 
+    // Light
+
+    glm::vec3 lightPos[]{
+        glm::vec3(200.0f, 2000.0f, 0.0f),
+    };
+    glm::vec4 lightColors[]{
+        glm::vec4(1.0f, 1.0f, 1.0f, 1.0f),
+    };
+
     glm::mat4 identity = glm::mat4(1.0);
     glm::vec4 colorWhite(1.0, 1.0, 1.0, 1.0);
     glm::vec4 colorRed(0.8, 0.1, 0.1, 1.0);
@@ -43,6 +51,18 @@ void pe::runWreckingBall() {
     glm::vec4 colorGrey(0.4, 0.4, 0.4, 1.0);
     glm::vec4 colorBlack(0.05, 0.05, 0.05, 1.0);
 
+
+    // Shaders
+
+    CookTorranceShader cookTorranceShader;
+    SolidColorShader lineShader;
+
+    cookTorranceShader.setLightPosition(lightPos, 1);
+    cookTorranceShader.setLightColors(lightColors, 1);
+    cookTorranceShader.setFresnel(0.5);
+    cookTorranceShader.setRoughness(0.05);
+    lineShader.setProjectionMatrix(camera.getProjectionMatrix());
+    cookTorranceShader.setProjectionMatrix(camera.getProjectionMatrix());
 
     // Cubes
 
@@ -63,6 +83,8 @@ void pe::runWreckingBall() {
                 );
                 prism->body.angularDamping = 0.8;
                 prism->body.linearDamping = 0.95;
+                prism->faceRenderer.setColor(colorPurple);
+                prism->faceRenderer.setShader(&cookTorranceShader);
 
                 prisms.push_back(prism);
             }
@@ -73,52 +95,24 @@ void pe::runWreckingBall() {
 
     CuboidObject ground(5000, 100, 5000, Vector3D(0, -350, -0), Quaternion::IDENTITY, 0);
     ground.body.inverseMass = 0;
+    ground.faceRenderer.setColor(colorWhite);
+    ground.faceRenderer.setShader(&cookTorranceShader);
 
     // Sphere
 
     SphereObject sphere(200, 20, 20, Vector3D(800, 400, 0), Quaternion::IDENTITY, 5);
     sphere.body.angularDamping = 0.8;
     sphere.body.linearDamping = 0.95;
+    sphere.faceRenderer.setColor(colorRed);
+    sphere.faceRenderer.setShader(&cookTorranceShader);
 
-    // Vertex buffer objects (we need only 3 since all cubes can share one)
-
-    FaceRenderer cubeRenderer(
-        prisms[0]->mesh, GL_STATIC_DRAW, 
-        NORMALS::USE_FACE_NORMALS, UV::INCLUDE
-    );
-    FaceRenderer sphereRenderer(
-        sphere.mesh, GL_STATIC_DRAW, 
-        NORMALS::USE_VERTEX_NORMALS, UV::INCLUDE
-    );
-    FaceRenderer groundRenderer(
-        ground.mesh, GL_STATIC_DRAW,
-        NORMALS::USE_FACE_NORMALS, UV::INCLUDE
-    );
 
     // For the line (dynamic as the line deforms)
     VertexBuffer lineBuffer(2, std::vector<unsigned int>{3}, 2, GL_DYNAMIC_DRAW);
-
-
-    // Light
-
-    glm::vec3 lightPos[]{
-        glm::vec3(200.0f, 2000.0f, 0.0f),
-    };
-    glm::vec4 lightColors[]{
-        glm::vec4(1.0f, 1.0f, 1.0f, 1.0f),
-    };
-
-    // Shaders
-
-    CookTorranceShader cookTorranceShader;
-    SolidColorShader lineShader;
-
-    cookTorranceShader.setLightPosition(lightPos, 1);
-    cookTorranceShader.setLightColors(lightColors, 1);
-    cookTorranceShader.setFresnel(0.5);
-    cookTorranceShader.setRoughness(0.05);
-
-    lineShader.setObjectColor(colorWhite);
+    RenderComponent lineRenderer;
+    lineRenderer.setColor(colorWhite);
+    lineRenderer.setVertexBuffer(&lineBuffer);
+    lineRenderer.setShader(&lineShader);
 
     // Forces
 
@@ -205,7 +199,10 @@ void pe::runWreckingBall() {
             
             std::vector<Contact> contacts;
             for (int i = 0; i < size; i++) {
-                generateContacts(*con[i].object[0], *con[i].object[1], contacts, 0.25, 0.0);
+                generateContacts(
+                    *con[i].object[0], *con[i].object[1], 
+                    contacts, 0.25, 0.0
+                );
             }
 
             CollisionResolver resolver(1, 1);
@@ -235,6 +232,15 @@ void pe::runWreckingBall() {
         };
         lineBuffer.setData(springData);
 
+        for (int i = 0; i < prisms.size(); i++) {
+            prisms[i]->updateModelMatrix();
+        }
+        sphere.updateModelMatrix();
+        ground.updateModelMatrix();
+
+        lineShader.setViewMatrix(camera.getViewMatrix());
+        cookTorranceShader.setViewMatrix(camera.getViewMatrix());
+
         if (deltaTime >= frameRate) {
 
             // Unbind framebuffer to render to default framebuffer (window)
@@ -244,35 +250,13 @@ void pe::runWreckingBall() {
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             // Rendering 
-
-            cookTorranceShader.setViewMatrix(camera.getViewMatrix());
-            cookTorranceShader.setProjectionMatrix(camera.getProjectionMatrix());
-
-            cookTorranceShader.setObjectColor(colorPurple);
+    
             for (int i = 0; i < prisms.size(); i++) {
-                cookTorranceShader.setModelMatrix(convertToGLM(
-                    prisms[i]->body.transformMatrix
-                ));
-                cookTorranceShader.render(cubeRenderer.getVertexBuffer());
+                prisms[i]->faceRenderer.render();
             }
-
-            cookTorranceShader.setObjectColor(colorWhite);
-            cookTorranceShader.setModelMatrix(convertToGLM(
-                ground.body.transformMatrix
-            ));
-            cookTorranceShader.render(groundRenderer.getVertexBuffer());
-
-            cookTorranceShader.setObjectColor(colorRed);
-            cookTorranceShader.setModelMatrix(convertToGLM(
-                sphere.body.transformMatrix
-            ));
-            cookTorranceShader.render(sphereRenderer.getVertexBuffer());
-
-            lineShader.setModelMatrix(identity);
-            lineShader.setProjectionMatrix(camera.getProjectionMatrix());
-            lineShader.setViewMatrix(camera.getViewMatrix());
-            lineShader.render(lineBuffer);
-
+            ground.faceRenderer.render();
+            sphere.faceRenderer.render();
+            lineRenderer.render();
 
             glfwSwapBuffers(window.getWindow());
 

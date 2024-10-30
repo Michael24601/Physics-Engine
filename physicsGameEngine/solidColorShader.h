@@ -3,6 +3,7 @@
 #define SOLID_COLOR_SHADER_H
 
 #include "shader.h"
+#include "renderComponent.h"
 
 namespace pe {
 
@@ -18,6 +19,11 @@ namespace pe {
 
         void setObjectColor(const glm::vec4& color) {
             setUniform("color", color);
+        }
+
+        void setObjectData(RenderComponent& renderComponent) override {
+            setModelMatrix(renderComponent.model);
+            setObjectColor(renderComponent.color);
         }
 
 	};

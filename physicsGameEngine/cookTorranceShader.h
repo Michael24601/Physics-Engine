@@ -3,6 +3,7 @@
 #define COOK_TORRANCE_SHADER_H
 
 #include "shader.h"
+#include "renderComponent.h"
 
 namespace pe {
 
@@ -22,6 +23,9 @@ namespace pe {
         }
 
         void setObjectTexture(const GLuint& textureId) {
+
+            if (textureId == 0) return;
+
             setTextureUniform(
                 "objectTexture",
                 textureId,
@@ -47,6 +51,12 @@ namespace pe {
 
         void setFresnel(float fresnel) {
             setUniform("fresnel", fresnel);
+        }
+
+        void setObjectData(RenderComponent& renderComponent) override {
+            setModelMatrix(renderComponent.model);
+            setObjectColor(renderComponent.color);
+            setObjectTexture(renderComponent.texture);
         }
     };
 }

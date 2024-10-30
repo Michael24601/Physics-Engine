@@ -13,6 +13,7 @@
 #define SIMPLE_SHADER_H
 
 #include "shader.h"
+#include "renderComponent.h"
 
 namespace pe {
 
@@ -25,6 +26,11 @@ namespace pe {
             "simpleShader.frag.glsl",
             std::vector<unsigned int>{3}
         ) {}
+
+
+        void setObjectData(RenderComponent& renderComponent) override {
+            setModelMatrix(renderComponent.model);
+        }
 
     };
 }

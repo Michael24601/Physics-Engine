@@ -97,15 +97,6 @@
     <Filter Include="Header Files\RigidObjects">
       <UniqueIdentifier>{e5aad90b-164c-4750-bd25-a7f3e7990117}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\GLSL Shaders\Texture Shader">
-      <UniqueIdentifier>{c2b810fe-b2e8-456c-bc3d-de79eec3db89}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\GLSL Shaders\Cubemap Shader">
-      <UniqueIdentifier>{dc65b283-ab1e-4a96-a8ae-daddc63bf1c2}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Renderers">
-      <UniqueIdentifier>{2a817f8f-bdbe-4dd5-b9b1-77f37a7b0b56}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\OpenGL Utilities">
       <UniqueIdentifier>{f6af3ec7-fa98-4c89-8a0b-c9815225c3d1}</UniqueIdentifier>
     </Filter>
@@ -114,6 +105,15 @@
     </Filter>
     <Filter Include="Source Files\Simulations">
       <UniqueIdentifier>{cdd87a84-6bbd-4319-88df-7a57008b66a2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Rendering">
+      <UniqueIdentifier>{2a817f8f-bdbe-4dd5-b9b1-77f37a7b0b56}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\GLSL Shaders\Flat Shader">
+      <UniqueIdentifier>{174b7f19-fe4b-472e-aa51-5339376eade5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Rendering">
+      <UniqueIdentifier>{8d18904f-9d29-4245-a4f5-ecf654bd4a50}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -261,8 +261,8 @@
     <ClCompile Include="vector2D.cpp">
       <Filter>Source Files\Core</Filter>
     </ClCompile>
-    <ClCompile Include="faceRenderer.h">
-      <Filter>Header Files\Renderers</Filter>
+    <ClCompile Include="faceBufferGenerator.h">
+      <Filter>Header Files\Rendering</Filter>
     </ClCompile>
     <ClCompile Include="shaderInterface.cpp">
       <Filter>Source Files\OpenGL Utilities</Filter>
@@ -281,6 +281,15 @@
     </ClCompile>
     <ClCompile Include="boundingVolumeHierarchy.cpp">
       <Filter>Source Files\Collision</Filter>
+    </ClCompile>
+    <ClCompile Include="faceBufferGenerator.cpp">
+      <Filter>Source Files\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="edgeBufferGenerator.cpp">
+      <Filter>Source Files\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="skyboxBufferGenerator.cpp">
+      <Filter>Source Files\Rendering</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -464,9 +473,6 @@
     <ClInclude Include="simpleShader.h">
       <Filter>Header Files\OpenGL Shaders</Filter>
     </ClInclude>
-    <ClInclude Include="cubemapShader.h">
-      <Filter>Header Files\OpenGL Shaders</Filter>
-    </ClInclude>
     <ClInclude Include="solidColorShader.h">
       <Filter>Header Files\OpenGL Shaders</Filter>
     </ClInclude>
@@ -487,9 +493,6 @@
     </ClInclude>
     <ClInclude Include="pointProjection.h">
       <Filter>Header Files\Camera</Filter>
-    </ClInclude>
-    <ClInclude Include="textureShader.h">
-      <Filter>Header Files\OpenGL Shaders</Filter>
     </ClInclude>
     <ClInclude Include="simulations.h">
       <Filter>Header Files\Simulations</Filter>
@@ -521,14 +524,11 @@
     <ClInclude Include="rigidObject.h">
       <Filter>Header Files\RigidObjects</Filter>
     </ClInclude>
-    <ClInclude Include="skyboxRenderer.h">
-      <Filter>Header Files\Renderers</Filter>
+    <ClInclude Include="skyboxBufferGenerator.h">
+      <Filter>Header Files\Rendering</Filter>
     </ClInclude>
     <ClInclude Include="vertexBuffer.h">
       <Filter>Header Files\OpenGL Utilities</Filter>
-    </ClInclude>
-    <ClInclude Include="edgeRenderer.h">
-      <Filter>Header Files\Renderers</Filter>
     </ClInclude>
     <ClInclude Include="shaderInterface.h">
       <Filter>Header Files\OpenGL Utilities</Filter>
@@ -566,6 +566,18 @@
     <ClInclude Include="axisAlignedBoundingBox.h">
       <Filter>Header Files\BoundingVolumes</Filter>
     </ClInclude>
+    <ClInclude Include="cubemapShader.h">
+      <Filter>Header Files\OpenGL Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="flatShader.h">
+      <Filter>Header Files\OpenGL Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="renderComponent.h">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="edgeBufferGenerator.h">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="todo.txt" />
@@ -579,12 +591,6 @@
     </None>
     <None Include="solidColorShader.frag.glsl">
       <Filter>Source Files\GLSL Shaders\Solid Color Shader</Filter>
-    </None>
-    <None Include="cubemapShader.frag.glsl">
-      <Filter>Source Files\GLSL Shaders\Cubemap Shader</Filter>
-    </None>
-    <None Include="cubemapShader.vert.glsl">
-      <Filter>Source Files\GLSL Shaders\Cubemap Shader</Filter>
     </None>
     <None Include="cookTorranceReflectionShader.vert.glsl">
       <Filter>Source Files\GLSL Shaders\Reflection Shader</Filter>
@@ -604,11 +610,11 @@
     <None Include="shadowMappingShader.vert.glsl">
       <Filter>Source Files\GLSL Shaders\Shadow Shader</Filter>
     </None>
-    <None Include="textureShader.frag.glsl">
-      <Filter>Source Files\GLSL Shaders\Texture Shader</Filter>
+    <None Include="flatShader.vert.glsl">
+      <Filter>Source Files\GLSL Shaders\Flat Shader</Filter>
     </None>
-    <None Include="textureShader.vert.glsl">
-      <Filter>Source Files\GLSL Shaders\Texture Shader</Filter>
+    <None Include="flatShader.frag.glsl">
+      <Filter>Source Files\GLSL Shaders\Flat Shader</Filter>
     </None>
   </ItemGroup>
 </Project>

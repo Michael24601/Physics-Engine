@@ -170,7 +170,9 @@
     <ClCompile Include="collisionResolver.cpp" />
     <ClCompile Include="contact.cpp" />
     <ClCompile Include="edge.cpp" />
-    <ClCompile Include="faceRenderer.h" />
+    <ClCompile Include="edgeBufferGenerator.cpp" />
+    <ClCompile Include="faceBufferGenerator.cpp" />
+    <ClCompile Include="faceBufferGenerator.h" />
     <ClCompile Include="importedMesh.cpp" />
     <ClCompile Include="drawingUtil.cpp" />
     <ClCompile Include="face.cpp" />
@@ -208,6 +210,7 @@
     <ClCompile Include="rigidBodySpringForce.cpp" />
     <ClCompile Include="rigidBodyWorld.cpp" />
     <ClCompile Include="sat.cpp" />
+    <ClCompile Include="skyboxBufferGenerator.cpp" />
     <ClCompile Include="staircase.cpp" />
     <ClCompile Include="util.cpp" />
     <ClCompile Include="vector2D.cpp" />
@@ -222,14 +225,17 @@
     <ClInclude Include="boundingSphere.h" />
     <ClInclude Include="boundingVolume.h" />
     <ClInclude Include="BVHNode.h" />
+    <ClInclude Include="cubemapShader.h" />
     <ClInclude Include="curvature.h" />
     <ClInclude Include="boundingVolumeHierarchy.h" />
     <ClInclude Include="camera.h" />
-    <ClInclude Include="edgeRenderer.h" />
+    <ClInclude Include="edgeBufferGenerator.h" />
+    <ClInclude Include="flatShader.h" />
     <ClInclude Include="inertiaTensorUtil.h" />
     <ClInclude Include="orientedBoundingBox.h" />
     <ClInclude Include="polyhedra.h" />
-    <ClInclude Include="skyboxRenderer.h" />
+    <ClInclude Include="renderComponent.h" />
+    <ClInclude Include="skyboxBufferGenerator.h" />
     <ClInclude Include="softObject.h" />
     <ClInclude Include="vertexBuffer.h" />
     <ClInclude Include="collisionResolver.h" />
@@ -301,12 +307,10 @@
     <ClInclude Include="shaderProgram.h" />
     <ClInclude Include="simpleShader.h" />
     <ClInclude Include="simulations.h" />
-    <ClInclude Include="cubemapShader.h" />
     <ClInclude Include="softBody.h" />
     <ClInclude Include="solidColorShader.h" />
     <ClInclude Include="sphere.h" />
     <ClInclude Include="particleSpringDamper.h" />
-    <ClInclude Include="textureShader.h" />
     <ClInclude Include="util.h" />
     <ClInclude Include="vector2D.h" />
     <ClInclude Include="vector3D.h" />
@@ -317,17 +321,15 @@
   <ItemGroup>
     <None Include="cookTorranceReflectionShader.frag.glsl" />
     <None Include="cookTorranceReflectionShader.vert.glsl" />
+    <None Include="flatShader.frag.glsl" />
+    <None Include="flatShader.vert.glsl" />
     <None Include="shadowMappingShader.vert.glsl" />
     <None Include="shadowMappingShader.frag.glsl" />
     <None Include="diffuseLightingShader.frag.glsl" />
     <None Include="simpleShader.frag.glsl" />
     <None Include="simpleShader.vert.glsl" />
-    <None Include="cubemapShader.frag.glsl" />
-    <None Include="cubemapShader.vert.glsl" />
     <None Include="solidColorShader.frag.glsl" />
     <None Include="solidColorShader.vert.glsl" />
-    <None Include="textureShader.frag.glsl" />
-    <None Include="textureShader.vert.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

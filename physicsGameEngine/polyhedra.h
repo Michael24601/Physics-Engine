@@ -51,7 +51,54 @@
 
 namespace pe {
 
-	class CuboidObject : public RigidObject {
+	class PolyhedronObject : public RigidObject {
+
+	public:
+
+		VertexBuffer faceBuffer;
+		VertexBuffer edgeBuffer;
+
+		PolyhedronObject(
+			Mesh* mesh,
+			BoundingVolume* boundingVolume,
+			const Vector3D& position = Vector3D::ZERO,
+			const Quaternion& orientation = Quaternion::IDENTITY,
+			real mass = 0,
+			const Matrix3x3& inertiaTensor = Matrix3x3::IDENTITY,
+			bool smooth = false
+		) : 
+			RigidObject(
+			mesh, boundingVolume, position, 
+			orientation, mass, inertiaTensor
+			),
+			faceBuffer(createFaceVertexBuffer(
+				this->mesh, GL_STATIC_DRAW, 
+				(smooth ? NORMALS::VERTEX_NORMALS : NORMALS::FACE_NORMALS),
+				UV::INCLUDE
+			)),
+			edgeBuffer(createEdgeVertexBuffer(
+				this->mesh, GL_STATIC_DRAW
+			)) {
+			
+			faceBuffer.setData(generateFaceData(
+				this->mesh,
+				(smooth ? NORMALS::VERTEX_NORMALS : NORMALS::FACE_NORMALS),
+				UV::INCLUDE
+			));
+
+			edgeBuffer.setData(generateEdgeData(this->mesh));
+
+			faceRenderer.setVertexBuffer(&faceBuffer);
+			edgeRenderer.setVertexBuffer(&edgeBuffer);
+		}
+
+		void updateModelMatrix() {
+			faceRenderer.setModel(convertToGLM(body.transformMatrix));
+		}
+
+	};
+
+	class CuboidObject : public PolyhedronObject {
 
 	public:
 
@@ -78,13 +125,14 @@ namespace pe {
 			const Quaternion& orientation,
 			real mass
 		) : width{ width }, height{ height }, depth{depth},
-			RigidObject(
+			PolyhedronObject(
 			new Cuboid(width, height, depth),
 			new OrientedBoundingBox(Vector3D(width / 2.0, height / 2.0, depth / 2.0)),
 			position,
 			orientation,
 			mass,
-			getInertiaTensor(width, height, depth, mass)
+			getInertiaTensor(width, height, depth, mass),
+			false
 		) {}
 
 
@@ -95,7 +143,7 @@ namespace pe {
 	};
 
 
-	class SphereObject : public RigidObject {
+	class SphereObject : public PolyhedronObject {
 
 	public:
 
@@ -121,13 +169,14 @@ namespace pe {
 			real mass
 		) : radius{ radius }, latitudeSegments{ latitudeSegments },
 			longitudeSegments{ longitudeSegments },
-			RigidObject(
+			PolyhedronObject(
 			new Sphere(radius, latitudeSegments, longitudeSegments),
 			new BoundingSphere(radius),
 			position,
 			orientation,
 			mass,
-			getInertiaTensor(radius, mass)
+			getInertiaTensor(radius, mass),
+			true
 		) {}
 
 
@@ -138,7 +187,7 @@ namespace pe {
 	};
 
 
-	class PyramidObject : public RigidObject {
+	class PyramidObject : public PolyhedronObject {
 
 	public:
 
@@ -163,7 +212,7 @@ namespace pe {
 			const Quaternion& orientation,
 			real mass
 		) : side{ side }, height{height},
-			RigidObject(
+			PolyhedronObject(
 			new Pyramid(side, height),
 			/*
 				The centroid of the pyramid is one fourth of the way
@@ -180,7 +229,8 @@ namespace pe {
 			position,
 			orientation,
 			mass,
-			getInertiaTensor(side, height, mass)
+			getInertiaTensor(side, height, mass),
+			false
 		) {}
 
 
@@ -191,7 +241,7 @@ namespace pe {
 	};
 
 
-	class ConeObject : public RigidObject {
+	class ConeObject : public PolyhedronObject {
 
 	public:
 
@@ -218,24 +268,25 @@ namespace pe {
 			real mass,
 			bool smooth
 		) : radius{ radius }, height{ height }, segments{ segments },
-			RigidObject(
-			new Cone(radius, height, segments),
-			/*
-				The centroid of the cone is one fourth of the way
-				up from the base. The bounding box is centred halfway
-				between the base and apex of the pyramid, so we have
-				to shift it by a quarter of the height.
-				The halfsize of the bounding box is the radius,
-				half the height, then the radius.
-			*/
-			new OrientedBoundingBox(
-				Vector3D(radius, height / 2.0, radius),
-				Vector3D(0, height / 4.0, 0)
-			),
-			position,
-			orientation,
-			mass,
-			getInertiaTensor(radius, height, mass)
+			PolyhedronObject(
+				new Cone(radius, height, segments),
+				/*
+					The centroid of the cone is one fourth of the way
+					up from the base. The bounding box is centred halfway
+					between the base and apex of the pyramid, so we have
+					to shift it by a quarter of the height.
+					The halfsize of the bounding box is the radius,
+					half the height, then the radius.
+				*/
+				new OrientedBoundingBox(
+					Vector3D(radius, height / 2.0, radius),
+					Vector3D(0, height / 4.0, 0)
+				),
+				position,
+				orientation,
+				mass,
+				getInertiaTensor(radius, height, mass),
+				true
 		) {}
 
 
@@ -246,7 +297,7 @@ namespace pe {
 	};
 
 
-	class CylinderObject : RigidObject {
+	class CylinderObject : PolyhedronObject {
 
 	public:
 
@@ -275,13 +326,14 @@ namespace pe {
 			real mass,
 			bool smooth
 		) : radius{ radius }, height{ height }, segments{ segments },
-			RigidObject(
+			PolyhedronObject(
 			new Cylinder(radius, height, segments),
 			new OrientedBoundingBox(Vector3D(radius, 0, radius)),
 			position,
 			orientation,
 			mass,
-			getInertiaTensor(radius, height, segments)
+			getInertiaTensor(radius, height, segments),
+			true
 		) {}
 
 

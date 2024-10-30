@@ -3,7 +3,6 @@
 #define VERTEX_BUFFER_H
 
 #include "mesh.h"
-#include "boundingSphere.h"
 #include "shaderInterface.h"
 #include "shaderProgram.h"
 

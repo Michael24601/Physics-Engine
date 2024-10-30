@@ -3,6 +3,7 @@
 #define COOK_TORRANCE_REFLECTION_SHADER_H
 
 #include "shader.h"
+#include "renderComponent.h"
 
 namespace pe {
 
@@ -16,7 +17,10 @@ namespace pe {
             std::vector<unsigned int>{3, 3, 2}
         ) {}
 
-        void setEnvironmentMap(GLuint environmentMapTextureId, int activeTexture = 1) {
+        void setEnvironmentMap(
+            GLuint environmentMapTextureId, 
+            int activeTexture = 2
+        ) {
             setTextureUniform(
                 "environmentMap",
                 environmentMapTextureId, 
@@ -34,16 +38,6 @@ namespace pe {
             );
         }
 
-        void setLightPosition(const glm::vec3* positions, int size) {
-            // Setting an array means sending the first value
-            setUniform("lightPos", positions, size);
-            setUniform("numActiveLights", size);
-        }
-
-        void setLightColors(const glm::vec4* colors, int size) {
-            setUniform("lightColors", colors, size);
-        }
-
         void setObjectColor(const glm::vec4& color) {
             setUniform("color", color);
             setUniform("useTexture", false);
@@ -54,13 +48,19 @@ namespace pe {
                 "objectTexture",
                 textureId,
                 GL_TEXTURE_2D,
-                0
+                1
             );
             setUniform("useTexture", true);
         }
 
-        void setRoughness(float roughness) {
-            setUniform("roughness", roughness);
+        void setLightPosition(const glm::vec3* positions, int size) {
+            // Setting an array means sending the first value
+            setUniform("lightPos", positions, size);
+            setUniform("numActiveLights", size);
+        }
+
+        void setLightColors(const glm::vec4* colors, int size) {
+            setUniform("lightColors", colors, size);
         }
 
         void setFresnel(float fresnel) {
@@ -73,6 +73,13 @@ namespace pe {
 
         void setLightInfluence(float lightInfluence) {
             setUniform("lightInfluence", lightInfluence);
+        }
+
+        void setObjectData(RenderComponent& renderComponent) override {
+            setModelMatrix(renderComponent.model);
+            setObjectColor(renderComponent.color);
+            setObjectTexture(renderComponent.texture);
+            setEnvironmentMap(renderComponent.environmentMap);
         }
     };
 }
