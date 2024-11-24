@@ -13,7 +13,7 @@
 #include <glm.hpp>
 #include <glm.hpp>
 #include <gtc/matrix_transform.hpp>
-#include "shader.h"
+#include "simpleShader.h"
 
 namespace pe {
 
@@ -30,6 +30,14 @@ namespace pe {
 
         // Framebuffer object
         GLuint framebuffer;
+
+        /*
+            Simple shader used to render all objects casting a shadow.
+            This shader doesn't output anything in the fragment shader,
+            as only the depth value is needed to calculate the shadow/depth
+            map.
+        */
+        SimpleShader shader;
 
     public:
 
@@ -71,32 +79,28 @@ namespace pe {
         /*
             Captures the environment at the given position, by rendering
             the given shaders.
-            We assume all of the uniforms of the shaders were set outside,
-            including the model. Only the view matrix and projection
-            matrices of the shaders are modified in this function (since
-            we need to use a specific view matrix for the source we are
-            given, and the projection may change depending on the type
-            of lighting).
-
-            Any shader can be used, but it is recommneded to use a simple
-            shader that doesn't write any colors in the fragment shader.
-            This is because we only care for the fragment depth.
+            The render components are given, but only the vertex buffer
+            and model matrices are used; the shader of the given render component
+            is set aside in favor of the simple shader.
         */
         void captureDepth(
             const glm::mat4& viewMatrix,
             const glm::mat4& projectionMatrix,
-            std::vector<Shader*>& shaders
+            std::vector<RenderComponent*>& objects
         ) {
+
             glViewport(0, 0, width, height);
             glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
             glClear(GL_DEPTH_BUFFER_BIT);
             glEnable(GL_DEPTH_TEST);
 
+            shader.setViewMatrix(viewMatrix);
+            shader.setProjectionMatrix(projectionMatrix);
+
             // Uses each shader to render the scene from this perspective
-            for (Shader* shader : shaders) {
-                shader->setViewMatrix(viewMatrix);
-                shader->setProjectionMatrix(projectionMatrix);
-                shader->drawFaces();
+            for (RenderComponent* object: objects) {
+                shader.setModelMatrix(object->model);
+                shader.render(*object->vertexBuffer);
             }
 
             // We finally unbind the framebuffer

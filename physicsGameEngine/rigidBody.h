@@ -252,6 +252,12 @@ namespace pe {
 		*/
 		void setMass(real mass);
 
+
+		// Sets the inverse mass to 0
+		inline void setInfiniteMass() {
+			inverseMass = 0;
+		}
+
 		// Returns mass if inverse is not 0, otherwise 0 is returned
 		real getMass() const;
 

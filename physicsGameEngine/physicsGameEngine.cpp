@@ -3,7 +3,7 @@
 
 int main() {
 
-	pe::runMirrors();
+	pe::runShadowSimulation();
 
 	return 0;
 }

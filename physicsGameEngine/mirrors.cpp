@@ -9,7 +9,6 @@
 
 using namespace pe;
 
-
 void pe::runMirrors() {
 
     GlfwWindowWrapper window(800, 800, 6, "window", true);

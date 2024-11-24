@@ -29,7 +29,7 @@ namespace pe {
 
 	void runClothSimulation();
 
-	void runVideoGameLevel();
+	void runShadowSimulation();
 }
 
 #endif

@@ -482,3 +482,5 @@ The isAwake and isActive should be seperate, and both are
 usable. When that is done, return the matchAwakeState function
 to the collision resolver, since isAwake no longer acts as
 an isActive.
+
+Add multiple light sources to shadow mapping shader.

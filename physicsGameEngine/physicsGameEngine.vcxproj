@@ -210,6 +210,7 @@
     <ClCompile Include="rigidBodySpringForce.cpp" />
     <ClCompile Include="rigidBodyWorld.cpp" />
     <ClCompile Include="sat.cpp" />
+    <ClCompile Include="shadowSimulation.cpp" />
     <ClCompile Include="skyboxBufferGenerator.cpp" />
     <ClCompile Include="util.cpp" />
     <ClCompile Include="vector2D.cpp" />

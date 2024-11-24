@@ -23,11 +23,11 @@ std::vector<unsigned int> pe::getAttributeSizes(
     if (useNormals != NORMALS::OMIT && useUv != UV::OMIT) {
         return std::vector<unsigned int>{3, 3, 2};
     }
-    else if (useNormals == NORMALS::OMIT) {
-        return std::vector<unsigned int>{3, 2};
+    else if (useNormals != NORMALS::OMIT) {
+        return std::vector<unsigned int>{3, 3};
     }
     else if (useUv != UV::OMIT) {
-        return std::vector<unsigned int>{3, 3};
+        return std::vector<unsigned int>{3, 2};
     }
     else {
         return std::vector<unsigned int>{3};
