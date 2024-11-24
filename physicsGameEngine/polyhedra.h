@@ -265,8 +265,7 @@ namespace pe {
 			real radius, real height, int segments,
 			const Vector3D& position,
 			const Quaternion& orientation,
-			real mass,
-			bool smooth
+			real mass
 		) : radius{ radius }, height{ height }, segments{ segments },
 			PolyhedronObject(
 				new Cone(radius, height, segments),
@@ -297,7 +296,7 @@ namespace pe {
 	};
 
 
-	class CylinderObject : PolyhedronObject {
+	class CylinderObject : public PolyhedronObject {
 
 	public:
 
@@ -323,8 +322,7 @@ namespace pe {
 			real radius, real height, int segments,
 			const Vector3D& position,
 			const Quaternion& orientation,
-			real mass,
-			bool smooth
+			real mass
 		) : radius{ radius }, height{ height }, segments{ segments },
 			PolyhedronObject(
 			new Cylinder(radius, height, segments),

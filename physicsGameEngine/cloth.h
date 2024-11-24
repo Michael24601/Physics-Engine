@@ -3,7 +3,7 @@
 #define CLOTH_H
 
 #include "softObject.h"
-#include "particleDistanceConstraint.h"
+#include "particleDirectForce.h"
 
 namespace pe {
 
@@ -70,6 +70,15 @@ namespace pe {
 			vertices have been moved to match the particle grid position.
 		*/
 		void applyLaplacianSmoothing(int iterations, real factor);
+
+
+		/*
+			Applies wind force to the cloth.
+			It can do that by adding forces to particles based on the normal
+			vector direction of the faces the particle is part of, compared
+			to the wind direction.
+		*/
+		void applyWindForce(const Vector3D& force, real deltaT);
 
 	};
 }

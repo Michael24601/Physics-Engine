@@ -207,9 +207,6 @@
     <ClCompile Include="wreckingBall.cpp">
       <Filter>Source Files\Simulations</Filter>
     </ClCompile>
-    <ClCompile Include="staircase.cpp">
-      <Filter>Source Files\Simulations</Filter>
-    </ClCompile>
     <ClCompile Include="ballPit.cpp">
       <Filter>Source Files\Simulations</Filter>
     </ClCompile>
@@ -220,9 +217,6 @@
       <Filter>Source Files\Simulations</Filter>
     </ClCompile>
     <ClCompile Include="reflection.cpp">
-      <Filter>Source Files\Simulations</Filter>
-    </ClCompile>
-    <ClCompile Include="videoGameLevel.cpp">
       <Filter>Source Files\Simulations</Filter>
     </ClCompile>
     <ClCompile Include="fineCollisionDetection.cpp">
@@ -548,17 +542,8 @@
     <ClInclude Include="sphere.h">
       <Filter>Header Files\Polyhedron</Filter>
     </ClInclude>
-    <ClInclude Include="importedMesh.h">
-      <Filter>Header Files\Primitive</Filter>
-    </ClInclude>
     <ClInclude Include="polyhedra.h">
       <Filter>Header Files\RigidObjects</Filter>
-    </ClInclude>
-    <ClInclude Include="particleAngleConstraint.h">
-      <Filter>Header Files\ParticlePhysics</Filter>
-    </ClInclude>
-    <ClInclude Include="particleDistanceConstraint.h">
-      <Filter>Header Files\ParticlePhysics</Filter>
     </ClInclude>
     <ClInclude Include="orientedBoundingBox.h">
       <Filter>Header Files\BoundingVolumes</Filter>
@@ -577,6 +562,12 @@
     </ClInclude>
     <ClInclude Include="edgeBufferGenerator.h">
       <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="particleDirectForce.h">
+      <Filter>Header Files\ParticlePhysics</Filter>
+    </ClInclude>
+    <ClInclude Include="importedMesh.h">
+      <Filter>Header Files\RigidObjects</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -43,7 +43,7 @@ namespace pe {
 			const std::vector<Vector3D>& vertices,
 			const std::vector<std::vector<int>>& faceIndexes,
 			const std::vector<std::pair<int, int>>& edgeIndexes
-		) : vertices{ vertices }, vertexNormals{ vertexNormals } {
+		) : vertices{ vertices } {
 
 			faceVertexCount = 0;
 			faces.resize(faceIndexes.size());
@@ -155,13 +155,30 @@ namespace pe {
 				this->vertices = vertices;
 				for (Face& face : faces) {
 					// Updates the normals and centroids
-					face.update(this);
+					face.calculateCentroid(this);
+					face.calculateNormal(this);
 				}
 			}
 			else {
 				throw std::invalid_argument(
 					"Vertex count must match the mesh"
 				);
+			}
+		}
+
+
+		void updateVertices(const Matrix3x4& transform) {
+			for (Vector3D& vertex : vertices) {
+				vertex = transform.transform(vertex);
+			}
+			/*
+				Since the vertices are updates using a transform matrix,
+				we can update the normals/centroids/vertex normals
+				using the transform, instead of recalculating them.
+			*/
+			for (Face& face : faces) {
+				face.normal = transform.transformDirection(face.normal).normalized();
+				face.centroid = transform.transform(face.centroid);
 			}
 		}
 

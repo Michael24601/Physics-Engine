@@ -3,7 +3,7 @@
 
 int main() {
 
-	pe::runBallPit();
+	pe::runMirrors();
 
 	return 0;
 }

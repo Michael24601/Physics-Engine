@@ -40,7 +40,7 @@ bool Face::findUniqueVertexIndexes(
 }
 
 
-Vector3D Face::calculateNormal(const Mesh* mesh) const {
+void Face::calculateNormal(const Mesh* mesh) {
 
 	/*
 		Because it is possible that the first three vertices
@@ -52,45 +52,38 @@ Vector3D Face::calculateNormal(const Mesh* mesh) const {
 
 	int index[3];
 	if (!findUniqueVertexIndexes(mesh, index)) {
-		return Vector3D::ZERO;
+		return;
 	}
 
 	Vector3D AB = getVertex(mesh, index[1]) - getVertex(mesh, index[0]);
 	Vector3D AC = getVertex(mesh, index[2]) - getVertex(mesh, index[0]);
 
-	Vector3D normal = AB.vectorProduct(AC);
+	normal = AB.vectorProduct(AC);
 	normal.normalize();
-	return normal;
 }
 
 
-Vector3D Face::calculateCentroid(const Mesh* mesh) const {
+void Face::calculateCentroid(const Mesh* mesh) {
 
 	Vector3D sum;
 	for (int i = 0; i < getVertexCount(); i++) {
 		sum += getVertex(mesh, i);
 	}
-	Vector3D centroid = sum * (
+	centroid = sum * (
 		1.0f / static_cast<real>(getVertexCount())
-		);
-	return centroid;
+	);
 }
 
 
 Face::Face(const Mesh* mesh, const std::vector<int>& indexes) :
 	indexes{ indexes } {
 
-	update(mesh);
+	calculateCentroid(mesh);
+	calculateNormal(mesh);
 
 	// Initially, the texture coordinates are all 0
 	textureCoordinates = 
 		std::vector<Vector2D>(getVertexCount(), Vector2D::ZERO);
-}
-
-
-void Face::update(const Mesh* mesh) {
-	centroid = calculateCentroid(mesh);
-	normal = calculateNormal(mesh);
 }
 
 

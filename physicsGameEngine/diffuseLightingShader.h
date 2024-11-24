@@ -33,6 +33,9 @@ namespace pe {
         }
 
         void setObjectTexture(const GLuint& textureId) {
+
+            if (textureId == 0) return;
+
             setTextureUniform(
                 "objectTexture",
                 textureId,

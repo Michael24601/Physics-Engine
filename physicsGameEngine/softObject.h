@@ -5,6 +5,8 @@
 #include "mesh.h"
 #include "curvature.h"
 #include "softBody.h"
+#include "renderComponent.h"
+#include <unordered_map>
 
 namespace pe {
 
@@ -40,10 +42,18 @@ namespace pe {
 
 
 		/*
-			Maps particles in the soft body to a vertex in the mesh that
+			Maps vertices in the mesh to the particle in the body that
 			corresponds to it, so that we can modify the mesh accordingly.
+			We expect each vertex to map to exatcly one particle, but not
+			all particles will be the image of a vertex necessarily.
 		*/
-		std::vector<std::pair<int, int>> particleVertexMap;
+		std::vector<int> vertexParticleMap;
+
+		/*
+			The rendering components.
+		*/
+		RenderComponent faceRenderer;
+		RenderComponent edgeRenderer;
 		
 		SoftObject(
 			const std::vector<Vector3D>& vertices,
@@ -55,7 +65,7 @@ namespace pe {
 			real dampingCoefficient,
 			const std::vector<std::pair<int, int>>& springPairs,
 			const std::vector<real> springStrengths,
-			const std::vector<std::pair<int, int>>& particleVertexMap,
+			const std::vector<int>& vertexParticleMap,
 			const Curvature& curvature = Curvature()
 		) : mesh(vertices, faceIndexes, edgeIndexes),
 			body(
@@ -64,7 +74,13 @@ namespace pe {
 			),
 			isCurved{curvature.curvatureMap.size() > 0},
 			curvature(curvature),
-			particleVertexMap{ particleVertexMap } {
+			vertexParticleMap{ vertexParticleMap } {
+
+			if (vertices.size() != vertexParticleMap.size()) {
+				throw std::invalid_argument(
+					"The vertex particle map must match each vertex"
+				);
+			}
 		
 			if (isCurved) {
 				this->curvature.setMeshVertexNormals(this->mesh);
@@ -77,10 +93,9 @@ namespace pe {
 			and been integrated.
 		*/
 		void update() {
-			std::vector<Vector3D> vertices = mesh.getVertices();
-			for (int i = 0; i < particleVertexMap.size(); i++) {
-				vertices[particleVertexMap[i].second] =
-					body.particles[particleVertexMap[i].first].position;
+			std::vector<Vector3D> vertices(mesh.getVertexCount());
+			for (int i = 0; i < vertexParticleMap.size(); i++) {
+				vertices[i] = body.particles[vertexParticleMap[i]].position;
 			}
 			// This automatically updates the faces and their normals
 			mesh.updateVertices(vertices);

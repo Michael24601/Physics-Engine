@@ -6,6 +6,7 @@
 #include "boundingBox.h"
 #include "util.h"
 #include <string>
+#include <algorithm>
 
 namespace pe {
 
@@ -68,7 +69,7 @@ namespace pe {
     void centerOfGravityToOrigin(std::vector<Vector3D>& vectors);
 
 
-    Mesh* extractMesh(std::string filename, real scale);
+    Mesh* extractMesh(std::string filename);
 
 }
 

@@ -44,6 +44,9 @@ namespace pe {
         }
 
         void setObjectTexture(const GLuint& textureId) {
+
+            if (textureId == 0) return;
+
             setTextureUniform(
                 "objectTexture",
                 textureId,
@@ -65,6 +68,10 @@ namespace pe {
 
         void setFresnel(float fresnel) {
             setUniform("fresnel", fresnel);
+        }
+
+        void setRoughness(float roughness) {
+            setUniform("roughness", roughness);
         }
 
         void setReflectionStrength(float reflectionStrength) {

@@ -66,12 +66,12 @@ void pe::runClothSimulation() {
         cloth.body.particles[i].setAwake(false);
     }
 
-    ParticleGravity g(Vector3D(0, -10, 0));
-
     VertexBuffer buffer = createFaceVertexBuffer(
-        &cloth.mesh, GL_DYNAMIC_DRAW, 
+        &cloth.mesh, GL_DYNAMIC_DRAW,
         NORMALS::VERTEX_NORMALS, UV::INCLUDE
     );
+
+    ParticleGravity g(Vector3D(0, -10, 0));
 
     // Shaders
     DiffuseLightingShader shader;
@@ -81,7 +81,7 @@ void pe::runClothSimulation() {
 
     bool isButtonPressed = false;
 
-    float deltaT = 0.04;
+    float deltaT = 0.2;
 
     float lastTime = glfwGetTime();
     float deltaTime = 0.0;
@@ -130,9 +130,9 @@ void pe::runClothSimulation() {
 
         while (numSteps--) {
 
-            cloth.body.applyForce(g, deltaT);
-            cloth.body.applySpringForces(deltaT);
-            cloth.body.verletIntegrate(deltaT);
+            cloth.body.applyForce(g, substep);
+            cloth.body.applySpringForces(substep);
+            cloth.body.verletIntegrate(substep);
 
             cloth.applyLaplacianSmoothing(laplacianIterations, laplacianFactor);
         }

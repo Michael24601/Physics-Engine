@@ -315,6 +315,7 @@ namespace pe {
 			representing vectors, the result is not always another direction
 			vector, so we use a specialized function for direction vectors of
 			magnitude 1.
+			This function only uses the rotational component, not the translation.
 		*/
 		Vector3D transformDirection(const Vector3D& vector) const {
 			// Ensures the vector remains a direction vector of magnitude 1

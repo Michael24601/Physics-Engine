@@ -12,6 +12,7 @@
 #include <glm.hpp>
 #include <gtc/matrix_transform.hpp>
 #include "shader.h"
+#include "renderComponent.h"
 
 namespace pe {
 
@@ -98,10 +99,12 @@ namespace pe {
             the shaders is modified in this function (since we need to use
             a specific view matrix for each of the 6 directions we render
             the scene from).
+            Note that this function changes the projection and view matrices
+            of the shader, which needs to be reset after the function is called.
         */
         void captureEnvironment(
             const glm::vec3& position,
-            std::vector<Shader*>& shaders
+            std::vector<RenderComponent*>& objects
         ) {
 
             // The six directions for cubemap faces
@@ -145,16 +148,15 @@ namespace pe {
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
                 // Uses each shader to render the scene from this perspective
-                for (Shader* shader : shaders) {
-                    shader->setProjectionMatrix(projection);
-                    shader->setViewMatrix(view);
-                    // Setting other object specific data
+                for (RenderComponent* o : objects) {
+                    o->shader->setProjectionMatrix(projection);
+                    o->shader->setViewMatrix(view);
+                    o->render();
                 }
             }
 
             // Unbinds the buffer
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
             glActiveTexture(GL_TEXTURE0);
         }
 

@@ -48,6 +48,19 @@ Cloth::Cloth(
 			particleNeighbors[n].push_back(i * particlesX + (j + 1));
 	}
 
+	// Setting the UV coordinates
+	real stepX = (real)1.0 / (sideDensity.second - 1);
+	real stepY = (real)1.0 / (sideDensity.first - 1);
+	for (int i = 0; i < mesh.getFaceCount(); i++) {
+		std::vector<Vector2D> uv(mesh.getFace(i).getVertexCount());
+		for (int j = 0; j < mesh.getFace(i).getVertexCount(); j++) {
+			int x = mesh.getFace(i).getIndex(j) % sideDensity.second;
+			int y = 1 - (mesh.getFace(i).getIndex(j) / sideDensity.second);
+			uv[j] = Vector2D(x * stepX, y * stepY);
+		}
+		mesh.setFaceTextureCoordinates(i, uv);
+	}
+
 }
 
 
@@ -186,9 +199,9 @@ SoftObject Cloth::generateSoftObject(
 		Then we generate the vertex - particle map, which in the case
 		of cloth is 1 to 1.
 	*/
-	std::vector<std::pair<int, int>> particleVertexMap(particleGrid.size());
+	std::vector<int> vertexParticleMap(particleGrid.size());
 	for (int i = 0; i < particleGrid.size(); i++) {
-		particleVertexMap[i] = std::make_pair(i, i);
+		vertexParticleMap[i] = i;
 	}
 
 
@@ -245,7 +258,7 @@ SoftObject Cloth::generateSoftObject(
 		particleGrid, mass, damping, dampingCoefficient,
 		springPairs, springStrengths,
 		// Rendering data
-		particleVertexMap, curvature
+		vertexParticleMap, curvature
 	);
 }
 
@@ -283,5 +296,30 @@ void Cloth::applyLaplacianSmoothing(int iterations, real factor) {
 
 			body.particles[i].position = smoothedPosition;
 		}
+	}
+}
+
+
+void Cloth::applyWindForce(const Vector3D& force, real deltaT) {
+
+	/*
+		The wind force for each vertex in the mesh (which is likely shared
+		by multiple faces).
+	*/
+	std::vector<ParticleDirectForce> vertexForces(mesh.getVertexCount());
+
+	for (int i = 0; i < mesh.getFaceCount(); i++) {
+		Vector3D faceNormal = mesh.getFace(i).getNormal();
+		// Wind force for this face
+		Vector3D windForce (faceNormal * (faceNormal.scalarProduct(force)));
+		for (int j = 0; j < mesh.getFace(i).getVertexCount(); j++) {
+			int vertexIndex = mesh.getFace(i).getIndex(j);
+			vertexForces[vertexIndex].force += windForce;
+		}
+	}
+
+	// The vertex forces are then applied to the particles that correspond to them
+	for (int i = 0; i < vertexParticleMap.size(); i++) {
+		vertexForces[i].updateForce(&body.particles[vertexParticleMap[i]], deltaT);
 	}
 }

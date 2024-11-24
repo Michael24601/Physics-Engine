@@ -240,7 +240,7 @@ void pe::centerOfGravityToOrigin(std::vector<Vector3D>& vectors) {
     }
 }
 
-Mesh* pe::extractMesh(std::string filename, real scale) {
+Mesh* pe::extractMesh(std::string filename) {
 
     std::vector<Vector3D> vertices;
     std::vector<Vector3D> normals;
@@ -248,10 +248,6 @@ Mesh* pe::extractMesh(std::string filename, real scale) {
 
     extractMeshInformation(filename, vertices, normals, textures);
     centerOfGravityToOrigin(vertices);
-
-    for (Vector3D& vertex : vertices) {
-        vertex *= scale;
-    }
 
     std::vector<std::vector<int>> faces;
     std::vector<std::pair<int, int>> edges;

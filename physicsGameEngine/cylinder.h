@@ -48,19 +48,6 @@ namespace pe {
 
 			std::vector<std::vector<int>> faces;
 
-			// Side faces
-			for (int i = 0; i < segments; ++i) {
-				// Indices of the four vertices of the current rectangle
-				int v[4];
-				v[0] = 2 * i;
-				v[1] = (v[0] + 2) % (2 * segments);
-				v[2] = v[1] + 1;
-				v[3] = v[0] + 1;
-
-				// Forms faces in counter-clockwise order
-				faces.push_back(std::vector<int> { v[0], v[1], v[2], v[3] });
-			}
-
 			// Top face, in counter-clockwise order
 			std::vector<int> topFaceIndexes;
 			for (int i = segments - 1; i >= 0; i--) {
@@ -76,6 +63,19 @@ namespace pe {
 				bottomFaceIndexes.push_back(v1);
 			}
 			faces.push_back(bottomFaceIndexes);
+
+			// Side faces
+			for (int i = 0; i < segments; ++i) {
+				// Indices of the four vertices of the current rectangle
+				int v[4];
+				v[0] = 2 * i;
+				v[1] = (v[0] + 2) % (2 * segments);
+				v[2] = v[1] + 1;
+				v[3] = v[0] + 1;
+
+				// Forms faces in counter-clockwise order
+				faces.push_back(std::vector<int> { v[0], v[1], v[2], v[3] });
+			}
 
 			return faces;
 		}
@@ -138,10 +138,10 @@ namespace pe {
 				reference point to the centroid.
 			*/
 			Vector3D segments[2];
-			segments[0] = vertices[0] - centroids[1];
-			segments[1] = vertices[0] - centroids[1];
+			segments[0] = vertices[0] - centroids[0];
+			segments[1] = vertices[1] - centroids[1];
 
-			// Starting with the first curved face.
+			// Starting with the first curved face
 			for (int i = 2; i < getFaceCount(); i++) {
 				std::vector<Vector2D> textureCoordinates;
 				/*

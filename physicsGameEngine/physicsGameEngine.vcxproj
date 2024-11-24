@@ -211,11 +211,9 @@
     <ClCompile Include="rigidBodyWorld.cpp" />
     <ClCompile Include="sat.cpp" />
     <ClCompile Include="skyboxBufferGenerator.cpp" />
-    <ClCompile Include="staircase.cpp" />
     <ClCompile Include="util.cpp" />
     <ClCompile Include="vector2D.cpp" />
     <ClCompile Include="vector3D.cpp" />
-    <ClCompile Include="videoGameLevel.cpp" />
     <ClCompile Include="wreckingBall.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -229,6 +227,7 @@
     <ClInclude Include="curvature.h" />
     <ClInclude Include="boundingVolumeHierarchy.h" />
     <ClInclude Include="camera.h" />
+    <ClInclude Include="particleDirectForce.h" />
     <ClInclude Include="edgeBufferGenerator.h" />
     <ClInclude Include="flatShader.h" />
     <ClInclude Include="inertiaTensorUtil.h" />
@@ -269,8 +268,6 @@
     <ClInclude Include="cuboid.h" />
     <ClInclude Include="edge.h" />
     <ClInclude Include="face.h" />
-    <ClInclude Include="particleAngleConstraint.h" />
-    <ClInclude Include="particleDistanceConstraint.h" />
     <ClInclude Include="cloth.h" />
     <ClInclude Include="rigidBodyBungeeForce.h" />
     <ClInclude Include="rotatingCamera.h" />

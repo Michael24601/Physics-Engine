@@ -1,7 +1,13 @@
 
-#ifdef DONE_REFACTOR
-
 #include "simulations.h"
+#include "glfwWindowWrapper.h"
+#include "rotatingCamera.h"
+#include "cookTorranceReflectionShader.h"
+#include "diffuseLightingShader.h"
+#include "polyhedra.h"
+#include "environmentMapper.h"
+#include "cloth.h"
+#include "particleGravity.h"
 
 using namespace pe;
 
@@ -21,23 +27,7 @@ void pe::runFlag() {
         0.001
     );
 
-    // Shaders
-    DiffuseTextureShader poleShader;
-    DiffuseTextureShader lightShader;
-
-    GLuint texture1 = loadTexture(
-        "C:\\Users\\msaba\\Documents\\physen\\textureMaps\\leb.png"
-    );
-    GLuint texture3 = loadTexture(
-        "C:\\Users\\msaba\\Documents\\physen\\textureMaps\\wood.jpg"
-    );
-
-    glm::mat4 identity = glm::mat4(1.0);
-    glm::vec4 colorWhite(1.0, 1.0, 1.0, 1.0);
-    glm::vec4 colorRed(1.0, 0.2, 0.2, 1);
-    glm::vec4 colorBlue(0.2, 0.2, 1.0, 1);
-    glm::vec4 colorGreen(0.2, 1.0, 0.2, 1);
-
+    // Lighting
     glm::vec3 lightPos[]{
         glm::vec3(-500 ,0 , 500),
         glm::vec3(500, 0, 500)
@@ -47,57 +37,79 @@ void pe::runFlag() {
         glm::vec4(1.0, 1.0, 1.0, 1.0)
     };
 
-    int size = 20;
-    real strength = 0.5;
-    real mass = 0.4;
-    real damping = 0.5;
-    real dk = 0.20;
-    int laplacianIterations = 1;
-    real laplacianFactor = 0.08;
 
-    const real height = 400;
-    const Vector3D topLeft(-200, height / 2.0, 0);
+    // Shaders
+    DiffuseLightingShader shader;
+    shader.setLightColors(lightColor, 1);
+    shader.setLightPosition(lightPos, 1);
+    shader.setProjectionMatrix(camera.getProjectionMatrix());
 
-    Cloth mesh(
-        topLeft,
-        Vector3D(300, -height / 2.0, 0),
-        size, size,
-        mass, damping, strength, dk
+    GLuint textureFlag = loadTexture(
+        "C:\\Users\\msaba\\Documents\\physen\\textureMaps\\leb.png"
+    );
+    GLuint textureWood = loadTexture(
+        "C:\\Users\\msaba\\Documents\\physen\\textureMaps\\wood.jpg"
     );
 
-    Cylinder cylinder(10, 800, 10, 20, Vector3D(-205, -200, 0), new RigidBody());
+    glm::mat4 identity = glm::mat4(1.0);
+    glm::vec4 colorWhite(1.0, 1.0, 1.0, 1.0);
+    glm::vec4 colorRed(1.0, 0.2, 0.2, 1);
+    glm::vec4 colorBlue(0.2, 0.2, 1.0, 1);
+    glm::vec4 colorGreen(0.2, 1.0, 0.2, 1);
 
-    lightShader.setLightPosition(lightPos, 1);
-    poleShader.setLightPosition(lightPos, 1);
+    const real height = 400;
 
-    FaceData data = getFaceData(cylinder);
-    std::vector<std::vector<glm::vec3>> d{
-           data.vertices, data.normals, data.uvCoordinates
-    };
-    poleShader.sendVaribleData(d, GL_DYNAMIC_DRAW);
-    poleShader.setTrianglesNumber(data.vertices.size());
+    int size = 20;
+    real structuralStiffness = 5;
+    real shearStiffness = 2;
+    real bendingStiffness = 2;
+    real mass = 0.5;
+    real damping = 0.9;
+    real dampingCoefficient = 0.005;
 
-    poleShader.setLightColor(lightColor, 1);
-    lightShader.setLightColor(lightColor, 1);
+    int laplacianIterations = 1;
+    real laplacianFactor = 0.05;
 
+    Cloth cloth(
+        std::make_pair(size, size),
+        std::make_pair(400, 600),
+        std::make_pair(Vector3D(0, -1, 0), Vector3D(1, 0, 0)),
+        Vector3D(-300, 200, 0),
+        mass, damping, dampingCoefficient,
+        structuralStiffness, shearStiffness, bendingStiffness
+    );
+    cloth.faceRenderer.setTexture(textureFlag);
+    cloth.faceRenderer.setShader(&shader);
+
+    CylinderObject cylinder(
+        10, 800, 10, Vector3D(-305, -200, 0), Quaternion::IDENTITY, 0
+    );
+    cylinder.faceRenderer.setTexture(textureWood);
+    cylinder.faceRenderer.setShader(&shader);
 
     // The first row of particles is suspended
     for (int i = 0; i < size * size; i++) {
         if (i % size == 0) {
-            mesh.particles[i]->setAwake(false);
+            cloth.body.particles[i].setAwake(false);
         }
     }
 
+    VertexBuffer buffer = createFaceVertexBuffer(
+        &cloth.mesh, GL_DYNAMIC_DRAW,
+        NORMALS::VERTEX_NORMALS, UV::INCLUDE
+    );
+    cloth.faceRenderer.setVertexBuffer(&buffer);
+
     ParticleGravity g(Vector3D(0, -10, 0));
 
-    float deltaT = 0.13;
+    float deltaT = 0.2;
 
     float lastTime = glfwGetTime();
     float deltaTime = 0.0;
     float framesPerSecond = 30;
     float frameRate = 1.0 / framesPerSecond;
 
-    real windMultiplier = 0.8;
+    real windMultiplier = 1;
 
     glfwSetFramebufferSizeCallback(
         window.getWindow(),
@@ -118,26 +130,24 @@ void pe::runFlag() {
             Vector3D pos = Vector3D(
                 mouse.x,
                 mouse.y,
-                cylinder.body->position.z
+                cylinder.body.position.z
             );
-            cylinder.body->position = pos;
+            cylinder.body.position = pos;
             for (int i = 0; i < size; i++) {
-                mesh.particles[i * size]->position = pos +
-                    Vector3D(0, ((size - i) * height / size), 0);
+                cloth.body.particles[i * size].position =
+                    pos + Vector3D(0, ((size - i) * height / size), 0);
             }
         }
         else if (glfwGetKey(window.getWindow(), GLFW_KEY_B) == GLFW_PRESS) {
             glm::vec2 mouse = window.getCursorPosition();
             Vector3D pos = Vector3D(
                 mouse.x,
-                cylinder.body->position.y,
+                cylinder.body.position.y,
                 -mouse.y
             );
             for (int i = 0; i < size; i++) {
-                mesh.particles[(i+1) * size - 1]->position = pos +
-                    Vector3D(0, ((size - i) * height / size), 0);
-                mesh.particles[(i + 1) * size - 2]->position = pos +
-                    Vector3D(0, ((size - i) * height / size), 0);
+                cloth.body.particles[(i+1) * size - 1].position = 
+                    pos + Vector3D(0, ((size - i) * height / size), 0);
             }
         }
         else if (glfwGetKey(window.getWindow(), GLFW_KEY_X) == GLFW_PRESS) {
@@ -147,63 +157,29 @@ void pe::runFlag() {
             windMultiplier *= 0.9998;
         }
 
-        int numSteps = 2;
+        int numSteps = 5;
         real substep = deltaT / numSteps;
 
         while (numSteps--) {
 
-            cylinder.body->calculateDerivedData();
+            cloth.body.applyForce(g, substep);
+            cloth.body.applySpringForces(substep);
 
-            for (Particle* particle : mesh.particles) {
-                g.updateForce(particle, substep);
-            }
+            cloth.applyWindForce(Vector3D(3, 13, 4) * windMultiplier, substep);
 
-            for (int i = 0; i < mesh.particles.size(); i++) {
-
-                if (i < size) {
-                    mesh.particles[i]->addForce(Vector3D(2, 8, 0) * windMultiplier);
-                    continue;
-                }
-
-                int enter = generateRandomNumber(0, 5);
-                if (enter <= 3) {
-                    real x = generateRandomNumber(1.0f, 4.0f);
-                    real y = generateRandomNumber(4.0f, 8.0f);
-                    real z = generateRandomNumber(0.0f, 2.0f);
-                    mesh.particles[i]->addForce(Vector3D(x, y, z) * windMultiplier);
-                }
-            }
-
-            for (auto& force : mesh.forces) {
-                force.force1.updateForce(force.force2.otherParticle, substep);
-                force.force2.updateForce(force.force1.otherParticle, substep);
-            }
-
-            for (int i = 0; i < size * size; i++) {
-                if (mesh.particles[i]->isAwake) {
-                    mesh.particles[i]->verletIntegrate(substep);
-                }
-            }
-
-            mesh.laplacianSmoothing(laplacianIterations, laplacianFactor);
-            mesh.applyConstraints();
-
-            mesh.update();
+            cloth.body.verletIntegrate(substep);
+            cloth.applyLaplacianSmoothing(laplacianIterations, laplacianFactor);
         }
 
-        FaceData data = getFaceData(mesh);
-        std::vector<std::vector<glm::vec3>> d{
-            data.vertices, data.normals, data.uvCoordinates
-        };
-        lightShader.sendVaribleData(d, GL_DYNAMIC_DRAW);
-        lightShader.setTrianglesNumber(data.vertices.size());
-        lightShader.setModelMatrix(identity);
-        lightShader.setViewMatrix(camera.getViewMatrix());
-        lightShader.setProjectionMatrix(camera.getProjectionMatrix());
+        cylinder.update();
+        cylinder.updateModelMatrix();
+        cloth.update();
 
-        poleShader.setModelMatrix(convertToGLM(cylinder.getTransformMatrix()));
-        poleShader.setViewMatrix(camera.getViewMatrix());
-        poleShader.setProjectionMatrix(camera.getProjectionMatrix());
+        buffer.setData(generateFaceData(
+            &cloth.mesh, NORMALS::VERTEX_NORMALS, UV::INCLUDE
+        ));
+
+        shader.setViewMatrix(camera.getViewMatrix());
 
         if (deltaTime >= frameRate) {
 
@@ -214,10 +190,8 @@ void pe::runFlag() {
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             // We set the texture here cause they use the same unit
-            lightShader.setObjectTexture(texture1);
-            lightShader.drawFaces();
-            poleShader.setObjectTexture(texture3);
-            poleShader.drawFaces();
+            cloth.faceRenderer.render();
+            cylinder.faceRenderer.render();
 
             glfwSwapBuffers(window.getWindow());
 
@@ -226,5 +200,3 @@ void pe::runFlag() {
     }
 
 }
-
-#endif

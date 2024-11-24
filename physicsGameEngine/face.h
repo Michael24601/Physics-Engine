@@ -42,6 +42,8 @@ namespace pe {
 	*/
 	class Face {
 
+	friend class Mesh;
+
 	protected:
 
 		Vector3D normal;
@@ -59,10 +61,10 @@ namespace pe {
 		bool findUniqueVertexIndexes(const Mesh* mesh, int index[3]) const;
 
 
-		Vector3D calculateNormal(const Mesh* mesh) const; 
+		void calculateNormal(const Mesh* mesh); 
 
 
-		Vector3D calculateCentroid(const Mesh* mesh) const; 
+		void calculateCentroid(const Mesh* mesh); 
 
 
 		/*
@@ -79,9 +81,6 @@ namespace pe {
 
 
 		Face(const Mesh* mesh, const std::vector<int>& indeces);
-
-
-		void update(const Mesh* mesh);
 
 
 		/*
