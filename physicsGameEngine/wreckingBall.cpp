@@ -11,6 +11,7 @@
 #include "collisionResolver.h"
 #include "boundingVolumeHierarchy.h"
 #include "faceBufferGenerator.h"
+#include "boundingVolumeRenderer.h"
 
 using namespace pe;
 
@@ -120,6 +121,9 @@ void pe::runWreckingBall() {
     RigidBody b;
     b.position = Vector3D(800, 700, 0);
     RigidBodySpringForce f(sphere.mesh->getVertex(0), &b, Vector3D(), 0.3, 300);
+
+    // Renderer for bounding boxes
+    BoundingVolumeRenderer renderer(20, colorWhite);
 
     // Framerate
 
@@ -241,6 +245,8 @@ void pe::runWreckingBall() {
         lineShader.setViewMatrix(camera.getViewMatrix());
         cookTorranceShader.setViewMatrix(camera.getViewMatrix());
 
+        renderer.setCameraMatrices(camera);
+
         if (deltaTime >= frameRate) {
 
             // Unbind framebuffer to render to default framebuffer (window)
@@ -253,10 +259,13 @@ void pe::runWreckingBall() {
     
             for (int i = 0; i < prisms.size(); i++) {
                 prisms[i]->faceRenderer.render();
+            //    renderer.renderBoundingVolume(prisms[i]->boundingVolume, prisms[i]->boundingVolumeTransform);
             }
             ground.faceRenderer.render();
             sphere.faceRenderer.render();
             lineRenderer.render();
+
+            // renderer.renderBoundingVolume(sphere.boundingVolume, sphere.boundingVolumeTransform);
 
             glfwSwapBuffers(window.getWindow());
 

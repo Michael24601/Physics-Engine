@@ -380,7 +380,7 @@ Remove the cuboidal, spherical etc... interfaces, and instead make
 them interfaces for the later object classes, instead of the polyhedron.
 
 Explore the idea of making bounding volumes shared among objects, the
-same way meshes are, so we spend less time fitting them.
+same way meshes are, so we spend less time fitting them (DONE).
 
 Consider adding the sleep condition, this time to the object,
 since they were removed from the body.
@@ -399,7 +399,7 @@ and all are essentially the same.
 
 Consider making the shaders subclasses of each other. Also add
 a subclass of solid color shader which can scale bounding boxes
-at will.
+at will (DONE).
 
 Consider adding the ability to change vector size in the buffer
 class, right not it is fixed at vec3.
@@ -444,7 +444,7 @@ Test generateFaceData().
 Test the vertex buffer error handling when the vertex data
 sent doesn't match the allocated space.
 
-Add a way to draw bounding volumes.
+Add a way to draw bounding volumes (DONE).
 
 Reconsider explicit boudning volume types in the derived
 classes.

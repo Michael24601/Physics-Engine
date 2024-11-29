@@ -132,10 +132,10 @@ void pe::runShadowSimulation() {
         shader.setShadowMap(mapper.getTexture());
         diffuseShader.setViewMatrix(camera.getViewMatrix());
 
-        // Clears default framebuffer (window)
+        // Clears default framebuffer
         if (deltaTime >= frameRate) {
 
-            // Unbind framebuffer to render to default framebuffer (window)
+            // Unbinds framebuffer to render to default framebuffer
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
             glViewport(0, 0, window.getWidth(), window.getHeight());
             glClearColor(0.1f, 0.2f, 0.2f, 1.0f);

@@ -572,6 +572,9 @@
     <ClInclude Include="importedMesh.h">
       <Filter>Header Files\RigidObjects</Filter>
     </ClInclude>
+    <ClInclude Include="boundingVolumeRenderer.h">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="todo.txt" />

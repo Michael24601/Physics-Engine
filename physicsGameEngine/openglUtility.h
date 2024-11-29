@@ -58,6 +58,7 @@ namespace pe {
         const std::string& folder
     );
 
+    // Saves depth map to an image 
     void saveDepthMap(GLuint texture, int width, int height, std::string path);
 }
 

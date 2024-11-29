@@ -3,7 +3,7 @@
 
 int main() {
 
-	pe::runShadowSimulation();
+	pe::runWreckingBall();
 
 	return 0;
 }

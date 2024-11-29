@@ -223,6 +223,7 @@
     <ClInclude Include="boundingBox.h" />
     <ClInclude Include="boundingSphere.h" />
     <ClInclude Include="boundingVolume.h" />
+    <ClInclude Include="boundingVolumeRenderer.h" />
     <ClInclude Include="BVHNode.h" />
     <ClInclude Include="cubemapShader.h" />
     <ClInclude Include="curvature.h" />
