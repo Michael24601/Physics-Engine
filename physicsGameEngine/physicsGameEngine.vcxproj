@@ -225,7 +225,6 @@
     <ClInclude Include="boundingVolume.h" />
     <ClInclude Include="boundingVolumeRenderer.h" />
     <ClInclude Include="BVHNode.h" />
-    <ClInclude Include="cubemapShader.h" />
     <ClInclude Include="curvature.h" />
     <ClInclude Include="boundingVolumeHierarchy.h" />
     <ClInclude Include="camera.h" />
@@ -234,6 +233,7 @@
     <ClInclude Include="flatShader.h" />
     <ClInclude Include="inertiaTensorUtil.h" />
     <ClInclude Include="orientedBoundingBox.h" />
+    <ClInclude Include="pointDepthMapper.h" />
     <ClInclude Include="polyhedra.h" />
     <ClInclude Include="renderComponent.h" />
     <ClInclude Include="skyboxBufferGenerator.h" />

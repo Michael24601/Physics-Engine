@@ -137,6 +137,7 @@ GLuint pe::loadCubemap(const std::vector<std::string>& faces) {
 
 
 std::string pe::readFileToString(const std::string& filePath) {
+
     std::ifstream file(filePath);
     std::stringstream buffer;
 
@@ -248,11 +249,73 @@ void pe::saveDepthMap(GLuint texture, int width, int height, std::string path) {
     }
 
     // Save the depth map as a PNG file
-    stbi_write_png(path.c_str(), width, height, 1, grayscalePixels, width);
+    std::string imagePath = path + "\\" + getUniqueDate() + ".png";
+    stbi_write_png(imagePath.c_str(), width, height, 1, grayscalePixels, width);
 
     // Cleanup
     delete[] depthMapPixels;
     delete[] grayscalePixels;
 
     glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+
+void pe::saveCubemapDepth(GLuint cubemap, int width, int height, const std::string& path) {
+
+    float* depthMapPixels = new float[width * height];
+
+    std::string name = getUniqueDate();
+
+    // Cube map faces order
+    GLenum cubemapFaces[6] = {
+        GL_TEXTURE_CUBE_MAP_POSITIVE_X,
+        GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
+        GL_TEXTURE_CUBE_MAP_POSITIVE_Y,
+        GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,
+        GL_TEXTURE_CUBE_MAP_POSITIVE_Z,
+        GL_TEXTURE_CUBE_MAP_NEGATIVE_Z
+    };
+
+    // Each face of the cubemap
+    for (int i = 0; i < 6; ++i) {
+
+        glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap);
+        glGetTexImage(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT, GL_FLOAT, depthMapPixels);
+
+        // Depth map to grayscale
+        unsigned char* grayscalePixels = new unsigned char[width * height];
+        float minDepth = std::numeric_limits<float>::max();
+        float maxDepth = std::numeric_limits<float>::min();
+
+        for (int j = 0; j < width * height; ++j) {
+            if (depthMapPixels[j] < minDepth) minDepth = depthMapPixels[j];
+            if (depthMapPixels[j] > maxDepth) maxDepth = depthMapPixels[j];
+        }
+
+        std::cout << "Depth range for face " << i << ": [" << minDepth << ", " << maxDepth << "]" << std::endl;
+
+        // If the entire image is empty
+        if (maxDepth == minDepth) {
+            std::fill(grayscalePixels, grayscalePixels + width * height, 255); // White
+        }
+        // Normalizing depth values to grayscale (0 to 255)
+        else {
+            for (int j = 0; j < width * height; ++j) {
+                grayscalePixels[j] = static_cast<unsigned char>((depthMapPixels[j] - minDepth) / (maxDepth - minDepth) * 255);
+            }
+        }
+
+        // This part saves the depth map face as a PNG file
+        std::string facePath = path + "\\" + name + "_face_" + std::to_string(i) + ".png";
+        stbi_write_png(facePath.c_str(), width, height, 1, grayscalePixels, width);
+
+        // Cleanup
+        delete[] grayscalePixels;
+    }
+
+    // Cleanup
+    delete[] depthMapPixels;
+
+    // Unbinding the cubemap texture
+    glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 }

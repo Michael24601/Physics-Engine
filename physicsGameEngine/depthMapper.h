@@ -1,3 +1,4 @@
+
 /*
     This class captures the environment rendered by shaders, from the
     perspective of some source, and returns a texture containing the depth
@@ -98,7 +99,7 @@ namespace pe {
             shader.setProjectionMatrix(projectionMatrix);
 
             // Uses each shader to render the scene from this perspective
-            for (RenderComponent* object: objects) {
+            for (RenderComponent* object : objects) {
                 shader.setModelMatrix(object->model);
                 shader.render(*object->vertexBuffer);
             }

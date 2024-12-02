@@ -12,9 +12,9 @@ namespace pe {
     public:
 
         DiffuseLightingShader() : Shader(
+            std::vector<unsigned int>{3, 3, 2},
             "diffuseLightingShader.vert.glsl",
-            "diffuseLightingShader.frag.glsl",
-            std::vector<unsigned int>{3, 3, 2}
+            "diffuseLightingShader.frag.glsl"
         ) {}
 
         void setLightPosition(const glm::vec3* positions, int size) {

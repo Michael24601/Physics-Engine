@@ -96,33 +96,55 @@ namespace pe {
 
         void compileAndLinkShaderProgram(
             const std::string& vertexShaderSource,
-            const std::string& fragmentShaderSource
+            const std::string& fragmentShaderSource,
+            const std::string& geometryShaderSource = ""
         ) {
-            GLuint vertexShader = compileShader(GL_VERTEX_SHADER, 
-                vertexShaderSource);
+            GLuint vertexShader = compileShader(GL_VERTEX_SHADER, vertexShaderSource);
             checkShaderCompilation(vertexShader);
-            GLuint fragmentShader = compileShader(GL_FRAGMENT_SHADER, 
-                fragmentShaderSource);
-            checkShaderCompilation(fragmentShader);
-            checkShaderCompilation(vertexShader);
-            checkShaderCompilation(fragmentShader);
-            GLuint shaderProgram = linkShaderProgram(vertexShader, 
-                fragmentShader);
-            checkShaderProgramLinking(shaderProgram);
 
-            this->shaderProgram = shaderProgram;
+            GLuint fragmentShader = compileShader(GL_FRAGMENT_SHADER, fragmentShaderSource);
+            checkShaderCompilation(fragmentShader);
+
+            GLuint geometryShader = 0;
+            if (!geometryShaderSource.empty()) {
+                geometryShader = compileShader(GL_GEOMETRY_SHADER, geometryShaderSource);
+                checkShaderCompilation(geometryShader);
+            }
+
+            GLuint programID = glCreateProgram();
+            glAttachShader(programID, vertexShader);
+            glAttachShader(programID, fragmentShader);
+
+            if (!geometryShaderSource.empty()) {
+                glAttachShader(programID, geometryShader);
+            }
+
+            glLinkProgram(programID);
+            checkShaderProgramLinking(programID);
+
+            // Cleanup (we don't need them after linking)
+            glDeleteShader(vertexShader);
+            glDeleteShader(fragmentShader);
+            if (!geometryShaderSource.empty()) {
+                glDeleteShader(geometryShader);
+            }
+
+            this->shaderProgram = programID;
         }
 
 
 	public:
 
-		ShaderProgram(
+
+        ShaderProgram(
             const std::string& vertexShaderSource,
-            const std::string& fragmentShaderSource
+            const std::string& fragmentShaderSource,
+            const std::string& geometryShaderSource = ""
         ) {
             compileAndLinkShaderProgram(
                 vertexShaderSource,
-                fragmentShaderSource
+                fragmentShaderSource,
+                geometryShaderSource
             );
         }
 

@@ -13,10 +13,11 @@ namespace pe {
     public:
 
         ShadowMappingShader() : Shader (
+            std::vector<unsigned int>{3, 3, 2},
             "shadowMappingShader.vert.glsl",
-            "shadowMappingShader.frag.glsl",
-            std::vector<unsigned int>{3, 3, 2}
+            "shadowMappingShader.frag.glsl"
         ) {}
+
 
         void setShadowMap(const GLuint& textureId) {
             setTextureUniform(

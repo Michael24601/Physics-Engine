@@ -24,8 +24,8 @@ void pe::runShadowSimulation() {
         90.0,
         0.1,
         10000,
-        0.0001,
-        0.0001
+        0.001,
+        0.001
     );
 
     glm::mat4 identity = glm::mat4(1.0);
@@ -101,14 +101,14 @@ void pe::runShadowSimulation() {
         window.processInput();
         camera.processInput(deltaT);
         if (glfwGetKey(window.getWindow(), GLFW_KEY_A) == GLFW_PRESS) {
-            lightPos[0].x += speed;
+            lightPos[0].x -= speed;
             diffuseShader.setLightPosition(lightPos, 1);
             shader.setLightPosition(lightPos[0]);
             projection.setLightPosition(lightPos[0]);
             shader.setLightSpaceMatrix(projection.getProjectionView());
         }
         if (glfwGetKey(window.getWindow(), GLFW_KEY_S) == GLFW_PRESS) {
-            lightPos[0].x -= speed;
+            lightPos[0].x += speed;
             diffuseShader.setLightPosition(lightPos, 1);
             shader.setLightPosition(lightPos[0]);
             projection.setLightPosition(lightPos[0]);
@@ -124,9 +124,11 @@ void pe::runShadowSimulation() {
         std::vector<RenderComponent*> objects{ &renderer };
         mapper.captureDepth(
             projection.getView(),
-            projection.getProjection(), 
+            projection.getProjection(),
             objects
         );
+
+        saveDepthMap(mapper.getTexture(), 1024, 1024, "C:\\Users\\msaba\\Desktop\\ff");
 
         shader.setViewMatrix(camera.getViewMatrix());
         shader.setShadowMap(mapper.getTexture());
@@ -140,7 +142,7 @@ void pe::runShadowSimulation() {
             glViewport(0, 0, window.getWidth(), window.getHeight());
             glClearColor(0.1f, 0.2f, 0.2f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            
+
             renderer.render();
             ground.faceRenderer.render();
 

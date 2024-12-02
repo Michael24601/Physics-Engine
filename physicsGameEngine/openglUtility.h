@@ -60,6 +60,10 @@ namespace pe {
 
     // Saves depth map to an image 
     void saveDepthMap(GLuint texture, int width, int height, std::string path);
+
+
+    // Same, but saves 6 images for a cubemap depth map
+    void saveCubemapDepth(GLuint cubemap, int width, int height, const std::string& path);
 }
 
 #endif

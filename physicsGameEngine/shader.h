@@ -177,14 +177,17 @@ namespace pe {
 
         Shader(
             /*
-                The vertex and fragment shader code.
+                The vertex and fragment shader code,
+                as well as the attribute sizes.
             */
+            const std::vector<unsigned int>& attributeSizes,
             const std::string& vertexShaderSource,
             const std::string& fragmentShaderSource,
-            const std::vector<unsigned int>& attributeSizes
+            const std::string& geometryShaderSource = ""
         ) : shaderProgram(
             readFileToString(vertexShaderSource),
-            readFileToString(fragmentShaderSource)
+            readFileToString(fragmentShaderSource),
+            (geometryShaderSource == "" ? "" : readFileToString(geometryShaderSource))
         ), minAttributeNumber{attributeSizes.size()},
            attributeSizes{attributeSizes} {}
 

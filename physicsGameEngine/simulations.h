@@ -15,8 +15,6 @@ namespace pe {
 
 	void runWreckingBall();
 
-	void runStaircase();
-
 	void runBallPit();
 
 	void runRagdoll();

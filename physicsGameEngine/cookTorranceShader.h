@@ -12,9 +12,9 @@ namespace pe {
     public:
 
         CookTorranceShader() : Shader(
+            std::vector<unsigned int>{3, 3, 2},
             "cookTorranceShader.vert.glsl",
-            "cookTorranceShader.frag.glsl",
-            std::vector<unsigned int>{3, 3, 2}
+            "cookTorranceShader.frag.glsl"
         ) {}
 
         void setObjectColor(const glm::vec4& color) {

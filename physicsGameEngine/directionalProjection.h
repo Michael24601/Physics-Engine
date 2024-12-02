@@ -1,6 +1,10 @@
 /*
     Header file for a class representing a directional projection.
     Can be used for directional light.
+    A directional projection has rays that are parallel. An object moving
+    won't stretch or shrink the shadow in any way, and will only
+    move it along with the object. Only moving the light source changes
+    the shadow shape.
 */
 
 #ifndef DIRECTIONAL_PROJECTION_H

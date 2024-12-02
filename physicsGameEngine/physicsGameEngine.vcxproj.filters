@@ -554,9 +554,6 @@
     <ClInclude Include="axisAlignedBoundingBox.h">
       <Filter>Header Files\BoundingVolumes</Filter>
     </ClInclude>
-    <ClInclude Include="cubemapShader.h">
-      <Filter>Header Files\OpenGL Shaders</Filter>
-    </ClInclude>
     <ClInclude Include="flatShader.h">
       <Filter>Header Files\OpenGL Shaders</Filter>
     </ClInclude>
@@ -574,6 +571,9 @@
     </ClInclude>
     <ClInclude Include="boundingVolumeRenderer.h">
       <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="pointDepthMapper.h">
+      <Filter>Header Files\OpenGL Utilities</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

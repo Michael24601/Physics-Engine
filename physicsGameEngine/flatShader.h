@@ -12,9 +12,9 @@ namespace pe {
     public:
 
         FlatShader() : Shader(
+            std::vector<unsigned int>{3, 2},
             "flatShader.vert.glsl",
-            "flatShader.frag.glsl",
-            std::vector<unsigned int>{3, 2}
+            "flatShader.frag.glsl"
         ) {}
 
         void setObjectColor(const glm::vec4& color) {

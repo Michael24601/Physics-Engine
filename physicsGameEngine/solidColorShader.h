@@ -12,9 +12,9 @@ namespace pe {
 	public:
 
         SolidColorShader() : Shader(
+            std::vector<unsigned int>{3},
             "solidColorShader.vert.glsl",
-            "solidColorShader.frag.glsl",
-            std::vector<unsigned int>{3}
+            "solidColorShader.frag.glsl"
         ) {}
 
         void setObjectColor(const glm::vec4& color) {

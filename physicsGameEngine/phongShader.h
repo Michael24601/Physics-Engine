@@ -17,9 +17,9 @@ namespace pe {
     public:
 
        PhongShader() : Shader(
+           std::vector<unsigned int>{3, 3, 2},
             "phongShader.vert.glsl",
-            "phongShader.frag.glsl",
-            std::vector<unsigned int>{3, 3, 2}
+            "phongShader.frag.glsl"
         ) {}
 
        void setObjectColor(const glm::vec4& color) {

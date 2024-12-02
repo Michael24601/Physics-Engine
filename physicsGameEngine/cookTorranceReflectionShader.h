@@ -12,9 +12,9 @@ namespace pe {
     public:
 
         CookTorranceReflectionShader() : Shader(
+            std::vector<unsigned int>{3, 3, 2},
             "cookTorranceReflectionShader.vert.glsl",
-            "cookTorranceReflectionShader.frag.glsl",
-            std::vector<unsigned int>{3, 3, 2}
+            "cookTorranceReflectionShader.frag.glsl"
         ) {}
 
         void setEnvironmentMap(
