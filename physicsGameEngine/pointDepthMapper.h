@@ -10,7 +10,7 @@
 #include <glm.hpp>
 #include <array>
 #include <vector>
-#include "simpleShader.h"
+#include "cubemapShader.h"
 
 namespace pe {
 
@@ -22,33 +22,14 @@ namespace pe {
         GLuint depthCubemap;
         GLuint framebuffer;
 
-        SimpleShader shader;
-
-        float nearPlane;
-        float farPlane;
-        float fov;
-
-        // Six view matrices are generated for the cubemap
-        std::array<glm::mat4, 6> getViewMatrices(const glm::vec3& lightPos) const {
-            return {
-                glm::lookAt(lightPos, lightPos + glm::vec3(1, 0, 0), glm::vec3(0, -1, 0)), // +X
-                glm::lookAt(lightPos, lightPos + glm::vec3(-1, 0, 0), glm::vec3(0, -1, 0)), // -X
-                glm::lookAt(lightPos, lightPos + glm::vec3(0, 1, 0), glm::vec3(0, 0, 1)),   // +Y
-                glm::lookAt(lightPos, lightPos + glm::vec3(0, -1, 0), glm::vec3(0, 0, -1)), // -Y
-                glm::lookAt(lightPos, lightPos + glm::vec3(0, 0, 1), glm::vec3(0, -1, 0)),  // +Z
-                glm::lookAt(lightPos, lightPos + glm::vec3(0, 0, -1), glm::vec3(0, -1, 0))  // -Z
-            };
-        }
+        CubemapShader shader;
 
     public:
 
         PointDepthMapper(
             int width, 
-            int height, 
-            float nearPlane, 
-            float farPlane, 
-            float fov = 90.0f
-        ) : width(width), height(height), nearPlane(nearPlane), farPlane(farPlane), fov(fov) {
+            int height
+        ) : width(width), height(height) {
 
             // Cubemap
             glGenTextures(1, &depthCubemap);
@@ -89,22 +70,14 @@ namespace pe {
         // Renders the depth map from a point light
         void captureDepth(
             const glm::vec3& lightPos,
+            const std::vector<glm::mat4>& viewMatrices,
+            const glm::mat4& projectionMatrix,
+            float farPlane,
             std::vector<RenderComponent*>& objects
         ) {
 
-            float aspect = (float)width / height;
-            glm::mat4 projection = glm::perspective(
-                glm::radians(fov), 
-                aspect,
-                nearPlane, 
-                farPlane
-            );
-
-            auto viewMatrices = getViewMatrices(lightPos);
-
             glViewport(0, 0, width, height);
             glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
-            glClear(GL_DEPTH_BUFFER_BIT);
 
             for (size_t i = 0; i < 6; ++i) {
                 glFramebufferTexture2D(
@@ -114,7 +87,9 @@ namespace pe {
                 glClear(GL_DEPTH_BUFFER_BIT);
 
                 shader.setViewMatrix(viewMatrices[i]);
-                shader.setProjectionMatrix(projection);
+                shader.setProjectionMatrix(projectionMatrix);
+                shader.setFarPlane(farPlane);
+                shader.setLightPosition(lightPos);
 
                 for (RenderComponent* object : objects) {
                     shader.setModelMatrix(object->model);
@@ -137,13 +112,6 @@ namespace pe {
             return height;
         }
 
-        float getNearPlane() const {
-            return nearPlane;
-        }
-
-        float getFarPlane() const {
-            return farPlane;
-        }
     };
 
 }

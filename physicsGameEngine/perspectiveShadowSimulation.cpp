@@ -4,16 +4,16 @@
 #include "rotatingCamera.h"
 #include "solidColorShader.h"
 #include "diffuseLightingShader.h"
-#include "shadowMappingShader.h"
+#include "cubemapShadowMappingShader.h"
 #include "polyhedra.h"
-#include "depthMapper.h"
 #include "importedMesh.h"
 #include "renderComponent.h"
-#include "directionalProjection.h"
+#include "pointDepthMapper.h"
+#include "pointProjection.h"
 
 using namespace pe;
 
-void pe::runShadowSimulation() {
+void pe::runPerspectiveShadowSimulation() {
 
     GlfwWindowWrapper window(800, 800, 6, "window", true);
 
@@ -42,11 +42,12 @@ void pe::runShadowSimulation() {
     glm::vec4 lightColor[]{ glm::vec4(1.0, 1.0, 1.0, 1.0) };
 
     // Shaders
-    ShadowMappingShader shader;
+    CubemapShadowMappingShader shader;
     shader.setLightPosition(lightPos[0]);
     shader.setProjectionMatrix(camera.getProjectionMatrix());
     shader.setPCF(true);
     shader.setShadowStrength(0.8);
+    shader.setFarPlane(2000);
 
     DiffuseLightingShader diffuseShader;
     diffuseShader.setLightPosition(lightPos, 1);
@@ -74,9 +75,8 @@ void pe::runShadowSimulation() {
 
     // Shadow mapping
 
-    DirectionalProjection projection(lightPos[0], 400, 1024, 1024, 0.1, 2000);
-    DepthMapper mapper(1024, 1024);
-    shader.setLightSpaceMatrix(projection.getProjectionView());
+    PointProjection projection(lightPos[0], 90.0, 0.1, 2000);
+    PointDepthMapper mapper(1024, 1024);
 
     // Light movement speed
     float speed = 0.1;
@@ -105,14 +105,12 @@ void pe::runShadowSimulation() {
             diffuseShader.setLightPosition(lightPos, 1);
             shader.setLightPosition(lightPos[0]);
             projection.setLightPosition(lightPos[0]);
-            shader.setLightSpaceMatrix(projection.getProjectionView());
         }
         if (glfwGetKey(window.getWindow(), GLFW_KEY_S) == GLFW_PRESS) {
             lightPos[0].x += speed;
             diffuseShader.setLightPosition(lightPos, 1);
             shader.setLightPosition(lightPos[0]);
             projection.setLightPosition(lightPos[0]);
-            shader.setLightSpaceMatrix(projection.getProjectionView());
         }
 
         // Moves block with mouse
@@ -123,15 +121,17 @@ void pe::runShadowSimulation() {
 
         std::vector<RenderComponent*> objects{ &renderer };
         mapper.captureDepth(
-            projection.getView(),
-            projection.getProjection(),
+            lightPos[0],
+            projection.getViewMatrices(),
+            projection.getProjectionMatrix(),
+            projection.getFarPlane(),
             objects
         );
 
-        // saveDepthMap(mapper.getTexture(), 1024, 1024, "C:\\Users\\msaba\\Desktop\\ff");
+        // saveCubemapDepth(mapper.getTexture(), 1024, 1024, "C:\\Users\\msaba\\Desktop\\ff");
 
         shader.setViewMatrix(camera.getViewMatrix());
-        shader.setShadowMap(mapper.getTexture());
+        shader.setCubemapShadowMap(mapper.getTexture());
         diffuseShader.setViewMatrix(camera.getViewMatrix());
 
         // Clears default framebuffer

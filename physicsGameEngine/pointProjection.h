@@ -9,37 +9,35 @@ namespace pe {
 
     private:
 
-        // One projection matrix for each cubemap face
-        glm::mat4 projection[6];
+        // One projection matrix
+        glm::mat4 projection;
         // One view matrix for each cubemap face
-        glm::mat4 view[6];
+        std::vector<glm::mat4> view;
 
-        glm::vec3 lightPosition;
+        glm::vec3 lightPos;
         float fovRadians;
 
-        int sourceWidth;
-        int sourceHeight;
         float nearPlane;
         float farPlane;
 
 
         // Update projection matrices for each cubemap face
         void updateProjection() {
-            for (int i = 0; i < 6; ++i) {
-                float aspectRatio = 1.0;
-                projection[i] = glm::perspective(
-                    fovRadians, aspectRatio, nearPlane, farPlane
-                );
-            }
+            float aspectRatio = 1.0;
+            projection = glm::perspective(
+                fovRadians, aspectRatio, nearPlane, farPlane
+            );
         }
 
         void updateView() {
-            view[0] = glm::lookAt(lightPosition, lightPosition + glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));  // Positive X
-            view[1] = glm::lookAt(lightPosition, lightPosition + glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f)); // Negative X
-            view[2] = glm::lookAt(lightPosition, lightPosition + glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));  // Positive Y
-            view[3] = glm::lookAt(lightPosition, lightPosition + glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f)); // Negative Y
-            view[4] = glm::lookAt(lightPosition, lightPosition + glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f));  // Positive Z
-            view[5] = glm::lookAt(lightPosition, lightPosition + glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f, 0.0f)); // Negative Z
+            view = std::vector<glm::mat4>{
+                glm::lookAt(lightPos, lightPos + glm::vec3(1, 0, 0), glm::vec3(0, -1, 0)), // +X
+                glm::lookAt(lightPos, lightPos + glm::vec3(-1, 0, 0), glm::vec3(0, -1, 0)), // -X
+                glm::lookAt(lightPos, lightPos + glm::vec3(0, 1, 0), glm::vec3(0, 0, 1)),   // +Y
+                glm::lookAt(lightPos, lightPos + glm::vec3(0, -1, 0), glm::vec3(0, 0, -1)), // -Y
+                glm::lookAt(lightPos, lightPos + glm::vec3(0, 0, 1), glm::vec3(0, -1, 0)),  // +Z
+                glm::lookAt(lightPos, lightPos + glm::vec3(0, 0, -1), glm::vec3(0, -1, 0))  // -Z
+            };
         }
 
     public:
@@ -47,13 +45,10 @@ namespace pe {
         PointProjection(
             const glm::vec3& lightPos,
             float fovDegrees,
-            int sourceWidth,
-            int sourceHeight,
             float nearPlane,
             float farPlane
         ) :
-            lightPosition(lightPos), fovRadians(glm::radians(fovDegrees)),
-            sourceWidth(sourceWidth), sourceHeight(sourceHeight),
+            lightPos(lightPos), fovRadians(glm::radians(fovDegrees)),
             nearPlane(nearPlane), farPlane(farPlane)
         {
             updateProjection();
@@ -61,28 +56,20 @@ namespace pe {
         }
 
         void setLightPosition(const glm::vec3& pos) {
-            lightPosition = pos;
+            lightPos = pos;
             updateView();
         }
 
-        glm::mat4 getProjection(int faceIndex) const {
-            return projection[faceIndex];
+        glm::mat4 getProjectionMatrix() const {
+            return projection;
         }
 
-        glm::mat4 getView(int faceIndex) const {
-            return view[faceIndex];
+        std::vector<glm::mat4> getViewMatrices() const {
+            return view;
         }
 
-        glm::mat4 getProjectionView(int faceIndex) const {
-            return projection[faceIndex] * view[faceIndex];
-        }
-
-        int getWidth() const {
-            return sourceWidth;
-        }
-
-        int getHeight() const {
-            return sourceHeight;
+        glm::vec3 getLightPosition() const {
+            return lightPos;
         }
 
         float getNearPlane() const {

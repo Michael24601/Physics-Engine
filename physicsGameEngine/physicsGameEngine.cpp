@@ -3,7 +3,7 @@
 
 int main() {
 
-	pe::runShadowSimulation();
+	pe::runPerspectiveShadowSimulation();
 
 	return 0;
 }

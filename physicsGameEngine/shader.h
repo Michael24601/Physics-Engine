@@ -82,6 +82,20 @@ namespace pe {
             glUseProgram(0);
         }
 
+        void setUniform(const std::string& name, const glm::mat4* value, int size) {
+            glUseProgram(shaderProgram.getShaderProgram());
+            GLint location = glGetUniformLocation(shaderProgram.getShaderProgram(), name.c_str());
+            if (location != -1) {
+                glUniformMatrix4fv(location, size, GL_FALSE, glm::value_ptr(value[0]));
+            }
+            else {
+                // Handle error: Uniform location not found
+                std::cerr << "Uniform '" << name << "' not found in shader program.\n";
+            }
+            glUseProgram(0);
+        }
+
+
         void setUniform(const std::string& name, const glm::vec3* arr, int size) {
             glUseProgram(shaderProgram.getShaderProgram());
             GLint location = glGetUniformLocation(shaderProgram.getShaderProgram(), name.c_str());
@@ -209,15 +223,16 @@ namespace pe {
 
 
         /*
-            The below three functions are public setters for the 3 matrices
-            used to transform vertices in the vertex shaders; the model,
-            view, and projection.
-            Other more specific uniforms such as color, alpha value,
-            lightSource etc... are specific to certain shaders, and their
-            setters are included in the subclasses. The 3 matrix setters
-            are included in the parent class because they are the only
-            uniforms guaranteed to be present in every shader.
+            Because each shaders has its own data, each shader will
+            override this function and set their own uniforms given a render
+            object.
+            Note that this only includes the object specific data, not the
+            world parameters such as light positions, shininess factors,
+            and shadow maps of the world; this data is not available in
+            any render component.
         */
+        virtual void setObjectData(RenderComponent& component) = 0;
+
 
         void setModelMatrix(const glm::mat4& model) {
             setUniform("model", model);
@@ -230,32 +245,6 @@ namespace pe {
         void setProjectionMatrix(const glm::mat4& projection) {
             setUniform("projection", projection);
         }
-
-        /*
-            This function is similar to the set model function, but also
-            allows adding a scaling factor to the model matrix.
-            Careful using it: if the objects that are being rendered
-            have collision detection applied to them, this function will
-            make them look larger or smaller than they physically are.
-            If a
-        */
-        void setModelMatrix(const glm::mat4& model, const glm::vec3& scale) {
-            glm::mat4 scalingMatrix = glm::scale(glm::mat4(1.0f), scale);
-            glm::mat4 scaledModelMatrix = scalingMatrix * model;
-            setUniform("model", scaledModelMatrix);
-        }
-
-
-        /*
-            Because each shaders has its own data, each shader will
-            override this function and set their own uniforms given a render
-            object.
-            Note that this only includes the object specific data, not the
-            world parameters such as light positions, shininess factors,
-            and shadow maps of the world; this data is not available in
-            any render component.
-        */
-        virtual void setObjectData(RenderComponent& component) = 0;
 
 
         /*

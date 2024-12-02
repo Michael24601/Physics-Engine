@@ -27,7 +27,6 @@ namespace pe {
             "simpleShader.frag.glsl"
         ) {}
 
-
         void setObjectData(RenderComponent& renderComponent) override {
             setModelMatrix(renderComponent.model);
         }

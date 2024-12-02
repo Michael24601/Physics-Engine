@@ -115,6 +115,12 @@
     <Filter Include="Source Files\Rendering">
       <UniqueIdentifier>{8d18904f-9d29-4245-a4f5-ecf654bd4a50}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\GLSL Shaders\Cubemap Shader">
+      <UniqueIdentifier>{38401830-c7d9-4e93-a87b-d0ef0fa7bb41}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\GLSL Shaders\Cubemap Shadow Shader">
+      <UniqueIdentifier>{6e1d615a-9679-46b2-ad65-76f3e8a13e2b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="physicsGameEngine.cpp">
@@ -286,6 +292,9 @@
       <Filter>Source Files\Rendering</Filter>
     </ClCompile>
     <ClCompile Include="shadowSimulation.cpp">
+      <Filter>Source Files\Simulations</Filter>
+    </ClCompile>
+    <ClCompile Include="perspectiveShadowSimulation.cpp">
       <Filter>Source Files\Simulations</Filter>
     </ClCompile>
   </ItemGroup>
@@ -575,6 +584,12 @@
     <ClInclude Include="pointDepthMapper.h">
       <Filter>Header Files\OpenGL Utilities</Filter>
     </ClInclude>
+    <ClInclude Include="cubemapShader.h">
+      <Filter>Header Files\OpenGL Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="cubemapShadowMappingShader.h">
+      <Filter>Header Files\OpenGL Shaders</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="todo.txt" />
@@ -612,6 +627,18 @@
     </None>
     <None Include="flatShader.frag.glsl">
       <Filter>Source Files\GLSL Shaders\Flat Shader</Filter>
+    </None>
+    <None Include="cubemapShader.vert.glsl">
+      <Filter>Source Files\GLSL Shaders\Cubemap Shader</Filter>
+    </None>
+    <None Include="cubemapShader.frag.glsl">
+      <Filter>Source Files\GLSL Shaders\Cubemap Shader</Filter>
+    </None>
+    <None Include="cubemapShadowMappingShader.vert.glsl">
+      <Filter>Source Files\GLSL Shaders\Cubemap Shadow Shader</Filter>
+    </None>
+    <None Include="cubemapShadowMappingShader.frag.glsl">
+      <Filter>Source Files\GLSL Shaders\Cubemap Shadow Shader</Filter>
     </None>
   </ItemGroup>
 </Project>

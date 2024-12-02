@@ -28,6 +28,8 @@ namespace pe {
 	void runClothSimulation();
 
 	void runShadowSimulation();
+
+	void runPerspectiveShadowSimulation();
 }
 
 #endif
