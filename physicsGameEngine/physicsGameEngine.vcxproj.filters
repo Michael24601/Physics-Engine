@@ -640,5 +640,8 @@
     <None Include="cubemapShadowMappingShader.frag.glsl">
       <Filter>Source Files\GLSL Shaders\Cubemap Shadow Shader</Filter>
     </None>
+    <None Include="cubemapShader.geom.glsl">
+      <Filter>Source Files\GLSL Shaders\Cubemap Shader</Filter>
+    </None>
   </ItemGroup>
 </Project>

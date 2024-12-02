@@ -485,7 +485,6 @@ an isActive.
 
 Add multiple light sources to shadow mapping shader.
 
-Create a geometry shader that renders the scene 6 times,
-one from each side of a cubemap, so that the shader can be
-used inside the environment and depth mappers that use a cubemap
-texture without repeating the operation 6 times.
+Consider editing the shaders so that they all have a geometry
+shader that allows the scene to be rendered 6 times, so that
+the environment mapper can use it to draw the scene 6 times.

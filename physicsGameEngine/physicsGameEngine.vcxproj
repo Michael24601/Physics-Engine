@@ -324,6 +324,7 @@
     <None Include="cookTorranceReflectionShader.frag.glsl" />
     <None Include="cookTorranceReflectionShader.vert.glsl" />
     <None Include="cubemapShader.frag.glsl" />
+    <None Include="cubemapShader.geom.glsl" />
     <None Include="cubemapShader.vert.glsl" />
     <None Include="cubemapShadowMappingShader.frag.glsl" />
     <None Include="cubemapShadowMappingShader.vert.glsl" />

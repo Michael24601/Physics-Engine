@@ -292,10 +292,8 @@ void pe::saveCubemapDepth(GLuint cubemap, int width, int height, const std::stri
             if (depthMapPixels[j] > maxDepth) maxDepth = depthMapPixels[j];
         }
 
-        std::cout << "Depth range for face " << i << ": [" << minDepth << ", " << maxDepth << "]" << std::endl;
-
         // If the entire image is empty
-        if (maxDepth == minDepth) {
+        if (maxDepth - minDepth < 0.00001f) {
             std::fill(grayscalePixels, grayscalePixels + width * height, 255); // White
         }
         // Normalizing depth values to grayscale (0 to 255)

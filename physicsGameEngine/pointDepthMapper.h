@@ -79,14 +79,35 @@ namespace pe {
             glViewport(0, 0, width, height);
             glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
 
-            for (size_t i = 0; i < 6; ++i) {
-                glFramebufferTexture2D(
-                    GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
-                    GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, depthCubemap, 0
-                );
                 glClear(GL_DEPTH_BUFFER_BIT);
 
-                shader.setViewMatrix(viewMatrices[i]);
+                /*
+                    Instead of rendering the scene 6 times, we can use
+                    a shader program that has a geometry shader in it 
+                    that genearates 6 triangles for every triangle in the
+                    scene, one from each view matrix. It achieves the
+                    same result as having 6 scenes rendered for each face.
+
+                    for (size_t i = 0; i < 6; ++i) {
+                        glFramebufferTexture2D(
+                            GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
+                            GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, depthCubemap, 0
+                        );
+                        glClear(GL_DEPTH_BUFFER_BIT);
+
+                        shader.setViewMatrix(viewMatrices[i]);
+                        shader.setProjectionMatrix(projectionMatrix);
+                        shader.setFarPlane(farPlane);
+                        shader.setLightPosition(lightPos);
+
+                        for (RenderComponent* object : objects) {
+                            shader.setModelMatrix(object->model);
+                            shader.render(*object->vertexBuffer);
+                        }
+                    }
+                */
+
+                shader.setViewMatrices(viewMatrices);
                 shader.setProjectionMatrix(projectionMatrix);
                 shader.setFarPlane(farPlane);
                 shader.setLightPosition(lightPos);
@@ -95,7 +116,7 @@ namespace pe {
                     shader.setModelMatrix(object->model);
                     shader.render(*object->vertexBuffer);
                 }
-            }
+            
 
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
         }
