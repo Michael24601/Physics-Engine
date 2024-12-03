@@ -227,6 +227,7 @@
     <ClInclude Include="boundingVolumeRenderer.h" />
     <ClInclude Include="BVHNode.h" />
     <ClInclude Include="cubemapShader.h" />
+    <ClInclude Include="cubemapGeometryShader.h" />
     <ClInclude Include="cubemapShadowMappingShader.h" />
     <ClInclude Include="curvature.h" />
     <ClInclude Include="boundingVolumeHierarchy.h" />
@@ -324,8 +325,9 @@
     <None Include="cookTorranceReflectionShader.frag.glsl" />
     <None Include="cookTorranceReflectionShader.vert.glsl" />
     <None Include="cubemapShader.frag.glsl" />
-    <None Include="cubemapShader.geom.glsl" />
+    <None Include="cubemapShaderGeometry.geom.glsl" />
     <None Include="cubemapShader.vert.glsl" />
+    <None Include="cubemapShaderGeometry.vert.glsl" />
     <None Include="cubemapShadowMappingShader.frag.glsl" />
     <None Include="cubemapShadowMappingShader.vert.glsl" />
     <None Include="flatShader.frag.glsl" />

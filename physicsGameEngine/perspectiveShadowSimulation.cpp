@@ -47,7 +47,6 @@ void pe::runPerspectiveShadowSimulation() {
     shader.setProjectionMatrix(camera.getProjectionMatrix());
     shader.setPCF(true);
     shader.setShadowStrength(0.8);
-    shader.setFarPlane(2000);
 
     DiffuseLightingShader diffuseShader;
     diffuseShader.setLightPosition(lightPos, 1);
@@ -77,6 +76,7 @@ void pe::runPerspectiveShadowSimulation() {
 
     PointProjection projection(lightPos[0], 90.0, 0.1, 2000);
     PointDepthMapper mapper(1024, 1024);
+    shader.setFarPlane(projection.getFarPlane());
 
     // Light movement speed
     float speed = 0.1;

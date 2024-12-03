@@ -590,6 +590,9 @@
     <ClInclude Include="cubemapShadowMappingShader.h">
       <Filter>Header Files\OpenGL Shaders</Filter>
     </ClInclude>
+    <ClInclude Include="cubemapGeometryShader.h">
+      <Filter>Header Files\OpenGL Shaders</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="todo.txt" />
@@ -640,7 +643,10 @@
     <None Include="cubemapShadowMappingShader.frag.glsl">
       <Filter>Source Files\GLSL Shaders\Cubemap Shadow Shader</Filter>
     </None>
-    <None Include="cubemapShader.geom.glsl">
+    <None Include="cubemapShaderGeometry.geom.glsl">
+      <Filter>Source Files\GLSL Shaders\Cubemap Shader</Filter>
+    </None>
+    <None Include="cubemapShaderGeometry.vert.glsl">
       <Filter>Source Files\GLSL Shaders\Cubemap Shader</Filter>
     </None>
   </ItemGroup>

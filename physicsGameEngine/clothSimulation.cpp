@@ -163,5 +163,4 @@ void pe::runClothSimulation() {
             deltaTime = 0.0f;
         }
     }
-
 }

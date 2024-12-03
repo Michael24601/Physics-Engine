@@ -60,15 +60,15 @@ namespace pe {
             updateView();
         }
 
-        glm::mat4 getProjectionMatrix() const {
+        const glm::mat4& getProjectionMatrix() const {
             return projection;
         }
 
-        std::vector<glm::mat4> getViewMatrices() const {
+        const std::vector<glm::mat4>& getViewMatrices() const {
             return view;
         }
 
-        glm::vec3 getLightPosition() const {
+        const glm::vec3& getLightPosition() const {
             return lightPos;
         }
 

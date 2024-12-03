@@ -11,6 +11,7 @@
 #include <array>
 #include <vector>
 #include "cubemapShader.h"
+#include "cubemapGeometryShader.h"
 
 namespace pe {
 
@@ -22,7 +23,16 @@ namespace pe {
         GLuint depthCubemap;
         GLuint framebuffer;
 
+        /*
+            Used in rendering the depth map in 6 passes.
+        */
         CubemapShader shader;
+
+        /*
+            Used for rendering the map in one pass by making
+            use of a geometry shader.
+        */
+        CubemapGeometryShader shaderOnePass;
 
     public:
 
@@ -67,7 +77,14 @@ namespace pe {
             glDeleteFramebuffers(1, &framebuffer);
         }
 
-        // Renders the depth map from a point light
+        /*
+            We have two options for rendering the depth cubemap.
+            We can render the scene 6 times one from each view of
+            the cubemap, or we can use a geometry shader that generates
+            6 triangles, one from each view.
+            This is the first method, and after testing it turned out
+            to be faster.
+        */
         void captureDepth(
             const glm::vec3& lightPos,
             const std::vector<glm::mat4>& viewMatrices,
@@ -79,35 +96,16 @@ namespace pe {
             glViewport(0, 0, width, height);
             glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
 
+            // 6 passes
+            for (size_t i = 0; i < 6; ++i) {
+                glFramebufferTexture2D(
+                    GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
+                    GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, depthCubemap, 0
+                );
                 glClear(GL_DEPTH_BUFFER_BIT);
 
-                /*
-                    Instead of rendering the scene 6 times, we can use
-                    a shader program that has a geometry shader in it 
-                    that genearates 6 triangles for every triangle in the
-                    scene, one from each view matrix. It achieves the
-                    same result as having 6 scenes rendered for each face.
-
-                    for (size_t i = 0; i < 6; ++i) {
-                        glFramebufferTexture2D(
-                            GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
-                            GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, depthCubemap, 0
-                        );
-                        glClear(GL_DEPTH_BUFFER_BIT);
-
-                        shader.setViewMatrix(viewMatrices[i]);
-                        shader.setProjectionMatrix(projectionMatrix);
-                        shader.setFarPlane(farPlane);
-                        shader.setLightPosition(lightPos);
-
-                        for (RenderComponent* object : objects) {
-                            shader.setModelMatrix(object->model);
-                            shader.render(*object->vertexBuffer);
-                        }
-                    }
-                */
-
-                shader.setViewMatrices(viewMatrices);
+                // Using the normal shader
+                shader.setViewMatrix(viewMatrices[i]);
                 shader.setProjectionMatrix(projectionMatrix);
                 shader.setFarPlane(farPlane);
                 shader.setLightPosition(lightPos);
@@ -116,10 +114,43 @@ namespace pe {
                     shader.setModelMatrix(object->model);
                     shader.render(*object->vertexBuffer);
                 }
+            }
             
 
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
         }
+
+
+        /*
+            This is the second method, and it turned out to be slower.
+        */
+        void captureDepthOnePass(
+            const glm::vec3& lightPos,
+            const std::vector<glm::mat4>& viewMatrices,
+            const glm::mat4& projectionMatrix,
+            float farPlane,
+            std::vector<RenderComponent*>& objects
+        ) {
+
+            glViewport(0, 0, width, height);
+            glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+
+            glClear(GL_DEPTH_BUFFER_BIT);
+
+            // Using the shader program with the geometry shader
+            shaderOnePass.setViewMatrices(viewMatrices);
+            shaderOnePass.setProjectionMatrix(projectionMatrix);
+            shaderOnePass.setFarPlane(farPlane);
+            shaderOnePass.setLightPosition(lightPos);
+
+            for (RenderComponent* object : objects) {
+                shaderOnePass.setModelMatrix(object->model);
+                shaderOnePass.render(*object->vertexBuffer);
+            }
+
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        }
+
 
         GLuint getTexture() const {
             return depthCubemap;
