@@ -8,6 +8,7 @@
 #include "environmentMapper.h"
 #include "cloth.h"
 #include "particleGravity.h"
+#include "skyboxRenderer.h"
 
 using namespace pe;
 

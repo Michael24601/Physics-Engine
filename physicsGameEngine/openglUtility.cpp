@@ -206,22 +206,21 @@ void pe::saveCubemapFaces(
 
     std::string folderName = folder;
 
-    if (!createDirectory(folderName)) {
-        return;
-    }
+    // Bind the cubemap face as the current texture target
+    glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
 
     // Iterate over each face of the cubemap
     for (GLuint face = 0; face < 6; ++face) {
-        // Bind the cubemap face as the current texture target
-        glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
 
         // Get the pixel data from the current cubemap face
         glGetTexImage(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels.data());
 
         // Save the pixel data as an image file
-        std::string filename = folderName + "\\cubemap_face_" + std::to_string(face) + ".png";
+        std::string filename = folderName + "\\_" + getUniqueDate() +"_face_" + std::to_string(face) + ".png";
         saveImage(filename, width, height, pixels);
     }
+
+    glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 }
 
 

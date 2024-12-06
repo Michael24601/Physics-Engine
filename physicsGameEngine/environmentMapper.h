@@ -26,6 +26,10 @@ namespace pe {
         float width;
         float height;
 
+        float farPlane;
+        float nearPlane;
+        float fov;
+
 		// Texture that will contain the cubemap 
         GLuint cubeMapTexture;
   
@@ -34,8 +38,15 @@ namespace pe {
 
 	public:
 
-        EnvironmentMapper(float width, float height, int activeTexture = 1) :
-            width{ width }, height{ height }, activeTexture{ activeTexture } {
+        EnvironmentMapper(
+            float width, float height, 
+            float nearPlane, float farPlane, 
+            float fov = 105,
+            int activeTexture = 1
+        ) :
+            width{ width }, height{ height }, 
+            nearPlane{ nearPlane }, farPlane{ farPlane }, fov{fov},
+            activeTexture{ activeTexture } {
 
             glActiveTexture(GL_TEXTURE0 + activeTexture);
             glGenTextures(1, &cubeMapTexture);
@@ -117,13 +128,24 @@ namespace pe {
                 glm::vec3(0.0f, 0.0f, -1.0f)  // -Z
             };
 
+            // The corresponding up vectors
+            glm::vec3 upVectors[6] = {
+                glm::vec3(0.0f, -1.0f, 0.0f), // +X
+                glm::vec3(0.0f, -1.0f, 0.0f), // -X
+                glm::vec3(0.0f, 0.0f, 1.0f),  // +Y
+                glm::vec3(0.0f, 0.0f, -1.0f), // -Y
+                glm::vec3(0.0f, -1.0f, 0.0f), // +Z
+                glm::vec3(0.0f, -1.0f, 0.0f)  // -Z
+            };
+
             // Binds the buffer
             glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
 
             glActiveTexture(GL_TEXTURE0 + activeTexture);
 
+
             glm::mat4 projection = glm::perspective(
-                glm::radians(105.0f), 1.0f, 0.1f, 1000.0f
+                glm::radians(fov), 1.0f, nearPlane, farPlane
             );
 
             for (GLuint face = 0; face < 6; face++) {
@@ -138,8 +160,7 @@ namespace pe {
                 glm::mat4 view = glm::lookAt(
                     position,
                     position + directions[face],
-                    // The up vector is reverse since it is a reflection
-                    glm::vec3(0.0f, -1.0f, 0.0f)
+                    upVectors[face]
                 );
 
                 // We have to set the viewport for the current cubemap face

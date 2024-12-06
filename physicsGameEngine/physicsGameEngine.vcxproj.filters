@@ -121,6 +121,9 @@
     <Filter Include="Source Files\GLSL Shaders\Cubemap Shadow Shader">
       <UniqueIdentifier>{6e1d615a-9679-46b2-ad65-76f3e8a13e2b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\GLSL Shaders\Skybox Shader">
+      <UniqueIdentifier>{6be3998b-2899-4987-93c0-a069fabba327}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="physicsGameEngine.cpp">
@@ -578,9 +581,6 @@
     <ClInclude Include="importedMesh.h">
       <Filter>Header Files\RigidObjects</Filter>
     </ClInclude>
-    <ClInclude Include="boundingVolumeRenderer.h">
-      <Filter>Header Files\Rendering</Filter>
-    </ClInclude>
     <ClInclude Include="pointDepthMapper.h">
       <Filter>Header Files\OpenGL Utilities</Filter>
     </ClInclude>
@@ -592,6 +592,15 @@
     </ClInclude>
     <ClInclude Include="cubemapGeometryShader.h">
       <Filter>Header Files\OpenGL Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="boundingVolumeRenderer.h">
+      <Filter>Header Files\RigidObjects</Filter>
+    </ClInclude>
+    <ClInclude Include="skyboxShader.h">
+      <Filter>Header Files\OpenGL Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="skyboxRenderer.h">
+      <Filter>Header Files\RigidObjects</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -648,6 +657,12 @@
     </None>
     <None Include="cubemapShaderGeometry.vert.glsl">
       <Filter>Source Files\GLSL Shaders\Cubemap Shader</Filter>
+    </None>
+    <None Include="skyboxShader.vert.glsl">
+      <Filter>Source Files\GLSL Shaders\Skybox Shader</Filter>
+    </None>
+    <None Include="skyboxShader.frag.glsl">
+      <Filter>Source Files\GLSL Shaders\Skybox Shader</Filter>
     </None>
   </ItemGroup>
 </Project>

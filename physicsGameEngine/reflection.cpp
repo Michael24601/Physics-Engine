@@ -1,11 +1,20 @@
 
-
-#ifdef DONE_REFACTOR
-
 #include "simulations.h"
+#include "glfwWindowWrapper.h"
+#include "rotatingCamera.h"
+#include "solidColorShader.h"
+#include "diffuseLightingShader.h"
+#include "shadowMappingShader.h"
+#include "polyhedra.h"
+#include "depthMapper.h"
+#include "importedMesh.h"
+#include "renderComponent.h"
+#include "cookTorranceReflectionShader.h"
+#include "cookTorranceShader.h"
+#include "skyboxRenderer.h"
+#include "environmentMapper.h"
 
 using namespace pe;
-
 
 void pe::runReflection() {
 
@@ -24,17 +33,7 @@ void pe::runReflection() {
 
     // Shaders
     CookTorranceShader cookShader;
-    SkyboxShader skyboxShader;
-    CookTorranceSkyboxReflectionShader refShader2;
-
-    GLuint skybox = loadCubemap(std::vector<std::string>{
-        "C:\\Users\\msaba\\Documents\\physen\\cubemaps\\right.jpg",
-            "C:\\Users\\msaba\\Documents\\physen\\cubemaps\\left.jpg",
-            "C:\\Users\\msaba\\Documents\\physen\\cubemaps\\top.jpg",
-            "C:\\Users\\msaba\\Documents\\physen\\cubemaps\\bottom.jpg",
-            "C:\\Users\\msaba\\Documents\\physen\\cubemaps\\front.jpg",
-            "C:\\Users\\msaba\\Documents\\physen\\cubemaps\\back.jpg"
-    });
+    CookTorranceReflectionShader refShader;
 
     glm::mat4 identity = glm::mat4(1.0);
     glm::vec4 colorWhite(1.0, 1.0, 1.0, 1.0);
@@ -44,61 +43,56 @@ void pe::runReflection() {
     glm::vec4 colorGrey(0.35, 0.35, 0.35, 1);
     glm::vec4 colorTrans(0, 0, 0, 1.0);
 
-
     glm::vec3 lightPos[]{ glm::vec3(0, 500, 0), glm::vec3(-500, 0, -500) };
     glm::vec4 lightColor[]{ glm::vec4(1.0, 1.0, 1.0, 1.0),
         glm::vec4(1.0, 1.0, 1.0, 1.0) };
 
-    RectangularPrism c(100, 100, 100, 20, Vector3D(0, 0, 400), new RigidBody);
+    CuboidObject c(100, 100, 100, Vector3D(0, 0, 400), Quaternion::IDENTITY, 1);
+    c.faceRenderer.setColor(colorRed);
+    c.faceRenderer.setShader(&cookShader);
 
-    real radius = 150;
     std::string filename = "C:\\Users\\msaba\\Documents\\physen\\textureMaps\\moai.obj";
-    Polyhedron c2 = returnPrimitive(filename, 1, Vector3D::ZERO, new RigidBody(), 2);
-    // c2.body->orientation = Quaternion::rotatedByAxisAngle(Vector3D(0, 0, 1), PI / 2);
-    c2.body->calculateDerivedData();
+    Mesh* mesh = extractMesh(filename);
+    VertexBuffer buffer = createFaceVertexBuffer(
+        mesh, GL_STATIC_DRAW, NORMALS::FACE_NORMALS, UV::INCLUDE
+    );
+    buffer.setData(generateFaceData(
+        mesh, NORMALS::VERTEX_NORMALS, UV::INCLUDE
+    ));
+    RenderComponent renderer;
+    renderer.setColor(colorGrey);
+    renderer.setShader(&refShader);
+    renderer.setVertexBuffer(&buffer);
+    Vector3D position(0, 0, 0);
+    Quaternion rotation = Quaternion::rotatedByAxisAngle(Vector3D(0, 0, 1), PI / 2.0);
+    Matrix3x4 transform(Matrix3x3(rotation), position);
+    renderer.setModel(convertToGLM(transform));
 
-    skyboxShader.setSkybox(skybox);
-    skyboxShader.setModelScaleAndTranslate(2000, glm::vec3(0));
+    // The skybox
+    SkyboxRenderer skybox(
+        std::vector<std::string>{
+        "C:\\Users\\msaba\\Documents\\physen\\cubemaps\\right.jpg",
+            "C:\\Users\\msaba\\Documents\\physen\\cubemaps\\left.jpg",
+            "C:\\Users\\msaba\\Documents\\physen\\cubemaps\\top.jpg",
+            "C:\\Users\\msaba\\Documents\\physen\\cubemaps\\bottom.jpg",
+            "C:\\Users\\msaba\\Documents\\physen\\cubemaps\\front.jpg",
+            "C:\\Users\\msaba\\Documents\\physen\\cubemaps\\back.jpg"
+        },
+        2000
+    );
 
-    FaceData data = getFaceData(c2);
-    std::vector<std::vector<glm::vec3>> d = {
-        data.vertices, data.normals
-    };
-    refShader2.sendVaribleData(d, GL_STATIC_DRAW);
-    refShader2.setTrianglesNumber(data.vertices.size());
-    refShader2.setLightPosition(lightPos, 1);
-    refShader2.setLightColors(lightColor, 1);
-    refShader2.setBaseColor(colorRed);
-    refShader2.setRoughness(0.05);
-    refShader2.setFresnel(0.5);
-    refShader2.setSkybox(skybox);
-    refShader2.setLightInfluence(0.0);
-    refShader2.setReflectionStrength(1.0);
-
-    data = getFaceData(c);
-    d = {
-        data.vertices, data.normals
-    };
-    cookShader.sendVaribleData(d, GL_STATIC_DRAW);
-    cookShader.setTrianglesNumber(data.vertices.size());
-    cookShader.setLightPosition(lightPos, 1);
     cookShader.setLightColors(lightColor, 1);
-    cookShader.setObjectColor(colorRed);
-    cookShader.setRoughness(0.05);
+    cookShader.setLightPosition(lightPos, 1);
     cookShader.setFresnel(0.5);
+    cookShader.setRoughness(0.05);
 
-    OrientedBoundingBox b(&c2);
-    SolidColorShader s;
-    EdgeData ds = getBoxData(b);
-    std::vector<std::vector<glm::vec3>> v = { ds.vertices };
-    s.sendVaribleData(v, GL_STATIC_DRAW);
-    s.setEdgeNumber(ds.vertices.size());
-    s.setObjectColor(colorRed);
-    glm::mat4 m = convertToGLM(b.getTransformMatrix());
-    s.setModelMatrix(m);
-    s.setProjectionMatrix(camera.getProjectionMatrix());
+    refShader.setLightColors(lightColor, 1);
+    refShader.setLightPosition(lightPos, 1);
+    refShader.setFresnel(0.5);
+    refShader.setRoughness(0.05);
+    refShader.setReflectionStrength(1.0);
 
-    EnvironmentMapper mapper(512, 512);
+    EnvironmentMapper mapper(512, 512, 0.1f, 2500.0f);
 
     float deltaT = 0.07;
 
@@ -120,41 +114,34 @@ void pe::runReflection() {
         window.processInput();
         camera.processInput(deltaT);
 
-        c.body->calculateDerivedData();
-        c2.body->calculateDerivedData();
-
 
         glm::vec2 pos = window.getCursorPosition();
-        c.body->position = {
-            c.body->position.x,
+        c.body.position = {
+            c.body.position.x,
             pos.y,
             pos.x
         };
 
+        c.body.calculateDerivedData();
 
-        cookShader.setModelMatrix(convertToGLM(c.body->transformMatrix));
-        cookShader.setViewMatrix(camera.getViewMatrix());
-        cookShader.setProjectionMatrix(camera.getProjectionMatrix());
-
-        refShader2.setModelMatrix(convertToGLM(c2.body->transformMatrix));
-        refShader2.setViewMatrix(camera.getViewMatrix());
-        refShader2.setProjectionMatrix(camera.getProjectionMatrix());
-
-
-        std::vector<Shader*> shaders{ &cookShader };
+        std::vector<RenderComponent*> objects{ &c.faceRenderer, &skybox.skyboxRenderer };
 
         mapper.captureEnvironment(
-            convertToGLM(c2.body->position),
-            shaders
+            glm::vec3(0.0),
+            objects
         );
 
-        refShader2.setEnvironmentMap(mapper.getTexture());
+        // saveCubemapFaces(mapper.getTexture(), 512, 512, "C:\\Users\\msaba\\Desktop\\ff");
+
+        renderer.setEnvironmentMap(mapper.getTexture());
+        c.updateModelMatrix();
 
         cookShader.setViewMatrix(camera.getViewMatrix());
         cookShader.setProjectionMatrix(camera.getProjectionMatrix());
+        refShader.setViewMatrix(camera.getViewMatrix());
+        refShader.setProjectionMatrix(camera.getProjectionMatrix());
 
-        skyboxShader.setViewMatrix(camera.getViewMatrix());
-        skyboxShader.setProjectionMatrix(camera.getProjectionMatrix());
+        skybox.setViewProjection(camera.getViewMatrix(), camera.getProjectionMatrix());
 
         // Unbind framebuffer to render to default framebuffer (window)
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -168,12 +155,9 @@ void pe::runReflection() {
             glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-            cookShader.drawFaces();
-            skyboxShader.drawFaces();
-            refShader2.drawFaces();
-
-            s.setViewMatrix(camera.getViewMatrix());
-            s.drawEdges();
+            c.faceRenderer.render();
+            renderer.render();
+            skybox.renderSkybox();
 
             glfwSwapBuffers(window.getWindow());
             glfwPollEvents();
@@ -183,5 +167,3 @@ void pe::runReflection() {
     }
 
 }
-
-#endif

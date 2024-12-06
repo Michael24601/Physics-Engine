@@ -25,6 +25,9 @@ namespace pe {
 		// The texture (if there is one)
 		GLuint texture;
 
+		// The tetxure (if there is a cubemap one)
+		GLuint cubemapTexture;
+
 		/*
 			In case the shader has a reflection component, this datafield
 			holds an enviornment map from this object's point of view.
@@ -62,6 +65,10 @@ namespace pe {
 
 		void setTexture(GLuint texture) {
 			this->texture = texture;
+		}
+
+		void setCubemapTexture(GLuint cubemapTexture) {
+			this->cubemapTexture = cubemapTexture;
 		}
 
 		void setEnvironmentMap(GLuint environmentMap) {

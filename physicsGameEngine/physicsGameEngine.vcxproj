@@ -241,6 +241,8 @@
     <ClInclude Include="polyhedra.h" />
     <ClInclude Include="renderComponent.h" />
     <ClInclude Include="skyboxBufferGenerator.h" />
+    <ClInclude Include="skyboxRenderer.h" />
+    <ClInclude Include="skyboxShader.h" />
     <ClInclude Include="softObject.h" />
     <ClInclude Include="vertexBuffer.h" />
     <ClInclude Include="collisionResolver.h" />
@@ -337,6 +339,8 @@
     <None Include="diffuseLightingShader.frag.glsl" />
     <None Include="simpleShader.frag.glsl" />
     <None Include="simpleShader.vert.glsl" />
+    <None Include="skyboxShader.frag.glsl" />
+    <None Include="skyboxShader.vert.glsl" />
     <None Include="solidColorShader.frag.glsl" />
     <None Include="solidColorShader.vert.glsl" />
   </ItemGroup>

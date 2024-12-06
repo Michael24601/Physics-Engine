@@ -64,10 +64,9 @@ namespace pe {
         -1.0f, -1.0f, -1.0f
     };
 
-
     // Allocates the data for a VBO meant to render a surface and returns it
     VertexBuffer createSkyboxVertexBuffer();
-    
+ 
 }
 
 #endif

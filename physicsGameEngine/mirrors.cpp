@@ -82,8 +82,8 @@ void pe::runMirrors() {
     }
 
     // For the first and second mirrors
-    EnvironmentMapper mapper0(512, 512, 1);
-    EnvironmentMapper mapper1(512, 512, 2);
+    EnvironmentMapper mapper0(512, 512, 0.1f, 500.0f, 105.0f, 1);
+    EnvironmentMapper mapper1(512, 512, 0.1f, 500.0f, 105.0f, 2);
 
     float deltaT = 0.07;
 

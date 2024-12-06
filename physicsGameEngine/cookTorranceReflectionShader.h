@@ -29,15 +29,6 @@ namespace pe {
             );
         }
 
-        void setSkybox(GLuint skyboxTextureId) {
-            setTextureUniform(
-                "skybox",
-                skyboxTextureId,
-                GL_TEXTURE_CUBE_MAP,
-                0
-            );
-        }
-
         void setObjectColor(const glm::vec4& color) {
             setUniform("color", color);
             setUniform("useTexture", false);

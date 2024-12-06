@@ -9,7 +9,6 @@ uniform vec4 color;
 uniform sampler2D objectTexture;
 uniform bool useTexture;
 
-uniform samplerCube skybox;
 uniform samplerCube environmentMap;
 
 #define MAX_LIGHTS 10
@@ -59,7 +58,6 @@ void main() {
 
     vec3 I = normalize(FragPos - viewPos);
     vec3 R = reflect(I, normalize(normal));
-    vec3 skyboxColor = texture(skybox, R).rgb;
 
     vec4 objectColor;
     if(useTexture)
@@ -68,7 +66,7 @@ void main() {
         objectColor = color;
 
     vec3 color = objectColor.rgb * (1-reflectionStrength)
-        + (skyboxColor + envReflection) * reflectionStrength;
+        + (envReflection) * reflectionStrength;
 
     for (int i = 0; i < numActiveLights; ++i) {
         // Diffuse calculation

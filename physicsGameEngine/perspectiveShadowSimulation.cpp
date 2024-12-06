@@ -121,7 +121,7 @@ void pe::runPerspectiveShadowSimulation() {
 
         std::vector<RenderComponent*> objects{ &renderer };
         mapper.captureDepth(
-            lightPos[0],
+            projection.getLightPosition(),
             projection.getViewMatrices(),
             projection.getProjectionMatrix(),
             projection.getFarPlane(),
