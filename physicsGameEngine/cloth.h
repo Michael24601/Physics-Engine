@@ -11,11 +11,11 @@ namespace pe {
 
 	private:
 
-
 		static SoftObject generateSoftObject(
-			const std::pair<int, int>& sideDensity,
-			const std::pair<real, real>& sideLength,
-			const std::pair<Vector3D, Vector3D>& sideDirection,
+			int columnDensity, int rowDensity,
+			real height, real width,
+			const Vector3D& direction1,
+			const Vector3D& direction2,
 			const Vector3D& origin,
 			real mass,
 			real damping,
@@ -24,7 +24,6 @@ namespace pe {
 			real shearStifness,
 			real bendStiffness
 		);
-
 
 	public:
 
@@ -48,10 +47,17 @@ namespace pe {
 		// Map that quickly returns the neighbors of a particle in the grid
 		std::vector<std::vector<int>> particleNeighbors;
 
+		/*
+			The rendering components.
+		*/
+		RenderComponent faceRenderer;
+		RenderComponent edgeRenderer;
+
 		Cloth(
-			const std::pair<int, int>& sideDensity,
-			const std::pair<real, real>& sideLength,
-			const std::pair<Vector3D, Vector3D>& sideDirection,
+			int columnDensity, int rowDensity,
+			real height, real width,
+			const Vector3D& sideDirection1,
+			const Vector3D& sideDirection2,
 			const Vector3D& origin,
 			real mass,
 			real damping,

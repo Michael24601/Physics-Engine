@@ -133,28 +133,23 @@ void pe::runMirrors() {
             mapper0.captureEnvironment(
                 convertToGLM(prisms[0]->body.position), renderComponents0
             );
-            /*
-                We then capture the second environment, including the
-                first mirror with its newly added reflection.
-            */
+            
+            //    We then capture the second environment, including the
+            //  first mirror with its newly added reflection.
             mapper1.captureEnvironment(
                 convertToGLM(prisms[1]->body.position), renderComponents1
             );
 
-            /*
-                We then set the capture environment in the first and second
-                mirrors. The next iteration, the set environment map
-                will appear in the next environment map, creating the infinite
-                mirror effect.
-            */
+            // We then set the capture environment in the first and second
+            // mirrors. The next iteration, the set environment map
+            // will appear in the next environment map, creating the infinite
+            // mirror effect.
             prisms[0]->faceRenderer.setEnvironmentMap(mapper0.getTexture());
             prisms[1]->faceRenderer.setEnvironmentMap(mapper1.getTexture());
         }
 
-        /*
-            The environment mapper resets the projection and view matrices so
-            we need to reset them here.
-        */
+        // The environment mapper resets the projection and view matrices so
+        // we need to reset them here.
         refShader.setProjectionMatrix(camera.getProjectionMatrix());
         refShader.setViewMatrix(camera.getViewMatrix());
         cubeShader.setProjectionMatrix(camera.getProjectionMatrix());
@@ -179,5 +174,4 @@ void pe::runMirrors() {
             deltaTime = 0.0f;
         }
     }
-
 }

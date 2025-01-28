@@ -19,9 +19,6 @@
 #include "rigidBody.h"
 #include "rigidBodyForceGenerator.h"
 #include "boundingVolume.h"
-#include "renderComponent.h"
-#include "edgeBufferGenerator.h"
-#include "faceBufferGenerator.h"
 
 namespace pe {
 
@@ -51,17 +48,6 @@ namespace pe {
 		*/
 		Matrix3x4 boundingVolumeTransform;
 
-		/*
-			Object used to render the faces of the object.
-			However, instead of initializing the vertex buffer directly using
-			the mesh, the user is allowed to set the vertex buffer manually.
-			This is in case the mesh is shared between multiple objects; it would
-			be wasteful to create several vertex buffers.
-			Same for the edge renderer.
-		*/
-		RenderComponent faceRenderer;
-		RenderComponent edgeRenderer;
-
 
 		RigidObject(
 			Mesh* mesh,
@@ -90,8 +76,6 @@ namespace pe {
 		void update() {
 			// Calculates the derived data, like the transform matrix
 			body.calculateDerivedData();
-
-
 
 			// Updates the bounding volume transform
 			boundingVolumeTransform = boundingVolume->getTransformMatrix();

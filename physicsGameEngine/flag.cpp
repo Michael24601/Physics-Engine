@@ -12,7 +12,6 @@
 
 using namespace pe;
 
-
 void pe::runFlag() {
 
     GlfwWindowWrapper window(800, 800, 6, "window", false);
@@ -72,9 +71,9 @@ void pe::runFlag() {
     real laplacianFactor = 0.05;
 
     Cloth cloth(
-        std::make_pair(size, size),
-        std::make_pair(400, 600),
-        std::make_pair(Vector3D(0, -1, 0), Vector3D(1, 0, 0)),
+        size, size,
+        400, 600,
+        Vector3D(0, -1, 0), Vector3D(1, 0, 0),
         Vector3D(-300, 200, 0),
         mass, damping, dampingCoefficient,
         structuralStiffness, shearStiffness, bendingStiffness

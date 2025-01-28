@@ -91,9 +91,6 @@
     <Filter Include="Header Files\SoftBodyPhysics">
       <UniqueIdentifier>{1aa70bbb-545d-4597-8b7f-bec87747f6db}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\SoftBody.h">
-      <UniqueIdentifier>{b9331864-0fb9-464d-a0f9-2b07e6fbc5b6}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\RigidObjects">
       <UniqueIdentifier>{e5aad90b-164c-4750-bd25-a7f3e7990117}</UniqueIdentifier>
     </Filter>
@@ -207,9 +204,6 @@
     <ClCompile Include="util.cpp">
       <Filter>Source Files\Core</Filter>
     </ClCompile>
-    <ClCompile Include="cloth.cpp">
-      <Filter>Source Files\SoftBody.h</Filter>
-    </ClCompile>
     <ClCompile Include="particleSpringDamper.cpp">
       <Filter>Source Files\ParticlePhysics</Filter>
     </ClCompile>
@@ -300,6 +294,9 @@
     <ClCompile Include="perspectiveShadowSimulation.cpp">
       <Filter>Source Files\Simulations</Filter>
     </ClCompile>
+    <ClCompile Include="cloth.cpp">
+      <Filter>Source Files\Simulations</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="accuracy.h">
@@ -388,9 +385,6 @@
     </ClInclude>
     <ClInclude Include="shaderProgram.h">
       <Filter>Header Files\OpenGL Utilities</Filter>
-    </ClInclude>
-    <ClInclude Include="cloth.h">
-      <Filter>Header Files\SoftBodyPhysics</Filter>
     </ClInclude>
     <ClInclude Include="contact.h">
       <Filter>Header Files\Collision</Filter>
@@ -557,9 +551,6 @@
     <ClInclude Include="sphere.h">
       <Filter>Header Files\Polyhedron</Filter>
     </ClInclude>
-    <ClInclude Include="polyhedra.h">
-      <Filter>Header Files\RigidObjects</Filter>
-    </ClInclude>
     <ClInclude Include="orientedBoundingBox.h">
       <Filter>Header Files\BoundingVolumes</Filter>
     </ClInclude>
@@ -593,14 +584,20 @@
     <ClInclude Include="cubemapGeometryShader.h">
       <Filter>Header Files\OpenGL Shaders</Filter>
     </ClInclude>
-    <ClInclude Include="boundingVolumeRenderer.h">
-      <Filter>Header Files\RigidObjects</Filter>
-    </ClInclude>
     <ClInclude Include="skyboxShader.h">
       <Filter>Header Files\OpenGL Shaders</Filter>
     </ClInclude>
     <ClInclude Include="skyboxRenderer.h">
-      <Filter>Header Files\RigidObjects</Filter>
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="boundingVolumeRenderer.h">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="polyhedra.h">
+      <Filter>Header Files\Simulations</Filter>
+    </ClInclude>
+    <ClInclude Include="cloth.h">
+      <Filter>Header Files\Simulations</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

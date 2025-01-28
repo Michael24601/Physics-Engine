@@ -48,17 +48,9 @@ namespace pe {
 			all particles will be the image of a vertex necessarily.
 		*/
 		std::vector<int> vertexParticleMap;
-
-		/*
-			The rendering components.
-		*/
-		RenderComponent faceRenderer;
-		RenderComponent edgeRenderer;
 		
 		SoftObject(
-			const std::vector<Vector3D>& vertices,
-			const std::vector<std::vector<int>>& faceIndexes,
-			const std::vector<std::pair<int, int>>& edgeIndexes,
+			const Mesh& mesh,
 			const std::vector<Vector3D>& particleCoordinates,
 			real mass,
 			real damping,
@@ -66,8 +58,8 @@ namespace pe {
 			const std::vector<std::pair<int, int>>& springPairs,
 			const std::vector<real> springStrengths,
 			const std::vector<int>& vertexParticleMap,
-			const Curvature& curvature = Curvature()
-		) : mesh(vertices, faceIndexes, edgeIndexes),
+			const Curvature& curvature
+		) : mesh(mesh),
 			body(
 				particleCoordinates, mass, damping, dampingCoefficient, 
 				springPairs, springStrengths
@@ -76,7 +68,7 @@ namespace pe {
 			curvature(curvature),
 			vertexParticleMap{ vertexParticleMap } {
 
-			if (vertices.size() != vertexParticleMap.size()) {
+			if (mesh.getVertexCount() != vertexParticleMap.size()) {
 				throw std::invalid_argument(
 					"The vertex particle map must match each vertex"
 				);

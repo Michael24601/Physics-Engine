@@ -12,6 +12,7 @@
 #define RENDER_COMPONENT_H
 
 #include "shader.h"
+#include "rigidObject.h"
 
 namespace pe {
 
@@ -49,11 +50,10 @@ namespace pe {
 		*/
 		Shader* shader;
 
-
 		RenderComponent() : 
 			model(glm::mat4(1.0)), vertexBuffer{ nullptr },
 			shader{ nullptr }, color{ glm::vec4(0.0) }, texture{ 0 },
-			environmentMap{0} {}
+			environmentMap{ 0 } {}
 
 		void setModel(const glm::mat4& model) {
 			this->model = model;
@@ -84,7 +84,6 @@ namespace pe {
 		}
 
 		void render() {
-
 			if (shader == nullptr || vertexBuffer == nullptr) {
 				return;
 			}

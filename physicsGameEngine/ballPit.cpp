@@ -14,7 +14,6 @@
 
 using namespace pe;
 
-
 void pe::runBallPit() {
 
     GlfwWindowWrapper window(1200, 800, 6, "window", true);

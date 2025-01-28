@@ -12,7 +12,6 @@
 
 using namespace pe;
 
-
 void pe::runRagdoll() {
 
     GlfwWindowWrapper window(800, 800, 6, "window", false);

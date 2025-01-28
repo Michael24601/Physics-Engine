@@ -3,7 +3,7 @@
 
 int main() {
 
-	pe::runReflection();
+	pe::runRagdoll();
 
 	return 0;
 }

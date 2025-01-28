@@ -41,6 +41,8 @@
 #define POLYHEDRA_H
 
 #include "rigidObject.h"
+#include "faceBufferGenerator.h"
+#include "edgeBufferGenerator.h"
 #include "orientedBoundingBox.h"
 #include "boundingSphere.h"
 #include "cuboid.h"
@@ -57,6 +59,9 @@ namespace pe {
 
 		VertexBuffer faceBuffer;
 		VertexBuffer edgeBuffer;
+
+		RenderComponent faceRenderer;
+		RenderComponent edgeRenderer;
 
 		PolyhedronObject(
 			Mesh* mesh,

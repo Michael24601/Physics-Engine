@@ -13,6 +13,7 @@
 
 using namespace pe;
 
+
 void pe::runPerspectiveShadowSimulation() {
 
     GlfwWindowWrapper window(800, 800, 6, "window", true);

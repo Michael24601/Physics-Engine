@@ -5,9 +5,10 @@ using namespace pe;
 
 
 Cloth::Cloth(
-	const std::pair<int, int>& sideDensity,
-	const std::pair<real, real>& sideLength,
-	const std::pair<Vector3D, Vector3D>& sideDirection,
+	int columnDensity, int rowDensity,
+	real height, real width,
+	const Vector3D& direction1,
+	const Vector3D& direction2,
 	const Vector3D& origin,
 	real mass,
 	real damping,
@@ -15,10 +16,15 @@ Cloth::Cloth(
 	real structuralStifness,
 	real shearStifness,
 	real bendStiffness
-) : SoftObject(std::move(
+) : sideDensity{std::make_pair(columnDensity, rowDensity)},
+	sideLength{ std::make_pair(height, width) },
+	sideDirection{ std::make_pair(direction1, direction2)},
+	origin{origin},
+	SoftObject(std::move(
 		generateSoftObject(
-		sideDensity, sideLength, sideDirection,
-		origin, mass, damping, dampingCoefficient,
+		columnDensity, rowDensity, height, width,
+		direction1, direction2, origin,
+		mass, damping, dampingCoefficient,
 		structuralStifness, shearStifness, bendStiffness
 	))
 ) {
@@ -65,9 +71,10 @@ Cloth::Cloth(
 
 
 SoftObject Cloth::generateSoftObject(
-	const std::pair<int, int>& sideDensity,
-	const std::pair<real, real>& sideLength,
-	const std::pair<Vector3D, Vector3D>& sideDirection,
+	int columnDensity, int rowDensity,
+	real height, real width,
+	const Vector3D& direction1,
+	const Vector3D& direction2,
 	const Vector3D& origin,
 	real mass,
 	real damping,
@@ -80,23 +87,23 @@ SoftObject Cloth::generateSoftObject(
 	std::vector<Vector3D> particleGrid;
 
 	// The step size in each direction
-	real step1 = sideLength.first / (sideDensity.first - 1);
-	real step2 = sideLength.second / (sideDensity.second - 1);
+	real step1 = height / (columnDensity - 1);
+	real step2 = width / (rowDensity - 1);
 
-	for (int i = 0; i < sideDensity.first; ++i) {
-		for (int j = 0; j < sideDensity.second; ++j) {
+	for (int i = 0; i < columnDensity; ++i) {
+		for (int j = 0; j < rowDensity; ++j) {
 			// Particle position
 			Vector3D particle = (
-				origin + sideDirection.first * (i * step1) +
-				sideDirection.second * (j * step2)
+				origin + direction1 * (i * step1) +
+				direction2 * (j * step2)
 			);
 
 			particleGrid.push_back(particle);
 		}
 	}
 
-	int particlesX = sideDensity.first;
-	int particlesY = sideDensity.second;
+	int particlesX = rowDensity;
+	int particlesY = columnDensity;
 
 	// Generating the mesh, whose vertices are the particles themselves
 	std::vector<std::vector<int>> faces;
@@ -251,9 +258,11 @@ SoftObject Cloth::generateSoftObject(
 	Curvature curvature;
 	curvature.curvatureMap = curvatureMap;
 
+	Mesh mesh(particleGrid, faces, edges);
+
 	return SoftObject(
 		// The mesh
-		particleGrid, faces, edges, 
+		mesh,
 		// The soft body
 		particleGrid, mass, damping, dampingCoefficient,
 		springPairs, springStrengths,
