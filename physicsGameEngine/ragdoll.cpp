@@ -9,10 +9,17 @@
 #include "joint.h"
 #include "collisionResolver.h"
 #include "rigidBodyGravity.h"
+#include "boundingVolumeHierarchy.h"
+#include "fineCollisionDetection.h"
 
 using namespace pe;
 
 void pe::runRagdoll() {
+
+    std::cout << "Use arrow keys to move the camera\n";
+    std::cout << "Hold A and move the mouse to move the ragdoll\n";
+    std::cout << "Hold L and move the mouse to move the left hand\n";
+    std::cout << "Hold R and move the mouse to move the right hand\n";
 
     GlfwWindowWrapper window(800, 800, 6, "window", false);
 
@@ -60,7 +67,7 @@ void pe::runRagdoll() {
     real armLength = 50, legLength = 50;
     std::vector<PolyhedronObject*> prisms{
         // Head 0
-        new SphereObject(30, 20, 20, Vector3D(100, 100, 0),  Quaternion::IDENTITY, 50),
+        new SphereObject(30, 20, 20, Vector3D(100, 100, 0), Quaternion::IDENTITY, 50),
         // Torso 1
         new CuboidObject(torsoWidth, torsoHeight, 60, Vector3D(0, 0, 0), Quaternion::IDENTITY, 100),
         // Core 2
@@ -280,6 +287,14 @@ void pe::runRagdoll() {
             CollisionResolver resolver(10, 1, 0.01, 0.01);
             resolver.resolveContacts(contacts.data(), contacts.size(), substep);
 
+            BoundingVolumeHierarchy BVH;
+            for (PolyhedronObject* o : prisms) {
+                BVH.insert(
+                    o,
+                    o->boundingVolumeTransform.getTranslation(),
+                    o->boundingVolume->getBVHSphereRadius()
+                );
+            }
 
             for (PolyhedronObject* prism : prisms) {
                 prism->body.integrate(substep);

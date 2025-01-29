@@ -3,7 +3,7 @@
 
 int main() {
 
-	pe::runRagdoll();
+	pe::runFlag();
 
 	return 0;
 }

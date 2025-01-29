@@ -7,13 +7,16 @@
 #include "polyhedra.h"
 #include "particleGravity.h"
 #include "diffuseLightingShader.h"
-#include "cloth.h"
+#include "clothObject.h"
 #include "faceBufferGenerator.h"
 
 using namespace pe;
 
 
 void pe::runClothSimulation() {
+
+    std::cout << "Use arrow keys to move the camera\n";
+    std::cout << "Hold the A key and move the mouse to move the cloth\n";
 
     GlfwWindowWrapper window(800, 800, 6, "window", false);
 
@@ -41,8 +44,8 @@ void pe::runClothSimulation() {
         0.01
     );
 
-    int size = 25;
-    real structuralStiffness = 6;
+    int size = 30;
+    real structuralStiffness = 7;
     real shearStiffness = 3;
     real bendingStiffness = 3;
     real mass = 0.5;
@@ -52,7 +55,7 @@ void pe::runClothSimulation() {
     int laplacianIterations = 1;
     real laplacianFactor = 0.05;
 
-    Cloth cloth(
+    ClothObject cloth(
         size, size,
         400, 400,
         Vector3D(0, -1, 0), Vector3D(1, 0, 0),
@@ -66,11 +69,6 @@ void pe::runClothSimulation() {
         cloth.body.particles[i].setAwake(false);
     }
 
-    VertexBuffer buffer = createFaceVertexBuffer(
-        &cloth.mesh, GL_DYNAMIC_DRAW,
-        NORMALS::VERTEX_NORMALS, UV::INCLUDE
-    );
-
     ParticleGravity g(Vector3D(0, -10, 0));
 
     // Shaders
@@ -78,6 +76,9 @@ void pe::runClothSimulation() {
     shader.setLightPosition(lightPos, 1);
     shader.setLightColors(lightColor, 1);
     shader.setObjectColor(colorRed);
+
+    cloth.faceRenderer.setShader(&shader);
+    cloth.faceRenderer.setColor(colorRed);
 
     bool isButtonPressed = false;
 
@@ -138,9 +139,7 @@ void pe::runClothSimulation() {
         }
 
         cloth.update();
-        buffer.setData(generateFaceData(
-            &cloth.mesh, NORMALS::VERTEX_NORMALS, UV::INCLUDE
-        ));
+        cloth.updateVertexBuffer();
 
         shader.setViewMatrix(camera.getViewMatrix());
         shader.setProjectionMatrix(camera.getProjectionMatrix());
@@ -155,7 +154,7 @@ void pe::runClothSimulation() {
             glClearColor(0.1f, 0.2f, 0.2f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-            shader.render(buffer);
+            cloth.faceRenderer.render();
 
             glfwSwapBuffers(window.getWindow());
             glfwPollEvents();

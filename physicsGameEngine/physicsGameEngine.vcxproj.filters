@@ -121,6 +121,9 @@
     <Filter Include="Source Files\GLSL Shaders\Skybox Shader">
       <UniqueIdentifier>{6be3998b-2899-4987-93c0-a069fabba327}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\SoftBody">
+      <UniqueIdentifier>{69414091-4986-4e2e-9f79-3e0b1655430f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="physicsGameEngine.cpp">
@@ -295,7 +298,7 @@
       <Filter>Source Files\Simulations</Filter>
     </ClCompile>
     <ClCompile Include="cloth.cpp">
-      <Filter>Source Files\Simulations</Filter>
+      <Filter>Source Files\SoftBody</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -597,6 +600,9 @@
       <Filter>Header Files\Simulations</Filter>
     </ClInclude>
     <ClInclude Include="cloth.h">
+      <Filter>Header Files\SoftBodyPhysics</Filter>
+    </ClInclude>
+    <ClInclude Include="clothObject.h">
       <Filter>Header Files\Simulations</Filter>
     </ClInclude>
   </ItemGroup>

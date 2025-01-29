@@ -6,13 +6,18 @@
 #include "diffuseLightingShader.h"
 #include "polyhedra.h"
 #include "environmentMapper.h"
-#include "cloth.h"
+#include "clothObject.h"
 #include "particleGravity.h"
 #include "skyboxRenderer.h"
 
 using namespace pe;
 
 void pe::runFlag() {
+
+    std::cout << "Use arrow keys to move the camera\n";
+    std::cout << "Hold the A key and move the mouse to move the flag\n";
+    std::cout << "Hold the X key to strengthen the wind force\n";
+    std::cout << "Hold the Z key to weaken the wind force\n";
 
     GlfwWindowWrapper window(800, 800, 6, "window", false);
 
@@ -70,7 +75,7 @@ void pe::runFlag() {
     int laplacianIterations = 1;
     real laplacianFactor = 0.05;
 
-    Cloth cloth(
+    ClothObject cloth(
         size, size,
         400, 600,
         Vector3D(0, -1, 0), Vector3D(1, 0, 0),
@@ -93,12 +98,6 @@ void pe::runFlag() {
             cloth.body.particles[i].setAwake(false);
         }
     }
-
-    VertexBuffer buffer = createFaceVertexBuffer(
-        &cloth.mesh, GL_DYNAMIC_DRAW,
-        NORMALS::VERTEX_NORMALS, UV::INCLUDE
-    );
-    cloth.faceRenderer.setVertexBuffer(&buffer);
 
     ParticleGravity g(Vector3D(0, -10, 0));
 
@@ -138,18 +137,6 @@ void pe::runFlag() {
                     pos + Vector3D(0, ((size - i) * height / size), 0);
             }
         }
-        else if (glfwGetKey(window.getWindow(), GLFW_KEY_B) == GLFW_PRESS) {
-            glm::vec2 mouse = window.getCursorPosition();
-            Vector3D pos = Vector3D(
-                mouse.x,
-                cylinder.body.position.y,
-                -mouse.y
-            );
-            for (int i = 0; i < size; i++) {
-                cloth.body.particles[(i+1) * size - 1].position = 
-                    pos + Vector3D(0, ((size - i) * height / size), 0);
-            }
-        }
         else if (glfwGetKey(window.getWindow(), GLFW_KEY_X) == GLFW_PRESS) {
             windMultiplier *= 1.0002;
         }
@@ -173,11 +160,9 @@ void pe::runFlag() {
 
         cylinder.update();
         cylinder.updateModelMatrix();
+   
         cloth.update();
-
-        buffer.setData(generateFaceData(
-            &cloth.mesh, NORMALS::VERTEX_NORMALS, UV::INCLUDE
-        ));
+        cloth.updateVertexBuffer();
 
         shader.setViewMatrix(camera.getViewMatrix());
 
@@ -189,7 +174,6 @@ void pe::runFlag() {
             glClearColor(0.1f, 0.15f, 0.15f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-            // We set the texture here cause they use the same unit
             cloth.faceRenderer.render();
             cylinder.faceRenderer.render();
 

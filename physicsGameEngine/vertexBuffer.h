@@ -180,7 +180,7 @@ namespace pe {
 
         /*
             Becasuse repeatedly binding and unbinding the VBO can be
-            inefficient, so we can set the entire VBO data here.
+            inefficient, we can set the entire VBO data here.
         */
         void setData(const std::vector<float>& combinedData) {
 

@@ -16,6 +16,9 @@ using namespace pe;
 
 void pe::runBallPit() {
 
+    std::cout << "Use arrow keys to move the camera\n";
+    std::cout << "Press the A key to add a ball\n";
+
     GlfwWindowWrapper window(1200, 800, 6, "window", true);
 
     RotatingCamera camera(

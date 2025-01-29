@@ -17,6 +17,9 @@ using namespace pe;
 
 void pe::runWreckingBall() {
 
+    std::cout << "Use arrow keys to move the camera\n";
+    std::cout << "Hold A and move the mouse to move the ball\n";
+
     GlfwWindowWrapper window(1200, 800, 6, "window", true);
 
     RotatingCamera camera(

@@ -18,6 +18,9 @@ using namespace pe;
 
 void pe::runReflection() {
 
+    std::cout << "Use arrow keys to move the camera\n";
+    std::cout << "Move the mouse to move the cube\n";
+
     GlfwWindowWrapper window(800, 800, 6, "window", true);
 
     RotatingCamera camera(

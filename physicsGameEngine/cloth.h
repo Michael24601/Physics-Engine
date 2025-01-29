@@ -47,12 +47,6 @@ namespace pe {
 		// Map that quickly returns the neighbors of a particle in the grid
 		std::vector<std::vector<int>> particleNeighbors;
 
-		/*
-			The rendering components.
-		*/
-		RenderComponent faceRenderer;
-		RenderComponent edgeRenderer;
-
 		Cloth(
 			int columnDensity, int rowDensity,
 			real height, real width,
