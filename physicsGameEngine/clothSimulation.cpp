@@ -8,6 +8,8 @@
 #include "particleGravity.h"
 #include "diffuseLightingShader.h"
 #include "clothObject.h"
+#include "particleCollisionDetection.h"
+#include "particleContactResolver.h"
 #include "faceBufferGenerator.h"
 
 using namespace pe;
@@ -44,7 +46,7 @@ void pe::runClothSimulation() {
         0.01
     );
 
-    int size = 30;
+    int size = 25;
     real structuralStiffness = 7;
     real shearStiffness = 3;
     real bendingStiffness = 3;
@@ -64,6 +66,8 @@ void pe::runClothSimulation() {
         structuralStiffness, shearStiffness, bendingStiffness
     );
 
+    CuboidObject cube(100, 100, 100, Vector3D(0, 0, 200), Quaternion::IDENTITY, 20);
+
     // The first row of particles is suspended
     for (int i = 0; i < size; i++) {
         cloth.body.particles[i].setAwake(false);
@@ -80,7 +84,11 @@ void pe::runClothSimulation() {
     cloth.faceRenderer.setShader(&shader);
     cloth.faceRenderer.setColor(colorRed);
 
+    cube.faceRenderer.setColor(colorBlue);
+    cube.faceRenderer.setShader(&shader);
+
     bool isButtonPressed = false;
+    bool isButtonPressed2 = false;
 
     float deltaT = 0.2;
 
@@ -107,6 +115,12 @@ void pe::runClothSimulation() {
         else if (glfwGetKey(window.getWindow(), GLFW_KEY_A) == GLFW_RELEASE) {
             isButtonPressed = false;
         }
+        if (glfwGetKey(window.getWindow(), GLFW_KEY_B) == GLFW_PRESS) {
+            isButtonPressed2 = true;
+        }
+        else if (glfwGetKey(window.getWindow(), GLFW_KEY_B) == GLFW_RELEASE) {
+            isButtonPressed2 = false;
+        }
 
 
         glm::vec2 worldPos = window.getCursorPosition();
@@ -126,10 +140,24 @@ void pe::runClothSimulation() {
             }
         }
 
+        if (isButtonPressed2) {
+            glm::vec2 worldPos = window.getCursorPosition();
+            cube.body.position = Vector3D(0, worldPos.y, worldPos.x);
+        }
+
         int numSteps = 5;
         real substep = deltaT / numSteps;
 
         while (numSteps--) {
+
+            std::vector<ParticleContact> contacts;
+            for (int i = 0; i < cloth.body.particles.size(); i++) {
+                generateContactParticleAndObject(
+                    &cloth.body.particles[i], cube, contacts, 1.0);
+            }
+            ParticleContactResolver resolver(contacts.size());
+            resolver.resolveContacts(contacts, substep);
+
 
             cloth.body.applyForce(g, substep);
             cloth.body.applySpringForces(substep);
@@ -140,6 +168,9 @@ void pe::runClothSimulation() {
 
         cloth.update();
         cloth.updateVertexBuffer();
+
+        cube.update();
+        cube.updateModelMatrix();
 
         shader.setViewMatrix(camera.getViewMatrix());
         shader.setProjectionMatrix(camera.getProjectionMatrix());
@@ -155,6 +186,7 @@ void pe::runClothSimulation() {
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             cloth.faceRenderer.render();
+            cube.faceRenderer.render();
 
             glfwSwapBuffers(window.getWindow());
             glfwPollEvents();

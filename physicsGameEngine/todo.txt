@@ -495,3 +495,5 @@ Consider making the special render classes like the skybox and
 bounding volume renderers children of render components,
 and consider seperating render component from rigidObject.
 Create a graphics pipeline that is seperate from the physics.
+
+Update ParticleWorld.

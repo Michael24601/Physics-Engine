@@ -84,6 +84,6 @@ void ParticleWorld::runPhysics(real duration) {
 		else{
 			resolver.setIterations(numberOfContacts * 2);
 		}
-		resolver.resolveContacts(contacts, numberOfContacts, duration);
+		// resolver.resolveContacts(contacts, numberOfContacts, duration);
 	}
 }

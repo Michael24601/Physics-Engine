@@ -27,7 +27,8 @@ namespace pe {
 	public:
 
 		// No-arg constructor
-		ParticleContactResolver() : iterations{} {};
+		ParticleContactResolver(unsigned int iterations = 0) : 
+			iterations{iterations} {};
 
 		// Setter for the number of allowed iterations
 		void setIterations(unsigned int iterations) {
@@ -40,8 +41,9 @@ namespace pe {
 			collisions. Moreover, the function deals with interpenetrations
 			after dealing with each collision.
 		*/
-		void resolveContacts(ParticleContact*
-			particleContactArray, unsigned int numberOfContacts, real duration) {
+		void resolveContacts(std::vector<ParticleContact> contacts, real duration) {
+
+			if (contacts.empty()) return;
 
 			int iterationCount = 0;
 
@@ -59,11 +61,14 @@ namespace pe {
 			while (iterationCount < iterations) {
 
 				// Resolves the most severe collision first
-				auto mostSevereCollision = *std::min_element(particleContactArray,
-					particleContactArray + numberOfContacts, [](const
-						ParticleContact& first, const ParticleContact& second) ->
-					bool { return first.calculateSeperationVecolity()
-					< second.calculateSeperationVecolity();
+				auto mostSevereCollision = *std::min_element(
+					contacts.begin(), contacts.end(), 
+					[](
+						const ParticleContact& first, 
+						const ParticleContact& second
+					) -> bool { 
+						return first.calculateSeperationVecolity()
+						< second.calculateSeperationVecolity();
 					}
 				);
 

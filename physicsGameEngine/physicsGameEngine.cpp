@@ -3,7 +3,7 @@
 
 int main() {
 
-	pe::runFlag();
+	pe::runClothSimulation();
 
 	return 0;
 }

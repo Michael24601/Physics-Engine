@@ -26,7 +26,7 @@ namespace pe {
 
     void generateContactParticleAndObject(
         Particle* particle,
-        const RigidObject& one,
+        RigidObject& one,
         std::vector<ParticleContact>& contacts,
         real restitution
     );
